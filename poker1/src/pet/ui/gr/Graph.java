@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.gr;
 
 import java.awt.Color;
 import java.awt.Dimension;

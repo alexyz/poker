@@ -2,7 +2,8 @@ package pet.ui.eq;
 
 import java.util.*;
 import javax.swing.*;
-import pet.*;
+
+import pet.eq.*;
 
 public class HoldemCalcPanel extends CalcPanel {
 	private final BoardPanel boardPanel;
@@ -66,7 +67,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		deckPanel.deselectCards();
 		deckPanel.selectCards(cardLabels);
 		String[] deck = deckPanel.getCards(false);
-		Util.shuffle(deck);
+		pet.eq.Util.shuffle(deck);
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {

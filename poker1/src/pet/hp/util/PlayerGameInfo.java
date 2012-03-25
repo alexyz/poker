@@ -7,8 +7,8 @@ import pet.hp.HandUtil;
 public class PlayerGameInfo {
 	final char type;
 	int rake = 0;
-	/** number of seats player had */
-	int hands = 0;
+	/** hands in this game */
+	int hands;
 	/** hands where the player won something */
 	int woncount = 0;
 	/** amount won and lost */
@@ -20,10 +20,12 @@ public class PlayerGameInfo {
 	int showdown;
 	/** action map: int[] { count, amount } */
 	final Map<String,int[]> amap = new TreeMap<String,int[]>();
+	
 	public PlayerGameInfo(char type) {
 		this.type = type;
 		this.foldedon = new int[HandUtil.getMaxStreets(type)];
 	}
+	
 	int[] getAction(String action) {
 		int[] c = amap.get(action);
 		if (c == null) {
@@ -31,6 +33,7 @@ public class PlayerGameInfo {
 		}
 		return c;
 	}
+	
 	@Override
 	public String toString() {
 		return "GameInfo[hands=" + hands + "]";

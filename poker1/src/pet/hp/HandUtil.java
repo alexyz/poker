@@ -1,9 +1,15 @@
 package pet.hp;
 
-import java.util.Comparator;
+import java.util.*;
 
+/**
+ * Utilities for hands (no analysis - see HandInfo)
+ */
 public class HandUtil {
-	public static final Comparator<Hand> idcmp = new Comparator<Hand>() {
+	/**
+	 * Compare hands by id
+	 */
+	public static final Comparator<Hand> idCmp = new Comparator<Hand>() {
 		@Override
 		public int compare(Hand h1, Hand h2) {
 			long cl = h1.id - h2.id;
@@ -18,6 +24,7 @@ public class HandUtil {
 	public static final char FCD_TYPE = '5', HE_TYPE = 'H', OM_TYPE = 'O';
 	public static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	public static final String[] drawstreetnames = { "Pre draw", "Post draw" };
+	
 	/** return true if this street is the showdown street for the given game type */
 	public static boolean isShowdown (char type, int street) {
 		switch (type) {
@@ -29,6 +36,7 @@ public class HandUtil {
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
+	
 	/** return the maximum number of streets in this game type */
 	public static int getMaxStreets (char type) {
 		switch (type) {
@@ -40,6 +48,7 @@ public class HandUtil {
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
+	
 	/** get the name of the street for this game type */
 	public static String getStreetName (char type, int s) {
 		switch (type) {
@@ -51,4 +60,12 @@ public class HandUtil {
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
+	
+	/**
+	 * get board for street
+	 */
+	public static String[] getStreetBoard(String[] board, int s) {
+		return s > 0 ? Arrays.copyOf(board, s + 2) : null;
+	}
+	
 }

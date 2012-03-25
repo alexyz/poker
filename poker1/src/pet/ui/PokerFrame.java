@@ -1,22 +1,36 @@
 package pet.ui;
 
+import java.util.Locale;
+
 import javax.swing.*;
 
+import pet.hp.Hand;
+import pet.hp.util.History;
 import pet.ui.eq.*;
+import pet.ui.rep.ReplayPanel;
 
 /**
  * Poker equity GUI tool.
- * TODO
- * back and fwd button
- * resize listener to reduce card font size and eq label size
- * 
  */
 public class PokerFrame extends JFrame {
-
+	
+	private static final PokerFrame instance = new PokerFrame();
+	
 	public static void main(String[] args) {
-		JFrame f = new PokerFrame();
-		f.setVisible(true);
+		Locale.setDefault(Locale.UK);
+		instance.setVisible(true);
 	}
+	
+	public static History getHistory() {
+		return instance.history;
+	}
+	
+	public static void replay(Hand hand) {
+		instance.replayPanel.setHand(hand);
+	}
+	
+	private final History history = new History();
+	private final ReplayPanel replayPanel = new ReplayPanel();
 
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -25,6 +39,10 @@ public class PokerFrame extends JFrame {
 		p.addTab("Omaha", new HoldemCalcPanel(false));
 		p.addTab("Draw", new DrawCalcPanel());
 		p.addTab("History", new HistoryPanel());
+		p.addTab("Players", new PlayerPanel());
+		p.addTab("Session", new SessionPanel());
+		p.addTab("Replay", replayPanel);
+		p.addTab("Console", new ConsolePanel());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(p);
 		pack();

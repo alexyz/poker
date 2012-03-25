@@ -2,7 +2,7 @@ package pet.ui.eq;
 
 import java.util.Arrays;
 
-import pet.*;
+import pet.eq.*;
 
 public class DrawCalcPanel extends CalcPanel {
 	private final HandCardPanel[] handPanels = new HandCardPanel[4];

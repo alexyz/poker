@@ -26,6 +26,7 @@ public class PlayerInfo {
 
 	public String toLongString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(name).append("\n");
 		for (Map.Entry<String,PlayerGameInfo> e : gmap.entrySet()) {
 			sb.append("Game ").append(e.getKey()).append("\n");
 			sb.append(e.getValue().toLongString()).append("\n");

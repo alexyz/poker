@@ -1,6 +1,6 @@
-package pet;
+package pet.eq;
 
-import static pet.MUtil.*;
+import static pet.eq.MUtil.*;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -11,7 +11,6 @@ import java.util.Arrays;
  */
 public class HEPoker extends Poker {
 	
-	public static PrintStream out = System.out;
 	private final String[] hand = new String[5];
 	
 	/**
@@ -50,7 +49,7 @@ public class HEPoker extends Poker {
 	 * Calc exact tex/omaha hand equity for each hand for given flop (can include turn and riv)
 	 */
 	private HandEq[] exactEquity(String[] flop, String[][] holes, boolean omaha) {
-		out.println("flop size: " + flop.length);
+		println("flop size: " + flop.length);
 		
 		// get current values
 		final int[] vals = new int[holes.length];
@@ -59,7 +58,7 @@ public class HEPoker extends Poker {
 		}
 		
 		final String[] deck = Util.remdeck(Poker.FULL_DECK, flop, holes);
-		out.println("cards remaining: " + deck.length);
+		println("cards remaining: " + deck.length);
 		
 		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
 		HandEq.updateCurrent(eqs, vals);
@@ -67,9 +66,9 @@ public class HEPoker extends Poker {
 		// get equity
 		final String[] board = Arrays.copyOf(flop, 5);
 		final int k = 5 - flop.length;
-		out.println("cards to deal: " + k);
+		println("cards to deal: " + k);
 		final int combs = bincoff(deck.length, k);
-		out.println("combinations remaining: " + combs);
+		println("combinations remaining: " + combs);
 		for (int p = 0; p < combs; p++) {
 			kcomb(k, p, deck, board, flop.length);
 			for (int i = 0; i < holes.length; i++) {

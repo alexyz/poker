@@ -9,26 +9,14 @@ import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 
-import pet.Poker;
+import pet.eq.*;
 
+/**
+ * label to show individual card
+ */
 class CardLabel extends JLabel {
 	public static final Font cardfont = new Font("SansSerif", Font.PLAIN, 24);
 	public static String CARD_SEL_PROP_CHANGE = "cardsel", CARD_DESEL_PROP_CHANGE = "carddesel";
-	
-	/**
-	 * Return colour of suit
-	 */
-	public static Color suitcol (char s) {
-		// switch instead of map due to primitive type
-		switch (s) {
-		case Poker.S_SUIT: return Color.black;
-		case Poker.C_SUIT: return Color.green;
-		case Poker.H_SUIT: return Color.red;
-		case Poker.D_SUIT: return Color.blue;
-		}
-		throw new RuntimeException();
-	}
-	
 	
 	private boolean selected;
 	private boolean hidden;
@@ -80,7 +68,7 @@ class CardLabel extends JLabel {
 				setForeground(Color.black);
 				setText("--");
 			} else {
-				setForeground(suitcol(Poker.suit(c)));
+				setForeground(Poker.suitcol(Poker.suit(c)));
 				char f = Poker.face(c);
 				char s = Poker.suitsym(c);
 				// doesn't fit

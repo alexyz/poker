@@ -1,5 +1,6 @@
-package pet;
+package pet.eq;
 
+import java.awt.Color;
 import java.util.Comparator;
 
 /**
@@ -90,15 +91,22 @@ public class Poker {
 			l = newl;
 		}
 	}
-	
+
 	private final String[] hand = new String[5];
-	
+	public boolean debug;
+
+	protected void println(String s) {
+		if (debug) {
+			System.out.println(s);
+		}
+	}
+
 	private void copy(Object[] from, Object[] to) {
 		for (int n = 0; n < from.length; n++) {
 			to[n] = from[n];
 		}
 	}
-	
+
 	public boolean islow(String[] hand) {
 		for (int n = 0; n < hand.length; n++) {
 			if (faceval(hand[n], false) > 8) {
@@ -107,7 +115,7 @@ public class Poker {
 		}
 		return true;
 	}
-	
+
 	public int lowvalue(String[] hand) {
 		if (islow(hand)) {
 			int p = ispair(hand, false);
@@ -220,7 +228,7 @@ public class Poker {
 			return H_RANK | hc;
 		}
 	}
-	
+
 	/**
 	 * Return integer value of card face, ace high (from A = 14 to 2 = 2)
 	 */
@@ -283,12 +291,42 @@ public class Poker {
 		}
 	}
 
+	/**
+	 * Return colour of suit
+	 */
+	public static Color suitcol (char s) {
+		// switch instead of map due to primitive type
+		switch (s) {
+		case Poker.S_SUIT: return Color.black;
+		case Poker.C_SUIT: return Color.green;
+		case Poker.H_SUIT: return Color.red;
+		case Poker.D_SUIT: return Color.blue;
+		}
+		throw new RuntimeException();
+	}
+
 	public static char suitsym(String c) {
+		/*
+		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
+		 */
 		switch (suit(c)) {
-		case S_SUIT: return '♠';
+		case C_SUIT: return '♣';
 		case D_SUIT: return '♦';
 		case H_SUIT: return '♥';
-		case C_SUIT: return '♣';
+		case S_SUIT: return '♠';
+		default: return 0;
+		}
+	}
+
+	public static char suitsyml(String c) {
+		/*
+		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
+		 */
+		switch (suit(c)) {
+		case C_SUIT: return '♧';
+		case D_SUIT: return '♢';
+		case H_SUIT: return '♡';
+		case S_SUIT: return '♤';
 		default: return 0;
 		}
 	}
@@ -296,7 +334,23 @@ public class Poker {
 	public static char face(String card) {
 		return card.charAt(0);
 	}
-	
-	
+
+	public static String getCardString(String[] cards, boolean sort) {
+		if (cards != null) {
+			StringBuilder sb = new StringBuilder(cards.length * 2);
+			// FIXME sort by card val then suit
+			// should probably do this in handinfo
+			for (String c : cards) {
+				if (c != null) {
+					sb.append(c.charAt(0)).append(Poker.suitsyml(c));
+				} else {
+					sb.append("..");
+				}
+			}
+			return sb.toString();
+		} else {
+			return "";
+		}
+	}
 
 }

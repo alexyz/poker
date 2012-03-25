@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.gr;
 
 public class GraphData {
 	private final int x;

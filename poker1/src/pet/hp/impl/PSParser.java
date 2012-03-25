@@ -9,9 +9,7 @@ import pet.hp.*;
 /**
  * PokerStars hand parser
  */
-public class PSHP extends HP implements Serializable {
-
-	public static PrintStream out = System.out;
+public class PSParser extends Parser implements Serializable {
 
 	private static final long serialVersionUID = 1;
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
@@ -31,14 +29,22 @@ public class PSHP extends HP implements Serializable {
 	private transient Hand hand;
 	/** is in summary phase */
 	private transient boolean show = false, sum = false;
+	
+	public boolean debug;
 
-	public PSHP() {
+	public PSParser() {
 		//
+	}
+	
+	private void println(String s) {
+		if (debug) {
+			System.out.println(s);
+		}
 	}
 
 	@Override
 	public boolean isHistoryFile(String name) {
-		if (name.startsWith("HH") && name.endsWith(".txt")) {
+		if (!name.contains("H-L") && name.startsWith("HH") && name.endsWith(".txt")) {
 			int a = name.indexOf(" ");
 			int b = name.indexOf(" ", a + 1);
 			String tname = name.substring(a + 1, b);
@@ -67,10 +73,12 @@ public class PSHP extends HP implements Serializable {
 
 		if (line.length() > 0 && line.charAt(0) == 0xfeff) {
 			line = line.substring(1);
-			out.println("skip bom");
+			println("skip bom");
 		}
 
 		line = line.trim();
+		if (debug)
+			println(">  " + line);
 
 		if (line.length() == 0) {
 			if (sum && hand != null) {
@@ -82,17 +90,18 @@ public class PSHP extends HP implements Serializable {
 					hand.streets[n] = street.toArray(new Action[street.size()]);
 				}
 				hand.showdown = show;
-				out.println("end of " + hand);
+				println("end of " + hand);
 				hands.add(hand);
 				ret = hand;
 				clear();
 			}
 
-		} else if (line.startsWith("PokerStars Game") || line.startsWith("PokerStars Hand")) {
+		} else if (line.startsWith("PokerStars ")) {
 			// PokerStars Game #73347266323:  Omaha Pot Limit ($0.01/$0.02 USD) - 2012/01/05 16:12:04 ET
 			// PokerStars Game #73076810536:  5 Card Draw No Limit (100/200) - 2011/12/31 14:45:08 ET
 			// PokerStars Game #73112640557: Tournament #493078525, 2000+110 Omaha Pot Limit - Level I (10/20) - 2012/01/01 13:43:02 ET
 			// PokerStars Game #73111358128:  Hold'em Pot Limit (100/200) - 2012/01/01 13:19:41 ET
+			// PokerStars Zoom Hand #77405734487:  Omaha Pot Limit ($0.01/$0.02) - 2012/03/18 14:38:20 ET
 			if (hand != null) {
 				throw new RuntimeException("unsaved game");
 			}
@@ -135,11 +144,11 @@ public class PSHP extends HP implements Serializable {
 			}
 
 			this.hand = hand;
-			out.println("game " + hand.id);
+			println("game " + hand.id);
 
 		} else if (line.startsWith("Betting is capped")) {
 			// TODO
-			out.println("capped");
+			println("capped");
 
 		} else if (line.startsWith("Table")) {
 			// Table 'Roehla IX' 9-max Seat #7 is the button
@@ -147,14 +156,20 @@ public class PSHP extends HP implements Serializable {
 			// Table 'Honoria V' 6-max Seat #6 is the button
 			// Table 'Mekbuda VIII' 2-max (Play Money) Seat #2 is the button
 			// Table '493078525 1' 9-max Seat #1 is the button
+			// Table 'bltable.1225797637.1225917089' 6-max
+			// seat 1 is button if unspec
 			int a = line.indexOf("'");
 			int b = line.indexOf("'", a + 1);
 			hand.tablename = cache(line.substring(a + 1, b));
 			int c = line.indexOf("-max");
 			hand.max = Integer.parseInt(line.substring(c - 1, c));
 			int d = line.indexOf("Seat");
-			hand.button = Integer.parseInt(line.substring(d + 6, d + 7));
-			out.println("table " + hand.tablename);
+			if (d > 0) {
+				hand.button = Integer.parseInt(line.substring(d + 6, d + 7));
+			} else {
+				println("table " + hand.tablename);
+				hand.button = 1;
+			}
 
 		} else if (line.startsWith("Seat")) {
 			int a = line.indexOf(":");
@@ -165,7 +180,7 @@ public class PSHP extends HP implements Serializable {
 				// Seat 2: tawvx showed [4c 6h 7d 5h] and won ($0.44) with a straight, Four to Eight
 				// Seat 4: fearvanilla folded before Flop (didn't bet)
 				// Seat 5: $AbRaO$ TT folded on the Flop
-				// Seat 6: Sama–ito mucked [2h 6c Qh Jh]
+				// Seat 6: Samaï¿½ito mucked [2h 6c Qh Jh]
 				// Seat 7: azacel77 (button) folded before Flop (didn't bet)
 				// Seat 8: Bumerang16 (small blind) folded on the Flop
 				// Seat 9: NSavov (big blind) folded on the Flop
@@ -182,10 +197,10 @@ public class PSHP extends HP implements Serializable {
 							seat.hand = hand;
 						}
 					}
-					out.println("seat summary " + seatno + " hand " + Arrays.asList(hand));
+					println("seat summary " + seatno + " hand " + Arrays.asList(hand));
 
 				} else {
-					out.println("seat summary");
+					println("seat summary");
 				}
 
 			} else {
@@ -200,7 +215,7 @@ public class PSHP extends HP implements Serializable {
 				seat.chips = parseMoney(line, b + 1);
 				seats.put(seat.name, seat);
 				seatsl.add(seat);
-				out.println("seat " + seat);
+				println("seat " + seat);
 			}
 
 		} else if (line.startsWith("***")) {
@@ -238,7 +253,7 @@ public class PSHP extends HP implements Serializable {
 
 			if (newstr) {
 				streets.add(new ArrayList<Action>());
-				out.println("street " + streets.size());
+				println("street " + streets.size());
 				
 			} else if (name.equals("SHOW DOWN")) {
 				show = true;
@@ -254,7 +269,7 @@ public class PSHP extends HP implements Serializable {
 			// Board [6d 3s Qc 8s 5d]
 			int a = nextToken(line, 0);
 			hand.board = parseHand(line, a);
-			out.println("board " + Arrays.asList(hand.board));
+			println("board " + Arrays.asList(hand.board));
 
 		} else if (line.startsWith("Dealt to")) {
 			// Dealt to tawvx [4c 6h 7d 5h]
@@ -300,7 +315,7 @@ public class PSHP extends HP implements Serializable {
 				myseat.hand = hand;
 			}
 
-			out.println("dealt " + name + " " + Arrays.asList(hand));
+			println("dealt " + name + " " + Arrays.asList(hand));
 
 		} else if (line.startsWith("Uncalled")) {
 			// Uncalled bet ($0.19) returned to Hokage_91
@@ -314,45 +329,45 @@ public class PSHP extends HP implements Serializable {
 			} else {
 				throw new RuntimeException("could not get seat " + name);
 			}
-			out.println("uncalled " + name + " " + amount);
+			println("uncalled " + name + " " + amount);
 
 		} else if (line.endsWith("sits out")) {
 			// h_fa: sits out 
-			out.println("sit out");
+			println("sit out");
 
 		} else if (line.endsWith("is sitting out")) {
 			// scotty912: is sitting out 
-			out.println("sitting out");
+			println("sitting out");
 
 		} else if (line.endsWith("has timed out")) {
 			// Festo5811 has timed out
-			out.println("timed out");
+			println("timed out");
 
 		} else if (line.endsWith("leaves the table")) {
 			// kuca444 leaves the table
-			out.println("leaves");
+			println("leaves");
 
 		} else if (line.endsWith("is connected")) {
-			out.println("connected");
+			println("connected");
 
 		} else if (line.endsWith("is disconnected")) {
-			out.println("connected");
+			println("connected");
 
 		} else if (line.endsWith("has timed out while disconnected")) {
-			out.println("timed out");
+			println("timed out");
 
 		} else if (line.endsWith("has timed out while being disconnected")) {
-			out.println("timed out");
+			println("timed out");
 
 		} else if (line.endsWith("was removed from the table for failing to post")) {
-			out.println("kicked");
+			println("kicked");
 
 		} else if (line.endsWith("will be allowed to play after the button")) {
-			out.println("play after");
+			println("play after");
 
 		} else if (line.contains("joins the table at seat")) {
 			// scotty912 joins the table at seat #6 
-			out.println("joins");
+			println("joins");
 
 		} else if (line.contains("collected")) {
 			// olasz53 collected $1.42 from main pot
@@ -367,7 +382,7 @@ public class PSHP extends HP implements Serializable {
 			}
 			int amount = parseMoney(line, a + 10);
 			seat.won += amount;
-			out.println("collected " + name + " " + amount);
+			println("collected " + name + " " + amount);
 
 		} else if (line.startsWith("Total pot")) {
 			// Total pot $0.30 | Rake $0.01 
@@ -375,11 +390,11 @@ public class PSHP extends HP implements Serializable {
 			hand.pot = parseMoney(line, 10);
 			int a = line.indexOf("Rake");
 			hand.rake = parseMoney(line, a + 5);
-			out.println("total " + hand.pot + " rake " + hand.rake);
+			println("total " + hand.pot + " rake " + hand.rake);
 
 		} else if (line.contains("said,")) {
 			// tawvx said, "it's not a race"
-			out.println("talk");
+			println("talk");
 
 		} else if (line.contains(": ")) {
 			// Bumerang16: posts small blind $0.01
@@ -470,16 +485,16 @@ public class PSHP extends HP implements Serializable {
 
 				} else if (act.equals("stands")) {
 					draw = true;
-					out.println("stands");
+					println("stands");
 
 				} else {
 					throw new RuntimeException("unknown action: " + action.act);
 				}
 
-				out.println("action " + action);
+				println("action " + action);
 				// fake a new street if drawing
 				if (streets.size() == 0 || streets.size() == 1 && draw) {
-					out.println("new street");
+					println("new street");
 					streets.add(new ArrayList<Action>());
 				}
 				List<Action> street = streets.get(streets.size() - 1);
@@ -490,9 +505,9 @@ public class PSHP extends HP implements Serializable {
 			}
 
 		} else {
+			System.out.println("unknown line");
+			System.out.println("> " + line);
 			throw new RuntimeException("unknown line");
-			//out.println("unknown line");
-			//out.println("> " + line);
 		}
 
 		return ret;

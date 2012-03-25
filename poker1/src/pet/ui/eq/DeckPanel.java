@@ -11,8 +11,11 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import pet.Poker;
+import pet.eq.*;
 
+/**
+ * panel to show a whole deck of cards
+ */
 class DeckPanel extends JPanel {
 	private final List<CardLabel> labels = new ArrayList<CardLabel>();
 	public DeckPanel() {

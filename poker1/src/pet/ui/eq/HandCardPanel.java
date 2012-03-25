@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import pet.*;
+import pet.eq.*;
 
 /**
  * extends card panel to show hand equity statistics

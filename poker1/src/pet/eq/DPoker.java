@@ -1,7 +1,7 @@
-package pet;
+package pet.eq;
 
 /**
- * Draw poker methods
+ * Draw poker equity methods
  */
 public class DPoker extends Poker {
 

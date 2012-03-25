@@ -1,4 +1,4 @@
-package pet;
+package pet.eq;
 
 import java.math.BigInteger;
 

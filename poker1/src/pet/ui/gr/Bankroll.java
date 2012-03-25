@@ -1,10 +1,8 @@
-package pet.hp.util;
+package pet.ui.gr;
 
 import java.text.DateFormat;
 import java.util.*;
 import pet.hp.*;
-import pet.ui.GraphData;
-import pet.ui.GraphDataName;
 
 public class Bankroll {
 
@@ -20,10 +18,10 @@ public class Bankroll {
 		}
 	};
 
-	public static List<GraphData> getBankRoll (HP p, String player, String game) {
+	public static List<GraphData> getBankRoll (Parser hp, String player, String game) {
 		List<GraphData> data = new ArrayList<GraphData>();
-		List<Hand> hands = p.getHands();
-		Collections.sort(hands, HandUtil.idcmp);
+		List<Hand> hands = hp.getHands();
+		Collections.sort(hands, HandUtil.idCmp);
 		int won = 0, date = 0;
 		for (Hand hand : hands) {
 			if (game == null || game.equals(hand.gamename)) {
