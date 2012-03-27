@@ -7,8 +7,9 @@ class SeatState implements Cloneable {
 	String name;
 	int stack;
 	int bet;
-	String cards;
+	String hole;
 	boolean folded;
+	boolean won;
 	@Override
 	public SeatState clone() {
 		try {

@@ -1,13 +1,9 @@
 package pet.ui.rep;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import pet.eq.Poker;
-import pet.hp.Action;
-import pet.hp.Hand;
-import pet.hp.HandUtil;
-import pet.hp.Seat;
+import pet.hp.*;
 
 class HandStateUtil {
 	/**
@@ -23,7 +19,11 @@ class HandStateUtil {
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState();
 			ss.name = seat.name;
-			ss.cards = Poker.getCardString(seat.hand, true);
+			if (seat.hole != null) {
+				String[] hole = seat.hole.clone();
+				Arrays.sort(hole, Poker.revCardCmp);
+				ss.hole = Poker.toString(seat.hole);
+			}
 			ss.stack = seat.chips;
 			hs.seats[seat.num - 1] = ss;
 		}
@@ -33,7 +33,7 @@ class HandStateUtil {
 		for (int s = 0; s < hand.streets.length; s++) {
 			// clear bets, place card
 			hs = hs.clone();
-			hs.board = Poker.getCardString(HandUtil.getStreetBoard(hand.board, s), false);
+			hs.board = Poker.toString(HandUtil.getStreetBoard(hand.board, s));
 			hs.note = HandUtil.getStreetName(hand.gametype, s);
 			hs.action = null;
 			hs.actionSeat = -1;
@@ -48,7 +48,10 @@ class HandStateUtil {
 			// player actions
 			for (Action act : hand.streets[s]) {
 				hs = hs.clone();
-				hs.action = act.act + " " + act.amount;
+				hs.action = act.act;
+				if (act.amount > 0) {
+					hs.action += " " + act.amount;
+				}
 				hs.actionSeat = act.seat.num - 1;
 
 				SeatState ss = hs.seats[act.seat.num - 1];
@@ -56,12 +59,27 @@ class HandStateUtil {
 					ss.folded = true;
 				} else if (act.amount > 0) {
 					ss.bet += act.amount;
+					ss.stack -= act.amount;
 				}
 				states.add(hs);
 			}
 		}
 		
-		// collect, return uncalled, showdown
+		// FIXME collect, return uncalled, showdown
+		hs = hs.clone();
+		hs.board = Poker.toString(hand.board);
+		hs.note = "End";
+		hs.actionSeat = -1;
+		hs.pot = hand.pot;
+		for (int s = 0; s < hand.seats.length; s++) {
+			Seat seat = hand.seats[s];
+			SeatState ss = hs.seats[seat.num - 1];
+			ss.bet = seat.won;
+			ss.stack += seat.uncalled;
+			ss.won = seat.won > 0;
+		}
+		states.add(hs);
+		
 
 		return states;
 	}

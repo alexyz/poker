@@ -27,14 +27,16 @@ public class PokerFrame extends JFrame {
 	
 	public static void replay(Hand hand) {
 		instance.replayPanel.setHand(hand);
+		instance.p.setSelectedComponent(instance.replayPanel);
 	}
 	
+	private final JTabbedPane p = new JTabbedPane();
 	private final History history = new History();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 
 	public PokerFrame() {
 		super("Poker Equity Tool");
-		JTabbedPane p = new JTabbedPane();
+		
 		p.addTab("Hold'em", new HoldemCalcPanel(true));
 		p.addTab("Omaha", new HoldemCalcPanel(false));
 		p.addTab("Draw", new DrawCalcPanel());

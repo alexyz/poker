@@ -71,7 +71,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			followThread.stop = !go;
 			
 		} else {
-			Parser hp = new PSParser();
+			PSParser hp = new PSParser();
 			//hp.debug = true;
 			
 			followThread = new FollowThread(hp);

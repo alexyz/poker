@@ -16,7 +16,7 @@ public class Hand implements Serializable {
 	public Date date;
 	/** hand currency, $ or 0 */
 	public char currency;
-	/** participants in hand in no particular order */
+	/** participants in hand in seat order */
 	public Seat[] seats;
 	/** current players seat */
 	public Seat myseat;

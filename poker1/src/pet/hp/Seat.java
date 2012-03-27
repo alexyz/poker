@@ -13,14 +13,14 @@ public class Seat implements Serializable {
 	public int chips;
 	/** amount bet as blind */
 	//int blind;
-	/** seats final hand */
-	public String[] hand;
+	/** seats final hole cards */
+	public String[] hole;
 	/** cards drawn as { prev hand, kept, drawn } */
 	public String[][] drawn; // 99876 { prev hand, kept, drawn }
 	/** amount won */
 	public int won;
 	/** amount put in pot, equal to sum of amount of player actions in hand */
-	public int lost;
+	public int pip;
 	/** any uncalled amount returned to seat */
 	public int uncalled;
 	/** number of cards discarded */
@@ -29,9 +29,9 @@ public class Seat implements Serializable {
 	public boolean defaultwin;
 	@Override
 	public String toString() {
-		String s = name + "(" + chips + ")";
-		if (hand != null) {
-			s += " " + Arrays.asList(hand);
+		String s = num + ":" + name + "(" + chips + ")";
+		if (hole != null) {
+			s += " " + Arrays.asList(hole);
 		}
 		if (discards > 0) {
 			s += " discards " + discards;

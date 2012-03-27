@@ -2,15 +2,25 @@ package pet.ui.rep;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
+import java.text.DateFormat;
 
 import javax.swing.JComponent;
 
+import pet.hp.Hand;
+
 /**
  * Draws a table in the given state
+ * TODO currency and number formatting
+ * TODO show table information in top left
  */
 class TableComponent extends JComponent {
 
+	private static final Font normalfont = new Font("SansSerif", Font.PLAIN, 12);
+	private static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
+	private static final Font centrefont = new Font("SansSerif", Font.BOLD, 24);
+	
 	private HandState state;
+	private Hand hand;
 
 	public TableComponent() {
 		//
@@ -20,6 +30,10 @@ class TableComponent extends JComponent {
 		System.out.println("state now " + state);
 		this.state = state;
 		repaint();
+	}
+	
+	public void setHand(Hand hand) {
+		this.hand = hand;
 	}
 
 	/**
@@ -68,17 +82,30 @@ class TableComponent extends JComponent {
 			//g2.drawOval(w / 10, h / 10, w * 8 / 10, h * 8 / 10);
 			g2.draw(table);
 		}
+		
+		if (hand != null) {
+			g2.setColor(Color.black);
+			g2.setFont(normalfont);
+			g2.drawString(String.valueOf(hand.gamename), 18, 18);
+			g2.drawString(String.valueOf(hand.tablename), 18, 36);
+			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
+		}
 
 		if (state == null)
 			return;
 
-		// table information
+		// pot information
 		{
 			int btx = w / 2;
-			int bty = h / 2;
-			g2.drawString(String.valueOf(state.note), btx, bty);
-			g2.drawString(String.valueOf(state.board), btx, bty + 20);
-			g2.drawString(String.valueOf(state.pot), btx, bty + 40);
+			int bty = h / 2 - 48;
+			g2.setFont(centrefont);
+			FontMetrics fm = g2.getFontMetrics();
+			String noteStr = String.valueOf(state.note);
+			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
+			String boardStr = String.valueOf(state.board);
+			g2.drawString(boardStr, btx - fm.stringWidth(boardStr) / 2, bty + 36);
+			String potStr = String.valueOf(state.pot);
+			g2.drawString(potStr, btx - fm.stringWidth(potStr) / 2, bty + 72);
 		}
 
 		int max = state.seats.length;
@@ -97,6 +124,8 @@ class TableComponent extends JComponent {
 				seatCol = Color.gray;
 			} else if (state.actionSeat == s) {
 				seatCol = Color.yellow;
+			} else if (ss.won) {
+				seatCol = Color.orange;
 			} else {
 				seatCol = Color.white;
 			}
@@ -118,19 +147,30 @@ class TableComponent extends JComponent {
 			g2.draw(seat);
 
 			// seat information
+			
 			if (ss != null) {
-				int textx = (int) (seatx - (w * 0.05));
-				int texty = (int) (seaty - (h * 0.05));
-				g2.drawString(String.valueOf(ss.name), textx, texty + 15);
-				g2.drawString(String.valueOf(ss.stack), textx, texty + 30);
-				g2.drawString(String.valueOf(ss.cards), textx, texty + 45);
-				if (state.actionSeat == s) {
-					g2.drawString(String.valueOf(state.action), textx, texty + 60);
+				int textx = (int) seatx;
+				int texty = (int) (seaty - 36);
+				g2.setFont(normalfont);
+				FontMetrics fm = g2.getFontMetrics();
+				String nameStr = String.valueOf(ss.name);
+				g2.drawString(nameStr, textx - fm.stringWidth(nameStr) / 2, texty + 15);
+				String stackStr = String.valueOf(ss.stack);
+				g2.drawString(stackStr, textx - fm.stringWidth(stackStr) / 2, texty + 30);
+				String holeStr = String.valueOf(ss.hole);
+				g2.drawString(holeStr, textx - fm.stringWidth(holeStr) / 2, texty + 45);
+				if (state.actionSeat == s || ss.won) {
+					g2.setFont(boldfont);
+					fm = g2.getFontMetrics();
+					String actStr = String.valueOf(ss.won ? "wins" : state.action);
+					g2.drawString(actStr, textx - fm.stringWidth(actStr) / 2, texty + 60);
 				}
 
 				if (ss.bet > 0) {
 					double betx = seatX(angle, 0.4);
 					double bety = seatY(angle, 0.4);
+					g2.setColor(Color.black);
+					g2.setFont(normalfont);
 					g2.drawString(String.valueOf(ss.bet), (int) betx, (int) bety);
 				}
 			}
@@ -146,6 +186,7 @@ class TableComponent extends JComponent {
 				Shape but = new Ellipse2D.Double(butx - w * butrad, buty - h * butrad, w * butrad * 2, h * butrad * 2);
 				g2.fill(but);
 				g2.setColor(Color.black);
+				g2.setFont(normalfont);
 				g2.drawString("D", (int) butx - 5, (int) buty + 5);
 			}
 		}

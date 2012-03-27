@@ -11,14 +11,13 @@ import pet.hp.*;
  */
 public class ReplayPanel extends JPanel {
 
-	TableComponent table = new TableComponent();
+	TableComponent tableComp = new TableComponent();
 	JComboBox stateCombo = new JComboBox();
 	JButton prevButton = new JButton("<");
 	JButton nextButton = new JButton(">");
 
 	public ReplayPanel() {
 		super(new BorderLayout());
-		table.setBorder(BorderFactory.createTitledBorder("Hand Replay"));
 
 		prevButton.addActionListener(new ActionListener() {
 			@Override
@@ -31,7 +30,7 @@ public class ReplayPanel extends JPanel {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					table.setState((HandState) e.getItem());
+					tableComp.setState((HandState) e.getItem());
 				}
 			}
 		});
@@ -48,7 +47,10 @@ public class ReplayPanel extends JPanel {
 		buttonPanel.add(stateCombo);
 		buttonPanel.add(nextButton);
 
-		add(table, BorderLayout.CENTER);
+		JPanel tablePanel = new JPanel(new GridLayout());
+		tablePanel.setBorder(BorderFactory.createTitledBorder("Hand Replay"));
+		tablePanel.add(tableComp);
+		add(tablePanel, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.NORTH);
 	}
 
@@ -72,7 +74,8 @@ public class ReplayPanel extends JPanel {
 		List<HandState> states = HandStateUtil.getStates(h);
 		stateCombo.setModel(new DefaultComboBoxModel(states.toArray(new Object[states.size()])));
 		stateCombo.setSelectedIndex(0);
-		table.setState(states.get(0));
+		tableComp.setHand(h);
+		tableComp.setState(states.get(0));
 		repaint();
 	}
 }

@@ -116,8 +116,8 @@ class HandCardPanel extends CardPanel {
 					}
 				}
 			}
-			Collections.sort(majl, Poker.cmp);
-			Collections.sort(minl, Poker.cmp);
+			Collections.sort(majl, Poker.cardCmp);
+			Collections.sort(minl, Poker.cardCmp);
 			outsLab.setText("Outs: " + majl.size() + " out of " + e.rem);
 			if (majl.size() > 0) {
 				setToolTipText("<html><b>Major outs</b><br/>" + majl + "</html>");

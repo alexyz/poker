@@ -98,9 +98,9 @@ public class HandInfo2 {
 		List<String> names = new ArrayList<String>();
 		List<String[]> holes = new ArrayList<String[]>();
 		for (P p : pmap.values()) {
-			if (!p.fold && p.seat.hand != null && p.seat.hand.length > 0) {
+			if (!p.fold && p.seat.hole != null && p.seat.hole.length > 0) {
 				names.add(p.seat.name);
-				holes.add(p.seat.hand);
+				holes.add(p.seat.hole);
 			}
 		}
 		
@@ -154,7 +154,7 @@ public class HandInfo2 {
 				// get hole cards and bet amounds
 				for (Action act : hand.streets[s]) {
 					SP2 p = str.get(act.seat.name);
-					p.hole = act.seat.hand;
+					p.hole = act.seat.hole;
 					if (act.act.equals("folds")) {
 						//System.out.println(p.name + " folds");
 						p.fold = true;
@@ -263,9 +263,9 @@ public class HandInfo2 {
 		List<String[]> hands = new ArrayList<String[]>();
 		int me = -1;
 		for (Seat s : hand.seats) {
-			if (s.hand != null) {
+			if (s.hole != null) {
 				names.add(s.name);
-				hands.add(s.hand);
+				hands.add(s.hole);
 				if (s == hand.myseat) {
 					me = names.size() - 1;
 				}

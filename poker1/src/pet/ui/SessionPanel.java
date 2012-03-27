@@ -1,17 +1,13 @@
 package pet.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.event.*;
-import java.text.DateFormat;
 import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 
-import pet.eq.Poker;
-import pet.hp.Hand;
 import pet.hp.util.*;
 
 public class SessionPanel extends JPanel {
@@ -73,8 +69,22 @@ public class SessionPanel extends JPanel {
 				if (!e.getValueIsAdjusting()) {
 					HandInfo hi = getHandInfo();
 					if (hi != null) {
-						textArea.setText(hi.toString());
+						textArea.setText(hi.getDescription());
 					}
+				}
+			}
+		});
+		handTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() >= 2) {
+					int r = handTable.rowAtPoint(e.getPoint());
+					if (r >= 0) {
+						int sr = handTable.convertRowIndexToModel(r);
+						HandInfo hi = ((SessionTableModel)handTable.getModel()).getRow(sr);
+						PokerFrame.replay(hi.hand);
+					}
+					System.out.println("double click");
 				}
 			}
 		});
@@ -101,7 +111,7 @@ public class SessionPanel extends JPanel {
 		int r = handTable.getSelectionModel().getMinSelectionIndex();
 		if (r >= 0) {
 			int sr = handTable.convertRowIndexToModel(r);
-			HandInfo hi = ((HandTableModel)handTable.getModel()).getRow(sr);
+			HandInfo hi = ((SessionTableModel)handTable.getModel()).getRow(sr);
 			System.out.println("selected " + r + " => " + sr + " => " + hi);
 			return hi;
 		}
@@ -123,80 +133,7 @@ public class SessionPanel extends JPanel {
 		String player = nameField.getText();
 		String game = (String) gameCombo.getSelectedItem();
 		List<HandInfo> hi = PokerFrame.getHistory().getHands(player, game);
-		handTable.setModel(new HandTableModel(hi));
-	}
-}
-
-class HandTableModel extends AbstractTableModel {
-	private static final String[] cols = new String[] {
-		"Date", "MyHole", "Board", "Seats",
-		"Winner", "WonOn", "Value"
-		//, "pip", "af", "av"
-	};
-	private static final Class<?>[] colcls = new Class<?>[] {
-		Date.class, String[].class, String[].class, Integer.class, String.class, String.class, Integer.class
-	};
-	private final List<HandInfo> hands;
-	public HandTableModel(List<HandInfo> hands) {
-		this.hands = hands;
-	}
-	public HandInfo getRow(int r) {
-		return hands.get(r);
-	}
-	@Override
-	public int getColumnCount() {
-		return cols.length;
-	}
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return colcls[c];
-	}
-	@Override
-	public String getColumnName(int c) {
-		return cols[c];
-	}
-	@Override
-	public int getRowCount() {
-		return hands.size();
-	}
-	@Override
-	public Object getValueAt(int r, int c) {
-		if (r < hands.size()) {
-			HandInfo hi = hands.get(r);
-			Hand h = hi.hand;
-			switch (c) {
-			case 0: return h.date;
-			case 1: return h.myseat.hand;
-			case 2: return h.board;
-			case 3: return h.seats.length;
-			}
-		}
-		return null;
-	}
-
-}
-
-class DateRenderer extends DefaultTableCellRenderer {
-	@Override
-	protected void setValue(Object value) {
-		if (value instanceof Date) {
-			value = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(value);
-		}
-		super.setValue(value);
-	}
-}
-
-class HandRenderer extends DefaultTableCellRenderer {
-	public HandRenderer() {
-		Font f = getFont();
-		setFont(new Font("Monospaced", 0, f.getSize()));
-	}
-	@Override
-	protected void setValue(Object value) {
-		if (value instanceof String[]) {
-			value = Poker.getCardString((String[]) value, true);
-		}
-		super.setValue(value);
+		handTable.setModel(new SessionTableModel(hi));
 	}
 }
 

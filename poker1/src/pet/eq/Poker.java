@@ -1,6 +1,7 @@
 package pet.eq;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -8,6 +9,21 @@ import java.util.Comparator;
  */
 public class Poker {
 
+	private static final class CardCmp implements Comparator<String> {
+		private final int polarity;
+		public CardCmp(boolean asc) {
+			polarity = asc ? 1 : -1;
+		}
+		@Override
+		public int compare(String c1, String c2) {
+			int v = faceval(c1) - faceval(c2);
+			if (v == 0) {
+				v = suit(c1) - suit(c2);
+			}
+			return polarity * v;
+		}
+	}
+	
 	/**
 	 * Rank masks (allowing 20 bits for hand value, i.e. 4 bits per card)
 	 */
@@ -42,17 +58,8 @@ public class Poker {
 	/**
 	 * compare by face then suit
 	 */
-	public static Comparator<String> cmp = new Comparator<String>() {
-		@Override
-		public int compare(String c1, String c2) {
-			int v = faceval(c1) - faceval(c2);
-			if (v == 0) {
-				v = suit(c1) - suit(c2);
-			}
-			return v;
-		}
-	};
-
+	public static Comparator<String> cardCmp = new CardCmp(true);
+	public static Comparator<String> revCardCmp = new CardCmp(false);
 	private static int[] mkfacevals() {
 		// use array instead of map due to primitive type
 		int[] fv = new int['T' - '2' + 1];
@@ -230,7 +237,7 @@ public class Poker {
 	}
 
 	/**
-	 * Return integer value of card face, ace high (from A = 14 to 2 = 2)
+	 * Return integer value of card face, ace high (from A = 14 to deuce = 2)
 	 */
 	private static int faceval(String card) {
 		return facevals[card.charAt(0) - '2'];
@@ -318,11 +325,11 @@ public class Poker {
 		}
 	}
 
-	public static char suitsyml(String c) {
+	public static char suitsyml(String card) {
 		/*
 		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
 		 */
-		switch (suit(c)) {
+		switch (suit(card)) {
 		case C_SUIT: return '♧';
 		case D_SUIT: return '♢';
 		case H_SUIT: return '♡';
@@ -330,16 +337,27 @@ public class Poker {
 		default: return 0;
 		}
 	}
+	
+	/**
+	 * Return suit value from 0-3 (for sorting purposes)
+	 */
+	public static int suitval(String card) {
+		switch (suit(card)) {
+		case C_SUIT: return 3;
+		case D_SUIT: return 2;
+		case H_SUIT: return 1;
+		case S_SUIT: return 0;
+		default: return -1;
+		}
+	}
 
 	public static char face(String card) {
 		return card.charAt(0);
 	}
 
-	public static String getCardString(String[] cards, boolean sort) {
+	public static String toString(String[] cards) {
 		if (cards != null) {
 			StringBuilder sb = new StringBuilder(cards.length * 2);
-			// FIXME sort by card val then suit
-			// should probably do this in handinfo
 			for (String c : cards) {
 				if (c != null) {
 					sb.append(c.charAt(0)).append(Poker.suitsyml(c));
@@ -351,6 +369,18 @@ public class Poker {
 		} else {
 			return "";
 		}
+	}
+	
+	/**
+	 * return integer value of cards (must be sorted)
+	 */
+	public static int cardsValue(String[] cards) {
+		int v = 0;
+		for (String card : cards) {
+			v *= 60;
+			v += faceval(card) * 4 + suitval(card);
+		}
+		return v;
 	}
 
 }

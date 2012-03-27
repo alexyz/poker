@@ -32,7 +32,7 @@ public class Bankroll {
 							data.add(new GraphData(handdate, won));
 							date = handdate;
 						}
-						won += seat.won - seat.lost + seat.uncalled;
+						won += seat.won - seat.pip + seat.uncalled;
 					}
 				}
 			}

@@ -21,6 +21,12 @@ public class HandUtil {
 			return c;
 		}
 	};
+	public static final Comparator<Seat> seatCmp = new Comparator<Seat>() {
+		@Override
+		public int compare(Seat s1, Seat s2) {
+			return s1.num - s2.num;
+		}
+	};
 	public static final char FCD_TYPE = '5', HE_TYPE = 'H', OM_TYPE = 'O';
 	public static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	public static final String[] drawstreetnames = { "Pre draw", "Post draw" };

@@ -86,14 +86,25 @@ public class FollowThread extends Thread {
 	
 	private void read(File f, long offset) {
 		try {
-			FileInputStream is = new FileInputStream(f);
+			InputStream is = new FileInputStream(f);
 			is.skip(offset);
-			
+			List<String> lines = new ArrayList<String>();
 			String line;
 			BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			while ((line = br.readLine()) != null) {
-				Hand h = parser.parseLine(line);
+				lines.add(line);
+				Hand h = null;
+				try {
+					h = parser.parseLine(line);
+				} catch (RuntimeException e) {
+					// FIXME clear and debug
+					for (String l : lines) {
+						System.out.println("> " + l);
+					}
+					throw e;
+				}
 				if (h != null) {
+					lines.clear();
 					for (FollowListener l : listeners) {
 						l.nextHand(h);
 					}
