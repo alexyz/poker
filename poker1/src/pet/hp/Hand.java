@@ -45,7 +45,9 @@ public class Hand implements Serializable {
 	/** button seat number */
 	public int button;
 	/** type of game for street and hand analysis purposes */
-	public char gametype; 
+	public char gametype;
+	/** uncalled action amount */
+	public int uncall;
 	@Override
 	public String toString() {
 		return String.format("Game[%s '%s' at '%s' on %s seats=%s str=%d]", 

@@ -18,9 +18,8 @@ public class BankrollUtil {
 		}
 	};
 
-	public static List<GraphDataPoint> getBankRoll (Parser hp, String player, String game) {
+	public static List<GraphDataPoint> getBankRoll (List<Hand> hands, String player, String game) {
 		List<GraphDataPoint> data = new ArrayList<GraphDataPoint>();
-		List<Hand> hands = hp.getHands();
 		Collections.sort(hands, HandUtil.idCmp);
 		int won = 0, date = 0;
 		for (Hand hand : hands) {
@@ -32,7 +31,7 @@ public class BankrollUtil {
 							data.add(new GraphDataPoint(handdate, won));
 							date = handdate;
 						}
-						won += seat.won - seat.pip + seat.uncalled;
+						won += seat.won - seat.pip;
 					}
 				}
 			}

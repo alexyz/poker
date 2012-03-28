@@ -10,6 +10,10 @@ import javax.swing.table.*;
 
 import pet.hp.util.*;
 
+/**
+ * todo send to eq panel button
+ * send to rep button
+ */
 public class SessionPanel extends JPanel {
 	// name
 	// game
@@ -123,7 +127,7 @@ public class SessionPanel extends JPanel {
 		Vector<String> games = new Vector<String>();
 		games.add("");
 		if (pi != null) {
-			games.addAll(pi.gmap.keySet());
+			games.addAll(pi.games.keySet());
 		}
 		gameCombo.setModel(new DefaultComboBoxModel(games));
 		handTable.setModel(new DefaultTableModel());

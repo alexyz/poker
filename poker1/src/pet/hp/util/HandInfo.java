@@ -35,7 +35,7 @@ public class HandInfo {
 	}
 	
 	public int myvalue() {
-		return hand.myseat.won - hand.myseat.pip + hand.myseat.uncalled;
+		return hand.myseat.won - hand.myseat.pip;
 	}
 	
 	public String getDescription() {

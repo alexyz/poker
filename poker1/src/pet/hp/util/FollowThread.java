@@ -80,7 +80,7 @@ public class FollowThread extends Thread {
 			}
 
 		} else {
-			//System.out.println("-- ignoring " + name); 
+			System.out.println("-- ignoring " + name); 
 		}
 	}
 	

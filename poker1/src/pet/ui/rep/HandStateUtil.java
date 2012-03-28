@@ -76,7 +76,6 @@ class HandStateUtil {
 			Seat seat = hand.seats[s];
 			SeatState ss = hs.seats[seat.num - 1];
 			ss.bet = seat.won;
-			ss.stack += seat.uncalled;
 			ss.won = seat.won > 0;
 		}
 		states.add(hs);

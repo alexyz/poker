@@ -67,6 +67,9 @@ public class PSParser extends Parser implements Serializable {
 	public void clear() {
 		show = false;
 		sum = false;
+		//for (Seat seat : seatsMap.values()) {
+			//println("seat " + seat + " pip " + seat.pip + " show=" + seat.showdown + " hole " + Arrays.asList(seat.hole));
+		//}
 		seatsMap.clear();
 		//seatsList.clear();
 		streets.clear();
@@ -145,7 +148,7 @@ public class PSParser extends Parser implements Serializable {
 			parseUncall(line);
 
 		} else if (line.startsWith("Total pot")) {
-			parsePot(line);
+			parseTotal(line);
 
 
 			/// ---------- ends with ----------
@@ -224,7 +227,7 @@ public class PSParser extends Parser implements Serializable {
 		return ret;
 	}
 
-	private void parsePot(final String line) {
+	private void parseTotal(final String line) {
 		// Total pot $0.30 | Rake $0.01 
 		// Total pot $4.15 Main pot $2.83. Side pot $1.12. | Rake $0.20 
 		hand.pot = parseMoney(line, 10);
@@ -233,6 +236,29 @@ public class PSParser extends Parser implements Serializable {
 		}
 		int a = line.indexOf("Rake");
 		hand.rake = parseMoney(line, a + 5);
+		
+		int won = 0;
+		int lost = 0;
+		for (Seat seat : seatsMap.values()) {
+			won += seat.won;
+			lost += seat.pip;
+		}
+		if (won != (hand.pot - hand.rake)) {
+			throw new RuntimeException("pot " + pot + " not equal to total won " + won + " - rake " + hand.rake);
+		}
+		if (won != (lost - hand.rake + hand.db)) {
+			throw new RuntimeException("won " + won + " not equal to lost " + lost);
+		}
+		int asum = 0;
+		for (List<Action> str : streets) {
+			for (Action ac : str) {
+				asum += ac.amount;
+			}
+		}
+		if ((asum - hand.uncall) != lost) {
+			throw new RuntimeException("actsum " + (asum - hand.uncall) + " not equal to lost " + lost);
+		}
+		
 		println("total " + hand.pot + " rake " + hand.rake);
 	}
 
@@ -248,6 +274,7 @@ public class PSParser extends Parser implements Serializable {
 		}
 		//seat.uncalled = amount;
 		seatPip[seat.num] -= amount;
+		hand.uncall = amount;
 		println("uncalled " + name + " " + amount);
 	}
 
@@ -605,6 +632,10 @@ public class PSParser extends Parser implements Serializable {
 
 		} else {
 			throw new RuntimeException("unknown action: " + action.act);
+		}
+		
+		if (show) {
+			seat.showdown = true;
 		}
 
 		// any betting action can cause this

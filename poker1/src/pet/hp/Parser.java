@@ -6,6 +6,7 @@ public abstract class Parser {
 	/**
 	 * Get hands that have been parsed so far
 	 */
+	@Deprecated
 	public abstract List<Hand> getHands();
 	/**
 	 * Parse next line from file.

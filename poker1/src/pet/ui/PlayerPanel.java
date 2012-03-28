@@ -1,6 +1,7 @@
 package pet.ui;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -8,17 +9,26 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 
+import pet.hp.util.PlayerGameInfo;
 import pet.hp.util.PlayerInfo;
+import pet.ui.gr.BankrollUtil;
 
+/**
+ * TODO send to bankroll button
+ * update table model
+ * add all time win/loss column
+ */
 public class PlayerPanel extends JPanel {
 	// [name]
 	// [table-name,games,hands,value]
 	// [pinfo]
 	private final JTextField nameField = new JTextField();
 	private final JTable playersTable = new JTable();
-	private final JTextArea playerTextArea = new JTextArea();
+	private final JTable gamesTable = new JTable();
+	private final JTextArea gameTextArea = new JTextArea();
+	private final JButton bankrollButton = new JButton("Bankroll");
+	private final JButton sessionButton = new JButton("Session");
 	
 	public PlayerPanel() {
 		super(new BorderLayout());
@@ -41,87 +51,74 @@ public class PlayerPanel extends JPanel {
 					int r = playersTable.getSelectionModel().getMinSelectionIndex();
 					if (r >= 0) {
 						int sr = playersTable.convertRowIndexToModel(r);
-						String player = (String) playersTable.getModel().getValueAt(sr, 0);
-						System.out.println("selected " + r + " => " + sr + " => " + player);
-						PlayerInfo pi = PokerFrame.getHistory().getPlayerInfo(player, false);
-						playerTextArea.setText(pi.toLongString());
+						PlayerInfo pi = ((PlayerTableModel)playersTable.getModel()).getRow(sr);
+						System.out.println("selected " + r + " => " + sr + " => " + pi);
+						gamesTable.setModel(new GameTableModel(pi.games));
+						revalidate();
 					}
 				}
 			}
 		});
 		
+		gamesTable.setAutoCreateRowSorter(true);
+		gamesTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		gamesTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+					if (r >= 0) {
+						int sr = gamesTable.convertRowIndexToModel(r);
+						PlayerGameInfo gi = ((GameTableModel) gamesTable.getModel()).getRow(sr);
+						System.out.println("selected " + r + " => " + sr + " => " + gi);
+						gameTextArea.setText(gi.toLongString());
+						revalidate();
+					}
+				}
+			}
+		});
+		
+		gameTextArea.setRows(5);
+		gameTextArea.setLineWrap(true);
+		
+		bankrollButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO get list of hands from history
+				//BankrollUtil.
+			}
+		});
+		
+		JScrollPane gamesTableScroller = new JScrollPane(gamesTable);
+		gamesTableScroller.setBorder(BorderFactory.createTitledBorder("Player Games"));
+		
+		JScrollPane gameTextAreaScroller = new JScrollPane(gameTextArea);
+		gameTextAreaScroller.setBorder(BorderFactory.createTitledBorder("Player Game Info"));
+		
 		JScrollPane playersTableScroller = new JScrollPane(playersTable);
 		playersTableScroller.setBorder(BorderFactory.createTitledBorder("Players"));
 		
-		playerTextArea.setRows(5);
-		playerTextArea.setLineWrap(true);
-		
-		JScrollPane playersTextAreaScroller = new JScrollPane(playerTextArea);
-		playersTextAreaScroller.setBorder(BorderFactory.createTitledBorder("Player Info"));
-		
-		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, playersTableScroller, playersTextAreaScroller);
+		JPanel mainPanel = new JPanel(new GridLayout(3, 1));
+		mainPanel.add(playersTableScroller);
+		mainPanel.add(gamesTableScroller);
+		mainPanel.add(gameTextAreaScroller);
 		
 		JPanel topPanel = new JPanel();
 		topPanel.add(nameField);
+		
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(sessionButton);
+		bottomPanel.add(bankrollButton);
 				
 		add(topPanel, BorderLayout.NORTH);
-		add(split, BorderLayout.CENTER);
+		add(mainPanel, BorderLayout.CENTER);
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	private void find() {
 		String pattern = nameField.getText();
 		playersTable.setModel(new PlayerTableModel(PokerFrame.getHistory().getPlayers(pattern)));
 	}
-}
-
-class PlayerTableModel extends AbstractTableModel {
-	private static final String[] cols = new String[] {
-		"Player", "Games", "Hands" // value?
-	};
-	private static final Class<?>[] colcls = new Class<?>[] {
-		String.class, Integer.class, Integer.class
-	};
-	private final List<String> players = new ArrayList<String>();
-	private final Map<String,PlayerInfo> playerMap;
-	public PlayerTableModel(Map<String, PlayerInfo> playerMap) {
-		this.playerMap = playerMap;
-		players.addAll(playerMap.keySet());
-		Collections.sort(players);
-	}
-	@Override
-	public int getColumnCount() {
-		return cols.length;
-	}
-	
-	@Override
-	public String getColumnName(int c) {
-		return cols[c];
-	}
-
-	@Override
-	public int getRowCount() {
-		return players.size();
-	}
-	
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return colcls[c];
-	}
-
-	@Override
-	public Object getValueAt(int r, int c) {
-		if (r < players.size()) {
-			String player = players.get(r);
-			PlayerInfo pi = playerMap.get(player);
-			switch (c) {
-			case 0: return pi.name;
-			case 1: return pi.gmap.size(); // not sync
-			case 2: return pi.hands;
-			}
-		}
-		return null;
-	}
-	
 }
 
 

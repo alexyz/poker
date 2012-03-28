@@ -62,41 +62,40 @@ public class History implements FollowListener {
 				String player = a.seat.name;
 				PlayerInfo pi = getPlayerInfo(player, true);
 				PlayerGameInfo gi = getPlayerGameInfo(pi, game, type);
-				if (actions.contains(a.act)) {
-					int[] c = gi.getAction(a.act);
-					c[0]++;
-					c[1] += a.amount;
-					gi.lost += a.amount;
-					// TODO push folded on into seat
-					if (a.act.equals("folds")) {
-						gi.foldedon[s]++;
-					}
-				}
-				// TODO push showdown into seat
-				if (a.act.equals("shows") && HandUtil.isShowdown(type, s)) {
-					gi.showdown++;
+				int[] c = gi.getAction(a.act);
+				c[0]++;
+				c[1] += a.amount;
+				//gi.pip += a.amount;
+				
+				// TODO push folded on into seat
+				if (a.act.equals("folds")) {
+					gi.foldedon[s]++;
 				}
 			}
 		}
 		
 		for (Seat s : h.seats) {
 			PlayerInfo pi = getPlayerInfo(s.name, true);
-			// FIXME overestimates hands
 			// could be sitting without hand?
 			pi.hands++;
+			if (pi.date == null || pi.date.before(h.date)) {
+				pi.date = h.date;
+			}
+			
 			PlayerGameInfo gi = getPlayerGameInfo(pi, game, type);
 			gi.hands++;
+			gi.pip += s.pip;
+			if (s.showdown) {
+				gi.showdown++;
+			}
 			if (s.won > 0) {
+				gi.handswon++;
 				gi.won += s.won;
-				// XXX probably double counts rake
+				// overcounts rake if split?
 				gi.rake += h.rake;
-				gi.woncount++;
 			}
-			if (s.uncalled > 0) {
-				gi.lost -= s.uncalled;
-			}
-			if (s.defaultwin) {
-				gi.defaultwin++;
+			if (s.showdown && s.won > 0) {
+				gi.handswonshow++;
 			}
 			
 		}
@@ -104,9 +103,9 @@ public class History implements FollowListener {
 	}
 	
 	private synchronized static PlayerGameInfo getPlayerGameInfo(PlayerInfo pi, String gamename, char gametype) {
-		PlayerGameInfo gi = pi.gmap.get(gamename);
+		PlayerGameInfo gi = pi.games.get(gamename);
 		if (gi == null) {
-			pi.gmap.put(gamename, gi = new PlayerGameInfo(gametype));
+			pi.games.put(gamename, gi = new PlayerGameInfo(gamename, gametype));
 		}
 		return gi;
 	}
