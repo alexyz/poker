@@ -1,10 +1,10 @@
 package pet.ui.gr;
 
-public class GraphData {
+public class GraphDataPoint {
 	private final int x;
 	private final int y;
 
-	public GraphData(int x, int y) {
+	public GraphDataPoint(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}

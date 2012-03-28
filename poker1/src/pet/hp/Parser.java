@@ -16,4 +16,8 @@ public abstract class Parser {
 	 * Return true if this file can be parsed
 	 */
 	public abstract boolean isHistoryFile(String name);
+	
+	public abstract void clear();
+	
+	public abstract List<String> getDebug();
 }

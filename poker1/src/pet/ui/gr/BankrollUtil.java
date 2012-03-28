@@ -4,9 +4,9 @@ import java.text.DateFormat;
 import java.util.*;
 import pet.hp.*;
 
-public class Bankroll {
+public class BankrollUtil {
 
-	public static final GraphDataName nf = new GraphDataName() {
+	public static final GraphNameFunction nf = new GraphNameFunction() {
 		@Override
 		public String getXName(int x) {
 			return dayname(x);
@@ -18,8 +18,8 @@ public class Bankroll {
 		}
 	};
 
-	public static List<GraphData> getBankRoll (Parser hp, String player, String game) {
-		List<GraphData> data = new ArrayList<GraphData>();
+	public static List<GraphDataPoint> getBankRoll (Parser hp, String player, String game) {
+		List<GraphDataPoint> data = new ArrayList<GraphDataPoint>();
 		List<Hand> hands = hp.getHands();
 		Collections.sort(hands, HandUtil.idCmp);
 		int won = 0, date = 0;
@@ -29,7 +29,7 @@ public class Bankroll {
 					if (seat.name.equals(player)) {
 						int handdate = daynumber(hand.date);
 						if (date != handdate) {
-							data.add(new GraphData(handdate, won));
+							data.add(new GraphDataPoint(handdate, won));
 							date = handdate;
 						}
 						won += seat.won - seat.pip + seat.uncalled;

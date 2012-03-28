@@ -14,8 +14,14 @@ public class Hand implements Serializable {
 	public String gamename;
 	/** hand date */
 	public Date date;
-	/** hand currency, $ or 0 */
+	/** hand currency, $, € or zero */
 	public char currency;
+	/** big blind (if any?) */
+	public int bb;
+	/** small blind (if any?) */
+	public int sb;
+	/** dead blinds */
+	public int db;
 	/** participants in hand in seat order */
 	public Seat[] seats;
 	/** current players seat */

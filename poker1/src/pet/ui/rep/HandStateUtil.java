@@ -14,6 +14,7 @@ class HandStateUtil {
 
 		// initial state
 		HandState hs = new HandState(hand.max);
+		hs.pot = hand.db;
 		hs.button = hand.button - 1;
 		hs.actionSeat = -1;
 		for (Seat seat : hand.seats) {

@@ -1,6 +1,6 @@
 package pet.ui.gr;
 
-public class GraphDataName {
+public class GraphNameFunction {
 
 	public String getXName(int x) {
 		return null;

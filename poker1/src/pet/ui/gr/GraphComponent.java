@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class Graph extends JComponent {
+public class GraphComponent extends JComponent {
 	public static void main(String[] args) {
-		List<GraphData> data = new ArrayList<GraphData>();
+		List<GraphDataPoint> data = new ArrayList<GraphDataPoint>();
 		for (float x = -2; x < 2; x += 0.05f) {
 			float y = (float) Math.sin(x);
-			data.add(new GraphData((int)(x*100.0), (int)(y*100.0)));
+			data.add(new GraphDataPoint((int)(x*100.0), (int)(y*100.0)));
 		}
-		GraphDataName nf = new GraphDataName() {
+		GraphNameFunction nf = new GraphNameFunction() {
 			@Override
 			public String getXName(int x) {
 				return Double.toString(x / 100.0);
@@ -26,23 +26,23 @@ public class Graph extends JComponent {
 		};
 		JFrame f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Graph g = new Graph(data, nf);
+		GraphComponent g = new GraphComponent(data, nf);
 		g.setPreferredSize(new Dimension(800,600));
 		f.setContentPane(g);
 		f.pack();
 		f.show();
 	}
-	private final List<GraphData> data;
+	private final List<GraphDataPoint> data;
 	private final int minx, miny, maxx, maxy;
-	private final GraphDataName nf;
-	public Graph(List<GraphData> data, GraphDataName nf) {
+	private final GraphNameFunction nf;
+	public GraphComponent(List<GraphDataPoint> data, GraphNameFunction nf) {
 		this.data = data;
 		this.nf = nf;
 		int minx = Integer.MAX_VALUE;
 		int miny = Integer.MAX_VALUE;
 		int maxx = Integer.MIN_VALUE;
 		int maxy = Integer.MIN_VALUE;
-		for (GraphData d : data) {
+		for (GraphDataPoint d : data) {
 			int x = d.getX();
 			if (x > maxx) {
 				maxx = x;
@@ -102,9 +102,9 @@ public class Graph extends JComponent {
 		}
 
 		g.setColor(Color.black);
-		GraphData pd = data.get(0);
+		GraphDataPoint pd = data.get(0);
 		for (int n = 1; n < data.size(); n++) {
-			GraphData d = data.get(n);
+			GraphDataPoint d = data.get(n);
 			int x1 = getVX(gw, xm, pd.getX());
 			int y1 = getVY(gh, ym, pd.getY());
 			int x2 = getVX(gw, xm, d.getX());

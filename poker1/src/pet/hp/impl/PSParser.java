@@ -1,9 +1,7 @@
 package pet.hp.impl;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import pet.hp.*;
 
@@ -23,7 +21,7 @@ public class PSParser extends Parser implements Serializable {
 	/** list of completed hands */
 	private final List<Hand> hands = new ArrayList<Hand>();
 
-	// transient fields
+	// transient fields - these probably shouldn't be final
 	
 	/** map of player name to seat for current hand */
 	// TODO see if hashmap or array is faster
@@ -39,6 +37,7 @@ public class PSParser extends Parser implements Serializable {
 	private transient Hand hand;
 	/** is in summary phase */
 	private transient boolean show = false, sum = false;
+	private transient final List<String> debuglines = new ArrayList<String>();
 	public transient boolean debug;
 
 	public PSParser() {
@@ -46,6 +45,7 @@ public class PSParser extends Parser implements Serializable {
 	}
 
 	private void println(String s) {
+		debuglines.add(s);
 		if (debug) {
 			System.out.println(s);
 		}
@@ -63,7 +63,8 @@ public class PSParser extends Parser implements Serializable {
 		}
 	}
 
-	private void clear() {
+	@Override
+	public void clear() {
 		show = false;
 		sum = false;
 		seatsMap.clear();
@@ -73,6 +74,12 @@ public class PSParser extends Parser implements Serializable {
 		Arrays.fill(seatPip, 0);
 		pot = 0;
 		hand = null;
+		debuglines.clear();
+	}
+	
+	@Override
+	public List<String> getDebug() {
+		return debuglines;
 	}
 
 	/**
@@ -90,8 +97,7 @@ public class PSParser extends Parser implements Serializable {
 
 		line = line.trim();
 
-		if (debug)
-			println(">  " + line);
+		println(">  " + line);
 
 		if (line.length() == 0) {
 			if (sum && hand != null) {
@@ -447,7 +453,7 @@ public class PSParser extends Parser implements Serializable {
 
 		} else if (hand.gametype == HandUtil.FCD_TYPE) {
 			if (name.equals("DEALING HANDS")) {
-				newstr = true;
+				ignstr = true;
 			}
 		}
 
@@ -516,8 +522,7 @@ public class PSParser extends Parser implements Serializable {
 		} else if (act.equals("raises")) {
 			// bluff.tb: raises $0.05 to $0.07
 			int amountStart = line.indexOf("to ", actEnd) + 3;
-
-			// XXX subtract what seat has already put in this round
+			// subtract what seat has already put in this round
 			int amount = parseMoney(line, amountStart) - seatPip[seat.num];
 			action.amount = amount;
 			seatPip[seat.num] += amount;
@@ -526,9 +531,43 @@ public class PSParser extends Parser implements Serializable {
 			// Bumerang16: posts small blind $0.01
 			// pisti361: posts small & big blinds $0.03
 			// Yury.Nik: posts big blind 50 and is all-in
+			// small and big blinds always posted first due to position
+			// though very occasionally the big blind may not be posted (?)
+			
 			int blindStart = line.indexOf("blind", actEnd);
 			int amountStart = nextToken(line, blindStart);
 			int amount = parseMoney(line, amountStart);
+			if (line.indexOf("small blind", actEnd) > 0) {
+				if (hand.sb == 0) {
+					println("small blind " + amount);
+					hand.sb = amount;
+					
+				} else {
+					// dead blind
+					println("dead small blind " + amount);
+					hand.db += amount;
+					pot += amount;
+					amount = 0;
+				}
+				
+			} else if (line.indexOf("small & big blinds", actEnd) > 0) {
+				// dead small blind doesn't count towards pip (but does count towards pot)
+				if (hand.sb == 0) {
+					throw new RuntimeException("post sb+bb without sb");
+				}
+				println("dead small and big blind " + amount);
+				hand.db += hand.sb;
+				pot += hand.sb;
+				amount -= hand.sb;
+				
+			} else if (line.indexOf("big blind", actEnd) > 0) {
+				println("big blind " + amount);
+				hand.bb = amount;
+				
+			} else {
+				throw new RuntimeException("unknown post");
+			}
+			
 			seatPip[seat.num] += amount;
 			action.amount = amount;
 
@@ -560,6 +599,7 @@ public class PSParser extends Parser implements Serializable {
 			}
 
 		} else if (act.equals("stands")) {
+			// stands pat
 			draw = true;
 			println("stands");
 
@@ -576,8 +616,8 @@ public class PSParser extends Parser implements Serializable {
 			
 		if (draw && streets.size() == 1) {
 			// there is no draw phase, so pip and fake a new street
-			pip();
 			println("new street for draw");
+			pip();
 			streets.add(new ArrayList<Action>());
 		}
 		
