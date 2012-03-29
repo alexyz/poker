@@ -77,7 +77,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			followThread = new FollowThread(hp);
 			followThread.addFile(pathLabel.getText());
 			followThread.addListener(this);
-			followThread.addListener(PokerFrame.getHistory());
+			followThread.addListener(PokerFrame.getInstance().getHistory());
 			followThread.start();
 			addButton.setEnabled(true);
 		}

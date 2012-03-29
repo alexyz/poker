@@ -1,12 +1,20 @@
 package pet.ui.gr;
 
-public class GraphNameFunction {
+import java.util.*;
+
+public class GraphData {
+	
+	public String name;
+	
+	public final List<GraphDataPoint> points = new ArrayList<GraphDataPoint>();
 
 	public String getXName(int x) {
-		return null;
+		return String.valueOf(x);
 	}
 
 	public String getYName(int y) {
-		return null;
+		return String.valueOf(y);
 	}
+	
+	
 }

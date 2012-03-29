@@ -237,6 +237,7 @@ public class PSParser extends Parser implements Serializable {
 		int a = line.indexOf("Rake");
 		hand.rake = parseMoney(line, a + 5);
 		
+		// FIXME remove these
 		int won = 0;
 		int lost = 0;
 		for (Seat seat : seatsMap.values()) {

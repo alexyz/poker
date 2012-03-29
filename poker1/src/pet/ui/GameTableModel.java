@@ -14,7 +14,7 @@ class GameTableModel extends AbstractTableModel {
 		cols.add(new TableModelColumn<PlayerGameInfo,String>("Game", String.class) {
 			@Override
 			public String getValue(PlayerGameInfo o) {
-				return o.name;
+				return o.gameName;
 			}
 		});
 		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("Hands", Integer.class) {

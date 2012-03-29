@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 
+import pet.hp.Hand;
 import pet.hp.util.*;
 
 /**
@@ -59,7 +60,7 @@ public class SessionPanel extends JPanel {
 		sendButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				PokerFrame.replay(getHandInfo().hand);
+				PokerFrame.getInstance().displayHand(getHandInfo().hand);
 			}
 		});
 
@@ -86,7 +87,7 @@ public class SessionPanel extends JPanel {
 					if (r >= 0) {
 						int sr = handTable.convertRowIndexToModel(r);
 						HandInfo hi = ((SessionTableModel)handTable.getModel()).getRow(sr);
-						PokerFrame.replay(hi.hand);
+						PokerFrame.getInstance().displayHand(hi.hand);
 					}
 					System.out.println("double click");
 				}
@@ -123,7 +124,7 @@ public class SessionPanel extends JPanel {
 	}
 
 	private void updateName(String name) {
-		PlayerInfo pi = PokerFrame.getHistory().getPlayerInfo(name, false);
+		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name, false);
 		Vector<String> games = new Vector<String>();
 		games.add("");
 		if (pi != null) {
@@ -136,7 +137,8 @@ public class SessionPanel extends JPanel {
 	private void updateGame() {
 		String player = nameField.getText();
 		String game = (String) gameCombo.getSelectedItem();
-		List<HandInfo> hi = PokerFrame.getHistory().getHands(player, game);
+		List<Hand> hands = PokerFrame.getInstance().getHistory().getHands(player, game);
+		List<HandInfo> hi = HandInfo.getHandInfos(hands);
 		handTable.setModel(new SessionTableModel(hi));
 	}
 }

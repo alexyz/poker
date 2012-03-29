@@ -1,20 +1,12 @@
 package pet.ui.gr;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.*;
 import javax.swing.*;
 
 public class GraphComponent extends JComponent {
+	
 	public static void main(String[] args) {
-		List<GraphDataPoint> data = new ArrayList<GraphDataPoint>();
-		for (float x = -2; x < 2; x += 0.05f) {
-			float y = (float) Math.sin(x);
-			data.add(new GraphDataPoint((int)(x*100.0), (int)(y*100.0)));
-		}
-		GraphNameFunction nf = new GraphNameFunction() {
+		GraphData data = new GraphData() {
 			@Override
 			public String getXName(int x) {
 				return Double.toString(x / 100.0);
@@ -24,25 +16,36 @@ public class GraphComponent extends JComponent {
 				return Double.toString(y / 100.0);
 			}
 		};
+		data.name = "sine wave";
+		for (float x = -2; x < 2; x += 0.05f) {
+			float y = (float) Math.sin(x);
+			data.points.add(new GraphDataPoint((int)(x*100.0), (int)(y*100.0)));
+		}
 		JFrame f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		GraphComponent g = new GraphComponent(data, nf);
+		GraphComponent g = new GraphComponent();
+		g.setData(data);
 		g.setPreferredSize(new Dimension(800,600));
 		f.setContentPane(g);
 		f.pack();
 		f.show();
 	}
-	private final List<GraphDataPoint> data;
-	private final int minx, miny, maxx, maxy;
-	private final GraphNameFunction nf;
-	public GraphComponent(List<GraphDataPoint> data, GraphNameFunction nf) {
+	
+	private GraphData data;
+	private int minx, miny, maxx, maxy;
+	
+	public GraphComponent() {
+		//
+	}
+	
+	public void setData(GraphData data) {
 		this.data = data;
-		this.nf = nf;
+		System.out.println("data points: " + data.points.size());
 		int minx = Integer.MAX_VALUE;
 		int miny = Integer.MAX_VALUE;
 		int maxx = Integer.MIN_VALUE;
 		int maxy = Integer.MIN_VALUE;
-		for (GraphDataPoint d : data) {
+		for (GraphDataPoint d : data.points) {
 			int x = d.getX();
 			if (x > maxx) {
 				maxx = x;
@@ -58,17 +61,30 @@ public class GraphComponent extends JComponent {
 				miny = y;
 			}
 		}
+		System.out.println(String.format("x: %d to %d, y: %d to %d", minx, maxx, miny, maxy));
 		this.minx = minx;
 		this.miny = miny;
 		this.maxx = maxx;
 		this.maxy = maxy;
 	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
+		if (data == null)
+			return;
+		
 		int w = getWidth();
-		int xm = w / 10;
 		int h = getHeight();
+		
+		if (data.name != null) {
+			g.setColor(Color.black);
+			int sw = g.getFontMetrics().stringWidth(data.name);
+			g.drawString(data.name, (w - sw) / 2, h / 20);
+		}
+		
+		int xm = w / 10;
 		int ym = h / 20;
+		
 		int gw = w - xm * 2;
 		int gh = h - ym * 2;
 
@@ -84,7 +100,7 @@ public class GraphComponent extends JComponent {
 			int x = minx + ((maxx - minx) * xx) / 10;
 			int vx = getVX(gw, xm, x);
 			g.drawLine(vx, vminy, vx, vminy + 5);
-			String n = nf != null ? nf.getXName(x) : String.valueOf(x);
+			String n = data.getXName(x);
 			int sw = g.getFontMetrics().stringWidth(n);
 			int sh = g.getFontMetrics().getHeight();
 			g.drawString(n, vx - (sw / 2), vminy + sh + 2);
@@ -95,16 +111,16 @@ public class GraphComponent extends JComponent {
 			int y = miny + ((maxy - miny) * yy) / 10;
 			int vy = getVY(gh, ym, y);
 			g.drawLine(vminx, vy, vminx - 5, vy);
-			String n = nf != null ? nf.getYName(y) : String.valueOf(y);
+			String n = data.getYName(y);
 			int sw = g.getFontMetrics().stringWidth(n);
 			int sh = g.getFontMetrics().getHeight();
 			g.drawString(n, vminx - sw - 10, vy + (sh / 2) - 3);
 		}
 
 		g.setColor(Color.black);
-		GraphDataPoint pd = data.get(0);
-		for (int n = 1; n < data.size(); n++) {
-			GraphDataPoint d = data.get(n);
+		GraphDataPoint pd = data.points.get(0);
+		for (int n = 1; n < data.points.size(); n++) {
+			GraphDataPoint d = data.points.get(n);
 			int x1 = getVX(gw, xm, pd.getX());
 			int y1 = getVY(gh, ym, pd.getY());
 			int x2 = getVX(gw, xm, d.getX());

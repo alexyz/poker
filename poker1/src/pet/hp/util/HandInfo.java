@@ -1,11 +1,19 @@
 package pet.hp.util;
 
-import java.util.Arrays;
+import java.util.*;
 
-import pet.eq.Poker;
 import pet.hp.*;
 
 public class HandInfo {
+	
+	public static List<HandInfo> getHandInfos(List<Hand> hands) {
+		List<HandInfo> handInfos = new ArrayList<HandInfo>();
+		for (Hand h : hands) {
+			handInfos.add(new HandInfo(h));
+		}
+		return handInfos;
+	}
+	
 	public final Hand hand;
 	public Hole hole;
 	

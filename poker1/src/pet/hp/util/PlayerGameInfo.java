@@ -5,8 +5,8 @@ import java.util.*;
 import pet.hp.HandUtil;
 
 public class PlayerGameInfo {
-	public final String name;
-	char type;
+	public final PlayerInfo player;
+	public final String gameName;
 	public int rake = 0;
 	/** hands in this game */
 	public int hands;
@@ -20,11 +20,16 @@ public class PlayerGameInfo {
 	public int handswonshow;
 	/** hands that went to showdown and were shown (should be all hands) */
 	public int showdown;
+	
+	// not public
+	
 	/** action map: int[] { count, amount } */
 	final Map<String,int[]> amap = new TreeMap<String,int[]>();
+	final char type;
 	
-	public PlayerGameInfo(String name, char type) {
-		this.name = name;
+	public PlayerGameInfo(PlayerInfo player, String name, char type) {
+		this.player = player;
+		this.gameName = name;
 		this.type = type;
 		this.foldedon = new int[HandUtil.getMaxStreets(type)];
 	}

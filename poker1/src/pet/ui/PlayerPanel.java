@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionListener;
 
 import pet.hp.util.PlayerGameInfo;
 import pet.hp.util.PlayerInfo;
-import pet.ui.gr.BankrollUtil;
+import pet.ui.gr.GraphData;
 
 /**
  * TODO send to bankroll button
@@ -85,7 +85,15 @@ public class PlayerPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO get list of hands from history
-				//BankrollUtil.
+				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					int sr = gamesTable.convertRowIndexToModel(r);
+					PlayerGameInfo gi = ((GameTableModel) gamesTable.getModel()).getRow(sr);
+					System.out.println("selected " + r + " => " + sr + " => " + gi);
+					PokerFrame pf = PokerFrame.getInstance();
+					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.gameName);
+					pf.displayBankRoll(bankRoll);
+				}
 			}
 		});
 		
@@ -117,7 +125,8 @@ public class PlayerPanel extends JPanel {
 	
 	private void find() {
 		String pattern = nameField.getText();
-		playersTable.setModel(new PlayerTableModel(PokerFrame.getHistory().getPlayers(pattern)));
+		PokerFrame pf = PokerFrame.getInstance();
+		playersTable.setModel(new PlayerTableModel(pf.getHistory().getPlayers(pattern)));
 	}
 }
 

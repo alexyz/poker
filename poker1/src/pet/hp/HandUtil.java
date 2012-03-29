@@ -74,4 +74,13 @@ public class HandUtil {
 		return s > 0 ? Arrays.copyOf(board, s + 2) : null;
 	}
 	
+	public static String formatMoney(char currency, int amount) {
+		// TODO commas
+		if (currency != 0) {
+			return "" + currency + (amount / 100f);
+		} else {
+			return String.valueOf(amount);
+		}
+	}
+	
 }
