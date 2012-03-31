@@ -6,6 +6,8 @@ import java.text.DateFormat;
 
 import javax.swing.JComponent;
 
+import pet.eq.Poker;
+import pet.eq.PokerUtil;
 import pet.hp.Hand;
 
 /**
@@ -102,7 +104,7 @@ class TableComponent extends JComponent {
 			FontMetrics fm = g2.getFontMetrics();
 			String noteStr = String.valueOf(state.note);
 			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
-			String boardStr = String.valueOf(state.board);
+			String boardStr = state.board != null ? PokerUtil.cardsString(state.board) : "";
 			g2.drawString(boardStr, btx - fm.stringWidth(boardStr) / 2, bty + 36);
 			String potStr = String.valueOf(state.pot);
 			g2.drawString(potStr, btx - fm.stringWidth(potStr) / 2, bty + 72);
@@ -150,20 +152,30 @@ class TableComponent extends JComponent {
 			
 			if (ss != null) {
 				int textx = (int) seatx;
-				int texty = (int) (seaty - 36);
+				int texty = (int) (seaty - 45); // TODO centre
 				g2.setFont(normalfont);
 				FontMetrics fm = g2.getFontMetrics();
-				String nameStr = String.valueOf(ss.name);
-				g2.drawString(nameStr, textx - fm.stringWidth(nameStr) / 2, texty + 15);
+				
+				String nameStr = String.valueOf(ss.seat.name);
+				g2.drawString(nameStr, textx - fm.stringWidth(nameStr) / 2, texty += 15);
+				
 				String stackStr = String.valueOf(ss.stack);
-				g2.drawString(stackStr, textx - fm.stringWidth(stackStr) / 2, texty + 30);
-				String holeStr = String.valueOf(ss.hole);
-				g2.drawString(holeStr, textx - fm.stringWidth(holeStr) / 2, texty + 45);
+				g2.drawString(stackStr, textx - fm.stringWidth(stackStr) / 2, texty += 15);
+				
+				String holeStr = ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[unknown]";
+				g2.drawString(holeStr, textx - fm.stringWidth(holeStr) / 2, texty += 15);
+				
+				String valueStr = ss.eq != null ? Poker.valueString(ss.eq.current) : "";
+				g2.drawString(valueStr, textx - fm.stringWidth(valueStr) / 2, texty += 15);
+				
+				String eqStr = "Equity: " + (ss.eq != null ? ss.eq.won + ss.eq.tied : 0);
+				g2.drawString(eqStr, textx - fm.stringWidth(eqStr) / 2, texty += 15);
+				
 				if (state.actionSeat == s || ss.won) {
 					g2.setFont(boldfont);
 					fm = g2.getFontMetrics();
 					String actStr = String.valueOf(ss.won ? "wins" : state.action);
-					g2.drawString(actStr, textx - fm.stringWidth(actStr) / 2, texty + 60);
+					g2.drawString(actStr, textx - fm.stringWidth(actStr) / 2, texty += 15);
 				}
 
 				if (ss.bet > 0) {

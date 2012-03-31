@@ -76,7 +76,7 @@ public class FollowThread extends Thread {
 				System.out.println("activity on " + name);
 				read(f, size[0]);
 				size[0] = fsize;
-				System.out.println("hands: " + parser.getHands().size());
+				System.out.println("read " + fsize + " bytes");
 			}
 
 		} else {

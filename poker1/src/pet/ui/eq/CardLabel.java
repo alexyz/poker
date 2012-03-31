@@ -62,15 +62,15 @@ class CardLabel extends JLabel {
 		update();
 	}
 	private void update() {
-		String c = getName();
-		if (c != null) {
+		String card = getName();
+		if (card != null) {
 			if (hidden) {
 				setForeground(Color.black);
 				setText("--");
 			} else {
-				setForeground(Poker.suitcol(Poker.suit(c)));
-				char f = Poker.face(c);
-				char s = Poker.suitsym(c);
+				setForeground(PokerUtil.suitColour(Poker.suit(card)));
+				char f = Poker.face(card);
+				char s = PokerUtil.suitSymbol(card, true);
 				// doesn't fit
 				//setText(f == 'T' ? "10" + s : "" + f + s);
 				setText("" + f + s);

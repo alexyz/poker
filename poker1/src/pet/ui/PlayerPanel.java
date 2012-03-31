@@ -1,17 +1,12 @@
 package pet.ui;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 
-import pet.hp.util.PlayerGameInfo;
-import pet.hp.util.PlayerInfo;
+import pet.hp.util.*;
 import pet.ui.gr.GraphData;
 
 /**
@@ -94,6 +89,13 @@ public class PlayerPanel extends JPanel {
 					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.gameName);
 					pf.displayBankRoll(bankRoll);
 				}
+			}
+		});
+		
+		sessionButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO
 			}
 		});
 		

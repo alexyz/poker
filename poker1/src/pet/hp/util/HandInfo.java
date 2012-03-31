@@ -51,7 +51,7 @@ public class HandInfo {
 		sb.append("button " + hand.button + "\n");
 		sb.append("currency " + hand.currency + "\n");
 		sb.append("date " + hand.date + "\n");
-		sb.append("discarded " + Arrays.toString(hand.mydiscard) + "\n");
+		sb.append("original hole " + Arrays.toString(hand.myhole) + "\n");
 		sb.append("game " + hand.gamename + "\n");
 		sb.append("gametype " + hand.gametype + "\n");
 		sb.append("id " + hand.id + "\n");
@@ -66,7 +66,7 @@ public class HandInfo {
 		}
 		
 		for (int s = 0; s < hand.streets.length; s++) {
-			sb.append("street " + s + " board " + HandUtil.getStreetBoard(hand.board, s) + "\n");
+			sb.append("street " + s + " board " + HandUtil.getStreetBoard(hand, s) + "\n");
 			for (Action a : hand.streets[s]) {
 				sb.append("  act " + a + "\n");
 			}

@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 public class Action implements Serializable {
 	private static final long serialVersionUID = 1;
-	// public static final char POSTS = 'P', BETS = 'B', SHOWS = 'S', CHECKS = 'c', FOLDS = 'F', MUCKS = 'M';
 	/** seat performing the action */
 	public Seat seat;
 	/** action string */

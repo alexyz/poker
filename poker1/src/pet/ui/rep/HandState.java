@@ -10,7 +10,7 @@ class HandState implements Cloneable {
 	/** seats in hand, elements can be null */
 	SeatState[] seats;
 	/** final community cards */
-	String board;
+	String[] board;
 	/** current pot */
 	int pot;
 	/** seat index of button */
@@ -42,7 +42,7 @@ class HandState implements Cloneable {
 		if (actionSeat >= 0) {
 			SeatState s = seats[actionSeat];
 			if (s != null) {
-				return s.name + " " + action;
+				return s.seat.name + " " + action;
 			}
 		}
 		return note;

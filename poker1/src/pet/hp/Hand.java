@@ -36,8 +36,8 @@ public class Hand implements Serializable {
 	public int pot;
 	/** pokerstars wealth delta */
 	public int rake;
-	/** cards discarded by current player (can never see opponents). probably not needed with seat.drawn */
-	public String[] mydiscard;
+	/** original hole cards dealt to player */
+	public String[] myhole;
 	/** name of table */
 	public String tablename;
 	/** max number of players at table */

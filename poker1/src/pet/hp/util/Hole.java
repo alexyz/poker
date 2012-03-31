@@ -2,7 +2,7 @@ package pet.hp.util;
 
 import java.util.Arrays;
 
-import pet.eq.Poker;
+import pet.eq.*;
 
 /**
  * comparable wrapper for hole cards
@@ -12,9 +12,9 @@ public class Hole implements Comparable<Hole> {
 	private int intValue;
 	public Hole(String[] hand) {
 		hand = hand.clone();
-		Arrays.sort(hand, Poker.revCardCmp);
-		strValue = Poker.toString(hand);
-		intValue = Poker.cardsValue(hand);
+		Arrays.sort(hand, Cmp.revCardCmp);
+		strValue = PokerUtil.cardsString(hand);
+		intValue = PokerUtil.cardsValue(hand);
 	}
 	@Override
 	public int compareTo(Hole h) {

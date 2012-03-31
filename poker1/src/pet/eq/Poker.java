@@ -1,28 +1,9 @@
 package pet.eq;
 
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
- * Poker hand analysis.
+ * Poker hand valuation.
  */
-public class Poker {
-
-	private static final class CardCmp implements Comparator<String> {
-		private final int polarity;
-		public CardCmp(boolean asc) {
-			polarity = asc ? 1 : -1;
-		}
-		@Override
-		public int compare(String c1, String c2) {
-			int v = faceval(c1) - faceval(c2);
-			if (v == 0) {
-				v = suit(c1) - suit(c2);
-			}
-			return polarity * v;
-		}
-	}
+public abstract class Poker {
 	
 	/**
 	 * Rank masks (allowing 20 bits for hand value, i.e. 4 bits per card)
@@ -54,53 +35,11 @@ public class Poker {
 	};
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
-	private static final int[] facevals = mkfacevals();
-	/**
-	 * compare by face then suit
-	 */
-	public static Comparator<String> cardCmp = new CardCmp(true);
-	public static Comparator<String> revCardCmp = new CardCmp(false);
-	private static int[] mkfacevals() {
-		// use array instead of map due to primitive type
-		int[] fv = new int['T' - '2' + 1];
-		fv['A' - '2'] = 14;
-		fv['K' - '2'] = 13;
-		fv['Q' - '2'] = 12;
-		fv['J' - '2'] = 11;
-		fv['T' - '2'] = 10;
-		fv['9' - '2'] = 9;
-		fv['8' - '2'] = 8;
-		fv['7' - '2'] = 7;
-		fv['6' - '2'] = 6;
-		fv['5' - '2'] = 5;
-		fv['4' - '2'] = 4;
-		fv['3' - '2'] = 3;
-		fv['2' - '2'] = 2;
-		return fv;
-	}
-
-	/**
-	 * Sort the hand in place (Arrays.sort copies array).
-	 */
-	private static void bubblesort(String[] h) {
-		int l = h.length;
-		while (l > 0) {
-			int newl = 0;
-			for (int n = 1; n < l; n++) {
-				String x = h[n - 1];
-				String y = h[n];
-				if (faceval(y) - faceval(x) > 0) {
-					newl = n;
-					h[n - 1] = y;
-					h[n] = x;
-				}
-			}
-			l = newl;
-		}
-	}
 
 	private final String[] hand = new String[5];
 	public boolean debug;
+	
+	public abstract HandEq[] equity(String[] board, String[][] holes);
 
 	protected void println(String s) {
 		if (debug) {
@@ -108,24 +47,18 @@ public class Poker {
 		}
 	}
 
-	private void copy(Object[] from, Object[] to) {
-		for (int n = 0; n < from.length; n++) {
-			to[n] = from[n];
-		}
-	}
-
-	public boolean islow(String[] hand) {
+	private static boolean isLow(String[] hand) {
 		for (int n = 0; n < hand.length; n++) {
-			if (faceval(hand[n], false) > 8) {
+			if (faceValue(hand[n], false) > 8) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public int lowvalue(String[] hand) {
-		if (islow(hand)) {
-			int p = ispair(hand, false);
+	public int lowValue(String[] hand) {
+		if (isLow(hand)) {
+			int p = isPair(hand, false);
 			if ((p & 0xf00000) == H_RANK) {
 				// no pairs
 				// invert value
@@ -140,10 +73,10 @@ public class Poker {
 	 */
 	public int value(String[] hand_) {
 		// copy so we can sort
-		copy(hand_, hand);
-		bubblesort(hand);
-		int f = isflush(hand);
-		int s = isstraight(hand);
+		ArrayUtil.copy(hand_, hand);
+		ArrayUtil.sort(hand, Cmp.faceCmp);
+		int f = isFlush(hand);
+		int s = isStraight(hand);
 		if (f != 0) {
 			if (s != 0) {
 				return SF_RANK | (s & 0xfffff);
@@ -153,10 +86,10 @@ public class Poker {
 		} else if (s != 0) {
 			return s;
 		}
-		return ispair(hand, true);
+		return isPair(hand, true);
 	}
 
-	private static int isflush(String[] hand) {
+	private static int isFlush(String[] hand) {
 		char s = suit(hand[0]);
 		for (int n = 1; n < 5; n++) {
 			if (suit(hand[n]) != s) {
@@ -164,15 +97,15 @@ public class Poker {
 			}
 		}
 		// requires sorted hand
-		return FL_RANK | (faceval(hand[0]) << 16) + (faceval(hand[1]) << 12) + (faceval(hand[2]) << 8) + (faceval(hand[3]) << 4) + faceval(hand[4]);
+		return FL_RANK | (faceValue(hand[0]) << 16) + (faceValue(hand[1]) << 12) + (faceValue(hand[2]) << 8) + (faceValue(hand[3]) << 4) + faceValue(hand[4]);
 	}
 
-	private static int isstraight(String[] hand) {
+	private static int isStraight(String[] hand) {
 		// requires sorted hand
 		// max str is AKJQT
 		// min str is A5432
-		int v0 = faceval(hand[0]);
-		int v = faceval(hand[1]);
+		int v0 = faceValue(hand[0]);
+		int v = faceValue(hand[1]);
 		int hc = 0;
 		if (v0 == 14 && v == 5) {
 			hc = 5;
@@ -181,7 +114,7 @@ public class Poker {
 		}
 		if (hc != 0) {
 			for (int n = 2; n < 5; n++) {
-				int vn = faceval(hand[n]);
+				int vn = faceValue(hand[n]);
 				if (v != vn + 1) {
 					return 0;
 				}
@@ -196,11 +129,11 @@ public class Poker {
 	 * Return pair value or high cards.
 	 * Does not require sorted hand
 	 */
-	private static int ispair(String[] hand, boolean acehigh) {
+	private static int isPair(String[] hand, boolean acehigh) {
 		// count card face frequencies (3 bits each) -- 0, 1, 2, 3, 4
 		long v = 0;
 		for (int n = 0; n < hand.length; n++) {
-			v += (1L << ((14 - faceval(hand[n], acehigh)) * 3));
+			v += (1L << ((14 - faceValue(hand[n], acehigh)) * 3));
 		}
 		// get the card faces for each frequency
 		int fk = 0, tk = 0, pa = 0, hc = 0;
@@ -239,15 +172,26 @@ public class Poker {
 	/**
 	 * Return integer value of card face, ace high (from A = 14 to deuce = 2)
 	 */
-	private static int faceval(String card) {
-		return facevals[card.charAt(0) - '2'];
+	static int faceValue(String card) {
+		char face = face(card);
+		if (face >= '2' && face <= '9') {
+			return face - '2';
+		}
+		switch (face) {
+			case 'A': return 14;
+			case 'K': return 13;
+			case 'Q': return 12;
+			case 'J': return 11;
+			case 'T': return 10;
+		}
+		throw new RuntimeException("unknown face " + card);
 	}
 
 	/**
 	 * Return integer value of card face, ace high or low (from A = 14 to 2 = 2 or K = 13 to A = 1)
 	 */
-	private static int faceval(String card, boolean acehigh) {
-		int v = facevals[card.charAt(0) - '2'];
+	private static int faceValue(String card, boolean acehigh) {
+		int v = faceValue(card);
 		if (v == 14 && !acehigh) {
 			v = 1;
 		}
@@ -271,19 +215,19 @@ public class Poker {
 	/**
 	 * Return string representation of hand value
 	 */
-	public static String desc(int v) {
-		if (v == 0) {
+	public static String valueString(int value) {
+		if (value == 0) {
 			return "nil";
 		}
-		if ((v & 0xf00000) == LOW_RANK) {
-			v = (LOW_RANK | 0xfffff) - v;
+		if ((value & 0xf00000) == LOW_RANK) {
+			value = (LOW_RANK | 0xfffff) - value;
 		}
-		char c1 = valface(v);
-		char c2 = valface(v >> 4);
-		char c3 = valface(v >> 8);
-		char c4 = valface(v >> 12);
-		char c5 = valface(v >> 16);
-		switch (v & 0xf00000) {
+		char c1 = valface(value);
+		char c2 = valface(value >> 4);
+		char c3 = valface(value >> 8);
+		char c4 = valface(value >> 12);
+		char c5 = valface(value >> 16);
+		switch (value & 0xf00000) {
 		case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " high";
 		case SF_RANK: return "Straight Flush " + c1;
 		case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
@@ -298,89 +242,8 @@ public class Poker {
 		}
 	}
 
-	/**
-	 * Return colour of suit
-	 */
-	public static Color suitcol (char s) {
-		// switch instead of map due to primitive type
-		switch (s) {
-		case Poker.S_SUIT: return Color.black;
-		case Poker.C_SUIT: return Color.green;
-		case Poker.H_SUIT: return Color.red;
-		case Poker.D_SUIT: return Color.blue;
-		}
-		throw new RuntimeException();
-	}
-
-	public static char suitsym(String c) {
-		/*
-		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
-		 */
-		switch (suit(c)) {
-		case C_SUIT: return '♣';
-		case D_SUIT: return '♦';
-		case H_SUIT: return '♥';
-		case S_SUIT: return '♠';
-		default: return 0;
-		}
-	}
-
-	public static char suitsyml(String card) {
-		/*
-		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
-		 */
-		switch (suit(card)) {
-		case C_SUIT: return '♧';
-		case D_SUIT: return '♢';
-		case H_SUIT: return '♡';
-		case S_SUIT: return '♤';
-		default: return 0;
-		}
-	}
-	
-	/**
-	 * Return suit value from 0-3 (for sorting purposes)
-	 */
-	public static int suitval(String card) {
-		switch (suit(card)) {
-		case C_SUIT: return 3;
-		case D_SUIT: return 2;
-		case H_SUIT: return 1;
-		case S_SUIT: return 0;
-		default: return -1;
-		}
-	}
-
 	public static char face(String card) {
 		return card.charAt(0);
 	}
-
-	public static String toString(String[] cards) {
-		if (cards != null) {
-			StringBuilder sb = new StringBuilder(cards.length * 2);
-			for (String c : cards) {
-				if (c != null) {
-					sb.append(c.charAt(0)).append(Poker.suitsyml(c));
-				} else {
-					sb.append("..");
-				}
-			}
-			return sb.toString();
-		} else {
-			return "";
-		}
-	}
 	
-	/**
-	 * return integer value of cards (must be sorted)
-	 */
-	public static int cardsValue(String[] cards) {
-		int v = 0;
-		for (String card : cards) {
-			v *= 60;
-			v += faceval(card) * 4 + suitval(card);
-		}
-		return v;
-	}
-
 }

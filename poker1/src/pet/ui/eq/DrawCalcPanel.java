@@ -22,7 +22,7 @@ public class DrawCalcPanel extends CalcPanel {
 		// XXX could be 0
 		String[][] hands = HandCardPanel.getCards(handPanels);
 		if (hands != null) {
-			HandEq[] v = new DPoker().deqs(hands);
+			HandEq[] v = new DrawPoker().equity(hands);
 			for (int n = 0; n < v.length; n++) {
 				handPanels[n].setHandEquity(v[n]);
 			}
@@ -34,7 +34,7 @@ public class DrawCalcPanel extends CalcPanel {
 	@Override
 	protected void random(int num) {
 		String[] deck = Poker.FULL_DECK.clone();
-		Util.shuffle(deck);
+		RandomUtil.shuffle(deck);
 		for (int n = 0; n < num; n++) {
 			handPanels[n].setCards(Arrays.copyOfRange(deck, n * 5, n * 5 + 5));
 		}

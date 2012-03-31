@@ -13,8 +13,6 @@ public class Seat implements Serializable {
 	public int chips;
 	/** seats final hole cards */
 	public String[] hole;
-	/** cards drawn as { prev hand, kept, drawn } */
-	public String[][] drawn; // 99876 { prev hand, kept, drawn }
 	/** amount won */
 	public int won;
 	/** amount put in pot, equal to sum of amount of player actions in hand */

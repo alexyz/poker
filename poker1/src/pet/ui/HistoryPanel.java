@@ -1,8 +1,14 @@
 package pet.ui;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -21,10 +27,20 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final Date now = new Date();
 	
 	public HistoryPanel() {
-		// path
-		// browse
-		// start
-		// progress
+		setDropTarget(new DropTarget(this, new DropTargetAdapter() {
+			@Override
+			public void drop(DropTargetDropEvent e) {
+				e.acceptDrop(TransferHandler.LINK);
+				Transferable t = e.getTransferable();
+				try {
+					List<?> files = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					System.out.println("dropped " + files);
+					// TODO add to follow thread
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}));
 		
 		String home = System.getProperty("user.home");
 		pathLabel.setText(home + "/Library/Application Support/PokerStars/HandHistory/tawvx");
@@ -71,14 +87,13 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			followThread.stop = !go;
 			
 		} else {
-			PSParser hp = new PSParser();
-			//hp.debug = true;
-			
-			followThread = new FollowThread(hp);
-			followThread.addFile(pathLabel.getText());
-			followThread.addListener(this);
-			followThread.addListener(PokerFrame.getInstance().getHistory());
-			followThread.start();
+			PSParser parser = new PSParser();
+			FollowThread ft = new FollowThread(parser);
+			ft.addFile(pathLabel.getText());
+			ft.addListener(this);
+			ft.addListener(PokerFrame.getInstance().getHistory());
+			ft.start();
+			followThread = ft;
 			addButton.setEnabled(true);
 		}
 	}

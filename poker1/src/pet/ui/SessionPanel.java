@@ -24,11 +24,9 @@ public class SessionPanel extends JPanel {
 	// handinfo
 	private final JTextField nameField = new JTextField();
 	private final JComboBox gameCombo = new JComboBox();
-	private final JTextField fromField = new JTextField();
-	private final JTextField toField = new JTextField();
 	private final JTable handTable = new JTable();
 	private final JTextArea textArea = new JTextArea();
-	private final JButton sendButton = new JButton("Send");
+	private final JButton replayButton = new JButton("Replay");
 
 	public SessionPanel() {
 		super(new BorderLayout());
@@ -51,13 +49,7 @@ public class SessionPanel extends JPanel {
 			}
 		});
 
-		fromField.setColumns(10);
-		fromField.setBorder(BorderFactory.createTitledBorder("From Date"));
-
-		toField.setColumns(10);
-		toField.setBorder(BorderFactory.createTitledBorder("To Date"));
-
-		sendButton.addActionListener(new ActionListener() {
+		replayButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				PokerFrame.getInstance().displayHand(getHandInfo().hand);
@@ -103,13 +95,14 @@ public class SessionPanel extends JPanel {
 		JPanel topPanel = new JPanel();
 		topPanel.add(nameField);
 		topPanel.add(gameCombo);
-		topPanel.add(fromField);
-		topPanel.add(toField);
-		topPanel.add(sendButton);
+		
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(replayButton);
 
 		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textScroller);
 		add(topPanel, BorderLayout.NORTH);
 		add(split, BorderLayout.CENTER);
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 
 	private HandInfo getHandInfo() {

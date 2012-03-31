@@ -15,7 +15,7 @@ import pet.ui.rep.ReplayPanel;
  */
 public class PokerFrame extends JFrame {
 	
-	private static final PokerFrame instance = new PokerFrame();
+	private static PokerFrame instance;
 	
 	public static PokerFrame getInstance() {
 		return instance;
@@ -23,6 +23,12 @@ public class PokerFrame extends JFrame {
 	
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.UK);
+		try {
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		instance = new PokerFrame();
 		instance.setVisible(true);
 	}
 	
@@ -62,6 +68,10 @@ public class PokerFrame extends JFrame {
 	public void displayBankRoll(GraphData bankRoll) {
 		bankrollPanel.setData(bankRoll);
 		tabs.setSelectedComponent(bankrollPanel);
+	}
+	
+	public void displaySession() {
+		
 	}
 
 }

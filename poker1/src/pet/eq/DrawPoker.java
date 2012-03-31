@@ -1,18 +1,26 @@
 package pet.eq;
 
+import java.util.Arrays;
+
 /**
  * Draw poker equity methods
  */
-public class DPoker extends Poker {
+public class DrawPoker extends Poker {
+	
+	@Override
+	public HandEq[] equity(String[] board, String[][] hands) {
+		return equity(hands);
+	}
 
 	/**
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity is too hard with more than 2 blank cards).
 	 */
-	public HandEq[] deqs(String[][] hands) {
-		final String[] d = Util.remdeck(Poker.FULL_DECK, null, hands);
+	public HandEq[] equity(String[][] hands) {
+		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
+		final String[] d = ArrayUtil.remove(Poker.FULL_DECK, null, hands);
 		final HandEq[] eqs = HandEq.makeHandEqs(hands.length, d.length, false);
-		Util.shuffle(d);
+		RandomUtil.shuffle(d);
 		final String[] h = new String[5];
 		
 		// hand values for a particular board
@@ -23,12 +31,13 @@ public class DPoker extends Poker {
 		for (int p = 0; p < c; p++) {
 			t[0] = 0;
 			for (int hn = 0; hn < hands.length; hn++) {
+				// could be any length
 				String[] hand = hands[hn];
 				for (int n = 0; n < 5; n++) {
-					if (hand[n] != null) {
+					if (hand.length > n) {
 						h[n] = hand[n];
 					} else {
-						h[n] = Util.pick(d, t);
+						h[n] = RandomUtil.pick(d, t);
 					}
 				}
 				int v = value(h);

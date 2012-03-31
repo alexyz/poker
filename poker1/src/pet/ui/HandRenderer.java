@@ -4,7 +4,7 @@ import java.awt.Font;
 
 import javax.swing.table.DefaultTableCellRenderer;
 
-import pet.eq.Poker;
+import pet.eq.PokerUtil;
 
 class HandRenderer extends DefaultTableCellRenderer {
 	public HandRenderer() {
@@ -14,7 +14,7 @@ class HandRenderer extends DefaultTableCellRenderer {
 	@Override
 	protected void setValue(Object value) {
 		if (value instanceof String[]) {
-			value = Poker.toString((String[]) value);
+			value = PokerUtil.cardsString((String[]) value);
 		}
 		super.setValue(value);
 	}

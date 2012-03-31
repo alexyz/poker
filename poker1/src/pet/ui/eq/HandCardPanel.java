@@ -22,10 +22,13 @@ class HandCardPanel extends CardPanel {
 		List<String[]> hands = new ArrayList<String[]>();
 		for (HandCardPanel cp : cps) {
 			String[] cards = cp.getCards();
-			if (cards.length > 0 && cards.length < cp.getMinCards()) {
-				return null;
+			if (cards.length > 0) {
+				if (cards.length < cp.getMinCards()) {
+					System.out.println("not enough cards for " + cp);
+					return null;
+				}
+				hands.add(cards);
 			}
-			hands.add(cards);
 		}
 		System.out.println("hands: " + hands.size());
 		return hands.size() == 0 ? null : hands.toArray(new String[hands.size()][]);
@@ -97,7 +100,7 @@ class HandCardPanel extends CardPanel {
 			valueLab.setText("");
 		} else {
 			valueLab.setFont(e.curwin ? boldfont : font);
-			valueLab.setText(Poker.desc(e.current));
+			valueLab.setText(Poker.valueString(e.current));
 		}
 		
 		if (e.current == 0 || e.curwin) {
@@ -116,8 +119,8 @@ class HandCardPanel extends CardPanel {
 					}
 				}
 			}
-			Collections.sort(majl, Poker.cardCmp);
-			Collections.sort(minl, Poker.cardCmp);
+			Collections.sort(majl, Cmp.cardCmp);
+			Collections.sort(minl, Cmp.cardCmp);
 			outsLab.setText("Outs: " + majl.size() + " out of " + e.rem);
 			if (majl.size() > 0) {
 				setToolTipText("<html><b>Major outs</b><br/>" + majl + "</html>");

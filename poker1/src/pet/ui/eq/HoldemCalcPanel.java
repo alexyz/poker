@@ -67,7 +67,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		deckPanel.deselectCards();
 		deckPanel.selectCards(cardLabels);
 		String[] deck = deckPanel.getCards(false);
-		pet.eq.Util.shuffle(deck);
+		RandomUtil.shuffle(deck);
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
@@ -124,7 +124,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 
 		String[][] hands = hl.toArray(new String[hl.size()][]);
-		HandEq[] eqs = new HEPoker().equity(board, hands, !isTexas);
+		HandEq[] eqs = new HEPoker(!isTexas).equity(board, hands);
 		for (int n = 0; n < eqs.length; n++) {
 			HandEq e = eqs[n];
 			pl.get(n).setHandEquity(e);

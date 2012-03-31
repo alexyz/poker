@@ -3,6 +3,8 @@ package pet.hp.impl;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+
+import pet.eq.ArrayUtil;
 import pet.hp.*;
 
 /**
@@ -285,45 +287,35 @@ public class PSParser extends Parser implements Serializable {
 		// Dealt to tawvx [Ts Th] [Kc 5d Qh]
 		// if discard all
 		// Dealt to tawvx [5c 7h 3d 4d Jh]
-		int a = line.indexOf("[");
-		String name = line.substring(9, a - 1);
+		
+		int handStart = line.indexOf("[");
+		String name = line.substring(9, handStart - 1);
 		Seat myseat = seatsMap.get(name);
 		if (myseat == null) {
 			throw new RuntimeException("could not find seat " + name);
 		}
+		if (hand.myseat != null && hand.myseat != myseat) {
+			throw new RuntimeException("two seats");
+		}
 		hand.myseat = myseat;
 
-		String[] hand = parseHand(line, a);
-		if (myseat.discards > 0) {
-			if (myseat.hole == null) {
-				throw new RuntimeException("draw without prev hand");
-			}
-			if (myseat.drawn != null) {
-				// probably fail for triple draw
-				throw new RuntimeException("already drawn");
-			}
-			int c = line.indexOf("[", a + 1);
-			if (c > 0) {
-				// discarded 1-4
-				String[] drawn = parseHand(line, c);
-				myseat.drawn = new String[][] { myseat.hole, hand, drawn };
-				String[] newhand = new String[hand.length +  drawn.length];
-				for (int n = 0; n < newhand.length; n++) {
-					newhand[n] = n < hand.length ? hand[n] : drawn[n - hand.length];
-				}
-				myseat.hole = newhand;
-			} else {
-				// discard all
-				myseat.drawn = new String[][] { myseat.hole, null, hand };
-				myseat.hole = hand;
-			}
-
-		} else {
-			checkNewHand(myseat.hole, hand);
-			myseat.hole = hand;
+		String[] h = parseHand(line, handStart);
+		int b = line.indexOf("[", handStart + 1);
+		if (b > 0) {
+			h = ArrayUtil.join(h, parseHand(line, b));
 		}
-
-		println("dealt " + name + " " + Arrays.asList(hand));
+		
+		if (hand.myhole == null) {
+			// first hand
+			println("dealt " + Arrays.asList(h));
+			hand.myhole = h;
+		}
+		
+		// last hand
+		if (myseat.hole != null) {
+			println("dealt new hand " + Arrays.asList(h));
+		}
+		myseat.hole = h;
 	}
 
 	private void parseSeat(final String line) {
@@ -615,16 +607,7 @@ public class PSParser extends Parser implements Serializable {
 				throw new RuntimeException("already discarded " + seat.discards);
 			}
 			int discardsStart = nextToken(line, actEnd);
-			// should probably put discard in action in case we do triple draw
 			seat.discards = parseInt(line, discardsStart);
-			int handStart = line.indexOf("[");
-			if (handStart > 0) {
-				if (hand.myseat != seat) {
-					throw new RuntimeException();
-				}
-				String[] disc = parseHand(line, handStart);
-				hand.mydiscard = disc;
-			}
 
 		} else if (act.equals("stands")) {
 			// stands pat
@@ -815,14 +798,6 @@ public class PSParser extends Parser implements Serializable {
 				}
 			}
 		}
-	}
-
-	/**
-	 * FIXME could lead to concurrent mod exception
-	 */
-	@Override
-	public List<Hand> getHands() {
-		return hands;
 	}
 
 }

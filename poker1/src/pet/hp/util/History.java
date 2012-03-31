@@ -13,6 +13,7 @@ public class History implements FollowListener {
 	
 	private final Map<String, PlayerInfo> playerMap = new TreeMap<String, PlayerInfo>();
 	private final List<Hand> hands = new ArrayList<Hand>();
+	private final Set<Long> handIds = new TreeSet<Long>();
 	
 	/**
 	 * Get the player info map
@@ -89,7 +90,11 @@ public class History implements FollowListener {
 	public synchronized void nextHand(Hand h) {
 		// interesting actions
 		
+		if (handIds.contains(h.id)) {
+			throw new RuntimeException("already has hand " + h);
+		}
 		hands.add(h);
+		handIds.add(h.id);
 
 		String game = h.gamename;
 		char type = h.gametype;

@@ -175,7 +175,7 @@ public class HandEq {
 	
 	@Override
 	public String toString() {
-		return String.format("Eq[win %-2.1f tie %-2.1f outs=%d %s]", won, tied, outs(75f), Poker.desc(current));
+		return String.format("Eq[win %-2.1f tie %-2.1f outs=%d %s]", won, tied, outs(75f), Poker.valueString(current));
 	}
 
 }

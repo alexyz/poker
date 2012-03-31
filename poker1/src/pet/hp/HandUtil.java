@@ -1,5 +1,6 @@
 package pet.hp;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -30,57 +31,108 @@ public class HandUtil {
 	public static final char FCD_TYPE = '5', HE_TYPE = 'H', OM_TYPE = 'O';
 	public static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	public static final String[] drawstreetnames = { "Pre draw", "Post draw" };
-	
+
 	/** return true if this street is the showdown street for the given game type */
 	public static boolean isShowdown (char type, int street) {
 		switch (type) {
-		case FCD_TYPE:
-			return street == drawstreetnames.length - 1;
-		case HE_TYPE:
-		case OM_TYPE:
-			return street == hestreetnames.length - 1;
+			case FCD_TYPE:
+				return street == drawstreetnames.length - 1;
+			case HE_TYPE:
+			case OM_TYPE:
+				return street == hestreetnames.length - 1;
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
-	
+
 	/** return the maximum number of streets in this game type */
 	public static int getMaxStreets (char type) {
 		switch (type) {
-		case FCD_TYPE:
-			return drawstreetnames.length;
-		case HE_TYPE:
-		case OM_TYPE:
-			return hestreetnames.length;
+			case FCD_TYPE:
+				return drawstreetnames.length;
+			case HE_TYPE:
+			case OM_TYPE:
+				return hestreetnames.length;
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
-	
+
 	/** get the name of the street for this game type */
-	public static String getStreetName (char type, int s) {
+	public static String getStreetName (char type, int street) {
 		switch (type) {
-		case FCD_TYPE:
-			return drawstreetnames[s];
-		case HE_TYPE:
-		case OM_TYPE:
-			return hestreetnames[s];
+			case FCD_TYPE:
+				return drawstreetnames[street];
+			case HE_TYPE:
+			case OM_TYPE:
+				return hestreetnames[street];
 		}
 		throw new RuntimeException("unknown game type " + type);
 	}
-	
+
 	/**
 	 * get board for street
 	 */
-	public static String[] getStreetBoard(String[] board, int s) {
-		return s > 0 ? Arrays.copyOf(board, s + 2) : null;
+	public static String[] getStreetBoard(Hand hand, int street) {
+		switch (hand.gametype) {
+			case FCD_TYPE:
+				return null;
+			case HE_TYPE:
+			case OM_TYPE:
+				return street > 0 ? Arrays.copyOf(hand.board, street + 2) : null;
+		}
+		throw new RuntimeException("unknown game type " + hand.gametype);
 	}
-	
+
 	public static String formatMoney(char currency, int amount) {
-		// TODO commas
+		NumberFormat nf = NumberFormat.getNumberInstance();
 		if (currency != 0) {
-			return "" + currency + (amount / 100f);
+			return "" + currency + nf.format(amount / 100f);
 		} else {
-			return String.valueOf(amount);
+			return nf.format(amount);
 		}
 	}
 	
+	private static String[] kept(String[] hole1, String[] hole2, int discards) {
+		String[] kept = new String[5 - discards];
+		int i = 0;
+		for (int n = 0; n < 5; n++) {
+			for (int m = 0; m < 5; m++) {
+				if (hole1[n].equals(hole2[m])) {
+					kept[i++] = hole1[n];
+					break;
+				}
+			}
+		}
+		return kept;
+	}
+
+	/**
+	 * Get hole cards player had on this street
+	 */
+	public static String[] getStreetHole(Hand hand, Seat seat, int street) {
+		switch (hand.gametype) {
+			case FCD_TYPE:
+				if (street == 1) {
+					// return final hand
+					return seat.hole;
+				}
+				if (hand.myseat == seat) {
+					// return starting hand
+					return kept(hand.myhole, seat.hole, seat.discards);
+				}
+				if (seat.hole != null) {
+					// guess what cards the opponent kept
+					String[] guessedHole = new String[5 - seat.discards];
+					for (int n = 0; n < guessedHole.length; n++) {
+						guessedHole[n] = seat.hole[n];
+					}
+					return guessedHole;
+				}
+				return null;
+			case HE_TYPE:
+			case OM_TYPE:
+				return seat.hole;
+		}
+		throw new RuntimeException("unknown game type " + hand.gametype);
+	}
+
 }

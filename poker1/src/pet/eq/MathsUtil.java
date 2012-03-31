@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * Mathematical utility methods
  */
-public class MUtil {
+public class MathsUtil {
 	
 	private static final int[][] C = mkbc(52, 52);
 
@@ -53,5 +53,25 @@ public class MUtil {
 		}
 		return c;
 	}
-
+	
+	/**
+	 * Combinatorial number system.
+	 * Get the k combination at position p and write from from into to at offset.
+	 */
+	static void kcomb(final int k, int p, final Object[] from, Object[] to, final int off) {
+		// for each digit (starting at the last)
+		for (int b = k; b >= 1; b--) {
+			// find biggest bin coff that will fit p
+			for (int a = b - 1; a < 100; a++) {
+				int x = bincoff(a, b);
+				if (x > p) {
+					// this is too big, so the last one must have fit
+					p -= bincoff(a - 1, b);
+					to[b - 1 + off] = from[a - 1];
+					break;
+				}
+			}
+		}
+	}
+	
 }
