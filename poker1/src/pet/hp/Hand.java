@@ -10,12 +10,10 @@ public class Hand implements Serializable {
 	private static final long serialVersionUID = 1;
 	/** hand id */
 	public long id;
-	/** game name including blinds */
-	public String gamename;
+	/** game name */
+	public Game game;
 	/** hand date */
 	public Date date;
-	/** hand currency, $, € or zero */
-	public char currency;
 	/** big blind (if any?) */
 	public int bb;
 	/** small blind (if any?) */
@@ -44,14 +42,12 @@ public class Hand implements Serializable {
 	public int max;
 	/** button seat number */
 	public int button;
-	/** type of game for street and hand analysis purposes */
-	public char gametype;
 	/** uncalled action amount */
 	public int uncall;
 	@Override
 	public String toString() {
 		return String.format("Game[%s '%s' at '%s' on %s seats=%s str=%d]", 
-				id, gamename, tablename, date, seats != null ? seats.length : -1, streets != null ? streets.length : -1);
+				id, game, tablename, date, seats != null ? seats.length : -1, streets != null ? streets.length : -1);
 	}
 	
 }

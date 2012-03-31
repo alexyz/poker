@@ -10,14 +10,14 @@ public class Action implements Serializable {
 	/** seat performing the action */
 	public Seat seat;
 	/** action string */
-	public String act;
+	public String type;
 	/** amount put in pot */
 	public int amount;
 	/** this action put the player all in */
 	public boolean allin;
 	@Override
 	public String toString() {
-		String s = seat.name + " " + act;
+		String s = seat.name + " " + type;
 		if (amount > 0) {
 			s += " " + amount;
 		}

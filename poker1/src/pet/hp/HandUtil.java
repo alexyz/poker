@@ -7,6 +7,7 @@ import java.util.*;
  * Utilities for hands (no analysis - see HandInfo)
  */
 public class HandUtil {
+	public static final char FCD_TYPE = 'F', HE_TYPE = 'H', OM_TYPE = 'O';
 	/**
 	 * Compare hands by id
 	 */
@@ -28,7 +29,7 @@ public class HandUtil {
 			return s1.num - s2.num;
 		}
 	};
-	public static final char FCD_TYPE = '5', HE_TYPE = 'H', OM_TYPE = 'O';
+	
 	public static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	public static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
@@ -72,20 +73,20 @@ public class HandUtil {
 	 * get board for street
 	 */
 	public static String[] getStreetBoard(Hand hand, int street) {
-		switch (hand.gametype) {
+		switch (hand.game.type) {
 			case FCD_TYPE:
 				return null;
 			case HE_TYPE:
 			case OM_TYPE:
 				return street > 0 ? Arrays.copyOf(hand.board, street + 2) : null;
 		}
-		throw new RuntimeException("unknown game type " + hand.gametype);
+		throw new RuntimeException("unknown game type " + hand.game);
 	}
 
 	public static String formatMoney(char currency, int amount) {
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		if (currency != 0) {
-			return "" + currency + nf.format(amount / 100f);
+			return String.format("%c%.2f", currency, amount / 100f);
 		} else {
 			return nf.format(amount);
 		}
@@ -109,7 +110,7 @@ public class HandUtil {
 	 * Get hole cards player had on this street
 	 */
 	public static String[] getStreetHole(Hand hand, Seat seat, int street) {
-		switch (hand.gametype) {
+		switch (hand.game.type) {
 			case FCD_TYPE:
 				if (street == 1) {
 					// return final hand
@@ -132,7 +133,7 @@ public class HandUtil {
 			case OM_TYPE:
 				return seat.hole;
 		}
-		throw new RuntimeException("unknown game type " + hand.gametype);
+		throw new RuntimeException("unknown game type " + hand.game);
 	}
 
 }

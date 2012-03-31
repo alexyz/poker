@@ -1,5 +1,7 @@
 package pet.eq;
 
+import java.util.Arrays;
+
 /**
  * Poker hand valuation.
  */
@@ -67,14 +69,29 @@ public abstract class Poker {
 		}
 		return 0;
 	}
+	
+	private void validate(String[] h) {
+		for (int n = 0; n < h.length; n++) {
+			String c = h[n];
+			if ("23456789TJQKA".indexOf(face(c)) == -1 || "hdsc".indexOf(suit(c)) == -1) {
+				throw new RuntimeException("invalid hand " + Arrays.toString(h));
+			}
+			for (int m = n + 1; m < h.length; m++) {
+				if (c.equals(h[m])) {
+					throw new RuntimeException("invalid hand " + Arrays.toString(h));
+				}
+			}
+		}
+	}
 
 	/**
 	 * Get high value of 5 card hand
 	 */
-	public int value(String[] hand_) {
+	public int value(String[] handp) {
 		// copy so we can sort
-		ArrayUtil.copy(hand_, hand);
+		ArrayUtil.copy(handp, hand);
 		ArrayUtil.sort(hand, Cmp.faceCmp);
+		//validate(hand);
 		int f = isFlush(hand);
 		int s = isStraight(hand);
 		if (f != 0) {
@@ -173,16 +190,9 @@ public abstract class Poker {
 	 * Return integer value of card face, ace high (from A = 14 to deuce = 2)
 	 */
 	static int faceValue(String card) {
-		char face = face(card);
-		if (face >= '2' && face <= '9') {
-			return face - '2';
-		}
-		switch (face) {
-			case 'A': return 14;
-			case 'K': return 13;
-			case 'Q': return 12;
-			case 'J': return 11;
-			case 'T': return 10;
+		int i = "23456789TJQKA".indexOf(face(card));
+		if (i >= 0) {
+			return i + 2;
 		}
 		throw new RuntimeException("unknown face " + card);
 	}
@@ -208,8 +218,10 @@ public abstract class Poker {
 	/**
 	 * Return character symbol of face value
 	 */
-	private static char valface(int x) {
-		return ".A23456789TJQKA".charAt(x & 0xf);
+	private static char valueFace(int x) {
+		int v = x & 0xf;
+		// allow 0 index
+		return "**23456789TJQKA".charAt(v);
 	}
 
 	/**
@@ -222,11 +234,11 @@ public abstract class Poker {
 		if ((value & 0xf00000) == LOW_RANK) {
 			value = (LOW_RANK | 0xfffff) - value;
 		}
-		char c1 = valface(value);
-		char c2 = valface(value >> 4);
-		char c3 = valface(value >> 8);
-		char c4 = valface(value >> 12);
-		char c5 = valface(value >> 16);
+		char c1 = valueFace(value);
+		char c2 = valueFace(value >> 4);
+		char c3 = valueFace(value >> 8);
+		char c4 = valueFace(value >> 12);
+		char c5 = valueFace(value >> 16);
 		switch (value & 0xf00000) {
 		case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " high";
 		case SF_RANK: return "Straight Flush " + c1;

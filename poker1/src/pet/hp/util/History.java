@@ -30,12 +30,12 @@ public class History implements FollowListener {
 		return playerMap;
 	}
 	
-	public synchronized List<Hand> getHands(String player, String game) {
-		System.out.println("get hands for " + player + " game " + game);
+	public synchronized List<Hand> getHands(String player, String gamename) {
+		System.out.println("get hands for " + player + " game " + gamename);
 		List<Hand> hands = new ArrayList<Hand>();
 		
 		for (Hand hand : this.hands) {
-			if (hand.gamename.equals(game)) {
+			if (hand.game.name.equals(gamename)) {
 				for (Seat seat : hand.seats) {
 					if (seat.name.equals(player)) {
 						hands.add(hand);
@@ -56,7 +56,7 @@ public class History implements FollowListener {
 		}
 		
 		Hand fh = hands.get(0);
-		final char currency = fh.currency;
+		final char currency = fh.game.currency;
 		GraphData data = new DateGraphData() {
 			@Override
 			public String getYName(int y) {
@@ -95,61 +95,24 @@ public class History implements FollowListener {
 		}
 		hands.add(h);
 		handIds.add(h.id);
-
-		String game = h.gamename;
-		char type = h.gametype;
-		for (int s = 0; s < h.streets.length; s++) {
-			Action[] str = h.streets[s];
-			for (Action a : str) {
-				String player = a.seat.name;
-				PlayerInfo pi = getPlayerInfo(player, true);
-				PlayerGameInfo gi = getPlayerGameInfo(pi, game, type);
-				int[] c = gi.getAction(a.act);
-				c[0]++;
-				c[1] += a.amount;
-				//gi.pip += a.amount;
-				
-				// TODO push folded on into seat
-				if (a.act.equals("folds")) {
-					gi.foldedon[s]++;
-				}
-			}
-		}
+		
+		// TODO population
 		
 		for (Seat s : h.seats) {
 			PlayerInfo pi = getPlayerInfo(s.name, true);
-			// could be sitting without hand?
-			pi.hands++;
-			if (pi.date == null || pi.date.before(h.date)) {
-				pi.date = h.date;
-			}
-			
-			PlayerGameInfo gi = getPlayerGameInfo(pi, game, type);
-			gi.hands++;
-			gi.pip += s.pip;
-			if (s.showdown) {
-				gi.showdown++;
-			}
-			if (s.won > 0) {
-				gi.handswon++;
-				gi.won += s.won;
-				// overcounts rake if split?
-				gi.rake += h.rake;
-			}
-			if (s.showdown && s.won > 0) {
-				gi.handswonshow++;
-			}
-			
+			pi.add(h, s);
 		}
 
-	}
-	
-	private synchronized static PlayerGameInfo getPlayerGameInfo(PlayerInfo pi, String gamename, char gametype) {
-		PlayerGameInfo gi = pi.games.get(gamename);
-		if (gi == null) {
-			pi.games.put(gamename, gi = new PlayerGameInfo(pi, gamename, gametype));
+		for (int s = 0; s < h.streets.length; s++) {
+			Action[] str = h.streets[s];
+			for (Action a : str) {
+				PlayerInfo pi = getPlayerInfo(a.seat.name, true);
+				PlayerGameInfo gi = pi.getGameInfo(h.game);
+				gi.add(s, a);
+			}
 		}
-		return gi;
+		
+
 	}
 	
 	public synchronized PlayerInfo getPlayerInfo(String player, boolean create) {

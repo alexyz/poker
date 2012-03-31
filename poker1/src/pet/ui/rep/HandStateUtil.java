@@ -11,7 +11,6 @@ class HandStateUtil {
 	 */
 	public static List<HandState> getStates(Hand hand) {
 		List<HandState> states = new Vector<HandState>();
-		//TreeMap<Integer,String[]> holes = new TreeMap<Integer,String[]>();
 
 		// initial state (not displayed)
 		HandState hs = new HandState(hand.max);
@@ -29,25 +28,24 @@ class HandStateUtil {
 			hs.seats[seat.num - 1] = ss;
 		}
 		
-		Poker poker = PokerUtil.getPoker(hand.gametype);
+		Poker poker = PokerUtil.getPoker(hand.game.type);
 		List<String[]> holes = new ArrayList<String[]>();
 		List<SeatState> holeSeats = new ArrayList<SeatState>();
 
 		for (int s = 0; s < hand.streets.length; s++) {
 			// clear bets, place card
-			// TODO calc equity
 			hs = hs.clone();
 			String[] board = HandUtil.getStreetBoard(hand, s);
 			hs.board = board;
-			hs.note = HandUtil.getStreetName(hand.gametype, s);
+			hs.note = HandUtil.getStreetName(hand.game.type, s);
 			hs.action = null;
 			hs.actionSeat = -1;
 			holes.clear();
 			holeSeats.clear();
 			for (SeatState ss : hs.seats) {
 				if (ss != null) {
-					hs.pot += ss.bet;
-					ss.bet = 0;
+					hs.pot += ss.amount;
+					ss.amount = 0;
 					ss.eq = null;
 					if (ss.hole != null) {
 						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
@@ -56,6 +54,10 @@ class HandStateUtil {
 						holeSeats.add(ss);
 					}
 				}
+			}
+			for (SeatState ss : hs.seats) {
+				// need to know pot to calc spr
+				ss.spr = hs.pot != 0 ? (ss.stack*1f) / hs.pot : 0;
 			}
 			
 			String[][] holesArr = holes.toArray(new String[holes.size()][]);
@@ -66,13 +68,15 @@ class HandStateUtil {
 			}
 			
 			states.add(hs);
+			int trail = 0;
+			int lastbet = 0;
 
 			// player actions for street
 			for (Action act : hand.streets[s]) {
 				hs = hs.clone();
-				hs.action = act.act;
+				hs.action = act.type;
 				if (act.amount > 0) {
-					hs.action += " " + act.amount;
+					hs.action += " " + HandUtil.formatMoney(hand.game.currency, act.amount);
 				}
 				if (act.seat.discards > 0) {
 					hs.action += " " + act.seat.discards;
@@ -80,17 +84,30 @@ class HandStateUtil {
 				hs.actionSeat = act.seat.num - 1;
 
 				SeatState ss = hs.seats[act.seat.num - 1];
-				if (act.act.equals("folds")) {
+				
+				if (act.type.equals("folds")) {
 					ss.folded = true;
+					
 				} else if (act.amount > 0) {
-					ss.bet += act.amount;
+					ss.amount += act.amount;
+					if (act.type.matches("bets|raises")) {
+						int potsz = (hs.pot + trail + 2 * lastbet);
+						ss.bpr = potsz != 0 ? (ss.amount * 100f) / potsz : 0;
+					} else {
+						ss.bpr = 0;
+					}
+					//System.out.println("act " + act);
+					//System.out.println("  pot=" + hs.pot + " trail=" + trail + " (2)lastbet=" + (2*lastbet) + " potsz=" + potsz + " bet=" + ss.amount + " bpr=" + ss.bpr);
+					
 					ss.stack -= act.amount;
+					lastbet = Math.max(lastbet, act.amount);
+					trail += act.amount;
 				}
 				states.add(hs);
 			}
 		}
 		
-		// FIXME collect, return uncalled, showdown
+		// collect, return uncalled, showdown
 		hs = hs.clone();
 		hs.board = hand.board; // prob not needed
 		hs.note = "End";
@@ -100,7 +117,7 @@ class HandStateUtil {
 		for (int s = 0; s < hand.seats.length; s++) {
 			Seat seat = hand.seats[s];
 			SeatState ss = hs.seats[seat.num - 1];
-			ss.bet = seat.won;
+			ss.amount = seat.won;
 			ss.won = seat.won > 0;
 		}
 		states.add(hs);

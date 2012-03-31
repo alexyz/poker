@@ -14,7 +14,7 @@ class GameTableModel extends AbstractTableModel {
 		cols.add(new TableModelColumn<PlayerGameInfo,String>("Game", String.class) {
 			@Override
 			public String getValue(PlayerGameInfo o) {
-				return o.gameName;
+				return o.game.name;
 			}
 		});
 		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("Hands", Integer.class) {
@@ -65,8 +65,18 @@ class GameTableModel extends AbstractTableModel {
 				return o.rake;
 			}
 		});
-
-
+		cols.add(new TableModelColumn<PlayerGameInfo,Float>("AFc", Float.class) {
+			@Override
+			public Float getValue(PlayerGameInfo o) {
+				return o.af(false);
+			}
+		});
+		cols.add(new TableModelColumn<PlayerGameInfo,Float>("AFv", Float.class) {
+			@Override
+			public Float getValue(PlayerGameInfo o) {
+				return o.af(true);
+			}
+		});
 	}
 	private final List<PlayerGameInfo> games = new ArrayList<PlayerGameInfo>();
 	public GameTableModel(Map<String,PlayerGameInfo> games) {

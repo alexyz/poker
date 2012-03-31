@@ -49,11 +49,9 @@ public class HandInfo {
 	public String getDescription() {
 		StringBuilder sb= new StringBuilder();
 		sb.append("button " + hand.button + "\n");
-		sb.append("currency " + hand.currency + "\n");
+		sb.append("game " + hand.game + "\n");
 		sb.append("date " + hand.date + "\n");
 		sb.append("original hole " + Arrays.toString(hand.myhole) + "\n");
-		sb.append("game " + hand.gamename + "\n");
-		sb.append("gametype " + hand.gametype + "\n");
 		sb.append("id " + hand.id + "\n");
 		sb.append("max " + hand.max + "\n");
 		sb.append("pot " + hand.pot + "\n");

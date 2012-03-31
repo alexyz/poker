@@ -9,7 +9,9 @@ import pet.hp.Seat;
 class SeatState implements Cloneable {
 	final Seat seat;
 	int stack;
-	int bet;
+	float spr;
+	int amount;
+	float bpr;
 	String[] hole;
 	boolean folded;
 	boolean won;

@@ -86,7 +86,7 @@ public class PlayerPanel extends JPanel {
 					PlayerGameInfo gi = ((GameTableModel) gamesTable.getModel()).getRow(sr);
 					System.out.println("selected " + r + " => " + sr + " => " + gi);
 					PokerFrame pf = PokerFrame.getInstance();
-					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.gameName);
+					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.game.name);
 					pf.displayBankRoll(bankRoll);
 				}
 			}

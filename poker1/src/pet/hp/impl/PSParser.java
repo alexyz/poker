@@ -22,6 +22,7 @@ public class PSParser extends Parser implements Serializable {
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** list of completed hands */
 	private final List<Hand> hands = new ArrayList<Hand>();
+	private final Map<String,Game> games = new TreeMap<String,Game>();
 
 	// transient fields - these probably shouldn't be final
 	
@@ -37,8 +38,10 @@ public class PSParser extends Parser implements Serializable {
 	private transient final List<List<Action>> streets = new ArrayList<List<Action>>();
 	/** current hand */
 	private transient Hand hand;
+	/** hand reached showdown */
+	private transient boolean showdown = false;
 	/** is in summary phase */
-	private transient boolean show = false, sum = false;
+	private transient boolean summaryPhase = false;
 	private transient final List<String> debuglines = new ArrayList<String>();
 	public transient boolean debug;
 
@@ -67,8 +70,8 @@ public class PSParser extends Parser implements Serializable {
 
 	@Override
 	public void clear() {
-		show = false;
-		sum = false;
+		showdown = false;
+		summaryPhase = false;
 		//for (Seat seat : seatsMap.values()) {
 			//println("seat " + seat + " pip " + seat.pip + " show=" + seat.showdown + " hole " + Arrays.asList(seat.hole));
 		//}
@@ -105,7 +108,7 @@ public class PSParser extends Parser implements Serializable {
 		println(">  " + line);
 
 		if (line.length() == 0) {
-			if (sum && hand != null) {
+			if (summaryPhase && hand != null) {
 				// finalise hand and return
 				hand.seats = seatsMap.values().toArray(new Seat[seatsMap.size()]);
 				Arrays.sort(hand.seats, HandUtil.seatCmp);
@@ -114,7 +117,7 @@ public class PSParser extends Parser implements Serializable {
 					List<Action> street = streets.get(n);
 					hand.streets[n] = street.toArray(new Action[street.size()]);
 				}
-				hand.showdown = show;
+				hand.showdown = showdown;
 				println("end of " + hand);
 				hands.add(hand);
 				ret = hand;
@@ -322,7 +325,7 @@ public class PSParser extends Parser implements Serializable {
 		int a = line.indexOf(":");
 		int seatno = parseInt(line, a - 1);
 
-		if (sum) {
+		if (summaryPhase) {
 			// Seat 1: 777KTO777 folded before Flop (didn't bet)
 			// Seat 2: tawvx showed [4c 6h 7d 5h] and won ($0.44) with a straight, Four to Eight
 			// Seat 4: fearvanilla folded before Flop (didn't bet)
@@ -390,21 +393,28 @@ public class PSParser extends Parser implements Serializable {
 		// TODO check if game already exists
 		hand.id = parseLong(line, i1 + 1);
 
-		String name = cache(line.substring(ns, i4 - 1));
-		hand.gamename = name;
-		if (name.contains("Hold'em")) {
-			hand.gametype = HandUtil.HE_TYPE;
-		} else if (name.contains("Omaha")) {
-			hand.gametype = HandUtil.OM_TYPE;
-		} else if (name.contains("5 Card Draw")) {
-			hand.gametype = HandUtil.FCD_TYPE;
+		String gamename = line.substring(ns, i4 - 1);
+		Game game = games.get(gamename);
+		if (game == null) {
+			game = new Game();
+			game.name = cache(gamename);
+			if (gamename.contains("Hold'em")) {
+				game.type = HandUtil.HE_TYPE;
+			} else if (gamename.contains("Omaha")) {
+				game.type = HandUtil.OM_TYPE;
+			} else if (gamename.contains("5 Card Draw")) {
+				game.type = HandUtil.FCD_TYPE;
+			}
+			if (gamename.indexOf("$") >= 0) {
+				game.currency = '$';
+			} else if (gamename.indexOf("€") >= 0) {
+				game.currency = '€';
+			} else {
+				game.currency = 'P';
+			}
 		}
-
-		// TODO euro
-		if (hand.gamename.indexOf("$") >= 0) {
-			hand.currency = '$';
-		}
-
+		hand.game = game;
+		
 		String datestr = line.substring(ds);
 		try {
 			// 2011/12/31 14:45:08 ET
@@ -463,7 +473,7 @@ public class PSParser extends Parser implements Serializable {
 		boolean newstr = false;
 		boolean ignstr = false;
 
-		if (hand.gametype == HandUtil.HE_TYPE || hand.gametype == HandUtil.OM_TYPE) {
+		if (hand.game.isHoldemType()) {
 			if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
 				newstr = true;
 			} else if (name.equals("HOLE CARDS")) {
@@ -471,7 +481,7 @@ public class PSParser extends Parser implements Serializable {
 			}
 
 
-		} else if (hand.gametype == HandUtil.FCD_TYPE) {
+		} else if (hand.game.isDrawType()) {
 			if (name.equals("DEALING HANDS")) {
 				ignstr = true;
 			}
@@ -484,13 +494,13 @@ public class PSParser extends Parser implements Serializable {
 
 		} else if (name.equals("SHOW DOWN")) {
 			println("showdown");
-			show = true;
+			showdown = true;
 
 		} else if (name.equals("SUMMARY")) {
 			println("summary");
 			// pip in case there is only one street
 			pip();
-			sum = true;
+			summaryPhase = true;
 
 		} else if (!ignstr) {
 			throw new RuntimeException("unknown phase " + name);
@@ -511,7 +521,7 @@ public class PSParser extends Parser implements Serializable {
 		String act = cache(line.substring(actStart, actEnd));
 		Action action = new Action();
 		action.seat = seat;
-		action.act = act;
+		action.type = act;
 		boolean draw = false;
 
 		// TODO action constants
@@ -530,7 +540,7 @@ public class PSParser extends Parser implements Serializable {
 
 		} else if (act.equals("mucks") || act.equals("doesn't")) {
 			// scotty912: doesn't show hand 
-			show = true;
+			//showdown = true;
 
 		} else if (act.equals("calls") || act.equals("bets")) {
 			// Bumerang16: calls $0.01
@@ -593,7 +603,7 @@ public class PSParser extends Parser implements Serializable {
 
 		} else if (act.equals("shows")) {
 			// bluff.tb: shows [Jc 8h Js Ad] (two pair, Aces and Kings)
-			show = true;
+			//showdown = true;
 			int handStart = nextToken(line, actEnd);
 			String[] hand = parseHand(line, handStart);
 			checkNewHand(seat.hole, hand);
@@ -615,10 +625,11 @@ public class PSParser extends Parser implements Serializable {
 			println("stands");
 
 		} else {
-			throw new RuntimeException("unknown action: " + action.act);
+			throw new RuntimeException("unknown action: " + action.type);
 		}
 		
-		if (show) {
+		if (showdown) {
+			// action after show down phase
 			seat.showdown = true;
 		}
 

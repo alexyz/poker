@@ -2,11 +2,11 @@ package pet.hp.util;
 
 import java.util.*;
 
-import pet.hp.HandUtil;
+import pet.hp.*;
 
 public class PlayerGameInfo {
 	public final PlayerInfo player;
-	public final String gameName;
+	public final Game game;
 	public int rake = 0;
 	/** hands in this game */
 	public int hands;
@@ -24,22 +24,68 @@ public class PlayerGameInfo {
 	// not public
 	
 	/** action map: int[] { count, amount } */
-	final Map<String,int[]> amap = new TreeMap<String,int[]>();
-	final char type;
+	final Map<String,int[]> actionTypes = new TreeMap<String,int[]>();
 	
-	public PlayerGameInfo(PlayerInfo player, String name, char type) {
+	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
-		this.gameName = name;
-		this.type = type;
-		this.foldedon = new int[HandUtil.getMaxStreets(type)];
+		this.game = game;
+		this.foldedon = new int[HandUtil.getMaxStreets(game.type)];
 	}
 	
-	int[] getAction(String action) {
-		int[] c = amap.get(action);
+	public void add(Hand h, Seat s) {
+		hands++;
+		pip += s.pip;
+		if (s.showdown) {
+			showdown++;
+		}
+		if (s.won > 0) {
+			handswon++;
+			won += s.won;
+			// overcounts rake if split?
+			rake += h.rake;
+		}
+		if (s.showdown && s.won > 0) {
+			handswonshow++;
+		}
+	}
+	
+	void add(int street, Action action) {
+		int[] typeCount = getActionType(action.type);
+		typeCount[0]++;
+		typeCount[1] += action.amount;
+		//gi.pip += a.amount;
+		
+		if (action.type.equals("folds")) {
+			foldedon[street]++;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	private int[] getActionType(String action) {
+		int[] c = actionTypes.get(action);
 		if (c == null) {
-			amap.put(action, c = new int[2]);
+			actionTypes.put(action, c = new int[2]);
 		}
 		return c;
+	}
+	
+	// player c/r freq
+	// play cbet freq
+	// player agr fac
+	
+	/** aggression factor count or volume */
+	public float af(boolean vol) {
+		// amount bet+raise / call
+		int[] b = getActionType("bets");
+		int[] c = getActionType("calls");
+		int[] r = getActionType("raises");
+		int[] ch = getActionType("checks");
+		int i = vol ? 1: 0;
+		return (b[i] + r[i] + 0f) / (c[i] + ch[i]);
 	}
 	
 	@Override
@@ -51,7 +97,7 @@ public class PlayerGameInfo {
 		sb.append(String.format("Hands:  %d  Won:  %d\n", hands, handswon));
 		sb.append(String.format("Amount won:  %d  Lost:  %d\n", won, pip));
 		sb.append("Actions:\n");
-		for (Map.Entry<String,int[]> e : amap.entrySet()) {
+		for (Map.Entry<String,int[]> e : actionTypes.entrySet()) {
 			int[] c = e.getValue();
 			if (c[0] > 0) {
 				String act = e.getKey();
@@ -65,7 +111,7 @@ public class PlayerGameInfo {
 		sb.append("Folded on:\n");
 		for (int s = 0; s < foldedon.length; s++) {
 			if (foldedon[s] > 0) {
-				sb.append("  " + HandUtil.getStreetName(type, s) + ":  " + foldedon[s] + "\n");
+				sb.append("  " + HandUtil.getStreetName(game.type, s) + ":  " + foldedon[s] + "\n");
 			}
 		}
 		sb.append("Show downs:  " + showdown + "\n");

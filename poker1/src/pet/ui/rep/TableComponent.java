@@ -3,12 +3,15 @@ package pet.ui.rep;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.text.DateFormat;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.JComponent;
 
 import pet.eq.Poker;
 import pet.eq.PokerUtil;
 import pet.hp.Hand;
+import pet.hp.HandUtil;
 
 /**
  * Draws a table in the given state
@@ -88,7 +91,7 @@ class TableComponent extends JComponent {
 		if (hand != null) {
 			g2.setColor(Color.black);
 			g2.setFont(normalfont);
-			g2.drawString(String.valueOf(hand.gamename), 18, 18);
+			g2.drawString(String.valueOf(hand.game.name), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}
@@ -151,39 +154,48 @@ class TableComponent extends JComponent {
 			// seat information
 			
 			if (ss != null) {
-				int textx = (int) seatx;
-				int texty = (int) (seaty - 45); // TODO centre
-				g2.setFont(normalfont);
-				FontMetrics fm = g2.getFontMetrics();
 				
-				String nameStr = String.valueOf(ss.seat.name);
-				g2.drawString(nameStr, textx - fm.stringWidth(nameStr) / 2, texty += 15);
-				
-				String stackStr = String.valueOf(ss.stack);
-				g2.drawString(stackStr, textx - fm.stringWidth(stackStr) / 2, texty += 15);
-				
-				String holeStr = ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[unknown]";
-				g2.drawString(holeStr, textx - fm.stringWidth(holeStr) / 2, texty += 15);
-				
-				String valueStr = ss.eq != null ? Poker.valueString(ss.eq.current) : "";
-				g2.drawString(valueStr, textx - fm.stringWidth(valueStr) / 2, texty += 15);
-				
-				String eqStr = "Equity: " + (ss.eq != null ? ss.eq.won + ss.eq.tied : 0);
-				g2.drawString(eqStr, textx - fm.stringWidth(eqStr) / 2, texty += 15);
-				
-				if (state.actionSeat == s || ss.won) {
-					g2.setFont(boldfont);
-					fm = g2.getFontMetrics();
-					String actStr = String.valueOf(ss.won ? "wins" : state.action);
-					g2.drawString(actStr, textx - fm.stringWidth(actStr) / 2, texty += 15);
+				List<String> lines = new ArrayList<String>();
+				lines.add(ss.seat.name);
+				lines.add(String.valueOf(ss.stack));
+				if (!ss.folded) {
+					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[?]");
 				}
-
-				if (ss.bet > 0) {
-					double betx = seatX(angle, 0.4);
-					double bety = seatY(angle, 0.4);
+				if (ss.eq != null) {
+					lines.add(Poker.valueString(ss.eq.current));
+					if (ss.eq.tied == 0) {
+						lines.add(String.format("%2.1f%%", ss.eq.won));
+					} else {
+						lines.add(String.format("%2.1f%% (T %2.1f%%)", ss.eq.won, ss.eq.tied));
+					}
+				}
+				if (ss.spr > 0) {
+					lines.add(String.format("SPR: %2.1f", ss.spr));
+				}
+				if (state.actionSeat == s || ss.won) {
+					lines.add(ss.won ? "wins" : String.valueOf(state.action));
+				}
+				
+				{
+					int texty = (int) (seaty - (lines.size() * 8));
+					g2.setFont(normalfont);
+					FontMetrics fm = g2.getFontMetrics();
+					for (String str : lines) {
+						g2.drawString(str, (int) seatx - fm.stringWidth(str) / 2, texty += 16);
+					}
+				}
+				
+				if (ss.amount > 0) {
+					double betx = seatX(angle, 0.36);
+					double bety = seatY(angle, 0.36);
 					g2.setColor(Color.black);
 					g2.setFont(normalfont);
-					g2.drawString(String.valueOf(ss.bet), (int) betx, (int) bety);
+					String amountStr = HandUtil.formatMoney(hand.game.currency, ss.amount);
+					if (ss.bpr != 0) {
+						amountStr = String.format("%s (%2.1f%% pot)", amountStr, ss.bpr);
+					}
+					FontMetrics fm = g2.getFontMetrics();
+					g2.drawString(amountStr, (int) betx - fm.stringWidth(amountStr) / 2, (int) bety);
 				}
 			}
 

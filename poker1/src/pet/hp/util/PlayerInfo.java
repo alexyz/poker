@@ -2,6 +2,10 @@ package pet.hp.util;
 
 import java.util.*;
 
+import pet.hp.Game;
+import pet.hp.Hand;
+import pet.hp.Seat;
+
 public class PlayerInfo {
 
 	/** player name */
@@ -15,6 +19,24 @@ public class PlayerInfo {
 		this.name = name;
 	}
 	
+	public PlayerGameInfo getGameInfo(Game game) {
+		PlayerGameInfo gi = games.get(game.name);
+		if (gi == null) {
+			games.put(game.name, gi = new PlayerGameInfo(this, game));
+		}
+		return gi;
+	}
+	
+	public void add(Hand h, Seat s) {
+		hands++;
+		if (date == null || date.before(h.date)) {
+			date = h.date;
+		}
+		
+		PlayerGameInfo gi = getGameInfo(h.game);
+		gi.add(h, s);
+	}
+
 	@Override
 	public String toString() {
 		return "PlayerInfo[" + name + " games=" + games.size() + " hands=" + hands + "]";
