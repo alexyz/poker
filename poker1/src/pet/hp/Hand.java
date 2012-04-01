@@ -10,8 +10,10 @@ public class Hand implements Serializable {
 	private static final long serialVersionUID = 1;
 	/** hand id */
 	public long id;
-	/** game name */
+	/** game type */
 	public Game game;
+	/** game name */
+	public String gamename;
 	/** hand date */
 	public Date date;
 	/** big blind (if any?) */
@@ -38,8 +40,6 @@ public class Hand implements Serializable {
 	public String[] myhole;
 	/** name of table */
 	public String tablename;
-	/** max number of players at table */
-	public int max;
 	/** button seat number */
 	public int button;
 	/** uncalled action amount */

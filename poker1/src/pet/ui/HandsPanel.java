@@ -10,12 +10,13 @@ import javax.swing.table.*;
 
 import pet.hp.Hand;
 import pet.hp.util.*;
+import pet.ui.ta.*;
 
 /**
  * todo send to eq panel button
  * send to rep button
  */
-public class SessionPanel extends JPanel {
+public class HandsPanel extends JPanel {
 	// name
 	// game
 	// from
@@ -24,11 +25,11 @@ public class SessionPanel extends JPanel {
 	// handinfo
 	private final JTextField nameField = new JTextField();
 	private final JComboBox gameCombo = new JComboBox();
-	private final JTable handTable = new JTable();
+	private final MyJTable<HandInfo> handTable = new MyJTable<HandInfo>(new HandInfoTableModel());
 	private final JTextArea textArea = new JTextArea();
 	private final JButton replayButton = new JButton("Replay");
 
-	public SessionPanel() {
+	public HandsPanel() {
 		super(new BorderLayout());
 		nameField.setColumns(10);
 		nameField.setBorder(BorderFactory.createTitledBorder("Player Name"));
@@ -56,7 +57,7 @@ public class SessionPanel extends JPanel {
 			}
 		});
 
-		handTable.setDefaultRenderer(Date.class, new DateRenderer());
+		handTable.setDefaultRenderer(Date.class, new MyDateRenderer());
 		handTable.setDefaultRenderer(String[].class, new HandRenderer());
 		handTable.setAutoCreateRowSorter(true);
 		handTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -78,7 +79,7 @@ public class SessionPanel extends JPanel {
 					int r = handTable.rowAtPoint(e.getPoint());
 					if (r >= 0) {
 						int sr = handTable.convertRowIndexToModel(r);
-						HandInfo hi = ((SessionTableModel)handTable.getModel()).getRow(sr);
+						HandInfo hi = handTable.getModel().getRow(sr);
 						PokerFrame.getInstance().displayHand(hi.hand);
 					}
 					System.out.println("double click");
@@ -109,7 +110,7 @@ public class SessionPanel extends JPanel {
 		int r = handTable.getSelectionModel().getMinSelectionIndex();
 		if (r >= 0) {
 			int sr = handTable.convertRowIndexToModel(r);
-			HandInfo hi = ((SessionTableModel)handTable.getModel()).getRow(sr);
+			HandInfo hi = handTable.getModel().getRow(sr);
 			System.out.println("selected " + r + " => " + sr + " => " + hi);
 			return hi;
 		}
@@ -124,15 +125,18 @@ public class SessionPanel extends JPanel {
 			games.addAll(pi.games.keySet());
 		}
 		gameCombo.setModel(new DefaultComboBoxModel(games));
-		handTable.setModel(new DefaultTableModel());
+		handTable.getModel().setRows(Collections.<HandInfo>emptyList());
 	}
 
 	private void updateGame() {
 		String player = nameField.getText();
 		String game = (String) gameCombo.getSelectedItem();
-		List<Hand> hands = PokerFrame.getInstance().getHistory().getHands(player, game);
-		List<HandInfo> hi = HandInfo.getHandInfos(hands);
-		handTable.setModel(new SessionTableModel(hi));
+		PokerFrame pf = PokerFrame.getInstance();
+		History his = pf.getHistory();
+		List<Hand> hands = his.getHands(player, game);
+		List<HandInfo> handInfos = HandInfo.getHandInfos(hands);
+		handTable.getModel().setRows(handInfos);
+		repaint();
 	}
 }
 

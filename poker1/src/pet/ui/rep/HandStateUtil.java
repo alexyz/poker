@@ -13,7 +13,7 @@ class HandStateUtil {
 		List<HandState> states = new Vector<HandState>();
 
 		// initial state (not displayed)
-		HandState hs = new HandState(hand.max);
+		HandState hs = new HandState(hand.game.max);
 		hs.pot = hand.db;
 		hs.button = hand.button - 1;
 		hs.actionSeat = -1;
@@ -47,7 +47,8 @@ class HandStateUtil {
 					hs.pot += ss.amount;
 					ss.amount = 0;
 					ss.eq = null;
-					if (ss.hole != null) {
+					// get hole cards of live hands
+					if (ss.hole != null && !ss.folded) {
 						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
 						ss.hole = hole;
 						holes.add(ss.hole);
@@ -56,8 +57,10 @@ class HandStateUtil {
 				}
 			}
 			for (SeatState ss : hs.seats) {
-				// need to know pot to calc spr
-				ss.spr = hs.pot != 0 ? (ss.stack*1f) / hs.pot : 0;
+				if (ss != null && !ss.folded) {
+					// need to know pot to calc spr
+					ss.spr = hs.pot != 0 ? (ss.stack*1f) / hs.pot : 0;
+				}
 			}
 			
 			String[][] holesArr = holes.toArray(new String[holes.size()][]);
@@ -85,12 +88,12 @@ class HandStateUtil {
 
 				SeatState ss = hs.seats[act.seat.num - 1];
 				
-				if (act.type.equals("folds")) {
+				if (act.type.equals(Action.FOLD_TYPE)) {
 					ss.folded = true;
 					
 				} else if (act.amount > 0) {
 					ss.amount += act.amount;
-					if (act.type.matches("bets|raises")) {
+					if (act.type.equals(Action.BET_TYPE) || act.type.equals(Action.RAISE_TYPE)) {
 						int potsz = (hs.pot + trail + 2 * lastbet);
 						ss.bpr = potsz != 0 ? (ss.amount * 100f) / potsz : 0;
 					} else {

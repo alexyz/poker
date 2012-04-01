@@ -20,9 +20,9 @@ public class PlayerInfo {
 	}
 	
 	public PlayerGameInfo getGameInfo(Game game) {
-		PlayerGameInfo gi = games.get(game.name);
+		PlayerGameInfo gi = games.get(game.id);
 		if (gi == null) {
-			games.put(game.name, gi = new PlayerGameInfo(this, game));
+			games.put(game.id, gi = new PlayerGameInfo(this, game));
 		}
 		return gi;
 	}
@@ -34,7 +34,7 @@ public class PlayerInfo {
 		}
 		
 		PlayerGameInfo gi = getGameInfo(h.game);
-		gi.add(h, s);
+		gi.add(s, h);
 	}
 
 	@Override

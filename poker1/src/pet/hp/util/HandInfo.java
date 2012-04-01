@@ -31,7 +31,7 @@ public class HandInfo {
 		// FIXME just look at first street actions?
 		for (int n = 0; n < hand.seats.length; n++) {
 			if (hand.seats[n].num == hand.button) {
-				for (int p = 0; p < hand.max; p++) {
+				for (int p = 0; p < hand.game.max; p++) {
 					if (hand.seats[(n + p) % hand.seats.length] == hand.myseat) {
 						return p;
 					}
@@ -53,7 +53,6 @@ public class HandInfo {
 		sb.append("date " + hand.date + "\n");
 		sb.append("original hole " + Arrays.toString(hand.myhole) + "\n");
 		sb.append("id " + hand.id + "\n");
-		sb.append("max " + hand.max + "\n");
 		sb.append("pot " + hand.pot + "\n");
 		sb.append("rake " + hand.rake + "\n");
 		sb.append("showdown " + hand.showdown + "\n");

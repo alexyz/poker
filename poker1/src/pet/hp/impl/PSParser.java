@@ -8,8 +8,9 @@ import pet.eq.ArrayUtil;
 import pet.hp.*;
 
 /**
- * PokerStars hand parser - primarily for Omaha cash games.
+ * PokerStars hand parser - primarily for Omaha/Holdem/Draw cash games.
  * TODO file/line/offset link
+ * TODO tournaments and oh/l
  */
 public class PSParser extends Parser implements Serializable {
 
@@ -46,7 +47,12 @@ public class PSParser extends Parser implements Serializable {
 	public transient boolean debug;
 
 	public PSParser() {
-		//
+		// cache these constants
+		cache(Action.BET_TYPE);
+		cache(Action.CALL_TYPE);
+		cache(Action.CHECK_TYPE);
+		cache(Action.FOLD_TYPE);
+		cache(Action.RAISE_TYPE);
 	}
 
 	private void println(String s) {
@@ -111,6 +117,7 @@ public class PSParser extends Parser implements Serializable {
 			if (summaryPhase && hand != null) {
 				// finalise hand and return
 				hand.seats = seatsMap.values().toArray(new Seat[seatsMap.size()]);
+				// prob already sorted
 				Arrays.sort(hand.seats, HandUtil.seatCmp);
 				hand.streets = new Action[streets.size()][];
 				for (int n = 0; n < streets.size(); n++) {
@@ -393,27 +400,7 @@ public class PSParser extends Parser implements Serializable {
 		// TODO check if game already exists
 		hand.id = parseLong(line, i1 + 1);
 
-		String gamename = line.substring(ns, i4 - 1);
-		Game game = games.get(gamename);
-		if (game == null) {
-			game = new Game();
-			game.name = cache(gamename);
-			if (gamename.contains("Hold'em")) {
-				game.type = HandUtil.HE_TYPE;
-			} else if (gamename.contains("Omaha")) {
-				game.type = HandUtil.OM_TYPE;
-			} else if (gamename.contains("5 Card Draw")) {
-				game.type = HandUtil.FCD_TYPE;
-			}
-			if (gamename.indexOf("$") >= 0) {
-				game.currency = '$';
-			} else if (gamename.indexOf("€") >= 0) {
-				game.currency = '€';
-			} else {
-				game.currency = 'P';
-			}
-		}
-		hand.game = game;
+		hand.gamename = cache(line.substring(ns, i4 - 1));
 		
 		String datestr = line.substring(ds);
 		try {
@@ -444,7 +431,8 @@ public class PSParser extends Parser implements Serializable {
 		int b = line.indexOf("'", a + 1);
 		hand.tablename = cache(line.substring(a + 1, b));
 		int c = line.indexOf("-max");
-		hand.max = Integer.parseInt(line.substring(c - 1, c));
+		int max = Integer.parseInt(line.substring(c - 1, c));
+		hand.game = getGame(hand.gamename, max);
 		int d = line.indexOf("Seat");
 		if (d > 0) {
 			hand.button = Integer.parseInt(line.substring(d + 6, d + 7));
@@ -809,6 +797,14 @@ public class PSParser extends Parser implements Serializable {
 				}
 			}
 		}
+	}
+	
+	private Game getGame(String gamename, int max) {
+		Game game = games.get(gamename);
+		if (game == null) {
+			game = new Game(gamename, max);
+		}
+		return game;
 	}
 
 }

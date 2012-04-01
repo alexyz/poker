@@ -14,28 +14,34 @@ public class History implements FollowListener {
 	private final Map<String, PlayerInfo> playerMap = new TreeMap<String, PlayerInfo>();
 	private final List<Hand> hands = new ArrayList<Hand>();
 	private final Set<Long> handIds = new TreeSet<Long>();
+	private final PlayerInfo population = new PlayerInfo("*");
+	
+	public PlayerInfo getPopulation() {
+		return population;
+	}
 	
 	/**
 	 * Get the player info map
 	 */
-	public synchronized Map<String,PlayerInfo> getPlayers(String pattern) {
+	public synchronized List<PlayerInfo> getPlayers(String pattern) {
 		pattern = pattern.toLowerCase();
 		System.out.println("get players " + pattern);
-		Map<String, PlayerInfo> playerMap = new TreeMap<String, PlayerInfo>();
+		List<PlayerInfo> players = new ArrayList<PlayerInfo>();
 		for (Map.Entry<String,PlayerInfo> e : this.playerMap.entrySet()) {
 			if (e.getKey().toLowerCase().contains(pattern)) {
-				playerMap.put(e.getKey(), e.getValue());
+				players.add(e.getValue());
 			}
 		}
-		return playerMap;
+		System.out.println("got " + players.size() + " players");
+		return players;
 	}
 	
-	public synchronized List<Hand> getHands(String player, String gamename) {
-		System.out.println("get hands for " + player + " game " + gamename);
+	public synchronized List<Hand> getHands(String player, String gameid) {
+		System.out.println("get hands for " + player + " gameid " + gameid);
 		List<Hand> hands = new ArrayList<Hand>();
 		
 		for (Hand hand : this.hands) {
-			if (hand.game.name.equals(gamename)) {
+			if (hand.game.id.equals(gameid)) {
 				for (Seat seat : hand.seats) {
 					if (seat.name.equals(player)) {
 						hands.add(hand);
@@ -45,6 +51,7 @@ public class History implements FollowListener {
 			}
 		}
 		
+		System.out.println("got " + hands.size() + " hands");
 		return hands;
 	}
 
@@ -79,7 +86,7 @@ public class History implements FollowListener {
 				}
 			}
 		}
-		System.out.println("bankroll data: " + data.points.size());
+		System.out.println("bank roll data points: " + data.points.size());
 		return data;
 	}
 	
@@ -101,14 +108,30 @@ public class History implements FollowListener {
 		for (Seat s : h.seats) {
 			PlayerInfo pi = getPlayerInfo(s.name, true);
 			pi.add(h, s);
+			
+			// add to population, but XXX careful not to overcount hand stuff
+			population.add(h, s);
 		}
 
+		
 		for (int s = 0; s < h.streets.length; s++) {
 			Action[] str = h.streets[s];
+			int checked = 0;
+			
 			for (Action a : str) {
 				PlayerInfo pi = getPlayerInfo(a.seat.name, true);
 				PlayerGameInfo gi = pi.getGameInfo(h.game);
-				gi.add(s, a);
+				int seatmask = 1 << a.seat.num;
+				boolean hasChecked = (checked & seatmask) != 0;
+				gi.addAction(s, a, hasChecked);
+				
+				PlayerGameInfo popgi = population.getGameInfo(h.game);
+				popgi.addAction(s, a, hasChecked);
+				//System.out.println("str " + s + " act " + a + " checked " + hasChecked);
+				
+				if (a.type.equals(Action.CHECK_TYPE)) {
+					checked |= seatmask;
+				}
 			}
 		}
 		

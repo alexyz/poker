@@ -1,81 +1,42 @@
-package pet.ui;
+package pet.ui.ta;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.table.AbstractTableModel;
+import java.util.*;
 
 import pet.hp.util.PlayerInfo;
 
-class PlayerTableModel extends AbstractTableModel {
-	private static final List<TableModelColumn<PlayerInfo,?>> cols = new ArrayList<TableModelColumn<PlayerInfo,?>>();
+public class PlayerInfoTableModel extends MyTableModel<PlayerInfo> {
+	
+	private static final List<MyTableModelColumn<PlayerInfo,?>> cols = new ArrayList<MyTableModelColumn<PlayerInfo,?>>();
+	
 	static {
-		cols.add(new TableModelColumn<PlayerInfo,String>("Player", String.class) {
+		cols.add(new MyTableModelColumn<PlayerInfo,String>("Player", "Player name", String.class) {
 			@Override
 			public String getValue(PlayerInfo o) {
 				return o.name;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerInfo,Integer>("Games", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerInfo,Integer>("Games", "Number of game types", Integer.class) {
 			@Override
 			public Integer getValue(PlayerInfo o) {
 				return o.games.size();
 			}
 		});
-		cols.add(new TableModelColumn<PlayerInfo,Integer>("Hands", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerInfo,Integer>("Hands", "Number of hands", Integer.class) {
 			@Override
 			public Integer getValue(PlayerInfo o) {
 				return o.hands;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerInfo,Date>("Last", Date.class) {
+		cols.add(new MyTableModelColumn<PlayerInfo,Date>("Last", "Date of last hand", Date.class) {
 			@Override
 			public Date getValue(PlayerInfo o) {
 				return o.date;
 			}
 		});
 	}
-	private final List<String> players = new ArrayList<String>();
-	private final Map<String,PlayerInfo> playerMap;
-	public PlayerTableModel(Map<String, PlayerInfo> playerMap) {
-		this.playerMap = playerMap;
-		players.addAll(playerMap.keySet());
-		Collections.sort(players);
-	}
-	public PlayerInfo getRow(int r) {
-		return playerMap.get(players.get(r));
-	}
-	@Override
-	public int getColumnCount() {
-		return cols.size();
-	}
 	
-	@Override
-	public String getColumnName(int c) {
-		return cols.get(c).name;
-	}
-
-	@Override
-	public int getRowCount() {
-		return players.size();
-	}
-	
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return cols.get(c).cl;
-	}
-
-	@Override
-	public Object getValueAt(int r, int c) {
-		if (r < players.size()) {
-			String player = players.get(r);
-			PlayerInfo pi = playerMap.get(player);
-			return cols.get(c).getValue(pi);
-		}
-		return null;
+	public PlayerInfoTableModel() {
+		super(cols);
 	}
 	
 }

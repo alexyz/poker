@@ -6,12 +6,20 @@ import java.io.Serializable;
  * An action that a player performs during a hand
  */
 public class Action implements Serializable {
+	
+	// XXX these are stars specific...
+	public static final String CHECK_TYPE = "checks";
+	public static final String FOLD_TYPE = "folds";
+	public static final String RAISE_TYPE = "raises";
+	public static final String CALL_TYPE = "calls";
+	public static final String BET_TYPE = "bets";
 	private static final long serialVersionUID = 1;
+	
 	/** seat performing the action */
 	public Seat seat;
 	/** action string */
 	public String type;
-	/** amount put in pot */
+	/** amount put in pot - note that not all bets/raises will be called */
 	public int amount;
 	/** this action put the player all in */
 	public boolean allin;

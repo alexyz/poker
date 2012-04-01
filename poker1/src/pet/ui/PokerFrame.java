@@ -46,7 +46,7 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("History", new HistoryPanel());
 		tabs.addTab("Players", new PlayerPanel());
 		tabs.addTab("Bankroll", bankrollPanel);
-		tabs.addTab("Session", new SessionPanel());
+		tabs.addTab("Session", new HandsPanel());
 		tabs.addTab("Replay", replayPanel);
 		tabs.addTab("Console", new ConsolePanel());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

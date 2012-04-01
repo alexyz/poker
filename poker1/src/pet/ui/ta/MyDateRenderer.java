@@ -1,11 +1,11 @@
-package pet.ui;
+package pet.ui.ta;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 import javax.swing.table.DefaultTableCellRenderer;
 
-class DateRenderer extends DefaultTableCellRenderer {
+public class MyDateRenderer extends DefaultTableCellRenderer {
 	@Override
 	protected void setValue(Object value) {
 		if (value instanceof Date) {

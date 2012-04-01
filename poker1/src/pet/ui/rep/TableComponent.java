@@ -15,8 +15,6 @@ import pet.hp.HandUtil;
 
 /**
  * Draws a table in the given state
- * TODO currency and number formatting
- * TODO show table information in top left
  */
 class TableComponent extends JComponent {
 
@@ -91,7 +89,7 @@ class TableComponent extends JComponent {
 		if (hand != null) {
 			g2.setColor(Color.black);
 			g2.setFont(normalfont);
-			g2.drawString(String.valueOf(hand.game.name), 18, 18);
+			g2.drawString(String.format("%s %d-max", hand.game.name, hand.game.max), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}

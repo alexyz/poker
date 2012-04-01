@@ -1,117 +1,119 @@
-package pet.ui;
+package pet.ui.ta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.table.AbstractTableModel;
+import java.util.*;
 
 import pet.hp.util.PlayerGameInfo;
+import pet.hp.util.PlayerInfo;
 
-class GameTableModel extends AbstractTableModel {
-	private static final List<TableModelColumn<PlayerGameInfo,?>> cols = new ArrayList<TableModelColumn<PlayerGameInfo,?>>();
+public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
+	
+	private static final List<MyTableModelColumn<PlayerGameInfo,?>> cols = new ArrayList<MyTableModelColumn<PlayerGameInfo,?>>();
+	
 	static {
-		cols.add(new TableModelColumn<PlayerGameInfo,String>("Game", String.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>("Game", "Game description", String.class) {
 			@Override
 			public String getValue(PlayerGameInfo o) {
-				return o.game.name;
+				return o.game.id;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("Hands", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>("Hands", "Number of hands", Integer.class) {
 			@Override
 			public Integer getValue(PlayerGameInfo o) {
 				return o.hands;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Float>("PcHandsShow", Float.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>("H-Show%", "Percentage of hands reaching show down", Float.class) {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
 				return (o.showdown*100f) / o.hands;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Float>("PcHandsWon", Float.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>("H-Won%", "Percentage of hands won", Float.class) {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
 				return (o.handswon*100f) / o.hands;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Float>("PcHandsWonShow", Float.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>("H-WonShow%", "Percentage of hands reaching show down that won", Float.class) {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
 				return (o.handswonshow*100f) / o.handswon;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("AmWon", Integer.class) {
-			@Override
-			public Integer getValue(PlayerGameInfo o) {
-				return o.won;
-			}
-		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("AmPip", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>("AmPip", "Amount put in pot", Integer.class) {
 			@Override
 			public Integer getValue(PlayerGameInfo o) {
 				return o.pip;
 			}
+			@Override
+			public Integer getPopValue(PlayerGameInfo o) {
+				// FIXME produces massive underestimate
+				return o.pip / o.hands;
+			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("AmTot", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>("AmWon", "Amount won", Integer.class) {
+			@Override
+			public Integer getValue(PlayerGameInfo o) {
+				return o.won;
+			}
+			@Override
+			public Integer getPopValue(PlayerGameInfo o) {
+				return o.won / o.hands;
+			}
+		});
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>("AmTot", "Amount won minus amount put in pot", Integer.class) {
 			@Override
 			public Integer getValue(PlayerGameInfo o) {
 				return o.won - o.pip;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Integer>("Rake", Integer.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>("Rake", "Rake for hands won", Integer.class) {
 			@Override
 			public Integer getValue(PlayerGameInfo o) {
 				return o.rake;
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Float>("AFc", Float.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>("AF-Count", "Times bet+raise/check+call", Float.class) {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
 				return o.af(false);
 			}
 		});
-		cols.add(new TableModelColumn<PlayerGameInfo,Float>("AFv", Float.class) {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>("AF-Vol", "Amount bet+raise/call", Float.class) {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
 				return o.af(true);
 			}
 		});
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>("Ch/F-C-R", "Check, Check-fold, check-call, check-raise count", String.class) {
+			@Override
+			public String getValue(PlayerGameInfo o) {
+				return o.cx();
+			}
+		});
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>("Ch/F-C-R%", "Check-fold, check-call, check-raise percentage", String.class) {
+			@Override
+			public String getValue(PlayerGameInfo o) {
+				return o.cxr();
+			}
+		});
 	}
-	private final List<PlayerGameInfo> games = new ArrayList<PlayerGameInfo>();
-	public GameTableModel(Map<String,PlayerGameInfo> games) {
-		this.games.addAll(games.values());
+	
+	private PlayerInfo population;
+	
+	public GameInfoTableModel() {
+		super(cols);
 	}
-	public PlayerGameInfo getRow(int r) {
-		return games.get(r);
-	}
-	@Override
-	public int getColumnCount() {
-		return cols.size();
+	
+	public void setPopulation(PlayerInfo population) {
+		this.population = population;
+		
 	}
 	
 	@Override
-	public String getColumnName(int c) {
-		return cols.get(c).name;
-	}
-
-	@Override
-	public int getRowCount() {
-		return games.size();
+	public PlayerGameInfo getPopulation(PlayerGameInfo row) {
+		return population.getGameInfo(row.game);
 	}
 	
-	@Override
-	public Class<?> getColumnClass(int c) {
-		return cols.get(c).cl;
-	}
-
-	@Override
-	public Object getValueAt(int r, int c) {
-		if (r < games.size()) {
-			PlayerGameInfo gi = games.get(r);
-			return cols.get(c).getValue(gi);
-		}
-		return null;
-	}
 	
 }
