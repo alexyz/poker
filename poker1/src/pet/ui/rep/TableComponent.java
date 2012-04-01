@@ -107,7 +107,7 @@ class TableComponent extends JComponent {
 			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
 			String boardStr = state.board != null ? PokerUtil.cardsString(state.board) : "";
 			g2.drawString(boardStr, btx - fm.stringWidth(boardStr) / 2, bty + 36);
-			String potStr = String.valueOf(state.pot);
+			String potStr = HandUtil.formatMoney(hand.game.currency, state.pot);
 			g2.drawString(potStr, btx - fm.stringWidth(potStr) / 2, bty + 72);
 		}
 
@@ -155,7 +155,7 @@ class TableComponent extends JComponent {
 				
 				List<String> lines = new ArrayList<String>();
 				lines.add(ss.seat.name);
-				lines.add(String.valueOf(ss.stack));
+				lines.add(HandUtil.formatMoney(hand.game.currency, ss.stack));
 				if (!ss.folded) {
 					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[?]");
 				}
@@ -164,7 +164,7 @@ class TableComponent extends JComponent {
 					if (ss.eq.tied == 0) {
 						lines.add(String.format("%2.1f%%", ss.eq.won));
 					} else {
-						lines.add(String.format("%2.1f%% (T %2.1f%%)", ss.eq.won, ss.eq.tied));
+						lines.add(String.format("%2.1f%% (%2.1f%% tie)", ss.eq.won, ss.eq.tied));
 					}
 				}
 				if (ss.spr > 0) {

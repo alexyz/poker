@@ -13,11 +13,13 @@ public class Action implements Serializable {
 	public static final String RAISE_TYPE = "raises";
 	public static final String CALL_TYPE = "calls";
 	public static final String BET_TYPE = "bets";
+	public static final String POST_TYPE = "posts";
 	private static final long serialVersionUID = 1;
 	
 	/** seat performing the action */
 	public Seat seat;
 	/** action string */
+	// make this byte to save space?
 	public String type;
 	/** amount put in pot - note that not all bets/raises will be called */
 	public int amount;

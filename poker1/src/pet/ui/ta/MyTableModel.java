@@ -27,7 +27,7 @@ public class MyTableModel<T> extends AbstractTableModel {
 		fireTableStructureChanged();
 		// doesn't seem to work
 		fireTableDataChanged();
-		System.out.println("table model rows now " + rows);
+		//System.out.println("table model rows now " + rows);
 	}
 	
 	public T getRow(int r) {
@@ -71,8 +71,7 @@ public class MyTableModel<T> extends AbstractTableModel {
 			//System.out.println("row is " + row);
 			MyTableModelColumn<T, ?> col = cols.get(c);
 			StringBuilder sb = new StringBuilder();
-			sb.append("<html>").append(c).append(",").append(r);
-			sb.append("<br><b>").append(col.desc).append("</b>");
+			sb.append("<html><b>").append(col.desc).append("</b>");
 			sb.append("<br>").append(col.getValue(row));
 			T population = getPopulation(row);
 			if (population != null) {

@@ -5,7 +5,7 @@ public abstract class MyTableModelColumn<T,S> {
 	public final Class<?> cl;
 	public final String desc;
 
-	public MyTableModelColumn(String name, String desc, Class<S> cl) {
+	public MyTableModelColumn(Class<S> cl, String name, String desc) {
 		this.name = name;
 		this.desc = desc;
 		this.cl = cl;

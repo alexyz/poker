@@ -367,7 +367,7 @@ public class PSParser extends Parser implements Serializable {
 			int b = line.lastIndexOf("(");
 
 			Seat seat = new Seat();
-			seat.num = seatno;
+			seat.num = (byte) seatno;
 			seat.name = cache(line.substring(a + 2, b - 1));
 			seat.chips = parseMoney(line, b + 1);
 			seatsMap.put(seat.name, seat);
@@ -567,6 +567,7 @@ public class PSParser extends Parser implements Serializable {
 					pot += amount;
 					amount = 0;
 				}
+				seat.smallblind = true;
 				
 			} else if (line.indexOf("small & big blinds", actEnd) > 0) {
 				// dead small blind doesn't count towards pip (but does count towards pot)
@@ -577,10 +578,13 @@ public class PSParser extends Parser implements Serializable {
 				hand.db += hand.sb;
 				pot += hand.sb;
 				amount -= hand.sb;
+				seat.bigblind = true;
+				seat.smallblind = true;
 				
 			} else if (line.indexOf("big blind", actEnd) > 0) {
 				println("big blind " + amount);
 				hand.bb = amount;
+				seat.bigblind = true;
 				
 			} else {
 				throw new RuntimeException("unknown post");
@@ -605,7 +609,7 @@ public class PSParser extends Parser implements Serializable {
 				throw new RuntimeException("already discarded " + seat.discards);
 			}
 			int discardsStart = nextToken(line, actEnd);
-			seat.discards = parseInt(line, discardsStart);
+			seat.discards = (byte) parseInt(line, discardsStart);
 
 		} else if (act.equals("stands")) {
 			// stands pat

@@ -6,6 +6,7 @@ package pet.hp;
 public class Game implements Comparable<Game> {
 	
 	// TODO blinds, bet type, remove name from id
+	// num hole cards for replayer
 	
 	/** description string (unique for all games) */
 	public final String id;

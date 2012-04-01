@@ -6,7 +6,7 @@ import java.util.Arrays;
 public class Seat implements Serializable {
 	private static final long serialVersionUID = 1;
 	/** seat number */
-	public int num;
+	public byte num;
 	/** player name */
 	public String name;
 	/** starting chips */
@@ -18,9 +18,11 @@ public class Seat implements Serializable {
 	/** amount put in pot, equal to sum of amount of player actions in hand */
 	public int pip;
 	/** number of cards discarded */
-	public int discards;
+	public byte discards;
 	/** seats hand reached showdown */
 	public boolean showdown;
+	public boolean bigblind;
+	public boolean smallblind;
 	@Override
 	public String toString() {
 		String s = num + ":" + name + "(" + chips + ")";

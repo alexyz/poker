@@ -28,19 +28,98 @@ public class HandInfo {
 	}
 	
 	public int mypos() {
-		// FIXME just look at first street actions?
-		for (int n = 0; n < hand.seats.length; n++) {
-			if (hand.seats[n].num == hand.button) {
-				for (int p = 0; p < hand.game.max; p++) {
-					if (hand.seats[(n + p) % hand.seats.length] == hand.myseat) {
-						return p;
+		// but, but+1, ... btn+5 (utg) (sb) (bb)
+		int b = hand.button;
+		Seat[] seats = hand.seats;
+		int p;
+		for (int s = 0; s < seats.length; s++) {
+			if (seats[s].num >= b) {
+				for (p = 0; p < seats.length; p++) {
+					if (seats[(s + p) % seats.length] == hand.myseat) {
+						// p is distance between button and me clockwise
+						return p == 0 ? 0 : seats.length - p;
 					}
 				}
-				return -1;
 			}
 		}
-		return -2;
+		return -1;
 	}
+	
+	public String myposdesc() {
+		int p = mypos();
+		boolean bb = hand.myseat.bigblind;
+		boolean sb = hand.myseat.smallblind;
+		boolean utg = false;
+		// utg is first to act after posts
+		Action[] acts = hand.streets[0];
+		for (int n = 0; n < acts.length; n++) {
+			Action act = acts[n];
+			if (!act.type.equals(Action.POST_TYPE)) {
+				utg = act.seat == hand.myseat;
+				break;
+			}
+		}
+		return p + (bb ? " (bb)" : "") + (sb ? " (sb)" : "") + (utg ? " (utg)" : "");
+	}
+	
+	public int numtoflop() {
+		// a ch, b bet, c call, a call
+		if (hand.streets.length >= 2) {
+			int a = 0;
+			Action[] acts = hand.streets[1];
+			for (int n = 0; n < acts.length; n++) {
+				Action act = acts[n];
+				// seat bit mask
+				int m = 1 << act.seat.num;
+				if ((a & m) != 0) {
+					// someone's acted twice
+					return n;
+				} else {
+					// mark seat as having acted
+					a |= m;
+				}
+			}
+			// everyone checked
+			return acts.length;
+		}
+		return 0;
+	}
+	
+	/**
+	 * was player last to act on flop?
+	 * return 0 = not in flop, 1 = last, -1 = not last
+	 */
+	public int lastonflop() {
+		// a ch, b bet, c call, a call
+		if (hand.streets.length >= 2) {
+			int a = 0;
+			boolean found = false;
+			Action[] acts = hand.streets[1];
+			for (int n = 0; n < acts.length; n++) {
+				Action act = acts[n];
+				if (act.seat == hand.myseat) {
+					found = true;
+				}
+				// seat bit mask
+				int m = 1 << act.seat.num;
+				if ((a & m) != 0) {
+					// someone's acted twice
+					// was prev me?
+					return found ? acts[n - 1].seat == hand.myseat ? 1 : -1 : 0;
+				} else {
+					// mark seat as having acted
+					a |= m;
+				}
+			}
+			// everyone checked
+			return found ? acts[acts.length - 1].seat == hand.myseat ? 1 : -1 : 0;
+		}
+		return 0;
+	}
+	
+	// TODO pos on flop
+	
+	// todo stack size
 	
 	public int myvalue() {
 		return hand.myseat.won - hand.myseat.pip;

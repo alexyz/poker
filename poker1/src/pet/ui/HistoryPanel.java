@@ -16,6 +16,15 @@ import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.util.*;
 
+/**
+ * TODO
+ * [path text field] follow
+ * [progress bar (hands, players)]
+ * [add file (no follow)]
+ * [rejected files]
+ * dnd
+ * 
+ */
 public class HistoryPanel extends JPanel implements FollowListener {
 	
 	public static FollowThread followThread;
