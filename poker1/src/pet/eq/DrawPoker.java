@@ -14,7 +14,7 @@ public class DrawPoker extends Poker {
 
 	/**
 	 * Calculate draw equity using random remaining cards.
-	 * (Exact equity is too hard with more than 2 blank cards).
+	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
 	public HandEq[] equity(String[][] hands) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(hands));

@@ -9,14 +9,9 @@ import pet.hp.HandUtil;
  */
 public class PokerUtil {
 	
-	public static String[] cardsString(String[][] cards) {
-		String[] ret = new String[cards.length];
-		for (int n = 0; n < cards.length; n++) {
-			ret[n] = cardsString(cards[n]);
-		}
-		return ret;
-	}
-	
+	/**
+	 * convert hand to unicode symbols
+	 */
 	public static String cardsString(String[] cards) {
 		if (cards != null) {
 			StringBuilder sb = new StringBuilder(cards.length * 2);
@@ -34,13 +29,17 @@ public class PokerUtil {
 	}
 
 	/**
-	 * return integer value of cards (must be sorted)
+	 * return integer value of cards (must be sorted, and no longer than 5)
 	 */
 	public static int cardsValue(String[] cards) {
 		int v = 0;
 		for (String card : cards) {
-			v *= 60;
-			v += Poker.faceValue(card) * 4 + suitValue(card);
+			v *= 16;
+			v += Poker.faceValue(card);
+		}
+		for (String card : cards) {
+			v *= 4;
+			v += suitValue(card);
 		}
 		return v;
 	}
@@ -65,6 +64,7 @@ public class PokerUtil {
 	 */
 	public static Color suitColour (char s) {
 		// switch instead of map due to primitive type
+		// TODO could just use "schd".indexOf(suit)
 		switch (s) {
 		case Poker.S_SUIT: return Color.black;
 		case Poker.C_SUIT: return Color.green;

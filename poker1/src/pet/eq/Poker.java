@@ -41,6 +41,9 @@ public abstract class Poker {
 	private final String[] hand = new String[5];
 	public boolean debug;
 	
+	/**
+	 * calculate equity for board and hands - implemented by subclass
+	 */
 	public abstract HandEq[] equity(String[] board, String[][] holes);
 
 	protected void println(String s) {
@@ -49,6 +52,9 @@ public abstract class Poker {
 		}
 	}
 
+	/**
+	 * does the 5 card hand qualify for low
+	 */
 	private static boolean isLow(String[] hand) {
 		for (int n = 0; n < hand.length; n++) {
 			if (faceValue(hand[n], false) > 8) {
@@ -58,6 +64,9 @@ public abstract class Poker {
 		return true;
 	}
 
+	/**
+	 * get low value of hand... FIXME untested
+	 */
 	public int lowValue(String[] hand) {
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
@@ -106,6 +115,9 @@ public abstract class Poker {
 		return isPair(hand, true);
 	}
 
+	/**
+	 * return flush rank or zero. requires sorted hand
+	 */
 	private static int isFlush(String[] hand) {
 		char s = suit(hand[0]);
 		for (int n = 1; n < 5; n++) {
@@ -117,6 +129,9 @@ public abstract class Poker {
 		return FL_RANK | (faceValue(hand[0]) << 16) + (faceValue(hand[1]) << 12) + (faceValue(hand[2]) << 8) + (faceValue(hand[3]) << 4) + faceValue(hand[4]);
 	}
 
+	/**
+	 * return straight rank or zero. requires sorted hand
+	 */
 	private static int isStraight(String[] hand) {
 		// requires sorted hand
 		// max str is AKJQT
@@ -240,17 +255,17 @@ public abstract class Poker {
 		char c4 = valueFace(value >> 12);
 		char c5 = valueFace(value >> 16);
 		switch (value & 0xf00000) {
-		case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " high";
-		case SF_RANK: return "Straight Flush " + c1;
-		case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
-		case FH_RANK: return "Full House " + c2 + " full of " + c1;
-		case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
-		case ST_RANK: return "Straight - " + c1 + " high";
-		case TK_RANK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
-		case TP_RANK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;
-		case P_RANK: return "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
-		case H_RANK: return c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
-		default: return "Unknown";
+			case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
+			case SF_RANK: return "Straight Flush " + c1;
+			case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
+			case FH_RANK: return "Full House " + c2 + " full of " + c1;
+			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
+			case ST_RANK: return "Straight - " + c1 + " high";
+			case TK_RANK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
+			case TP_RANK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;
+			case P_RANK: return "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
+			case H_RANK: return c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
+			default: return "Unknown";
 		}
 	}
 

@@ -4,6 +4,10 @@ import java.util.*;
 
 import pet.hp.*;
 
+/**
+ * Provides extra information about a hand suitable for displaying in table,
+ * such as position, number to flop, etc
+ */
 public class HandInfo {
 	
 	public static List<HandInfo> getHandInfos(List<Hand> hands) {
@@ -20,23 +24,26 @@ public class HandInfo {
 	public Seat winner;
 	public int wonOn;
 	
-	// "Winner", "WonOn", "Value"
-	// position, stacks, spr, n-flop/draw,
 	public HandInfo(Hand hand) {
 		this.hand = hand;
 		this.hole = new Hole(hand.myseat.hole);
 	}
 	
+	/**
+	 * Calculate position of player where 0=button
+	 */
 	public int mypos() {
 		// but, but+1, ... btn+5 (utg) (sb) (bb)
-		int b = hand.button;
 		Seat[] seats = hand.seats;
 		int p;
+		// first find button seat (note the actual button may not be at any live seat)
 		for (int s = 0; s < seats.length; s++) {
-			if (seats[s].num >= b) {
+			if (seats[s].num >= hand.button) {
+				// now find how far we are from it
 				for (p = 0; p < seats.length; p++) {
 					if (seats[(s + p) % seats.length] == hand.myseat) {
 						// p is distance between button and me clockwise
+						// so invert it
 						return p == 0 ? 0 : seats.length - p;
 					}
 				}
@@ -45,6 +52,9 @@ public class HandInfo {
 		return -1;
 	}
 	
+	/**
+	 * Position and extra relative information
+	 */
 	public String myposdesc() {
 		int p = mypos();
 		boolean bb = hand.myseat.bigblind;
@@ -54,7 +64,7 @@ public class HandInfo {
 		Action[] acts = hand.streets[0];
 		for (int n = 0; n < acts.length; n++) {
 			Action act = acts[n];
-			if (!act.type.equals(Action.POST_TYPE)) {
+			if (act.type != Action.POST_TYPE) {
 				utg = act.seat == hand.myseat;
 				break;
 			}
@@ -62,6 +72,9 @@ public class HandInfo {
 		return p + (bb ? " (bb)" : "") + (sb ? " (sb)" : "") + (utg ? " (utg)" : "");
 	}
 	
+	/**
+	 * number of people who saw flop (second street)
+	 */
 	public int numtoflop() {
 		// a ch, b bet, c call, a call
 		if (hand.streets.length >= 2) {
@@ -117,10 +130,9 @@ public class HandInfo {
 		return 0;
 	}
 	
-	// TODO pos on flop
-	
-	// todo stack size
-	
+	/**
+	 * amount player won in this hand
+	 */
 	public int myvalue() {
 		return hand.myseat.won - hand.myseat.pip;
 	}

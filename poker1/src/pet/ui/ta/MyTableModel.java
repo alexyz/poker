@@ -77,6 +77,7 @@ public class MyTableModel<T> extends AbstractTableModel {
 			if (population != null) {
 				sb.append("<br><i>").append(col.getPopValue(population)).append(" (population)</i>");
 			}
+			sb.append("<br>(").append(r).append(",").append(c).append(")");
 			sb.append("</html>");
 			return sb.toString();
 		}

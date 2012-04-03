@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * represents a single hand at a table
+ * represents a single hand at a table.
+ * No analysis - see HandUtil, HandInfo and HandState
  */
 public class Hand implements Serializable {
 	private static final long serialVersionUID = 1;

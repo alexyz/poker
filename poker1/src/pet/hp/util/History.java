@@ -129,7 +129,7 @@ public class History implements FollowListener {
 				popgi.addAction(s, a, hasChecked);
 				//System.out.println("str " + s + " act " + a + " checked " + hasChecked);
 				
-				if (a.type.equals(Action.CHECK_TYPE)) {
+				if (a.type == Action.CHECK_TYPE) {
 					checked |= seatmask;
 				}
 			}

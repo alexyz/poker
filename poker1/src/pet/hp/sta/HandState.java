@@ -1,26 +1,26 @@
-package pet.ui.rep;
+package pet.hp.sta;
 
 /**
  * represents current state of hand
  */
-class HandState implements Cloneable {
+public class HandState implements Cloneable {
 	public HandState(int max) {
 		seats = new SeatState[max];
 	}
-	/** seats in hand, elements can be null */
-	SeatState[] seats;
-	/** final community cards */
-	String[] board;
+	/** seats in hand (where seat 1 is index 0), elements can be null */
+	public SeatState[] seats;
+	/** community cards */
+	public String[] board;
 	/** current pot */
-	int pot;
+	public int pot;
 	/** seat index of button */
-	int button;
+	public int button;
 	/** seat index of current action, -1 if no action */
-	int actionSeat;
+	public int actionSeat;
 	/** current action */
-	String action;
+	public String action;
 	/** information */
-	String note;
+	public String note;
 	@Override
 	public HandState clone() {
 		try {

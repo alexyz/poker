@@ -3,6 +3,7 @@ package pet.ui;
 import java.awt.*;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 
 public class ConsolePanel extends JPanel {
 	
@@ -44,6 +45,13 @@ public class ConsolePanel extends JPanel {
 			@Override
 			public void run() {
 				textArea.append(s);
+				if (textArea.getDocument().getLength() > 50000) {
+					try {
+						textArea.getDocument().remove(0, 25000);
+					} catch (BadLocationException e) {
+						e.printStackTrace();
+					}
+				}
 				textArea.setCaretPosition(textArea.getDocument().getLength());
 			}
 		});

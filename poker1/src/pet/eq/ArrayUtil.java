@@ -11,15 +11,16 @@ public class ArrayUtil {
 	 * Sort the hand in place (Arrays.sort copies array).
 	 */
 	public static <T> void sort(T[] a, Comparator<T> cmp) {
+		// optimised bubble sort...
 		int l = a.length;
 		while (l > 0) {
 			int newl = 0;
 			for (int n = 1; n < l; n++) {
 				T x = a[n - 1];
 				T y = a[n];
-				if (x == null || y == null) {
-					throw new RuntimeException("can't sort " + Arrays.asList(a));
-				}
+				//if (x == null || y == null) {
+					//throw new RuntimeException("can't sort " + Arrays.asList(a));
+				//}
 				if (cmp.compare(x, y) > 0) {
 					newl = n;
 					a[n - 1] = y;
@@ -65,7 +66,6 @@ public class ArrayUtil {
 		}
 		return s.toArray(new String[s.size()]);
 	}
-
 
 	private static <T> void remove1(Set<T> s, T[] a) {
 		if (a != null) {

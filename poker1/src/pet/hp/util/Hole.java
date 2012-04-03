@@ -18,7 +18,6 @@ public class Hole implements Comparable<Hole> {
 	}
 	@Override
 	public int compareTo(Hole h) {
-		System.out.println("comparing hole");
 		return intValue - h.intValue;
 	}
 	@Override

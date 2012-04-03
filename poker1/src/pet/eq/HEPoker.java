@@ -11,6 +11,9 @@ public class HEPoker extends Poker {
 
 	private final boolean omaha;
 
+	/**
+	 * create equity calculator for given game type
+	 */
 	public HEPoker(boolean omaha) {
 		this.omaha = omaha;
 	}
@@ -135,6 +138,5 @@ public class HEPoker extends Poker {
 		}
 		return hv;
 	}
-
 
 }

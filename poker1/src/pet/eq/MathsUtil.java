@@ -56,7 +56,7 @@ public class MathsUtil {
 	
 	/**
 	 * Combinatorial number system.
-	 * Get the k combination at position p and write from from into to at offset.
+	 * Get the k combination at position p and write from 'from' into 'to' at offset.
 	 */
 	static void kcomb(final int k, int p, final Object[] from, Object[] to, final int off) {
 		// for each digit (starting at the last)

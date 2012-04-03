@@ -24,8 +24,10 @@ public class PlayerGameInfo {
 	
 	// not public
 	
-	/** action map: int[] { count, amount } */
-	final Map<String,int[]> acts = new TreeMap<String,int[]>();
+	/** number of times each action performed */
+	final int[] actionCount = new int[Action.TYPES];
+	/** total amount of each action performed */
+	final int[] actionAmount = new int[Action.TYPES];
 	
 	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
@@ -54,40 +56,31 @@ public class PlayerGameInfo {
 	 * Add action on street
 	 */
 	void addAction(int street, Action action, boolean hasChecked) {
-		int[] typeCount = getAct(action.type);
-		typeCount[0]++;
-		typeCount[1] += action.amount;
+		actionCount[action.type]++;
+		actionAmount[action.type] += action.amount;
 		
-		if (action.type.equals(Action.FOLD_TYPE)) {
+		if (action.type == Action.FOLD_TYPE) {
 			foldedon[street]++;
 		}
 		
 		if (hasChecked) {
-			if (action.type.equals(Action.FOLD_TYPE)) {
+			if (action.type == Action.FOLD_TYPE) {
 				checkfold++;
-			} else if (action.type.equals(Action.CALL_TYPE)) {
+			} else if (action.type == Action.CALL_TYPE) {
 				checkcall++;
-			} else if (action.type.equals(Action.RAISE_TYPE)) {
+			} else if (action.type == Action.RAISE_TYPE) {
 				checkraise++;
 			}
 		}
 	}
 	
-	private int[] getAct(String action) {
-		int[] c = acts.get(action);
-		if (c == null) {
-			acts.put(action, c = new int[2]);
-		}
-		return c;
-	}
-	
 	public String cx() {
-		int checks = getAct(Action.CHECK_TYPE)[0];
+		int checks = actionCount[Action.CHECK_TYPE];
 		return String.format("%d-%d-%d-%d", checks, checkfold, checkcall, checkraise);
 	}
 	
 	public String cxr() {
-		float checks = getAct(Action.CHECK_TYPE)[0];
+		int checks = actionCount[Action.CHECK_TYPE];
 		if (checks > 0) {
 			float f = (checkfold * 100f) / checks;
 			float c = (checkcall * 100f) / checks;
@@ -98,42 +91,48 @@ public class PlayerGameInfo {
 		}
 	}
 	
-	public int getActionSum(String actiontype) {
-		int[] c = getAct(actiontype);
-		return c[1];
+	public int getActionSum(byte actiontype) {
+		return actionAmount[actiontype];
 	}
 	
 	// player c/r freq
 	// play cbet freq
 	// player agr fac
 	
-	/** aggression factor count or volume */
-	public float af(boolean vol) {
+	/** aggression factor count */
+	public float afcount() {
+		return af(actionCount);
+	}
+	
+	/** aggression factor volume */
+	public float afam() {
+		return af(actionAmount);
+	}
+	
+	private float af(int[] a) {
 		// amount bet+raise / call
-		int[] b = getAct(Action.BET_TYPE);
-		int[] c = getAct(Action.CALL_TYPE);
-		int[] r = getAct(Action.RAISE_TYPE);
-		int[] ch = getAct(Action.CHECK_TYPE);
-		int i = vol ? 1: 0;
-		return (b[i] + r[i] + 0f) / (c[i] + ch[i]);
+		int b = a[Action.BET_TYPE];
+		int c = a[Action.CALL_TYPE];
+		int r = a[Action.RAISE_TYPE];
+		int ch = a[Action.CHECK_TYPE];
+		return (b + r + 0f) / (c + ch);
 	}
 	
 	@Override
 	public String toString() {
 		return "PlayerGameInfo[game=" + game + " hands=" + hands + "]";
 	}
+	
 	public String toLongString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("Hands:  %d  Won:  %d\n", hands, handswon));
 		sb.append(String.format("Amount won:  %d  Lost:  %d\n", won, pip));
 		sb.append("Actions:\n");
-		for (Map.Entry<String,int[]> e : acts.entrySet()) {
-			int[] c = e.getValue();
-			if (c[0] > 0) {
-				String act = e.getKey();
-				sb.append("  " + act + " times: " + c[0]);
-				if (c[1] > 0) {
-					sb.append(" amount: " + c[1]);
+		for (int n = 0; n < actionCount.length; n++) {
+			if (actionCount[n] > 0) {
+				sb.append("  " + Action.TYPENAME[n] + " times: " + actionCount[n]);
+				if (actionAmount[n] > 0) {
+					sb.append(" amount: " + actionAmount[n]);
 				}
 				sb.append("\n");
 			}

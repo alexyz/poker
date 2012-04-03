@@ -1,11 +1,11 @@
-package pet.ui.rep;
+package pet.hp.sta;
 
 import java.util.*;
 
 import pet.eq.*;
 import pet.hp.*;
 
-class HandStateUtil {
+public class HandStateUtil {
 	/**
 	 * convert hand into list of hand states
 	 */
@@ -77,7 +77,7 @@ class HandStateUtil {
 			// player actions for street
 			for (Action act : hand.streets[s]) {
 				hs = hs.clone();
-				hs.action = act.type;
+				hs.action = Action.TYPENAME[act.type];
 				if (act.amount > 0) {
 					hs.action += " " + HandUtil.formatMoney(hand.game.currency, act.amount);
 				}
@@ -88,12 +88,12 @@ class HandStateUtil {
 
 				SeatState ss = hs.seats[act.seat.num - 1];
 				
-				if (act.type.equals(Action.FOLD_TYPE)) {
+				if (act.type == Action.FOLD_TYPE) {
 					ss.folded = true;
 					
 				} else if (act.amount > 0) {
 					ss.amount += act.amount;
-					if (act.type.equals(Action.BET_TYPE) || act.type.equals(Action.RAISE_TYPE)) {
+					if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
 						int potsz = (hs.pot + trail + 2 * lastbet);
 						ss.bpr = potsz != 0 ? (ss.amount * 100f) / potsz : 0;
 					} else {
@@ -122,6 +122,8 @@ class HandStateUtil {
 			SeatState ss = hs.seats[seat.num - 1];
 			ss.amount = seat.won;
 			ss.won = seat.won > 0;
+			ss.spr = 0;
+			ss.bpr = 0;
 		}
 		states.add(hs);
 		

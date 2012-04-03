@@ -76,13 +76,13 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "AF-Count", "Times bet+raise/check+call") {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
-				return o.af(false);
+				return o.afcount();
 			}
 		});
 		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "AF-Vol", "Amount bet+raise/call") {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
-				return o.af(true);
+				return o.afam();
 			}
 		});
 		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "Ch/F-C-R", "Check, Check-fold, check-call, check-raise count") {

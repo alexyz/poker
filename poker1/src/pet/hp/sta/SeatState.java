@@ -1,4 +1,4 @@
-package pet.ui.rep;
+package pet.hp.sta;
 
 import pet.eq.HandEq;
 import pet.hp.Seat;
@@ -6,16 +6,25 @@ import pet.hp.Seat;
 /**
  * represents current state of seat
  */
-class SeatState implements Cloneable {
-	final Seat seat;
-	int stack;
-	float spr;
-	int amount;
-	float bpr;
-	String[] hole;
-	boolean folded;
-	boolean won;
-	HandEq eq;
+public class SeatState implements Cloneable {
+	/** seat of seat */
+	public final Seat seat;
+	/** current stack */
+	public int stack;
+	/** stack to pot ratio */
+	public float spr;
+	/** amount pushed toward pot for this round */
+	public int amount;
+	/** bet to pot ratio as percent (100 is pot bet) */
+	public float bpr;
+	/** current hole cards */
+	public String[] hole;
+	/** has folded yet */
+	public boolean folded;
+	/** has won */
+	public boolean won;
+	/** current hand equity, if any */
+	public HandEq eq;
 	
 	public SeatState(Seat seat) {
 		this.seat = seat;

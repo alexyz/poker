@@ -3,6 +3,9 @@ package pet.hp;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * A player sitting at a table (never sitting out) 
+ */
 public class Seat implements Serializable {
 	private static final long serialVersionUID = 1;
 	/** seat number */

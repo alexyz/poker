@@ -7,7 +7,8 @@ public class RandomUtil {
 	private static final Random random = new Random();
 	
 	/**
-	 * pick a value from a (max length 64) that hasn't been picked before according to picked[0] and update picked[0]
+	 * pick a value from a (max length 64) that hasn't been picked before
+	 * according to picked[0] and update picked[0]
 	 */
 	static String pick(String[] a, long[] picked) {
 		int i;

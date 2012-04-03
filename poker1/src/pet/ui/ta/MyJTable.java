@@ -1,14 +1,27 @@
 package pet.ui.ta;
 
-import java.awt.Component;
+import java.awt.event.MouseEvent;
 
 import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
 
+// TODO type param should really be table model, not record
 public class MyJTable<T> extends JTable {
 	public MyJTable(MyTableModel<T> model) {
 		super(model);
 	}
+	@Override
+	public String getToolTipText(MouseEvent e) {
+		int r = rowAtPoint(e.getPoint());
+		int c = columnAtPoint(e.getPoint());
+		if (r >= 0 && c >= 0) {
+			// calc tooltip on demand
+			int r2 = convertRowIndexToModel(r);
+			return getModel().getToolTip(r2, c);
+		} else {
+			return null;
+		}
+	}
+	/*
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int r, int c) {
 		int r2 = convertRowIndexToModel(r);
@@ -20,6 +33,7 @@ public class MyJTable<T> extends JTable {
 		}
 		return comp;
 	}
+	*/
 	@Override
 	public MyTableModel<T> getModel() {
 		return (MyTableModel<T>) super.getModel();

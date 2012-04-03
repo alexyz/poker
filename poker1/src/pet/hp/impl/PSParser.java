@@ -16,9 +16,26 @@ public class PSParser extends Parser implements Serializable {
 
 	private static final long serialVersionUID = 1;
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
+	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
+
+	static {
+		// map stars terms to action constants
+		actionMap.put("checks", Action.CHECK_TYPE);
+		actionMap.put("folds", Action.FOLD_TYPE);
+		actionMap.put("mucks", Action.MUCK_TYPE);
+		actionMap.put("doesn't", Action.DOESNTSHOW_TYPE);
+		actionMap.put("calls", Action.CALL_TYPE);
+		actionMap.put("bets", Action.BET_TYPE);
+		actionMap.put("calls", Action.CALL_TYPE);
+		actionMap.put("raises", Action.RAISE_TYPE);
+		actionMap.put("posts", Action.POST_TYPE);
+		actionMap.put("shows", Action.SHOW_TYPE);
+		actionMap.put("discards", Action.DRAW_TYPE);
+		actionMap.put("stands", Action.STANDPAT_TYPE);
+	}
 
 	// persisted fields
-	
+
 	/** string cache to avoid multiple instances of same string */
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** list of completed hands */
@@ -26,7 +43,7 @@ public class PSParser extends Parser implements Serializable {
 	private final Map<String,Game> games = new TreeMap<String,Game>();
 
 	// transient fields - these probably shouldn't be final
-	
+
 	/** map of player name to seat for current hand */
 	// TODO see if hashmap or array is faster
 	private transient final Map<String,Seat> seatsMap = new TreeMap<String,Seat>();
@@ -47,12 +64,7 @@ public class PSParser extends Parser implements Serializable {
 	public transient boolean debug;
 
 	public PSParser() {
-		// cache these constants
-		cache(Action.BET_TYPE);
-		cache(Action.CALL_TYPE);
-		cache(Action.CHECK_TYPE);
-		cache(Action.FOLD_TYPE);
-		cache(Action.RAISE_TYPE);
+		//
 	}
 
 	private void println(String s) {
@@ -79,7 +91,7 @@ public class PSParser extends Parser implements Serializable {
 		showdown = false;
 		summaryPhase = false;
 		//for (Seat seat : seatsMap.values()) {
-			//println("seat " + seat + " pip " + seat.pip + " show=" + seat.showdown + " hole " + Arrays.asList(seat.hole));
+		//println("seat " + seat + " pip " + seat.pip + " show=" + seat.showdown + " hole " + Arrays.asList(seat.hole));
 		//}
 		seatsMap.clear();
 		//seatsList.clear();
@@ -90,7 +102,7 @@ public class PSParser extends Parser implements Serializable {
 		hand = null;
 		debuglines.clear();
 	}
-	
+
 	@Override
 	public List<String> getDebug() {
 		return debuglines;
@@ -248,7 +260,7 @@ public class PSParser extends Parser implements Serializable {
 		}
 		int a = line.indexOf("Rake");
 		hand.rake = parseMoney(line, a + 5);
-		
+
 		// FIXME remove these
 		int won = 0;
 		int lost = 0;
@@ -271,7 +283,7 @@ public class PSParser extends Parser implements Serializable {
 		if ((asum - hand.uncall) != lost) {
 			throw new RuntimeException("actsum " + (asum - hand.uncall) + " not equal to lost " + lost);
 		}
-		
+
 		println("total " + hand.pot + " rake " + hand.rake);
 	}
 
@@ -297,7 +309,7 @@ public class PSParser extends Parser implements Serializable {
 		// Dealt to tawvx [Ts Th] [Kc 5d Qh]
 		// if discard all
 		// Dealt to tawvx [5c 7h 3d 4d Jh]
-		
+
 		int handStart = line.indexOf("[");
 		String name = line.substring(9, handStart - 1);
 		Seat myseat = seatsMap.get(name);
@@ -314,13 +326,13 @@ public class PSParser extends Parser implements Serializable {
 		if (b > 0) {
 			h = ArrayUtil.join(h, parseHand(line, b));
 		}
-		
+
 		if (hand.myhole == null) {
 			// first hand
 			println("dealt " + Arrays.asList(h));
 			hand.myhole = h;
 		}
-		
+
 		// last hand
 		if (myseat.hole != null) {
 			println("dealt new hand " + Arrays.asList(h));
@@ -401,7 +413,7 @@ public class PSParser extends Parser implements Serializable {
 		hand.id = parseLong(line, i1 + 1);
 
 		hand.gamename = cache(line.substring(ns, i4 - 1));
-		
+
 		String datestr = line.substring(ds);
 		try {
 			// 2011/12/31 14:45:08 ET
@@ -412,10 +424,10 @@ public class PSParser extends Parser implements Serializable {
 		}
 
 		this.hand = hand;
-		
+
 		// create first street
 		streets.add(new ArrayList<Action>());
-		
+
 		println("hand " + hand.id);
 	}
 
@@ -506,120 +518,134 @@ public class PSParser extends Parser implements Serializable {
 
 		int actStart = nextToken(line, nameEnd);
 		int actEnd = endToken(line, actStart);
-		String act = cache(line.substring(actStart, actEnd));
 		Action action = new Action();
 		action.seat = seat;
-		action.type = act;
+		action.type = actionMap.get(line.substring(actStart, actEnd));
 		boolean draw = false;
 
-		// TODO action constants
-		if (act.equals("checks")) {
-			// NSavov: checks 
+		switch (action.type) {
+			case Action.CHECK_TYPE:
+			case Action.MUCK_TYPE:
+			case Action.DOESNTSHOW_TYPE:
+				// NSavov: checks 
+				// scotty912: doesn't show hand
+				break;
 
-		} else if (act.equals("folds")) {
-			// azacel77: folds
-			// Ninjajundiai: folds [5d 5s]
-			int handStart = line.indexOf("[");
-			if (handStart > 0) {
+			case Action.FOLD_TYPE: {
+				// azacel77: folds
+				// Ninjajundiai: folds [5d 5s]
+				int handStart = line.indexOf("[");
+				if (handStart > 0) {
+					String[] hand = parseHand(line, handStart);
+					checkNewHand(seat.hole, hand);
+					seat.hole = hand;
+				}
+				break;
+			}
+
+			case Action.CALL_TYPE:
+			case Action.BET_TYPE: {
+				// Bumerang16: calls $0.01
+				int amountStart = nextToken(line, actEnd);
+				int amount = parseMoney(line, amountStart);
+				action.amount = amount;
+				seatPip[seat.num] += amount;
+				break;
+			}
+
+			case Action.RAISE_TYPE: {
+				// bluff.tb: raises $0.05 to $0.07
+				int amountStart = line.indexOf("to ", actEnd) + 3;
+				// subtract what seat has already put in this round
+				int amount = parseMoney(line, amountStart) - seatPip[seat.num];
+				action.amount = amount;
+				seatPip[seat.num] += amount;
+				break;
+			}
+
+			case Action.POST_TYPE: {
+				// Bumerang16: posts small blind $0.01
+				// pisti361: posts small & big blinds $0.03
+				// Yury.Nik: posts big blind 50 and is all-in
+				// small and big blinds always posted first due to position
+				// though very occasionally the big blind may not be posted (?)
+
+				int blindStart = line.indexOf("blind", actEnd);
+				int amountStart = nextToken(line, blindStart);
+				int amount = parseMoney(line, amountStart);
+				if (line.indexOf("small blind", actEnd) > 0) {
+					if (hand.sb == 0) {
+						println("small blind " + amount);
+						hand.sb = amount;
+
+					} else {
+						// dead blind
+						println("dead small blind " + amount);
+						hand.db += amount;
+						pot += amount;
+						amount = 0;
+					}
+					seat.smallblind = true;
+
+				} else if (line.indexOf("small & big blinds", actEnd) > 0) {
+					// dead small blind doesn't count towards pip (but does count towards pot)
+					if (hand.sb == 0) {
+						throw new RuntimeException("post sb+bb without sb");
+					}
+					println("dead small and big blind " + amount);
+					hand.db += hand.sb;
+					pot += hand.sb;
+					amount -= hand.sb;
+					seat.bigblind = true;
+					seat.smallblind = true;
+
+				} else if (line.indexOf("big blind", actEnd) > 0) {
+					println("big blind " + amount);
+					hand.bb = amount;
+					seat.bigblind = true;
+
+				} else {
+					throw new RuntimeException("unknown post");
+				}
+
+				seatPip[seat.num] += amount;
+				action.amount = amount;
+				break;
+			}
+
+			case Action.SHOW_TYPE: {
+				// bluff.tb: shows [Jc 8h Js Ad] (two pair, Aces and Kings)
+				//showdown = true;
+				int handStart = nextToken(line, actEnd);
 				String[] hand = parseHand(line, handStart);
 				checkNewHand(seat.hole, hand);
 				seat.hole = hand;
+				break;
 			}
 
-		} else if (act.equals("mucks") || act.equals("doesn't")) {
-			// scotty912: doesn't show hand 
-			//showdown = true;
-
-		} else if (act.equals("calls") || act.equals("bets")) {
-			// Bumerang16: calls $0.01
-			int amountStart = nextToken(line, actEnd);
-			int amount = parseMoney(line, amountStart);
-			action.amount = amount;
-			seatPip[seat.num] += amount;
-
-		} else if (act.equals("raises")) {
-			// bluff.tb: raises $0.05 to $0.07
-			int amountStart = line.indexOf("to ", actEnd) + 3;
-			// subtract what seat has already put in this round
-			int amount = parseMoney(line, amountStart) - seatPip[seat.num];
-			action.amount = amount;
-			seatPip[seat.num] += amount;
-
-		} else if (act.equals("posts")) {
-			// Bumerang16: posts small blind $0.01
-			// pisti361: posts small & big blinds $0.03
-			// Yury.Nik: posts big blind 50 and is all-in
-			// small and big blinds always posted first due to position
-			// though very occasionally the big blind may not be posted (?)
-			
-			int blindStart = line.indexOf("blind", actEnd);
-			int amountStart = nextToken(line, blindStart);
-			int amount = parseMoney(line, amountStart);
-			if (line.indexOf("small blind", actEnd) > 0) {
-				if (hand.sb == 0) {
-					println("small blind " + amount);
-					hand.sb = amount;
-					
-				} else {
-					// dead blind
-					println("dead small blind " + amount);
-					hand.db += amount;
-					pot += amount;
-					amount = 0;
+			case Action.DRAW_TYPE: {
+				draw = true;
+				// tawvx: discards 1 card [Ah]
+				// joven2010: discards 3 cards
+				if (seat.discards > 0) {
+					throw new RuntimeException("already discarded " + seat.discards);
 				}
-				seat.smallblind = true;
-				
-			} else if (line.indexOf("small & big blinds", actEnd) > 0) {
-				// dead small blind doesn't count towards pip (but does count towards pot)
-				if (hand.sb == 0) {
-					throw new RuntimeException("post sb+bb without sb");
-				}
-				println("dead small and big blind " + amount);
-				hand.db += hand.sb;
-				pot += hand.sb;
-				amount -= hand.sb;
-				seat.bigblind = true;
-				seat.smallblind = true;
-				
-			} else if (line.indexOf("big blind", actEnd) > 0) {
-				println("big blind " + amount);
-				hand.bb = amount;
-				seat.bigblind = true;
-				
-			} else {
-				throw new RuntimeException("unknown post");
+				int discardsStart = nextToken(line, actEnd);
+				seat.discards = (byte) parseInt(line, discardsStart);
+				break;
 			}
-			
-			seatPip[seat.num] += amount;
-			action.amount = amount;
 
-		} else if (act.equals("shows")) {
-			// bluff.tb: shows [Jc 8h Js Ad] (two pair, Aces and Kings)
-			//showdown = true;
-			int handStart = nextToken(line, actEnd);
-			String[] hand = parseHand(line, handStart);
-			checkNewHand(seat.hole, hand);
-			seat.hole = hand;
-
-		} else if (act.equals("discards")) {
-			draw = true;
-			// tawvx: discards 1 card [Ah]
-			// joven2010: discards 3 cards
-			if (seat.discards > 0) {
-				throw new RuntimeException("already discarded " + seat.discards);
+			case Action.STANDPAT_TYPE: {
+				// stands pat
+				draw = true;
+				println("stands");
+				break;
 			}
-			int discardsStart = nextToken(line, actEnd);
-			seat.discards = (byte) parseInt(line, discardsStart);
 
-		} else if (act.equals("stands")) {
-			// stands pat
-			draw = true;
-			println("stands");
-
-		} else {
-			throw new RuntimeException("unknown action: " + action.type);
+			default:
+				throw new RuntimeException("unknown action: " + action.type);
 		}
-		
+
 		if (showdown) {
 			// action after show down phase
 			seat.showdown = true;
@@ -631,14 +657,14 @@ public class PSParser extends Parser implements Serializable {
 		}
 
 		println("action " + action);
-			
+
 		if (draw && streets.size() == 1) {
 			// there is no draw phase, so pip and fake a new street
 			println("new street for draw");
 			pip();
 			streets.add(new ArrayList<Action>());
 		}
-		
+
 		List<Action> street = streets.get(streets.size() - 1);
 		street.add(action);
 	}
@@ -802,7 +828,7 @@ public class PSParser extends Parser implements Serializable {
 			}
 		}
 	}
-	
+
 	private Game getGame(String gamename, int max) {
 		Game game = games.get(gamename);
 		if (game == null) {
