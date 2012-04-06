@@ -36,7 +36,8 @@ public class PokerFrame extends JFrame {
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
-
+	public final HUDPanel hudPanel = new HUDPanel();
+	
 	public PokerFrame() {
 		super("Poker Equity Tool");
 		
@@ -48,7 +49,7 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Bankroll", bankrollPanel);
 		tabs.addTab("Session", new HandsPanel());
 		tabs.addTab("Replay", replayPanel);
-		tabs.addTab("HUD", new HUDPanel());
+		tabs.addTab("HUD", hudPanel);
 		tabs.addTab("Console", new ConsolePanel());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
@@ -72,7 +73,7 @@ public class PokerFrame extends JFrame {
 	}
 	
 	public void displaySession() {
-		
+		System.out.println("todo");
 	}
 
 }

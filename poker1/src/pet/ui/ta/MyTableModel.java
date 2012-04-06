@@ -1,5 +1,7 @@
 package pet.ui.ta;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.*;
 
 import javax.swing.table.AbstractTableModel;
@@ -80,6 +82,26 @@ public class MyTableModel<T> extends AbstractTableModel {
 			sb.append("<br>(").append(r).append(",").append(c).append(")");
 			sb.append("</html>");
 			return sb.toString();
+		}
+		return null;
+	}
+	
+	public Color getColour(int r, int c) {
+		if (r < rows.size()) {
+			T row = rows.get(r);
+			//System.out.println("row is " + row);
+			MyTableModelColumn<T, ?> col = cols.get(c);
+			return col.getColour(row);
+		}
+		return null;
+	}
+	
+	public Font getFont(int r, int c) {
+		if (r < rows.size()) {
+			T row = rows.get(r);
+			//System.out.println("row is " + row);
+			MyTableModelColumn<T, ?> col = cols.get(c);
+			return col.getFont(row);
 		}
 		return null;
 	}

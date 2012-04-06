@@ -12,10 +12,10 @@ import pet.hp.state.*;
  */
 public class ReplayPanel extends JPanel {
 
-	TableComponent tableComp = new TableComponent();
-	JComboBox stateCombo = new JComboBox();
-	JButton prevButton = new JButton("<");
-	JButton nextButton = new JButton(">");
+	private final TableComponent tableComp = new TableComponent();
+	private final JComboBox stateCombo = new JComboBox();
+	private final JButton prevButton = new JButton("<");
+	private final JButton nextButton = new JButton(">");
 
 	public ReplayPanel() {
 		super(new BorderLayout());
@@ -54,7 +54,6 @@ public class ReplayPanel extends JPanel {
 		add(tablePanel, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.NORTH);
 	}
-
 
 	private void selectState(int off) {
 		int i = stateCombo.getSelectedIndex();

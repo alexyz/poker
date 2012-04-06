@@ -1,12 +1,13 @@
 package pet.hp.state;
 
+import pet.hp.Action;
+import pet.hp.Hand;
+
 /**
  * represents current state of hand
  */
 public class HandState implements Cloneable {
-	public HandState(int max) {
-		seats = new SeatState[max];
-	}
+	public final Hand hand;
 	/** seats in hand (where seat 1 is index 0), elements can be null */
 	public SeatState[] seats;
 	/** community cards */
@@ -18,9 +19,14 @@ public class HandState implements Cloneable {
 	/** seat index of current action, -1 if no action */
 	public int actionSeat;
 	/** current action */
-	public String action;
+	public Action action;
 	/** information */
 	public String note;
+	public HandState(Hand hand) {
+		this.hand = hand;
+		this.seats = new SeatState[hand.game.max];
+	}
+
 	@Override
 	public HandState clone() {
 		try {

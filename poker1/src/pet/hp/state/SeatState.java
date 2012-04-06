@@ -21,7 +21,7 @@ public class SeatState implements Cloneable {
 	public String[] hole;
 	/** has folded yet */
 	public boolean folded;
-	/** has won */
+	/** has won - only true at end, unlike seat.won > 0 */
 	public boolean won;
 	/** current hand equity, if any */
 	public HandEq eq;

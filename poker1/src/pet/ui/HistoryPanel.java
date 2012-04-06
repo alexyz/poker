@@ -101,6 +101,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			ft.addFile(pathLabel.getText());
 			ft.addListener(this);
 			ft.addListener(PokerFrame.getInstance().getHistory());
+			ft.addListener(PokerFrame.getInstance().hudPanel);
 			// TODO add hud panel
 			ft.start();
 			followThread = ft;
@@ -113,6 +114,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		if (h.date.after(now)) {
 			System.out.println(h);
 			//HandInfo.printhand2(h);
+			
 		}
 	}
 	

@@ -13,7 +13,7 @@ public class HandStateUtil {
 		List<HandState> states = new Vector<HandState>();
 
 		// initial state (not displayed)
-		HandState hs = new HandState(hand.game.max);
+		HandState hs = new HandState(hand);
 		hs.pot = hand.db;
 		hs.button = hand.button - 1;
 		hs.actionSeat = -1;
@@ -77,13 +77,7 @@ public class HandStateUtil {
 			// player actions for street
 			for (Action act : hand.streets[s]) {
 				hs = hs.clone();
-				hs.action = Action.TYPENAME[act.type];
-				if (act.amount > 0) {
-					hs.action += " " + HandUtil.formatMoney(hand.game.currency, act.amount);
-				}
-				if (act.seat.discards > 0) {
-					hs.action += " " + act.seat.discards;
-				}
+				hs.action = act;
 				hs.actionSeat = act.seat.num - 1;
 
 				SeatState ss = hs.seats[act.seat.num - 1];

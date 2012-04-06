@@ -34,9 +34,10 @@ public class Action implements Serializable {
 	public int amount;
 	/** this action put the player all in */
 	public boolean allin;
+	
 	@Override
 	public String toString() {
-		String s = seat.name + " " + type;
+		String s = seat.name + " " + TYPENAME[type];
 		if (amount > 0) {
 			s += " " + amount;
 		}

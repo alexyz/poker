@@ -172,7 +172,7 @@ class TableComponent extends JComponent {
 					lines.add(String.format("SPR: %2.1f", ss.spr));
 				}
 				if (state.actionSeat == s || ss.won) {
-					lines.add(ss.won ? "wins" : String.valueOf(state.action));
+					lines.add(ss.won ? "wins" : String.valueOf(HandUtil.actionString(state.hand, state.action)));
 				}
 				
 				{

@@ -136,4 +136,22 @@ public class HandUtil {
 		throw new RuntimeException("unknown game type " + hand.game);
 	}
 
+	/**
+	 * Return string describing action (but not player)
+	 */
+	public static String actionString(Hand hand, Action action) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Action.TYPENAME[action.type]);
+		if (action.amount > 0) {
+			sb.append(" ").append(formatMoney(hand.game.currency, action.amount));
+		}
+		if (action.seat.discards > 0) {
+			sb.append(" discards ").append(action.seat.discards);
+		}
+		if (action.allin) {
+			sb.append(" all in");
+		}
+		return sb.toString();
+	}
+	
 }

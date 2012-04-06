@@ -27,9 +27,11 @@ public class HEPoker extends Poker {
 	 */
 	@Override
 	public HandEq[] equity(String[] board, String[][] holes) {
+		/*
 		for (String[] hand : holes) {
 			validateHand(hand, board, omaha);
 		}
+		*/
 		return board != null && board.length >= 3 ? exactEquity(board, holes) : sampleEquity(holes);
 	}
 
@@ -81,7 +83,7 @@ public class HEPoker extends Poker {
 		// hand values for a particular board
 		final int[] vals = new int[holes.length];
 		final long[] picked = new long[1];
-		final int sz = 10000;
+		final int sz = 1000;
 
 		for (int p = 0; p < sz; p++) {
 			picked[0] = 0;
