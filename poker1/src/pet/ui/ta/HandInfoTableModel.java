@@ -2,7 +2,7 @@ package pet.ui.ta;
 
 import java.util.*;
 
-import pet.hp.util.*;
+import pet.hp.info.*;
 
 /**
  * table model for hands in a session
@@ -18,9 +18,9 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.hand.date;
 			}
 		});
-		cols.add(new MyTableModelColumn<HandInfo,Hole>(Hole.class, "MyHole", "Final hole cards") {
+		cols.add(new MyTableModelColumn<HandInfo,HoleInfo>(HoleInfo.class, "MyHole", "Final hole cards") {
 			@Override
-			public Hole getValue(HandInfo o) {
+			public HoleInfo getValue(HandInfo o) {
 				return o.hole;
 			}
 		});

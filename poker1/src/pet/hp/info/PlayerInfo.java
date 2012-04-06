@@ -1,4 +1,4 @@
-package pet.hp.util;
+package pet.hp.info;
 
 import java.util.*;
 
@@ -34,7 +34,7 @@ public class PlayerInfo {
 		}
 		
 		PlayerGameInfo gi = getGameInfo(h.game);
-		gi.add(s, h);
+		gi.add(h, s);
 	}
 
 	@Override

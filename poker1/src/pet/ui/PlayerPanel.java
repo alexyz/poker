@@ -7,7 +7,7 @@ import java.util.Collections;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import pet.hp.util.*;
+import pet.hp.info.*;
 import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
 

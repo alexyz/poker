@@ -3,8 +3,7 @@ package pet.ui.ta;
 import java.util.*;
 
 import pet.eq.PokerUtil;
-import pet.hp.sta.HandState;
-import pet.hp.sta.SeatState;
+import pet.hp.state.*;
 
 public class HandStateTableModel extends MyTableModel<HandState> {
 
@@ -83,7 +82,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		});
 	}
 	
-	public HandStateTableModel(List<MyTableModelColumn<HandState,?>> cols) {
+	public HandStateTableModel() {
 		super(cols);
 	}
 

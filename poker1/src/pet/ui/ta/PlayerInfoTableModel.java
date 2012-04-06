@@ -2,7 +2,7 @@ package pet.ui.ta;
 
 import java.util.*;
 
-import pet.hp.util.PlayerInfo;
+import pet.hp.info.PlayerInfo;
 
 public class PlayerInfoTableModel extends MyTableModel<PlayerInfo> {
 	

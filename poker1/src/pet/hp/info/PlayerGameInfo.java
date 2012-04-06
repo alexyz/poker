@@ -1,6 +1,4 @@
-package pet.hp.util;
-
-import java.util.*;
+package pet.hp.info;
 
 import pet.hp.*;
 
@@ -15,54 +13,87 @@ public class PlayerGameInfo {
 	/** amount won and lost */
 	public int won = 0;
 	public int pip = 0;
-	final int[] foldedon;
+	
 	/** number of hands that were won at showdown */
-	public int handswonshow;
-	/** hands that went to showdown and were shown (should be all hands) */
-	public int showdown;
-	public int checkfold, checkcall, checkraise;
-	
-	// not public
-	
+	private int handswonshow;
+	/** hands that went to showdown */
+	private int showdownsseen;
+	private int checkfold, checkcall, checkraise;
 	/** number of times each action performed */
-	final int[] actionCount = new int[Action.TYPES];
+	private final int[] actionCount = new int[Action.TYPES];
 	/** total amount of each action performed */
-	final int[] actionAmount = new int[Action.TYPES];
+	private final int[] actionAmount = new int[Action.TYPES];
+	private final int[] streetinits;
+	private final int[] streetsseen;
 	
 	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
 		this.game = game;
-		this.foldedon = new int[HandUtil.getMaxStreets(game.type)];
+		int s = HandUtil.getMaxStreets(game.type);
+		streetinits = new int[s];
+		streetsseen = new int[s];
 	}
 	
-	public void add(Seat s, Hand h) {
+	/**
+	 * add this hand to the players game info
+	 */
+	public void add(Hand hand, Seat seat) {
 		hands++;
-		pip += s.pip;
-		if (s.showdown) {
-			showdown++;
+		pip += seat.pip;
+		
+		if (seat.showdown) {
+			showdownsseen++;
+			if (seat.won > 0) {
+				handswonshow++;
+			}
 		}
-		if (s.won > 0) {
+		
+		if (seat.won > 0) {
 			handswon++;
-			won += s.won;
-			// overcounts rake if split?
-			rake += h.rake;
+			won += seat.won;
+			// over counts rake if split
+			rake += hand.rake;
 		}
-		if (s.showdown && s.won > 0) {
-			handswonshow++;
+		
+		// update player game info with actions
+		for (int streetno = 0; streetno < hand.streets.length; streetno++) {
+			Action[] street = hand.streets[streetno];
+			streetsseen[streetno]++;
+			
+			Action init = null;
+			boolean hasChecked = false;
+			for (Action act : street) {
+				if (act.seat == seat) {
+					addAction(act, hasChecked);
+					if (act.type == Action.CHECK_TYPE) {
+						hasChecked = true;
+					}
+					if (act.type == Action.FOLD_TYPE) {
+						// no more actions for us
+						return;
+					}
+				}
+				if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
+					// last action on street with initiative
+					init = act;
+				}
+			}
+
+			// initiative
+			// TODO sustained initiative, fold to init?
+			if (init != null && init.seat == seat) {
+				streetinits[streetno]++;
+			}
 		}
+
 	}
 	
 	/**
 	 * Add action on street
 	 */
-	void addAction(int street, Action action, boolean hasChecked) {
+	private void addAction(Action action, boolean hasChecked) {
 		actionCount[action.type]++;
 		actionAmount[action.type] += action.amount;
-		
-		if (action.type == Action.FOLD_TYPE) {
-			foldedon[street]++;
-		}
-		
 		if (hasChecked) {
 			if (action.type == Action.FOLD_TYPE) {
 				checkfold++;
@@ -74,11 +105,67 @@ public class PlayerGameInfo {
 		}
 	}
 	
+	//
+	// derived methods
+	//
+	
+	// initiative
+	// play cbet freq
+	
+	/**
+	 * initiatives per street
+	 */
+	public String isstr() {
+		StringBuilder sb = new StringBuilder();
+		for (int n = 0; n < streetsseen.length; n++) {
+			if (sb.length() > 0) {
+				sb.append("-");
+			}
+			float i = (streetinits[n] * 100f) / streetsseen[n];
+			sb.append(String.format("%2.0f", i));
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * flops seen as percentage of hands
+	 */
+	public float fs() {
+		return (streetsseen[1] * 100f) / hands;
+	}
+	
+	/**
+	 * show downs seen as percentage of all hands
+	 */
+	public float ss() {
+		return (showdownsseen * 100f) / hands;
+	}
+	
+	/**
+	 * show downs won as percentage of all show downs
+	 */
+	public float sw() {
+		return (handswonshow * 100f) / showdownsseen;
+	}
+	
+	/**
+	 * hands won as percentage of all hands
+	 */
+	public float hw() {
+		return (handswon*100f) / hands;
+	}
+	
+	/**
+	 * check, check fold, check call, check raise count
+	 */
 	public String cx() {
 		int checks = actionCount[Action.CHECK_TYPE];
 		return String.format("%d-%d-%d-%d", checks, checkfold, checkcall, checkraise);
 	}
 	
+	/**
+	 * check fold, check call, check raise to checks ratio
+	 */
 	public String cxr() {
 		int checks = actionCount[Action.CHECK_TYPE];
 		if (checks > 0) {
@@ -90,14 +177,6 @@ public class PlayerGameInfo {
 			return "";
 		}
 	}
-	
-	public int getActionSum(byte actiontype) {
-		return actionAmount[actiontype];
-	}
-	
-	// player c/r freq
-	// play cbet freq
-	// player agr fac
 	
 	/** aggression factor count */
 	public float afcount() {
@@ -137,14 +216,9 @@ public class PlayerGameInfo {
 				sb.append("\n");
 			}
 		}
-		sb.append("Folded on:\n");
-		for (int s = 0; s < foldedon.length; s++) {
-			if (foldedon[s] > 0) {
-				sb.append("  " + HandUtil.getStreetName(game.type, s) + ":  " + foldedon[s] + "\n");
-			}
-		}
-		sb.append("Show downs:  " + showdown + "\n");
+		sb.append("Show downs:  " + showdownsseen + "\n");
 		sb.append("Showdown wins:  " + handswonshow + "\n");
 		return sb.toString();
 	}
+
 }

@@ -1,4 +1,4 @@
-package pet.hp.sta;
+package pet.hp.state;
 
 /**
  * represents current state of hand

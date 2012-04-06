@@ -1,4 +1,4 @@
-package pet.hp.util;
+package pet.hp.info;
 
 import java.io.*;
 import java.util.*;

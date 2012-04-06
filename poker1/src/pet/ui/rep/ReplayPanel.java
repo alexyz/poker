@@ -5,7 +5,7 @@ import java.awt.event.*;
 import java.util.List;
 import javax.swing.*;
 import pet.hp.*;
-import pet.hp.sta.*;
+import pet.hp.state.*;
 
 /**
  * allows user to replay hands

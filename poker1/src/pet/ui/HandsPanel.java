@@ -9,7 +9,7 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 import pet.hp.Hand;
-import pet.hp.util.*;
+import pet.hp.info.*;
 import pet.ui.ta.*;
 
 /**
@@ -118,7 +118,7 @@ public class HandsPanel extends JPanel {
 	}
 
 	private void updateName(String name) {
-		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name, false);
+		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name);
 		Vector<String> games = new Vector<String>();
 		games.add("");
 		if (pi != null) {

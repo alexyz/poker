@@ -5,7 +5,7 @@ import java.util.Locale;
 import javax.swing.*;
 
 import pet.hp.Hand;
-import pet.hp.util.History;
+import pet.hp.info.History;
 import pet.ui.eq.*;
 import pet.ui.gr.GraphData;
 import pet.ui.rep.ReplayPanel;

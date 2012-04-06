@@ -1,4 +1,4 @@
-package pet.hp.sta;
+package pet.hp.state;
 
 import pet.eq.HandEq;
 import pet.hp.Seat;

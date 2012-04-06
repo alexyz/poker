@@ -14,7 +14,7 @@ import javax.swing.*;
 
 import pet.hp.*;
 import pet.hp.impl.PSParser;
-import pet.hp.util.*;
+import pet.hp.info.*;
 
 /**
  * TODO
@@ -101,6 +101,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			ft.addFile(pathLabel.getText());
 			ft.addListener(this);
 			ft.addListener(PokerFrame.getInstance().getHistory());
+			// TODO add hud panel
 			ft.start();
 			followThread = ft;
 			addButton.setEnabled(true);

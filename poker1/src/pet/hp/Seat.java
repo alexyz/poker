@@ -18,11 +18,11 @@ public class Seat implements Serializable {
 	public String[] hole;
 	/** amount won */
 	public int won;
-	/** amount put in pot, equal to sum of amount of player actions in hand */
+	/** amount put in pot, equal to sum of amount of player actions in hand minus the uncalled amount */
 	public int pip;
 	/** number of cards discarded */
 	public byte discards;
-	/** seats hand reached showdown */
+	/** seats hand reached show down */
 	public boolean showdown;
 	public boolean bigblind;
 	public boolean smallblind;

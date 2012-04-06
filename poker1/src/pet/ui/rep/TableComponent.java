@@ -12,7 +12,7 @@ import pet.eq.Poker;
 import pet.eq.PokerUtil;
 import pet.hp.Hand;
 import pet.hp.HandUtil;
-import pet.hp.sta.*;
+import pet.hp.state.*;
 
 /**
  * Draws a table in the given state

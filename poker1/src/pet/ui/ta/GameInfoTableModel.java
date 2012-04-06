@@ -2,8 +2,7 @@ package pet.ui.ta;
 
 import java.util.*;
 
-import pet.hp.util.PlayerGameInfo;
-import pet.hp.util.PlayerInfo;
+import pet.hp.info.*;
 
 public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	
@@ -22,22 +21,22 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 				return o.hands;
 			}
 		});
-		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "H-Show%", "Percentage of hands reaching show down") {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "SS%", "Percentage of hands reaching show down") {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
-				return (o.showdown*100f) / o.hands;
+				return o.ss();
 			}
 		});
-		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "H-Won%", "Percentage of hands won") {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "HW%", "Percentage of hands won") {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
-				return (o.handswon*100f) / o.hands;
+				return o.hw();
 			}
 		});
-		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "H-WonShow%", "Percentage of hands reaching show down that won") {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,Float>(Float.class, "SW%", "Percentage of hands reaching show down that won") {
 			@Override
 			public Float getValue(PlayerGameInfo o) {
-				return (o.handswonshow*100f) / o.handswon;
+				return o.sw();
 			}
 		});
 		cols.add(new MyTableModelColumn<PlayerGameInfo,Integer>(Integer.class, "AmPip", "Amount put in pot") {
@@ -85,16 +84,22 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 				return o.afam();
 			}
 		});
-		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "Ch/F-C-R", "Check, Check-fold, check-call, check-raise count") {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "ChFCR", "Check, Check-fold, check-call, check-raise count") {
 			@Override
 			public String getValue(PlayerGameInfo o) {
 				return o.cx();
 			}
 		});
-		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "Ch/F-C-R%", "Check-fold, check-call, check-raise percentage") {
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "ChFCR%", "Check-fold, check-call, check-raise percentage") {
 			@Override
 			public String getValue(PlayerGameInfo o) {
 				return o.cxr();
+			}
+		});
+		cols.add(new MyTableModelColumn<PlayerGameInfo,String>(String.class, "SI%", "Percentage of time initiative taken on each street") {
+			@Override
+			public String getValue(PlayerGameInfo o) {
+				return o.isstr();
 			}
 		});
 	}

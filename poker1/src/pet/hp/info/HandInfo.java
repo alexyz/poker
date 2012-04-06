@@ -1,4 +1,4 @@
-package pet.hp.util;
+package pet.hp.info;
 
 import java.util.*;
 
@@ -19,14 +19,14 @@ public class HandInfo {
 	}
 	
 	public final Hand hand;
-	public Hole hole;
+	public HoleInfo hole;
 	
 	public Seat winner;
 	public int wonOn;
 	
 	public HandInfo(Hand hand) {
 		this.hand = hand;
-		this.hole = new Hole(hand.myseat.hole);
+		this.hole = new HoleInfo(hand.myseat.hole);
 	}
 	
 	/**
