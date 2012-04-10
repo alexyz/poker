@@ -11,14 +11,19 @@ import pet.hp.*;
  */
 public class FollowThread extends Thread {
 	
-	public volatile boolean stop;
+	public volatile boolean follow;
 	
 	private final Parser parser;
-	/** set of files to scan including directories */
-	private final Set<String> files = new TreeSet<String>();
 	/** map of found files to position read to */
 	private final Map<String,long[]> fileMap = new TreeMap<String,long[]>();
 	private final List<FollowListener> listeners = new ArrayList<FollowListener>();
+	
+	/** directory to scan */
+	private File dir;
+	/** files to parse */
+	private final Set<File> files = new TreeSet<File>();
+	/** rejected files */
+	private final Set<File> rejFiles = new TreeSet<File>();
 
 	public FollowThread(Parser parser) {
 		setName("follow thread");
@@ -30,87 +35,118 @@ public class FollowThread extends Thread {
 		listeners.add(l);
 	}
 	
-	public synchronized void addFile(String filename) {
-		files.add(filename);
-		System.out.println("following " + files);
+	public synchronized void setPath(File dir) {
+		if (dir.isDirectory()) {
+			System.out.println("following " + dir);
+			this.dir = dir;
+		} else {
+			System.out.println("not a directory: " + dir);
+		}
+	}
+	
+	public synchronized void addFile(File file) {
+		System.out.println("added file " + file);
+		files.add(file);
 	}
 	
 	@Override
 	public void run() {
+		System.out.println("follow thread running");
 		while (true) {
 			synchronized (this) {
-				for (String filename : files) {
-					File file = new File(filename);
-					if (file.isDirectory()) {
-						for (File f : file.listFiles()) {
-							parse(f);
-						}
-					} else {
-						parse(file);
-					}
+				if (follow) {
+					collect();
+				}
+				if (files.size() > 0) {
+					process();
 				}
 			}
-			do {
-				try {
-					Thread.sleep(1000);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} while (stop);
+
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
-	private void parse(File f) {
-		String name = f.getName();
-		if (parser.isHistoryFile(name)) {
-			long[] size = fileMap.get(name);
+
+	private void process() {
+		System.out.println("process " + files.size() + " files");
+		for (FollowListener l : listeners) {
+			l.doneFile(0, files.size());
+		}
+		int n = 0;
+		for (File f : files) {
+			long[] size = fileMap.get(f.getName());
 			if (size == null) {
-				// offset
-				fileMap.put(name, size = new long[1]);
+				fileMap.put(f.getName(), size = new long[1]);
 			}
-
-			long fsize = (int) f.length();
-			long mt = f.lastModified();
-			
-			if (fsize > size[0] && mt < (System.currentTimeMillis() - 1000L)) {
-				System.out.println("activity on " + name);
-				read(f, size[0]);
-				size[0] = fsize;
-				System.out.println("read " + fsize + " bytes");
+			long fsize = f.length();
+			long lastmod = f.lastModified();
+			long now = System.currentTimeMillis();
+			// don't parse if written to in last second
+			if (fsize > size[0] && lastmod < (now - 1000L)) {
+				size[0] = read(f, size[0]);
+				for (FollowListener l : listeners) {
+					l.doneFile(n, files.size());
+				}
 			}
+			n++;
+		}
+		files.clear();
+	}
 
-		} else {
-			System.out.println("-- ignoring " + name); 
+	private void collect() {
+		//System.out.println("collect files");
+		if (dir != null) {
+			// collect files to parse
+			for (File f : dir.listFiles()) {
+				if (f.isFile() && parser.isHistoryFile(f.getName())) {
+					long[] s = fileMap.get(f.getName());
+					if (s == null) {
+						fileMap.put(f.getName(), s = new long[1]);
+					}
+					if (f.length() > s[0]) {
+						files.add(f);
+					}
+				} else if (!rejFiles.contains(f)) {
+					System.out.println("rejected " + f);
+					rejFiles.add(f);
+				}
+			}
 		}
 	}
 	
-	private void read(File f, long offset) {
+	private long read(File file, long offset) {
+		System.out.println("parsing " + file.getName());
 		try {
-			InputStream is = new FileInputStream(f);
-			is.skip(offset);
+			FileInputStream fis = new FileInputStream(file);
+			fis.skip(offset);
 			String line;
-			BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+			long pos = 0;
 			while ((line = br.readLine()) != null) {
-				Hand h = null;
-				try {
-					h = parser.parseLine(line);
-				} catch (RuntimeException e) {
-					for (String l : parser.getDebug()) {
-						System.out.println(l);
-					}
-					throw e;
-				}
-				if (h != null) {
+				Hand hand = parser.parseLine(line);
+				if (hand != null) {
 					for (FollowListener l : listeners) {
-						l.nextHand(h);
+						l.nextHand(hand);
+						pos = fis.getChannel().position();
 					}
 				}
 			}
+			
+			// XXX should check if halfway though hand
 			br.close();
+			System.out.println("  read from " + offset + " to " + pos);
+			return pos;
 			
 		} catch (IOException e) {
-			System.out.println("file " + f);
+			System.out.println("could not parse file " + file);
+			for (String l : parser.getDebug()) {
+				System.out.println(l);
+			}
 			e.printStackTrace(System.out);
+			return offset;
 		}
 	}
 	

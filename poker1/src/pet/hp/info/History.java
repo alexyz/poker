@@ -129,6 +129,11 @@ public class History implements FollowListener {
 		}
 
 	}
+	
+	@Override
+	public void doneFile(int done, int total) {
+		//
+	}
 
 	public synchronized PlayerInfo getPlayerInfo(String player) {
 		return playerMap.get(player);

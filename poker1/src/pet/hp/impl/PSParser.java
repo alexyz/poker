@@ -395,7 +395,7 @@ public class PSParser extends Parser implements Serializable {
 		// PokerStars Game #73111358128:  Hold'em Pot Limit (100/200) - 2012/01/01 13:19:41 ET
 		// PokerStars Zoom Hand #77405734487:  Omaha Pot Limit ($0.01/$0.02) - 2012/03/18 14:38:20 ET
 		if (hand != null) {
-			throw new RuntimeException("unsaved game");
+			throw new RuntimeException("did not not finish parsing last hand");
 		}
 
 		if (line.contains("Tournament")) {

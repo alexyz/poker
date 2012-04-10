@@ -19,6 +19,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
 	private final JButton prevButton = new JButton("<");
 	private final JButton nextButton = new JButton(">");
+	private final Date startDate = new Date();
 	
 	public HUDPanel() {
 		super(new BorderLayout());
@@ -70,11 +71,18 @@ public class HUDPanel extends JPanel implements FollowListener {
 	}
 
 	@Override
-	public void nextHand(Hand h) {
+	public void nextHand(Hand hand) {
 		// create handstates, add to list
 		// display most recent in hud
-		((DefaultComboBoxModel)stateCombo.getModel()).addElement(new HandStates(h));
-		stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+		if (hand.date.after(startDate)) {
+			((DefaultComboBoxModel)stateCombo.getModel()).addElement(new HandStates(hand));
+			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+		}
+	}
+	
+	@Override
+	public void doneFile(int done, int total) {
+		//
 	}
 }
 

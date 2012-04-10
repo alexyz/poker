@@ -25,7 +25,7 @@ public class PlayerPanel extends JPanel {
 	private final MyJTable<PlayerGameInfo> gamesTable = new MyJTable<PlayerGameInfo>(new GameInfoTableModel());
 	private final JTextArea gameTextArea = new JTextArea();
 	private final JButton bankrollButton = new JButton("Bankroll");
-	private final JButton sessionButton = new JButton("Session");
+	private final JButton handsButton = new JButton("Hands");
 	
 	public PlayerPanel() {
 		super(new BorderLayout());
@@ -94,10 +94,15 @@ public class PlayerPanel extends JPanel {
 			}
 		});
 		
-		sessionButton.addActionListener(new ActionListener() {
+		handsButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO
+				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					int sr = gamesTable.convertRowIndexToModel(r);
+					PlayerGameInfo gi = ((GameInfoTableModel) gamesTable.getModel()).getRow(sr);
+					PokerFrame.getInstance().displayHands(gi.player.name, gi.game.id);
+				}
 			}
 		});
 		
@@ -119,7 +124,7 @@ public class PlayerPanel extends JPanel {
 		topPanel.add(nameField);
 		
 		JPanel bottomPanel = new JPanel();
-		bottomPanel.add(sessionButton);
+		bottomPanel.add(handsButton);
 		bottomPanel.add(bankrollButton);
 				
 		add(topPanel, BorderLayout.NORTH);

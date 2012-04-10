@@ -1,6 +1,8 @@
 package pet.ui;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -15,15 +17,24 @@ public class ConsolePanel extends JPanel {
 	
 	public ConsolePanel() {
 		super(new BorderLayout());
+		
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
+		
+		clearButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+			}
+		});
+		
 		scrollPane.setViewportView(textArea);
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Java Console"));
 		add(scrollPane, BorderLayout.CENTER);
 		buttonPanel.add(clearButton);
 		add(buttonPanel, BorderLayout.SOUTH);
 		
-		
+		// TODO start this sooner?
 		OutputStream os = new OutputStream() {
 			@Override
 			public void write(int b) throws IOException {
@@ -45,9 +56,9 @@ public class ConsolePanel extends JPanel {
 			@Override
 			public void run() {
 				textArea.append(s);
-				if (textArea.getDocument().getLength() > 50000) {
+				if (textArea.getDocument().getLength() > 100000) {
 					try {
-						textArea.getDocument().remove(0, 25000);
+						textArea.getDocument().remove(0, 10000);
 					} catch (BadLocationException e) {
 						e.printStackTrace();
 					}

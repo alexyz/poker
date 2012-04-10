@@ -2,6 +2,7 @@ package pet.ui;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
+import java.text.DateFormat;
 import java.util.*;
 
 import javax.swing.*;
@@ -27,6 +28,7 @@ public class HandsPanel extends JPanel {
 	private final JComboBox gameCombo = new JComboBox();
 	private final MyJTable<HandInfo> handTable = new MyJTable<HandInfo>(new HandInfoTableModel());
 	private final JTextArea textArea = new JTextArea();
+	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
 
 	public HandsPanel() {
@@ -36,7 +38,7 @@ public class HandsPanel extends JPanel {
 		nameField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				updateName(nameField.getText());
+				updateName(null);
 			}
 		});
 
@@ -96,6 +98,7 @@ public class HandsPanel extends JPanel {
 		JPanel topPanel = new JPanel();
 		topPanel.add(nameField);
 		topPanel.add(gameCombo);
+		topPanel.add(dateCombo);
 		
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(replayButton);
@@ -116,24 +119,57 @@ public class HandsPanel extends JPanel {
 		}
 		return null;
 	}
-
-	private void updateName(String name) {
+	
+	public void displayHands(String name, String game) {
+		nameField.setText(name);
+		updateName(game);
+	}
+	
+	private void updateName(String game) {
+		String name = nameField.getText();
+		System.out.println("update name " + name + " game " + game);
 		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name);
-		Vector<String> games = new Vector<String>();
-		games.add("");
-		if (pi != null) {
-			games.addAll(pi.games.keySet());
+		if (pi == null) {
+			gameCombo.setModel(new DefaultComboBoxModel());
+			dateCombo.setModel(new DefaultComboBoxModel());
+			handTable.getModel().setRows(Collections.<HandInfo>emptyList());
+			return;
 		}
+		
+		Vector<String> games = new Vector<String>(pi.games.keySet());
 		gameCombo.setModel(new DefaultComboBoxModel(games));
-		handTable.getModel().setRows(Collections.<HandInfo>emptyList());
+		if (game != null) {
+			gameCombo.setSelectedItem(game);
+		}
+		
+		updateGame();
 	}
 
 	private void updateGame() {
+		System.out.println("update game");
 		String player = nameField.getText();
 		String game = (String) gameCombo.getSelectedItem();
 		PokerFrame pf = PokerFrame.getInstance();
 		History his = pf.getHistory();
 		List<Hand> hands = his.getHands(player, game);
+		
+		// build date lookup
+		Map<String,Date> dateMap = new TreeMap<String,Date>();
+		for (Hand hand : hands) {
+			String datestr = DateFormat.getDateInstance().format(hand.date);
+			if (!dateMap.containsKey(datestr)) {
+				dateMap.put(datestr, hand.date);
+			}
+		}
+		List<Date> dateList = new ArrayList<Date>(dateMap.values());
+		Collections.sort(dateList);
+		Vector<String> dates = new Vector<String>();
+		dates.add("");
+		for (Date date : dateList) {
+			dates.add(DateFormat.getDateInstance().format(date));
+		}
+		dateCombo.setModel(new DefaultComboBoxModel(dates));
+		
 		List<HandInfo> handInfos = HandInfo.getHandInfos(hands);
 		handTable.getModel().setRows(handInfos);
 		repaint();

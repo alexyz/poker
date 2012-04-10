@@ -5,6 +5,8 @@ import java.util.Locale;
 import javax.swing.*;
 
 import pet.hp.Hand;
+import pet.hp.impl.PSParser;
+import pet.hp.info.FollowThread;
 import pet.hp.info.History;
 import pet.ui.eq.*;
 import pet.ui.gr.GraphData;
@@ -28,15 +30,27 @@ public class PokerFrame extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		instance = new PokerFrame();
-		instance.setVisible(true);
+		ToolTipManager.sharedInstance().setDismissDelay(60000);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// need to create and pack in awt thread otherwise it can deadlock
+				instance = new PokerFrame();
+				instance.setVisible(true);
+			}
+		});
+		
 	}
 	
+	private final FollowThread followThread = new FollowThread(new PSParser());
 	private final History history = new History();
+	
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
-	public final HUDPanel hudPanel = new HUDPanel();
+	private final HUDPanel hudPanel = new HUDPanel();
+	private final HistoryPanel historyPanel = new HistoryPanel();
+	private final HandsPanel handsPanel = new HandsPanel();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -44,17 +58,21 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Hold'em", new HoldemCalcPanel(true));
 		tabs.addTab("Omaha", new HoldemCalcPanel(false));
 		tabs.addTab("Draw", new DrawCalcPanel());
-		tabs.addTab("History", new HistoryPanel());
+		tabs.addTab("History", historyPanel);
 		tabs.addTab("Players", new PlayerPanel());
-		tabs.addTab("Bankroll", bankrollPanel);
-		tabs.addTab("Session", new HandsPanel());
+		tabs.addTab("Graph", bankrollPanel);
+		tabs.addTab("Hands", handsPanel);
 		tabs.addTab("Replay", replayPanel);
 		tabs.addTab("HUD", hudPanel);
-		tabs.addTab("Console", new ConsolePanel());
+		
+		followThread.addListener(hudPanel);
+		followThread.addListener(historyPanel);
+		followThread.addListener(history);
+		followThread.start();
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
 		pack();
-		ToolTipManager.sharedInstance().setDismissDelay(60000);
 	}
 	
 	public History getHistory() {
@@ -72,8 +90,12 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(bankrollPanel);
 	}
 	
-	public void displaySession() {
-		System.out.println("todo");
+	public FollowThread getFollow() {
+		return followThread;
+	}
+	
+	public void displayHands(String name, String gameid) {
+		handsPanel.displayHands(name, gameid);
 	}
 
 }

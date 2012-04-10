@@ -30,15 +30,13 @@ public class MyJTable<T> extends JTable {
 			return null;
 		}
 	}
-	
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int r, int c) {
-		int r2 = convertRowIndexToModel(r);
-		Component comp = super.prepareRenderer(renderer, r2, c);
-		// XXX r or r2?
+		Component comp = super.prepareRenderer(renderer, r, c);
 		if (!getSelectionModel().isSelectedIndex(r)) {
 			if (comp instanceof JComponent) {
 				JComponent jcomp = (JComponent)comp;
+				int r2 = convertRowIndexToModel(r);
 				Color col = getModel().getColour(r2, c);
 				jcomp.setBackground(col != null ? col : defcol);
 				Font font = getModel().getFont(r2, c);
@@ -47,7 +45,6 @@ public class MyJTable<T> extends JTable {
 		}
 		return comp;
 	}
-	
 	@Override
 	public MyTableModel<T> getModel() {
 		return (MyTableModel<T>) super.getModel();
