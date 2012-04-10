@@ -9,6 +9,9 @@ public class Game implements Comparable<Game> {
 	// num hole cards for replayer
 	// tidy up game stuff in hand utils
 	
+	// Play 5 Card Draw NL 6max Zoom 0.01/0.02
+	// (cur) (name) (bet) (max) (zoom) (blinds)
+	
 	/** description string (unique for all games) */
 	public final String id;
 	/** hand currency, $, € or P */

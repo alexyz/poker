@@ -94,8 +94,10 @@ public class PokerFrame extends JFrame {
 		return followThread;
 	}
 	
+	/** display hands in hands tab */
 	public void displayHands(String name, String gameid) {
 		handsPanel.displayHands(name, gameid);
+		tabs.setSelectedComponent(handsPanel);
 	}
 
 }

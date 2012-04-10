@@ -3,6 +3,8 @@ package pet.hp;
 import java.text.NumberFormat;
 import java.util.*;
 
+import pet.eq.Cmp;
+
 /**
  * Utilities for hands (no analysis - see HandInfo)
  */
@@ -29,7 +31,7 @@ public class HandUtil {
 			return s1.num - s2.num;
 		}
 	};
-	
+
 	public static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	public static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
@@ -91,7 +93,7 @@ public class HandUtil {
 			return nf.format(amount);
 		}
 	}
-	
+
 	private static String[] kept(String[] hole1, String[] hole2, int discards) {
 		String[] kept = new String[5 - discards];
 		int i = 0;
@@ -107,33 +109,41 @@ public class HandUtil {
 	}
 
 	/**
-	 * Get hole cards player had on this street
+	 * Get hole cards player had on this street (if they changed)
 	 */
 	public static String[] getStreetHole(Hand hand, Seat seat, int street) {
+		String[] h = null;
 		switch (hand.game.type) {
 			case FCD_TYPE:
 				if (street == 1) {
 					// return final hand
-					return seat.hole;
-				}
-				if (hand.myseat == seat) {
+					h = seat.hole.clone();
+					
+				} else if (hand.myseat == seat) {
 					// return starting hand
-					return kept(hand.myhole, seat.hole, seat.discards);
-				}
-				if (seat.hole != null) {
+					h = kept(hand.myhole, seat.hole, seat.discards);
+					
+				} else if (seat.hole != null) {
 					// guess what cards the opponent kept
-					String[] guessedHole = new String[5 - seat.discards];
-					for (int n = 0; n < guessedHole.length; n++) {
-						guessedHole[n] = seat.hole[n];
+					h = new String[5 - seat.discards];
+					for (int n = 0; n < h.length; n++) {
+						h[n] = seat.hole[n];
 					}
-					return guessedHole;
 				}
-				return null;
+				break;
 			case HE_TYPE:
 			case OM_TYPE:
-				return seat.hole;
+				if (seat.hole != null) {
+					h = seat.hole.clone();
+				}
+				break;
+			default:
+				throw new RuntimeException("unknown game type " + hand.game);
 		}
-		throw new RuntimeException("unknown game type " + hand.game);
+		if (h != null) {
+			Arrays.sort(h, Cmp.revCardCmp);
+		}
+		return h;
 	}
 
 	/**
@@ -153,5 +163,5 @@ public class HandUtil {
 		}
 		return sb.toString();
 	}
-	
+
 }

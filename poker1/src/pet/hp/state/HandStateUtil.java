@@ -22,7 +22,7 @@ public class HandStateUtil {
 			if (seat.hole != null) {
 				String[] hole = seat.hole.clone();
 				Arrays.sort(hole, Cmp.revCardCmp);
-				ss.hole = seat.hole;
+				ss.hole = hole;
 			}
 			ss.stack = seat.chips;
 			hs.seats[seat.num - 1] = ss;
@@ -57,9 +57,9 @@ public class HandStateUtil {
 				}
 			}
 			for (SeatState ss : hs.seats) {
-				if (ss != null && !ss.folded) {
+				if (ss != null) {
 					// need to know pot to calc spr
-					ss.spr = hs.pot != 0 ? (ss.stack*1f) / hs.pot : 0;
+					ss.spr = !ss.folded && hs.pot != 0 ? (ss.stack*1f) / hs.pot : 0;
 				}
 			}
 			

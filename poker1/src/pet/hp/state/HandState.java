@@ -48,7 +48,7 @@ public class HandState implements Cloneable {
 		if (actionSeat >= 0) {
 			SeatState s = seats[actionSeat];
 			if (s != null) {
-				return s.seat.name + " " + action;
+				return String.valueOf(action);
 			}
 		}
 		return note;

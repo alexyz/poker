@@ -3,11 +3,11 @@ package pet.ui;
 import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.*;
 
 import pet.hp.Hand;
 import pet.hp.info.*;
@@ -30,6 +30,8 @@ public class HandsPanel extends JPanel {
 	private final JTextArea textArea = new JTextArea();
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
+	private final JScrollPane tableScroller = new JScrollPane(handTable);
+	private List<HandInfo> handInfos;
 
 	public HandsPanel() {
 		super(new BorderLayout());
@@ -48,6 +50,16 @@ public class HandsPanel extends JPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					updateGame();
+				}
+			}
+		});
+		
+		dateCombo.setBorder(BorderFactory.createTitledBorder("Date"));
+		dateCombo.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					updateDate();
 				}
 			}
 		});
@@ -89,7 +101,6 @@ public class HandsPanel extends JPanel {
 			}
 		});
 
-		JScrollPane tableScroller = new JScrollPane(handTable);
 		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands"));
 
 		textArea.setBorder(BorderFactory.createTitledBorder("Hand Info"));
@@ -125,33 +136,36 @@ public class HandsPanel extends JPanel {
 		updateName(game);
 	}
 	
-	private void updateName(String game) {
+	private void clear() {
+		gameCombo.setModel(new DefaultComboBoxModel());
+		dateCombo.setModel(new DefaultComboBoxModel());
+		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands"));
+		handTable.getModel().setRows(Collections.<HandInfo>emptyList());
+	}
+	
+	private void updateName(String selectGame) {
 		String name = nameField.getText();
-		System.out.println("update name " + name + " game " + game);
+		System.out.println("update name " + name + " game " + selectGame);
 		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name);
-		if (pi == null) {
-			gameCombo.setModel(new DefaultComboBoxModel());
-			dateCombo.setModel(new DefaultComboBoxModel());
-			handTable.getModel().setRows(Collections.<HandInfo>emptyList());
-			return;
+		clear();
+		if (pi != null) {
+			Vector<String> games = new Vector<String>(pi.games.keySet());
+			gameCombo.setModel(new DefaultComboBoxModel(games));
+			if (selectGame != null) {
+				gameCombo.setSelectedItem(selectGame);
+			}
 		}
-		
-		Vector<String> games = new Vector<String>(pi.games.keySet());
-		gameCombo.setModel(new DefaultComboBoxModel(games));
-		if (game != null) {
-			gameCombo.setSelectedItem(game);
-		}
-		
+		// update table
 		updateGame();
 	}
-
+	
 	private void updateGame() {
 		System.out.println("update game");
 		String player = nameField.getText();
-		String game = (String) gameCombo.getSelectedItem();
-		PokerFrame pf = PokerFrame.getInstance();
-		History his = pf.getHistory();
-		List<Hand> hands = his.getHands(player, game);
+		String gameId = (String) gameCombo.getSelectedItem();
+		History history = PokerFrame.getInstance().getHistory();
+		List<Hand> hands = history.getHands(player, gameId);
+		handInfos = HandInfo.getHandInfos(hands);
 		
 		// build date lookup
 		Map<String,Date> dateMap = new TreeMap<String,Date>();
@@ -170,8 +184,36 @@ public class HandsPanel extends JPanel {
 		}
 		dateCombo.setModel(new DefaultComboBoxModel(dates));
 		
-		List<HandInfo> handInfos = HandInfo.getHandInfos(hands);
-		handTable.getModel().setRows(handInfos);
+		updateDate();
+	}
+	
+	private void updateDate() {
+		System.out.println("update date");
+		String dateStr = (String) dateCombo.getSelectedItem();
+		
+		// get hand infos for date
+		List<HandInfo> dateHandInfos;
+		if (dateStr != null && dateStr.length() > 0) {
+			Date date;
+			try {
+				date = DateFormat.getDateInstance().parse(dateStr);
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
+			}
+			Date date2 = new Date(date.getTime() + (24 * 60 * 60 * 1000L));
+			dateHandInfos = new ArrayList<HandInfo>();
+			for (HandInfo hi : handInfos) {
+				if (hi.hand.date.after(date) && hi.hand.date.before(date2)) {
+					dateHandInfos.add(hi);
+				}
+			}
+			
+		} else {
+			dateHandInfos = handInfos;
+		}
+		
+		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands (" + dateHandInfos.size() + ")"));
+		handTable.getModel().setRows(dateHandInfos);
 		repaint();
 	}
 }

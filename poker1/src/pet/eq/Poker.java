@@ -259,7 +259,7 @@ public abstract class Poker {
 			case SF_RANK: return "Straight Flush " + c1;
 			case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
 			case FH_RANK: return "Full House " + c2 + " full of " + c1;
-			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
+			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;
 			case ST_RANK: return "Straight - " + c1 + " high";
 			case TK_RANK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
 			case TP_RANK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;

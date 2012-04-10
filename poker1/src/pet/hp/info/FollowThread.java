@@ -6,17 +6,19 @@ import java.util.*;
 import pet.hp.*;
 
 /**
- * find and parse files in given directory
+ * find and parse files in given directory.
  * wait for file changes
  */
 public class FollowThread extends Thread {
 	
-	public volatile boolean follow;
-	
+	/** parser implementation */
 	private final Parser parser;
 	/** map of found files to position read to */
 	private final Map<String,long[]> fileMap = new TreeMap<String,long[]>();
+	/** listeners to send hands to */
 	private final List<FollowListener> listeners = new ArrayList<FollowListener>();
+	/** should scan directory */
+	private volatile boolean follow;
 	
 	/** directory to scan */
 	private File dir;
@@ -26,8 +28,9 @@ public class FollowThread extends Thread {
 	private final Set<File> rejFiles = new TreeSet<File>();
 
 	public FollowThread(Parser parser) {
-		setName("follow thread");
+		super("follow thread");
 		setPriority(Thread.MIN_PRIORITY);
+		setDaemon(true);
 		this.parser = parser;
 	}
 	
@@ -37,16 +40,23 @@ public class FollowThread extends Thread {
 	
 	public synchronized void setPath(File dir) {
 		if (dir.isDirectory()) {
-			System.out.println("following " + dir);
+			System.out.println("follow " + dir);
 			this.dir = dir;
 		} else {
 			System.out.println("not a directory: " + dir);
 		}
 	}
 	
+	public synchronized void setFollow(boolean follow) {
+		System.out.println("follow " + follow);
+		this.follow = follow;
+		notify();
+	}
+	
 	public synchronized void addFile(File file) {
 		System.out.println("added file " + file);
 		files.add(file);
+		notify();
 	}
 	
 	@Override
@@ -63,7 +73,17 @@ public class FollowThread extends Thread {
 			}
 
 			try {
-				Thread.sleep(1000);
+				if (follow) {
+					Thread.sleep(1000);
+				} else {
+					synchronized (this) {
+						while (!follow && files.size() == 0) {
+							System.out.println("waiting");
+							// wait for notify
+							wait();
+						}
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

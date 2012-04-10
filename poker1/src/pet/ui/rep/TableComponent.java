@@ -19,11 +19,10 @@ import pet.hp.state.*;
  */
 class TableComponent extends JComponent {
 
-	private static final Font normalfont = new Font("SansSerif", Font.PLAIN, 12);
 	private static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
 	private static final Font centrefont = new Font("SansSerif", Font.BOLD, 24);
 	
-	private HandState state;
+	private HandState hs;
 	private Hand hand;
 
 	public TableComponent() {
@@ -32,7 +31,7 @@ class TableComponent extends JComponent {
 
 	public void setState(HandState state) {
 		System.out.println("state now " + state);
-		this.state = state;
+		this.hs = state;
 		repaint();
 	}
 	
@@ -77,25 +76,28 @@ class TableComponent extends JComponent {
 
 		// table
 		{
-			g2.setColor(Color.green);
+			Color lg = new Color(0x18a020);
+			Color dg = new Color(0x085010);
+			GradientPaint p = new GradientPaint(w * 0.1f, h * 0.1f, dg, w * 0.5f, h * 0.5f, lg, true);
+			g2.setPaint(p);
+			//g2.setColor(Color.green);
 			Shape table = new Ellipse2D.Double(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
-			//g2.fillOval(w / 10, h / 10, w * 8 / 10, h * 8 / 10);
 			g2.fill(table);
+			g2.setPaint(null);
 			g2.setColor(Color.black);
 			g2.setStroke(new BasicStroke(5));
-			//g2.drawOval(w / 10, h / 10, w * 8 / 10, h * 8 / 10);
 			g2.draw(table);
 		}
 		
 		if (hand != null) {
 			g2.setColor(Color.black);
-			g2.setFont(normalfont);
+			g2.setFont(boldfont);
 			g2.drawString(String.format("%s %d-max", hand.game.name, hand.game.max), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}
 
-		if (state == null)
+		if (hs == null)
 			return;
 
 		// pot information
@@ -104,18 +106,18 @@ class TableComponent extends JComponent {
 			int bty = h / 2 - 48;
 			g2.setFont(centrefont);
 			FontMetrics fm = g2.getFontMetrics();
-			String noteStr = String.valueOf(state.note);
+			String noteStr = String.valueOf(hs.note);
 			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
-			String boardStr = state.board != null ? PokerUtil.cardsString(state.board) : "";
+			String boardStr = hs.board != null ? PokerUtil.cardsString(hs.board) : "";
 			g2.drawString(boardStr, btx - fm.stringWidth(boardStr) / 2, bty + 36);
-			String potStr = HandUtil.formatMoney(hand.game.currency, state.pot);
+			String potStr = HandUtil.formatMoney(hand.game.currency, hs.pot);
 			g2.drawString(potStr, btx - fm.stringWidth(potStr) / 2, bty + 72);
 		}
 
-		int max = state.seats.length;
+		int max = hs.seats.length;
 		for (int s = 0; s < max; s++) {
 			// can be null
-			SeatState ss = state.seats[s];
+			SeatState ss = hs.seats[s];
 
 			// seat angle
 			double angle = seatAngle(s, max);
@@ -126,7 +128,7 @@ class TableComponent extends JComponent {
 				seatCol = Color.darkGray;
 			} else if (ss.folded) {
 				seatCol = Color.gray;
-			} else if (state.actionSeat == s) {
+			} else if (hs.actionSeat == s) {
 				seatCol = Color.yellow;
 			} else if (ss.won) {
 				seatCol = Color.orange;
@@ -157,8 +159,8 @@ class TableComponent extends JComponent {
 				List<String> lines = new ArrayList<String>();
 				lines.add(ss.seat.name);
 				lines.add(HandUtil.formatMoney(hand.game.currency, ss.stack));
-				if (!ss.folded) {
-					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[?]");
+				if (!ss.folded || ss.hole != null) {
+					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[unknown]");
 				}
 				if (ss.eq != null) {
 					lines.add(Poker.valueString(ss.eq.current));
@@ -171,13 +173,13 @@ class TableComponent extends JComponent {
 				if (ss.spr > 0) {
 					lines.add(String.format("SPR: %2.1f", ss.spr));
 				}
-				if (state.actionSeat == s || ss.won) {
-					lines.add(ss.won ? "wins" : String.valueOf(HandUtil.actionString(state.hand, state.action)));
+				if (hs.actionSeat == s || ss.won) {
+					lines.add(ss.won ? "wins" : String.valueOf(HandUtil.actionString(hs.hand, hs.action)));
 				}
 				
 				{
-					int texty = (int) (seaty - (lines.size() * 8));
-					g2.setFont(normalfont);
+					int texty = (int) (seaty - (lines.size() * 8) - 4);
+					g2.setFont(boldfont);
 					FontMetrics fm = g2.getFontMetrics();
 					for (String str : lines) {
 						g2.drawString(str, (int) seatx - fm.stringWidth(str) / 2, texty += 16);
@@ -188,7 +190,7 @@ class TableComponent extends JComponent {
 					double betx = seatX(angle, 0.36);
 					double bety = seatY(angle, 0.36);
 					g2.setColor(Color.black);
-					g2.setFont(normalfont);
+					g2.setFont(boldfont);
 					String amountStr = HandUtil.formatMoney(hand.game.currency, ss.amount);
 					if (ss.bpr != 0) {
 						amountStr = String.format("%s (%2.1f%% pot)", amountStr, ss.bpr);
@@ -199,7 +201,7 @@ class TableComponent extends JComponent {
 			}
 
 			// seat button
-			if (state.button == s) {
+			if (hs.button == s) {
 				g2.setColor(Color.gray);
 				double butdis = 0.25;
 				double ao = Math.PI / 9;
@@ -209,7 +211,7 @@ class TableComponent extends JComponent {
 				Shape but = new Ellipse2D.Double(butx - w * butrad, buty - h * butrad, w * butrad * 2, h * butrad * 2);
 				g2.fill(but);
 				g2.setColor(Color.black);
-				g2.setFont(normalfont);
+				g2.setFont(boldfont);
 				g2.drawString("D", (int) butx - 5, (int) buty + 5);
 			}
 		}

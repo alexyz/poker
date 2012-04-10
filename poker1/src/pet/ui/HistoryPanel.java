@@ -55,6 +55,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			}
 		}));
 		
+		pathField.setEditable(false);
 		pathField.setBorder(BorderFactory.createTitledBorder("Path"));
 		pathField.setColumns(50);
 		String home = System.getProperty("user.home");
@@ -70,8 +71,8 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				if (opt == JFileChooser.APPROVE_OPTION) {
 					File f = fc.getSelectedFile();
 					if (f != null) {
-						//pathField.setText(f.toString());
-						PokerFrame.getInstance().getFollow().addFile(f);
+						pathField.setText(f.toString());
+						PokerFrame.getInstance().getFollow().setPath(f);
 					}
 				}
 			}
@@ -81,10 +82,8 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean follow = e.getStateChange() == ItemEvent.SELECTED;
-				if (follow) {
-					PokerFrame.getInstance().getFollow().setPath(new File(pathField.getText()));
-				}
-				PokerFrame.getInstance().getFollow().follow = follow;
+				FollowThread ft = PokerFrame.getInstance().getFollow();
+				ft.setFollow(follow);
 			}
 		});
 		

@@ -36,15 +36,7 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.hand.seats.length;
 			}
 		});
-		/*
-		cols.add(new MyTableModelColumn<HandInfo,Integer>(Integer.class, "MyPos", "My position") {
-			@Override
-			public Integer getValue(HandInfo o) {
-				return o.mypos();
-			}
-		});
-		*/
-		cols.add(new MyTableModelColumn<HandInfo,String>(String.class, "MyPosDesc", "My position description (0=button)") {
+		cols.add(new MyTableModelColumn<HandInfo,String>(String.class, "MyPos", "My position description (0=button)") {
 			@Override
 			public String getValue(HandInfo o) {
 				return o.myposdesc();
