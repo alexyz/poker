@@ -17,6 +17,10 @@ import pet.ui.rep.ReplayPanel;
  */
 public class PokerFrame extends JFrame {
 	
+	// left triangle 25c0, right triangle 25b6 
+	public static final String LEFT_TRI = "\u25c0";
+	public static final String RIGHT_TRI = "\u25b6";
+	
 	private static PokerFrame instance;
 	
 	public static PokerFrame getInstance() {

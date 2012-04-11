@@ -10,6 +10,7 @@ import javax.swing.JComponent;
 
 import pet.eq.Poker;
 import pet.eq.PokerUtil;
+import pet.hp.GameUtil;
 import pet.hp.Hand;
 import pet.hp.HandUtil;
 import pet.hp.state.*;
@@ -92,7 +93,7 @@ class TableComponent extends JComponent {
 		if (hand != null) {
 			g2.setColor(Color.black);
 			g2.setFont(boldfont);
-			g2.drawString(String.format("%s %d-max", hand.game.name, hand.game.max), 18, 18);
+			g2.drawString(String.format("%s %d-max", hand.game.id, hand.game.max), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}
@@ -110,7 +111,7 @@ class TableComponent extends JComponent {
 			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
 			String boardStr = hs.board != null ? PokerUtil.cardsString(hs.board) : "";
 			g2.drawString(boardStr, btx - fm.stringWidth(boardStr) / 2, bty + 36);
-			String potStr = HandUtil.formatMoney(hand.game.currency, hs.pot);
+			String potStr = GameUtil.formatMoney(hand.game.currency, hs.pot);
 			g2.drawString(potStr, btx - fm.stringWidth(potStr) / 2, bty + 72);
 		}
 
@@ -158,9 +159,9 @@ class TableComponent extends JComponent {
 				
 				List<String> lines = new ArrayList<String>();
 				lines.add(ss.seat.name);
-				lines.add(HandUtil.formatMoney(hand.game.currency, ss.stack));
+				lines.add(GameUtil.formatMoney(hand.game.currency, ss.stack));
 				if (!ss.folded || ss.hole != null) {
-					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : "[unknown]");
+					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : GameUtil.getHoleCardString(hs.hand.game.type));
 				}
 				if (ss.eq != null) {
 					lines.add(Poker.valueString(ss.eq.current));
@@ -191,7 +192,7 @@ class TableComponent extends JComponent {
 					double bety = seatY(angle, 0.36);
 					g2.setColor(Color.black);
 					g2.setFont(boldfont);
-					String amountStr = HandUtil.formatMoney(hand.game.currency, ss.amount);
+					String amountStr = GameUtil.formatMoney(hand.game.currency, ss.amount);
 					if (ss.bpr != 0) {
 						amountStr = String.format("%s (%2.1f%% pot)", amountStr, ss.bpr);
 					}

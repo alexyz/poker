@@ -161,12 +161,14 @@ public class FollowThread extends Thread {
 			return pos;
 			
 		} catch (IOException e) {
+			e.printStackTrace(System.out);
+			return offset;
+		} catch (RuntimeException e) {
 			System.out.println("could not parse file " + file);
 			for (String l : parser.getDebug()) {
 				System.out.println(l);
 			}
-			e.printStackTrace(System.out);
-			return offset;
+			throw e;
 		}
 	}
 	

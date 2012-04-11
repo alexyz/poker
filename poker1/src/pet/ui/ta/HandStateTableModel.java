@@ -6,6 +6,7 @@ import java.util.*;
 
 import pet.eq.PokerUtil;
 import pet.hp.Action;
+import pet.hp.GameUtil;
 import pet.hp.HandUtil;
 import pet.hp.state.*;
 
@@ -39,14 +40,14 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
-					String v = HandUtil.formatMoney(h.hand.game.currency, ss.stack);
+					String v = GameUtil.formatMoney(h.hand.game.currency, ss.stack);
 					if (ss.spr > 0) {
 						v += String.format(" (spr %2.1f)", ss.spr);
 					}
 					return v;
 
 				} else {
-					return "Pot: " + HandUtil.formatMoney(h.hand.game.currency, h.pot);
+					return "Pot: " + GameUtil.formatMoney(h.hand.game.currency, h.pot);
 				}
 			}
 		});

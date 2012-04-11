@@ -14,7 +14,9 @@ import pet.hp.*;
  */
 public class PSParser extends Parser implements Serializable {
 
+	private static final TimeZone ET = TimeZone.getTimeZone("US/Eastern");
 	private static final long serialVersionUID = 1;
+	private static final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
 	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
 
@@ -40,7 +42,8 @@ public class PSParser extends Parser implements Serializable {
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** list of completed hands */
 	private final List<Hand> hands = new ArrayList<Hand>();
-	private final Map<String,Game> games = new TreeMap<String,Game>();
+	//private final Map<String,Game> games = new TreeMap<String,Game>();
+	private final List<Game> games = new ArrayList<Game>();
 
 	// transient fields - these probably shouldn't be final
 
@@ -62,6 +65,7 @@ public class PSParser extends Parser implements Serializable {
 	private transient boolean summaryPhase = false;
 	private transient final List<String> debuglines = new ArrayList<String>();
 	public transient boolean debug;
+	private transient String handline;
 
 	public PSParser() {
 		//
@@ -101,6 +105,7 @@ public class PSParser extends Parser implements Serializable {
 		pot = 0;
 		hand = null;
 		debuglines.clear();
+		handline = null;
 	}
 
 	@Override
@@ -137,7 +142,7 @@ public class PSParser extends Parser implements Serializable {
 					hand.streets[n] = street.toArray(new Action[street.size()]);
 				}
 				hand.showdown = showdown;
-				println("end of " + hand);
+				println("end of hand " + hand);
 				hands.add(hand);
 				ret = hand;
 				clear();
@@ -401,6 +406,9 @@ public class PSParser extends Parser implements Serializable {
 		if (line.contains("Tournament")) {
 			throw new RuntimeException("no tournaments");
 		}
+		
+		// get game later
+		handline = line;
 
 		Hand hand = new Hand();
 		int i1 = line.indexOf("#");
@@ -412,12 +420,16 @@ public class PSParser extends Parser implements Serializable {
 		// TODO check if game already exists
 		hand.id = parseLong(line, i1 + 1);
 
-		hand.gamename = cache(line.substring(ns, i4 - 1));
-
 		String datestr = line.substring(ds);
 		try {
 			// 2011/12/31 14:45:08 ET
-			Date date = dateFormat.parse(datestr.replace("ET", "EST"));
+			// 2012/04/11 10:41:17 ET
+			// ET can mean either EDT (summer dst) or EST (winter)
+			// FIXME this is probably parsed as local time zone so could be
+			// wrong by a few hours each year
+			Date d1 = shortDateFormat.parse(datestr.substring(0, datestr.indexOf(" ")));
+			boolean dst = ET.inDaylightTime(d1);
+			Date date = dateFormat.parse(datestr.replace("ET", dst ? "EDT" : "EST"));
 			hand.date = date;
 		} catch (Exception e) {
 			throw new RuntimeException("could not parse date " + datestr, e);
@@ -439,17 +451,28 @@ public class PSParser extends Parser implements Serializable {
 		// Table '493078525 1' 9-max Seat #1 is the button
 		// Table 'bltable.1225797637.1225917089' 6-max
 		// seat 1 is button if unspec
-		int a = line.indexOf("'");
-		int b = line.indexOf("'", a + 1);
-		hand.tablename = cache(line.substring(a + 1, b));
-		int c = line.indexOf("-max");
-		int max = Integer.parseInt(line.substring(c - 1, c));
-		hand.game = getGame(hand.gamename, max);
+		int tableStart = line.indexOf("'");
+		int tableEnd = line.indexOf("'", tableStart + 1);
+		hand.tablename = cache(line.substring(tableStart + 1, tableEnd));
+		println("table " + hand.tablename);
+		
+		// fix limit real money holdem games can be 10 player
+		int maxStart = nextToken(line, tableEnd + 1);
+		int max = parseInt(line, maxStart);
+		if (max == 0 || max > 10) {
+			throw new RuntimeException("invalid max " + line);
+		}
+		
+		// FIXME zoom doesn't include play in text, only in file name
+		//boolean play = line.contains("Play Money");
+		hand.game = getGame(handline, max);
+		
 		int d = line.indexOf("Seat");
 		if (d > 0) {
 			hand.button = Integer.parseInt(line.substring(d + 6, d + 7));
+			
 		} else {
-			println("table " + hand.tablename);
+			// assume button in seat one for zoom
 			hand.button = 1;
 		}
 	}
@@ -473,7 +496,7 @@ public class PSParser extends Parser implements Serializable {
 		boolean newstr = false;
 		boolean ignstr = false;
 
-		if (hand.game.isHoldemType()) {
+		if (hand.game.type == Game.HE_TYPE || hand.game.type == Game.OM_TYPE) {
 			if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
 				newstr = true;
 			} else if (name.equals("HOLE CARDS")) {
@@ -481,7 +504,7 @@ public class PSParser extends Parser implements Serializable {
 			}
 
 
-		} else if (hand.game.isDrawType()) {
+		} else if (hand.game.type == Game.FCD_TYPE) {
 			if (name.equals("DEALING HANDS")) {
 				ignstr = true;
 			}
@@ -576,6 +599,9 @@ public class PSParser extends Parser implements Serializable {
 				if (line.indexOf("small blind", actEnd) > 0) {
 					if (hand.sb == 0) {
 						println("small blind " + amount);
+						if (amount != hand.game.sb) {
+							throw new RuntimeException("invalid small blind");
+						}
 						hand.sb = amount;
 
 					} else {
@@ -585,6 +611,7 @@ public class PSParser extends Parser implements Serializable {
 						pot += amount;
 						amount = 0;
 					}
+					
 					seat.smallblind = true;
 
 				} else if (line.indexOf("small & big blinds", actEnd) > 0) {
@@ -601,6 +628,9 @@ public class PSParser extends Parser implements Serializable {
 
 				} else if (line.indexOf("big blind", actEnd) > 0) {
 					println("big blind " + amount);
+					if (amount != hand.game.bb) {
+						throw new RuntimeException("invalid big blind");
+					}
 					hand.bb = amount;
 					seat.bigblind = true;
 
@@ -829,11 +859,117 @@ public class PSParser extends Parser implements Serializable {
 		}
 	}
 
-	private Game getGame(String gamename, int max) {
-		Game game = games.get(gamename);
-		if (game == null) {
-			game = new Game(gamename, max);
+	/**
+	 * get the game for the hand line and table details
+	 */
+	private Game getGame(String handline, int max) {
+		// PokerStars Game #73347266323:  Omaha Pot Limit ($0.01/$0.02 USD) - 2012/01/05 16:12:04 ET
+		// PokerStars Game #73076810536:  5 Card Draw No Limit (100/200) - 2011/12/31 14:45:08 ET
+		// PokerStars Game #73112640557: Tournament #493078525, 2000+110 Omaha Pot Limit - Level I (10/20) - 2012/01/01 13:43:02 ET
+		// PokerStars Game #73111358128:  Hold'em Pot Limit (100/200) - 2012/01/01 13:19:41 ET
+		// PokerStars Zoom Hand #77405734487:  Omaha Pot Limit ($0.01/$0.02) - 2012/03/18 14:38:20 ET
+		// PokerStars Hand #75934682486:  Mixed NLH/PLO (Hold'em No Limit, 100/200) - 2012/02/20 16:16:13 ET
+		// PokerStars Game #64393043049:  5 Card Draw Pot Limit (5/10) - 2011/07/10 16:33:36 ET
+		
+		char mix = 0;
+		if (handline.contains("Mixed")) {
+			if (handline.contains("Mixed NLH/PLO")) {
+				mix = Game.NLHE_PLO_MIX;
+			} else {
+				throw new RuntimeException("unknown mix type: " + handline);
+			}
 		}
+		
+		char type;
+		if (handline.contains("Hold'em")) {
+			type = Game.HE_TYPE;
+		} else if (handline.contains("Omaha")) {
+			type = Game.OM_TYPE;
+		} else if (handline.contains("5 Card Draw")) {
+			type = Game.FCD_TYPE;
+		} else {
+			throw new RuntimeException("unknown game " + handline);
+		}
+		
+		char currency;
+		if (handline.indexOf("$") >= 0) {
+			currency = '$';
+		} else if (handline.indexOf("€") >= 0) {
+			currency = '€';
+		} else {
+			// assume play
+			currency = Game.PLAY_CURRENCY;
+			//throw new RuntimeException("unknown currency " + handline);
+		}
+		
+		char limit;
+		if (handline.contains("Pot Limit")) {
+			limit = Game.POT_LIMIT;
+		} else if (handline.contains("No Limit")) {
+			limit = Game.NO_LIMIT;
+		} else if (handline.contains("Limit")) {
+			limit = Game.FIXED_LIMIT;
+		} else {
+			throw new RuntimeException("unknown limit " + handline);
+		}
+		
+		char subtype = 0;
+		if (handline.contains("Zoom")) {
+			subtype = Game.ZOOM_SUBTYPE;
+		}
+		
+		int sbStart = handline.indexOf("(");
+		if (sbStart == -1) {
+			throw new RuntimeException("could not get small blind from " + handline);
+		}
+		sbStart += 1;
+		
+		// if there is a comma, move after it
+		// (Hold'em No Limit, 100/200)
+		int c = handline.indexOf(",", sbStart);
+		if (c > 0) {
+			sbStart = c + 2;
+		}
+		
+		int bbStart = handline.indexOf("/", sbStart);
+		if (bbStart == -1) {
+			throw new RuntimeException("could not get big blind from " + handline);
+		}
+		bbStart += 1;
+		
+		int sb = parseMoney(handline, sbStart);
+		int bb = parseMoney(handline, bbStart);
+		if (sb == 0 || bb == 0 || sb > bb) {
+			throw new RuntimeException("could not get blinds from " + handline);
+		}
+		
+		if (limit == Game.FIXED_LIMIT) {
+			// fixed limit has big bet and small bet not blinds
+			bb = sb;
+			sb = sb / 2;
+		}
+		
+		// find game, otherwise create it
+		for (Game game : games) {
+			if (game.currency == currency && game.type == type && game.limit == limit && game.max == max
+					&& game.subtype == subtype && game.sb == sb && game.bb == bb && game.mix == mix) {
+				return game;
+			}
+		}
+		
+		Game game = new Game();
+		game.currency = currency;
+		game.type = type;
+		game.limit = limit;
+		game.max = max;
+		game.subtype = subtype;
+		game.sb = sb;
+		game.bb = bb;
+		game.mix = mix;
+		game.id = GameUtil.getGameId(game);
+		games.add(game);
+		
+		System.out.println("created game " + game);
 		return game;
 	}
 

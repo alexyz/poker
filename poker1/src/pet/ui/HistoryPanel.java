@@ -2,11 +2,8 @@ package pet.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
+import java.awt.datatransfer.*;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.Date;
@@ -15,7 +12,6 @@ import java.util.List;
 import javax.swing.*;
 
 import pet.hp.*;
-import pet.hp.impl.PSParser;
 import pet.hp.info.*;
 
 /**
@@ -46,8 +42,14 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				e.acceptDrop(TransferHandler.LINK);
 				Transferable t = e.getTransferable();
 				try {
-					List<?> files = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 					System.out.println("dropped " + files);
+					if (files != null && files.size() > 0) {
+						FollowThread ft = PokerFrame.getInstance().getFollow();
+						for (File f : files) {
+							ft.addFile(f);
+						}
+					}
 					// TODO add to follow thread
 				} catch (Exception e1) {
 					e1.printStackTrace();
@@ -83,6 +85,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			public void itemStateChanged(ItemEvent e) {
 				boolean follow = e.getStateChange() == ItemEvent.SELECTED;
 				FollowThread ft = PokerFrame.getInstance().getFollow();
+				ft.setPath(new File(pathField.getText()));
 				ft.setFollow(follow);
 			}
 		});

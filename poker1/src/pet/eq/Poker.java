@@ -256,7 +256,7 @@ public abstract class Poker {
 		char c5 = valueFace(value >> 16);
 		switch (value & 0xf00000) {
 			case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
-			case SF_RANK: return "Straight Flush " + c1;
+			case SF_RANK: return "Straight Flush " + c1 + " high";
 			case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
 			case FH_RANK: return "Full House " + c2 + " full of " + c1;
 			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.*;
 import pet.hp.*;
 import pet.hp.state.*;
+import pet.ui.PokerFrame;
 
 /**
  * allows user to replay hands
@@ -14,8 +15,8 @@ public class ReplayPanel extends JPanel {
 
 	private final TableComponent tableComp = new TableComponent();
 	private final JComboBox stateCombo = new JComboBox();
-	private final JButton prevButton = new JButton("<");
-	private final JButton nextButton = new JButton(">");
+	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
+	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 
 	public ReplayPanel() {
 		super(new BorderLayout());

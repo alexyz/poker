@@ -17,8 +17,8 @@ import pet.ui.ta.MyJTable;
 public class HUDPanel extends JPanel implements FollowListener {
 	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
 	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
-	private final JButton prevButton = new JButton("<");
-	private final JButton nextButton = new JButton(">");
+	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
+	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 	private final Date startDate = new Date();
 	
 	public HUDPanel() {

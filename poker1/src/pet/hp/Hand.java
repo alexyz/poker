@@ -13,8 +13,6 @@ public class Hand implements Serializable {
 	public long id;
 	/** game type */
 	public Game game;
-	/** game name */
-	public String gamename;
 	/** hand date */
 	public Date date;
 	/** big blind (if any?) */
@@ -47,7 +45,7 @@ public class Hand implements Serializable {
 	public int uncall;
 	@Override
 	public String toString() {
-		return String.format("Game[%s '%s' at '%s' on %s seats=%s str=%d]", 
+		return String.format("Hand[%s '%s' at '%s' on %s seats=%s str=%d]", 
 				id, game, tablename, date, seats != null ? seats.length : -1, streets != null ? streets.length : -1);
 	}
 	

@@ -37,7 +37,7 @@ public class HandStateUtil {
 			hs = hs.clone();
 			String[] board = HandUtil.getStreetBoard(hand, s);
 			hs.board = board;
-			hs.note = HandUtil.getStreetName(hand.game.type, s);
+			hs.note = GameUtil.getStreetName(hand.game.type, s);
 			hs.action = null;
 			hs.actionSeat = -1;
 			holes.clear();

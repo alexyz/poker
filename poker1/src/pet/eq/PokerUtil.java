@@ -2,7 +2,7 @@ package pet.eq;
 
 import java.awt.Color;
 
-import pet.hp.HandUtil;
+import pet.hp.Game;
 
 /**
  * General utility methods
@@ -49,11 +49,11 @@ public class PokerUtil {
 	 */
 	public static Poker getPoker(char gametype) {
 		switch (gametype) {
-			case HandUtil.FCD_TYPE:
+			case Game.FCD_TYPE:
 				return new DrawPoker();
-			case HandUtil.HE_TYPE:
+			case Game.HE_TYPE:
 				return new HEPoker(false);
-			case HandUtil.OM_TYPE:
+			case Game.OM_TYPE:
 				return new HEPoker(true);
 		}
 		throw new RuntimeException("no poker for type " + gametype);
@@ -78,15 +78,16 @@ public class PokerUtil {
 	 * Get the unicode suit symbol
 	 */
 	public static char suitSymbol(String c, boolean heavy) {
-		/*
-		 * 2660 => ♠ 2661 => ♡ 2662 => ♢ 2663 => ♣ 2664 => ♤ 2665 => ♥ 2666 => ♦ 2667 => ♧
-		 */
 		switch (Poker.suit(c)) {
-		case Poker.C_SUIT: return heavy ? '♣' : '♧';
-		case Poker.D_SUIT: return heavy ? '♦' : '♢';
-		case Poker.H_SUIT: return heavy ? '♥' : '♡';
-		case Poker.S_SUIT: return heavy ? '♠' : '♤';
-		default: return 0;
+			//case Poker.C_SUIT: return heavy ? '\u2663' : '\u2667';
+			//case Poker.D_SUIT: return heavy ? '\u2666' : '\u2662';
+			//case Poker.H_SUIT: return heavy ? '\u2665' : '\u2661';
+			//case Poker.S_SUIT: return heavy ? '\u2660' : '\u2664';
+			case Poker.C_SUIT: return '\u2663';
+			case Poker.D_SUIT: return '\u2662';
+			case Poker.H_SUIT: return '\u2661';
+			case Poker.S_SUIT: return '\u2660';
+			default: return 0;
 		}
 	}
 

@@ -29,7 +29,7 @@ public class PlayerGameInfo {
 	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
 		this.game = game;
-		int s = HandUtil.getMaxStreets(game.type);
+		int s = GameUtil.getMaxStreets(game.type);
 		streetinits = new int[s];
 		streetsseen = new int[s];
 	}

@@ -85,7 +85,7 @@ public class History implements FollowListener {
 		GraphData data = new DateGraphData() {
 			@Override
 			public String getYName(int y) {
-				return HandUtil.formatMoney(currency, y);
+				return GameUtil.formatMoney(currency, y);
 			}
 		};
 		data.name = player + " * " + game;
