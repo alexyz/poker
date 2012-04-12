@@ -8,17 +8,17 @@ import java.util.Arrays;
 public class DrawPoker extends Poker {
 	
 	@Override
-	public HandEq[] equity(String[] board, String[][] hands) {
-		return equity(hands);
+	public HandEq[] equity(String[] board, String[][] hands, String[] blockers) {
+		return equity(hands, blockers);
 	}
 
 	/**
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
-	public HandEq[] equity(String[][] hands) {
+	public HandEq[] equity(String[][] hands, String[] blockers) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
-		final String[] d = ArrayUtil.remove(Poker.FULL_DECK, null, hands);
+		final String[] d = ArrayUtil.remove(Poker.FULL_DECK, null, hands, blockers);
 		final HandEq[] eqs = HandEq.makeHandEqs(hands.length, d.length, false);
 		RandomUtil.shuffle(d);
 		final String[] h = new String[5];

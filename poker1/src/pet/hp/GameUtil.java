@@ -5,54 +5,76 @@ import java.text.NumberFormat;
 import pet.eq.*;
 
 /**
- * Utility methods for game objects
+ * Utility methods for game objects, most methods are just interested in game type
  */
 public class GameUtil {
-	
-	private static final Poker dp = new DrawPoker();
-	private static final Poker he = new HEPoker(false);
-	private static final Poker om = new HEPoker(true);
+
+	/** poker equity functions */
+	private static final Poker drawPoker = new DrawPoker();
+	private static final Poker holdemPoker = new HEPoker(false);
+	private static final Poker omahaPoker = new HEPoker(true);
 	private static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
+	/** get full name of currency */
 	public static String getCurrencyName(char currency) {
 		switch (currency) {
-			case '$': return "USD";
-			case '€': return "EUR";
-			case Game.PLAY_CURRENCY: return "Play";
-			default: throw new RuntimeException("no such currency " + currency);
+			case '$': 
+				return "USD";
+			case '€': 
+				return "EUR";
+			case Game.PLAY_CURRENCY: 
+				return "Play";
+			default: 
+				throw new RuntimeException("no such currency " + currency);
 		}
 	}
 
-	public static String getLimitName(char limit) {
-		switch (limit) {
-			case Game.POT_LIMIT: return "Pot Limit";
-			case Game.NO_LIMIT: return "No Limit";
-			case Game.FIXED_LIMIT: return "Fixed Limit";
-			default: throw new RuntimeException("no such limit " + limit);
+	/** get full name of limit type */
+	public static String getLimitName(char limittype) {
+		switch (limittype) {
+			case Game.POT_LIMIT: 
+				return "Pot Limit";
+			case Game.NO_LIMIT: 
+				return "No Limit";
+			case Game.FIXED_LIMIT: 
+				return "Fixed Limit";
+			default: 
+				throw new RuntimeException("no such limit " + limittype);
 		}
 	}
 
+	/** get full name of game */
 	public static String getGameTypeName(char gametype) {
 		switch (gametype) {
-			case Game.OM_TYPE: return "Omaha";
-			case Game.HE_TYPE: return "Hold'em";
-			case Game.FCD_TYPE: return "5 Card Draw";
-			default: throw new RuntimeException("no such game type " + gametype);
+			case Game.OM_TYPE: 
+				return "Omaha";
+			case Game.HE_TYPE: 
+				return "Hold'em";
+			case Game.FCD_TYPE: 
+				return "5 Card Draw";
+			default: 
+				throw new RuntimeException("no such game type " + gametype);
 		}
 	}
 
+	/** get full name of mixed game type */
 	public static String getMixTypeName(char mixtype) {
 		switch (mixtype) {
-			case Game.NLHE_PLO_MIX: return "Mixed NLH/PLO";
-			default: throw new RuntimeException("unknown mix type " + mixtype);
+			case Game.NLHE_PLO_MIX: 
+				return "Mixed NLH/PLO";
+			default: 
+				throw new RuntimeException("unknown mix type " + mixtype);
 		}
 	}
 
+	/** get full name of game variant */
 	public static String getSubTypeName(char subtype) {
 		switch (subtype) {
-			case Game.ZOOM_SUBTYPE: return "Zoom";
-			default: throw new RuntimeException("unknown subtype type " + subtype);
+			case Game.ZOOM_SUBTYPE: 
+				return "Zoom";
+			default: 
+				throw new RuntimeException("unknown subtype type " + subtype);
 		}
 	}
 
@@ -87,8 +109,23 @@ public class GameUtil {
 				return 2;
 			case Game.OM_TYPE:
 				return 4;
+			default: 
+				throw new RuntimeException("unknown game type " + gametype);
 		}
-		throw new RuntimeException("unknown game type " + gametype);
+	}
+
+	/** return the minimum number of hole cards required for an equity calculation for this game */
+	public static int getMinHoleCards(char gametype) {
+		switch (gametype) {
+			case Game.FCD_TYPE:
+				return 1;
+			case Game.HE_TYPE:
+				return 1;
+			case Game.OM_TYPE:
+				return 2;
+			default: 
+				throw new RuntimeException("unknown game type " + gametype);
+		}
 	}
 
 	/** return a string representing unknown hole cards for this game */
@@ -159,11 +196,11 @@ public class GameUtil {
 	public static Poker getPoker(char gametype) {
 		switch (gametype) {
 			case Game.FCD_TYPE:
-				return dp;
+				return drawPoker;
 			case Game.HE_TYPE:
-				return he;
+				return holdemPoker;
 			case Game.OM_TYPE:
-				return om;
+				return omahaPoker;
 		}
 		throw new RuntimeException("no poker for type " + gametype);
 	}

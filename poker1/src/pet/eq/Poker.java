@@ -44,7 +44,7 @@ public abstract class Poker {
 	/**
 	 * calculate equity for board and hands - implemented by subclass
 	 */
-	public abstract HandEq[] equity(String[] board, String[][] holes);
+	public abstract HandEq[] equity(String[] board, String[][] holes, String[] blockers);
 	
 	/**
 	 * Calculate value of exact hand
@@ -78,6 +78,7 @@ public abstract class Poker {
 		return 0;
 	}
 	
+	/** check non of the cards are duplicated */
 	private static void validate(String[] h) {
 		for (int n = 0; n < h.length; n++) {
 			String c = h[n];
@@ -139,7 +140,7 @@ public abstract class Poker {
 			int v = faceValue(hand[n]) - 1;
 			x |= (1 << v);
 			if (v == 13) {
-				// ace low as well
+				// add ace low as well as ace high
 				x |= 1;
 			}
 		}

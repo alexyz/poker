@@ -124,7 +124,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 
 		String[][] hands = hl.toArray(new String[hl.size()][]);
-		HandEq[] eqs = new HEPoker(!isTexas).equity(board, hands);
+		HandEq[] eqs = new HEPoker(!isTexas).equity(board, hands, null);
 		for (int n = 0; n < eqs.length; n++) {
 			HandEq e = eqs[n];
 			pl.get(n).setHandEquity(e);

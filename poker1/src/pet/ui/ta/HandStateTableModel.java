@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.*;
 
+import pet.eq.Poker;
 import pet.eq.PokerUtil;
 import pet.hp.Action;
 import pet.hp.GameUtil;
@@ -25,17 +26,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				}
 			}
 		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Hole", "Players hole cards or board") {
-			@Override
-			public String getValue(HandState h) {
-				if (h.actionSeat >= 0) {
-					return PokerUtil.cardsString(h.seats[h.actionSeat].seat.hole);
-				} else {
-					return PokerUtil.cardsString(h.board);
-				}
-			}
-		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Stack (SPR)", "Player stack and SPR or pot") {
+		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Pot/Stack", "Player stack and SPR or pot") {
 			@Override
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
@@ -45,10 +36,35 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 						v += String.format(" (spr %2.1f)", ss.spr);
 					}
 					return v;
-
+					
 				} else {
 					return "Pot: " + GameUtil.formatMoney(h.hand.game.currency, h.pot);
 				}
+			}
+		});
+		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Board/Hole", "Players hole cards or board") {
+			@Override
+			public String getValue(HandState h) {
+				if (h.actionSeat >= 0) {
+					SeatState ss = h.seats[h.actionSeat];
+					if (ss.acts <= 1) {
+						return PokerUtil.cardsString(ss.seat.hole);
+					} else {
+						return "";
+					}
+				} else {
+					return PokerUtil.cardsString(h.board);
+				}
+			}
+			@Override
+			public String getToolTip(HandState hs) {
+				if (hs.actionSeat >= 0) {
+					SeatState ss = hs.seats[hs.actionSeat];
+					if (ss.eq != null) {
+						return Poker.valueString(ss.eq.current);
+					}
+				}
+				return null;
 			}
 		});
 		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Action", "Player action") {
@@ -59,7 +75,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 					String v = HandUtil.actionString(h.hand, h.action);
 					if (ss.amount > 0) {
 						if (ss.bpr > 0) {
-							v += String.format(" (%2.1f%% pot)", ss.bpr);
+							v += String.format(" (%2.1f%% p)", ss.bpr);
 						}
 					}
 					return v;
@@ -73,7 +89,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
-					if (ss.eq != null) {
+					if (ss.eq != null && ss.acts <= 1) {
 						String v = String.format("%2.1f%%", ss.eq.won);
 						if (ss.eq.tied > 0) {
 							v += String.format(" (%2.1f%% T)", ss.eq.tied);
@@ -96,7 +112,8 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 
 abstract class HandStateTableModelColumn<T,S> extends MyTableModelColumn<HandState,S> {
 
-	private static final Color playerColour = new Color(224, 255, 224);
+	private static final Color playerColour = new Color(192, 255, 192);
+	private static final Color winColour = new Color(255, 255, 128);
 	private static final Font boldfont = MyJTable.deffont.deriveFont(Font.BOLD);
 	
 	public HandStateTableModelColumn(Class<S> cl, String name, String desc) {
@@ -113,7 +130,7 @@ abstract class HandStateTableModelColumn<T,S> extends MyTableModelColumn<HandSta
 				|| hs.action.type == Action.DOESNTSHOW_TYPE
 				|| hs.action.type == Action.MUCK_TYPE) 
 				&& hs.seats[hs.actionSeat].seat.won > 0) {
-			return Color.orange;
+			return winColour;
 			
 		} else if (hs.seats[hs.actionSeat].seat == hs.hand.myseat) {
 			return playerColour;

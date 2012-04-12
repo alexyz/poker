@@ -80,6 +80,3 @@ public class ReplayPanel extends JPanel {
 		repaint();
 	}
 }
-
-
-

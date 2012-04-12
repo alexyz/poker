@@ -84,9 +84,15 @@ public class PokerFrame extends JFrame {
 	}
 	
 	/** display hand in replayer */
-	public void displayHand(Hand hand) {
+	public void replayHand(Hand hand) {
 		replayPanel.setHand(hand);
 		tabs.setSelectedComponent(replayPanel);
+	}
+	
+	/** display hand in hud */
+	public void hudHand(Hand hand) {
+		hudPanel.nextHand(hand, true);
+		tabs.setSelectedComponent(hudPanel);
 	}
 
 	public void displayBankRoll(GraphData bankRoll) {

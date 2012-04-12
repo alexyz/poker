@@ -30,6 +30,7 @@ public class HandsPanel extends JPanel {
 	private final JTextArea textArea = new JTextArea();
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
+	private final JButton hudButton = new JButton("HUD");
 	private final JScrollPane tableScroller = new JScrollPane(handTable);
 	private List<HandInfo> handInfos;
 
@@ -67,7 +68,14 @@ public class HandsPanel extends JPanel {
 		replayButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				PokerFrame.getInstance().displayHand(getHandInfo().hand);
+				PokerFrame.getInstance().replayHand(getHandInfo().hand);
+			}
+		});
+		
+		hudButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				PokerFrame.getInstance().hudHand(getHandInfo().hand);
 			}
 		});
 
@@ -94,7 +102,7 @@ public class HandsPanel extends JPanel {
 					if (r >= 0) {
 						int sr = handTable.convertRowIndexToModel(r);
 						HandInfo hi = handTable.getModel().getRow(sr);
-						PokerFrame.getInstance().displayHand(hi.hand);
+						PokerFrame.getInstance().replayHand(hi.hand);
 					}
 					System.out.println("double click");
 				}
@@ -113,6 +121,7 @@ public class HandsPanel extends JPanel {
 		
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(replayButton);
+		bottomPanel.add(hudButton);
 
 		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textScroller);
 		add(topPanel, BorderLayout.NORTH);

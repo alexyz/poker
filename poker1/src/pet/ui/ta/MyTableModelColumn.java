@@ -27,4 +27,8 @@ public abstract class MyTableModelColumn<T,S> {
 	public Font getFont(T row) {
 		return null;
 	}
+	
+	public String getToolTip(T row) {
+		return null;
+	}
 }

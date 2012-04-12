@@ -25,7 +25,8 @@ public class MyJTable<T> extends JTable {
 		if (r >= 0 && c >= 0) {
 			// calc tooltip on demand
 			int r2 = convertRowIndexToModel(r);
-			return getModel().getToolTip(r2, c);
+			int c2 = convertColumnIndexToModel(c);
+			return getModel().getToolTip(r2, c2);
 		} else {
 			return null;
 		}
@@ -33,15 +34,16 @@ public class MyJTable<T> extends JTable {
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int r, int c) {
 		Component comp = super.prepareRenderer(renderer, r, c);
-		if (!getSelectionModel().isSelectedIndex(r)) {
-			if (comp instanceof JComponent) {
-				JComponent jcomp = (JComponent)comp;
-				int r2 = convertRowIndexToModel(r);
-				Color col = getModel().getColour(r2, c);
+		if (comp instanceof JComponent) {
+			JComponent jcomp = (JComponent)comp;
+			int r2 = convertRowIndexToModel(r);
+			int c2 = convertColumnIndexToModel(c);
+			if (!getSelectionModel().isSelectedIndex(r)) {
+				Color col = getModel().getColour(r2, c2);
 				jcomp.setBackground(col != null ? col : defcol);
-				Font font = getModel().getFont(r2, c);
-				jcomp.setFont(font != null ? font : deffont);	
 			}
+			Font font = getModel().getFont(r2, c2);
+			jcomp.setFont(font != null ? font : deffont);	
 		}
 		return comp;
 	}

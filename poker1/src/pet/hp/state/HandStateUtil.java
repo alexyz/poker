@@ -28,10 +28,13 @@ public class HandStateUtil {
 			hs.seats[seat.num - 1] = ss;
 		}
 		
+		// equity stuff
 		Poker poker = GameUtil.getPoker(hand.game.type);
 		List<String[]> holes = new ArrayList<String[]>();
 		List<SeatState> holeSeats = new ArrayList<SeatState>();
+		Set<String> blockers = new TreeSet<String>();
 
+		// for each street
 		for (int s = 0; s < hand.streets.length; s++) {
 			// clear bets, place card
 			hs = hs.clone();
@@ -42,20 +45,25 @@ public class HandStateUtil {
 			hs.actionSeat = -1;
 			holes.clear();
 			holeSeats.clear();
+			blockers.clear();
+			
 			for (SeatState ss : hs.seats) {
 				if (ss != null) {
 					hs.pot += ss.amount;
 					ss.amount = 0;
 					ss.eq = null;
+					ss.acts = 0;
 					// get hole cards of live hands
 					if (ss.hole != null && !ss.folded) {
 						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
 						ss.hole = hole;
-						xx
-						// FIXME need to make sure hand has minimum number of cards
-						// but should really pass as blockers...
-						holes.add(ss.hole);
-						holeSeats.add(ss);
+						// make sure hand has minimum number of cards, pass others as blockers
+						if (hole.length > GameUtil.getMinHoleCards(hand.game.type)) {
+							holes.add(ss.hole);
+							holeSeats.add(ss);
+						} else {
+							blockers.addAll(Arrays.asList(hole));
+						}
 					}
 				}
 			}
@@ -67,7 +75,8 @@ public class HandStateUtil {
 			}
 			
 			String[][] holesArr = holes.toArray(new String[holes.size()][]);
-			HandEq[] eqs = poker.equity(hs.board, holesArr);
+			String[] blockersArr = blockers.toArray(new String[blockers.size()]);
+			HandEq[] eqs = poker.equity(hs.board, holesArr, blockersArr);
 			for (int n = 0; n < holeSeats.size(); n++) {
 				SeatState ss = holeSeats.get(n);
 				ss.eq = eqs[n];
@@ -84,6 +93,8 @@ public class HandStateUtil {
 				hs.actionSeat = act.seat.num - 1;
 
 				SeatState ss = hs.seats[act.seat.num - 1];
+				ss.bpr = 0;
+				ss.acts++;
 				
 				if (act.type == Action.FOLD_TYPE) {
 					ss.folded = true;
@@ -92,9 +103,9 @@ public class HandStateUtil {
 					ss.amount += act.amount;
 					if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
 						int potsz = (hs.pot + trail + 2 * lastbet);
-						ss.bpr = potsz != 0 ? (ss.amount * 100f) / potsz : 0;
-					} else {
-						ss.bpr = 0;
+						if (potsz > 0) {
+							ss.bpr = (ss.amount * 100f) / potsz;
+						}
 					}
 					//System.out.println("act " + act);
 					//System.out.println("  pot=" + hs.pot + " trail=" + trail + " (2)lastbet=" + (2*lastbet) + " potsz=" + potsz + " bet=" + ss.amount + " bpr=" + ss.bpr);
@@ -103,6 +114,9 @@ public class HandStateUtil {
 					lastbet = Math.max(lastbet, act.amount);
 					trail += act.amount;
 				}
+				
+				
+				
 				states.add(hs);
 			}
 		}

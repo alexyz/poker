@@ -19,6 +19,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
+	private final JButton replayButton = new JButton("Replay");
 	private final Date startDate = new Date();
 	
 	public HUDPanel() {
@@ -45,16 +46,29 @@ public class HUDPanel extends JPanel implements FollowListener {
 				selectState(1);
 			}
 		});
+		
+		replayButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				HandStates hs = (HandStates) stateCombo.getSelectedItem();
+				if (hs != null) {
+					PokerFrame.getInstance().replayHand(hs.hand);
+				}
+			}
+		});
 
 		JPanel topPanel = new JPanel();
 		topPanel.add(prevButton);
 		topPanel.add(stateCombo);
 		topPanel.add(nextButton);
 		
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(replayButton);
+		
 		JScrollPane tableScroller = new JScrollPane(handTable);
 		add(topPanel, BorderLayout.NORTH);
 		add(tableScroller, BorderLayout.CENTER);
-		
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 
@@ -72,9 +86,13 @@ public class HUDPanel extends JPanel implements FollowListener {
 
 	@Override
 	public void nextHand(Hand hand) {
-		// create handstates, add to list
+		nextHand(hand, false);
+	}
+	
+	public void nextHand(Hand hand, boolean force) {
+		// create hand states, add to list
 		// display most recent in hud
-		if (hand.date.after(startDate)) {
+		if (force || hand.date.after(startDate)) {
 			((DefaultComboBoxModel)stateCombo.getModel()).addElement(new HandStates(hand));
 			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
 		}
@@ -86,26 +104,16 @@ public class HUDPanel extends JPanel implements FollowListener {
 	}
 }
 
+/** represents a list of hand states for a hand */
 class HandStates {
 	public final List<HandState> states;
-	private final Hand hand;
+	public final Hand hand;
 	public HandStates(Hand hand) {
 		this.hand = hand;
-		states = HandStateUtil.getStates(hand);
+		this.states = HandStateUtil.getStates(hand);
 	}
 	@Override
 	public String toString() {
 		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(hand.date);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-

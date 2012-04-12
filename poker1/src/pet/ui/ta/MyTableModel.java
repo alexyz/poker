@@ -75,6 +75,10 @@ public class MyTableModel<T> extends AbstractTableModel {
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html><b>").append(col.desc).append("</b>");
 			sb.append("<br>").append(col.getValue(row));
+			String tip = col.getToolTip(row);
+			if (tip != null && tip.length() > 0) {
+				sb.append("<br>").append(tip).append("</br>");
+			}
 			T population = getPopulation(row);
 			if (population != null) {
 				sb.append("<br><i>").append(col.getPopValue(population)).append(" (population)</i>");

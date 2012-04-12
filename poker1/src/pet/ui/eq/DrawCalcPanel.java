@@ -22,7 +22,7 @@ public class DrawCalcPanel extends CalcPanel {
 		// XXX could be 0
 		String[][] hands = HandCardPanel.getCards(handPanels);
 		if (hands != null) {
-			HandEq[] v = new DrawPoker().equity(hands);
+			HandEq[] v = new DrawPoker().equity(hands, null);
 			for (int n = 0; n < v.length; n++) {
 				handPanels[n].setHandEquity(v[n]);
 			}

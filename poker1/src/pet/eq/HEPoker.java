@@ -26,45 +26,45 @@ public class HEPoker extends Poker {
 	 * Flop and later uses every possible combination of remaining cards.
 	 */
 	@Override
-	public HandEq[] equity(String[] board, String[][] holes) {
-		/*
-		for (String[] hand : holes) {
-			validateHand(hand, board, omaha);
+	public HandEq[] equity(String[] board, String[][] holes, String[] blockers) {
+		// TODO validate here, not in value method
+		if (board != null && board.length >= 3) {
+			return exactEquity(board, holes, blockers);
+		} else {
+			return sampleEquity(holes, blockers);
 		}
-		*/
-		return board != null && board.length >= 3 ? exactEquity(board, holes) : sampleEquity(holes);
 	}
 
 	/**
 	 * Calc exact tex/omaha hand equity for each hand for given flop (can include turn and riv)
 	 */
-	private HandEq[] exactEquity(String[] flop, String[][] holes) {
+	private HandEq[] exactEquity(final String[] boardp, final String[][] holes, final String[] blockers) {
 		//println("flop size: " + flop.length);
 
 		// get current values
 		final int[] vals = new int[holes.length];
 		for (int n = 0; n < holes.length; n++) {
-			vals[n] = value(flop, holes[n]);
+			vals[n] = value(boardp, holes[n]);
 		}
 
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, flop, holes);
+		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, boardp, holes, blockers);
 		//println("cards remaining: " + deck.length);
 
 		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
 		HandEq.updateCurrent(eqs, vals);
 
 		// get equity
-		final String[] board = Arrays.copyOf(flop, 5);
-		final int k = 5 - flop.length;
+		final String[] board = Arrays.copyOf(boardp, 5);
+		final int k = 5 - boardp.length;
 		//println("cards to deal: " + k);
 		final int combs = bincoff(deck.length, k);
 		//println("combinations remaining: " + combs);
 		for (int p = 0; p < combs; p++) {
-			kcomb(k, p, deck, board, flop.length);
+			kcomb(k, p, deck, board, boardp.length);
 			for (int i = 0; i < holes.length; i++) {
 				vals[i] = value(board, holes[i]);
 			}
-			HandEq.updateEquities(eqs, vals, board, flop.length);
+			HandEq.updateEquities(eqs, vals, board, boardp.length);
 		}
 
 		HandEq.summariseEquities(eqs, combs);
@@ -75,8 +75,8 @@ public class HEPoker extends Poker {
 	/**
 	 * Calc sampled tex/omaha hand equity for each hand.
 	 */
-	private HandEq[] sampleEquity(String[][] holes) {
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, holes);
+	private HandEq[] sampleEquity(final String[][] holes, final String[] blockers) {
+		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, holes, blockers);
 		final String[] board = new String[5];
 		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, false);
 
