@@ -2,11 +2,16 @@ package pet.hp;
 
 import java.text.NumberFormat;
 
+import pet.eq.*;
+
 /**
  * Utility methods for game objects
  */
 public class GameUtil {
-
+	
+	private static final Poker dp = new DrawPoker();
+	private static final Poker he = new HEPoker(false);
+	private static final Poker om = new HEPoker(true);
 	private static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
@@ -86,15 +91,15 @@ public class GameUtil {
 		throw new RuntimeException("unknown game type " + gametype);
 	}
 
-	/** returna string representing unknown hole cards for this game */
+	/** return a string representing unknown hole cards for this game */
 	public static String getHoleCardString(char gametype) {
 		switch (gametype) {
 			case Game.FCD_TYPE:
-				return "[][][][][]";
+				return "[ ][ ][ ][ ][ ]";
 			case Game.HE_TYPE:
-				return "[][]";
+				return "[ ][ ]";
 			case Game.OM_TYPE:
-				return "[][][][]";
+				return "[ ][ ][ ][ ]";
 		}
 		throw new RuntimeException("unknown game type " + gametype);
 	}
@@ -146,6 +151,21 @@ public class GameUtil {
 				return nf.format(amount);
 			default: throw new RuntimeException("unknown currency " + currency);
 		}
+	}
+
+	/**
+	 * Get poker equity function for game type
+	 */
+	public static Poker getPoker(char gametype) {
+		switch (gametype) {
+			case Game.FCD_TYPE:
+				return dp;
+			case Game.HE_TYPE:
+				return he;
+			case Game.OM_TYPE:
+				return om;
+		}
+		throw new RuntimeException("no poker for type " + gametype);
 	}
 
 }

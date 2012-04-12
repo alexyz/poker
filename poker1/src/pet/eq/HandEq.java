@@ -77,7 +77,7 @@ public class HandEq {
 				} else {
 					e.tiedcount++;
 				}
-				e.wonrankcount[max >> 20]++;
+				e.wonrankcount[Poker.rank(max)]++;
 				
 				// count the cards as outs if this turns losing hand into win/tie or tying hand into win
 				if (cards != null && (!e.curwin || (e.curtie && maxcount == 1))) {

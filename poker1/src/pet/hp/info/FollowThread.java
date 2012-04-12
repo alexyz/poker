@@ -7,7 +7,7 @@ import pet.hp.*;
 
 /**
  * find and parse files in given directory.
- * wait for file changes
+ * scan for file changes
  */
 public class FollowThread extends Thread {
 	
@@ -17,9 +17,8 @@ public class FollowThread extends Thread {
 	private final Map<String,long[]> fileMap = new TreeMap<String,long[]>();
 	/** listeners to send hands to */
 	private final List<FollowListener> listeners = new ArrayList<FollowListener>();
-	/** should scan directory */
+	/** should scan directory or just wait */
 	private volatile boolean follow;
-	
 	/** directory to scan */
 	private File dir;
 	/** files to parse */
@@ -38,6 +37,7 @@ public class FollowThread extends Thread {
 		listeners.add(l);
 	}
 	
+	/** set the directory to scan for changes in. does nothing if file is not a directory */
 	public synchronized void setPath(File dir) {
 		if (dir.isDirectory()) {
 			System.out.println("follow " + dir);
@@ -47,12 +47,15 @@ public class FollowThread extends Thread {
 		}
 	}
 	
+	/** set whether the thread is currently scanning for file changes */
 	public synchronized void setFollow(boolean follow) {
 		System.out.println("follow " + follow);
 		this.follow = follow;
+		// wake up the follow thread
 		notify();
 	}
 	
+	/** unconditionally parse the given file */
 	public synchronized void addFile(File file) {
 		System.out.println("added file " + file);
 		files.add(file);

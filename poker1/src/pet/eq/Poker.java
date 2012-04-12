@@ -20,10 +20,12 @@ public abstract class Poker {
 	private static final int FK_RANK = 7 << 20;
 	private static final int SF_RANK = 8 << 20;
 	private static final int LOW_RANK = 9 << 20;
+	/** number of ranks */
+	public static final int RANKS = 10;
 	/**
 	 * short rank names (value >> 20)
 	 */
-	public static final String[] ranknames = { "H", "P", "2P", "3K", "S", "F", "FH", "4K", "SF" };
+	public static final String[] ranknames = { "H", "P", "2P", "3K", "S", "F", "FH", "4K", "SF", "L" };
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
 	/** complete deck */
@@ -35,23 +37,20 @@ public abstract class Poker {
 		"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
 		"Ah", "As", "Ac", "Ad" 
 	};
+	
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
 
-	private final String[] hand = new String[5];
-	public boolean debug;
-	
 	/**
 	 * calculate equity for board and hands - implemented by subclass
 	 */
 	public abstract HandEq[] equity(String[] board, String[][] holes);
-
-	protected void println(String s) {
-		if (debug) {
-			System.out.println(s);
-		}
-	}
-
+	
+	/**
+	 * Calculate value of exact hand
+	 */
+	public abstract int value(String[] board, String[] hole);
+	
 	/**
 	 * does the 5 card hand qualify for low
 	 */
@@ -67,7 +66,7 @@ public abstract class Poker {
 	/**
 	 * get low value of hand... FIXME untested
 	 */
-	public int lowValue(String[] hand) {
+	public static int lowValue(String[] hand) {
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
 			if ((p & 0xf00000) == H_RANK) {
@@ -79,7 +78,7 @@ public abstract class Poker {
 		return 0;
 	}
 	
-	private void validate(String[] h) {
+	private static void validate(String[] h) {
 		for (int n = 0; n < h.length; n++) {
 			String c = h[n];
 			if ("23456789TJQKA".indexOf(face(c)) == -1 || "hdsc".indexOf(suit(c)) == -1) {
@@ -96,63 +95,61 @@ public abstract class Poker {
 	/**
 	 * Get high value of 5 card hand
 	 */
-	public int value(String[] handp) {
-		// copy so we can sort
-		ArrayUtil.copy(handp, hand);
-		ArrayUtil.sort(hand, Cmp.faceCmp);
-		//validate(hand);
-		int f = isFlush(hand);
-		int s = isStraight(hand);
-		if (f != 0) {
-			if (s != 0) {
-				return SF_RANK | (s & 0xfffff);
-			} else {
-				return f;
+	public static int value(String[] hand) {
+		validate(hand);
+		int p = isPair(hand, true);
+		if ((p & 0xf00000) == H_RANK) {
+			boolean f = isFlush(hand);
+			int s = isStraight(hand);
+			if (f) {
+				if (s > 0) {
+					return SF_RANK | s;
+				} else {
+					return FL_RANK | p;
+				}
+			} else if (s > 0) {
+				return ST_RANK | s;
 			}
-		} else if (s != 0) {
-			return s;
 		}
-		return isPair(hand, true);
+		return p;
 	}
-
+	
 	/**
-	 * return flush rank or zero. requires sorted hand
+	 * return true if flush
 	 */
-	private static int isFlush(String[] hand) {
+	private static boolean isFlush(String[] hand) {
 		char s = suit(hand[0]);
 		for (int n = 1; n < 5; n++) {
 			if (suit(hand[n]) != s) {
-				return 0;
+				return false;
 			}
 		}
-		// requires sorted hand
-		return FL_RANK | (faceValue(hand[0]) << 16) + (faceValue(hand[1]) << 12) + (faceValue(hand[2]) << 8) + (faceValue(hand[3]) << 4) + faceValue(hand[4]);
+		return true;
 	}
 
-	/**
-	 * return straight rank or zero. requires sorted hand
+	/** 
+	 * return value of high card of straight or 0 
 	 */
 	private static int isStraight(String[] hand) {
-		// requires sorted hand
-		// max str is AKJQT
-		// min str is A5432
-		int v0 = faceValue(hand[0]);
-		int v = faceValue(hand[1]);
-		int hc = 0;
-		if (v0 == 14 && v == 5) {
-			hc = 5;
-		} else if (v0 == v + 1) {
-			hc = v0;
-		}
-		if (hc != 0) {
-			for (int n = 2; n < 5; n++) {
-				int vn = faceValue(hand[n]);
-				if (v != vn + 1) {
-					return 0;
-				}
-				v = vn;
+		int x = 0;
+		// straight value
+		int str = 5;
+		for (int n = 0; n < hand.length; n++) {
+			// sub 1 so bottom bit equals ace low
+			int v = faceValue(hand[n]) - 1;
+			x |= (1 << v);
+			if (v == 13) {
+				// ace low as well
+				x |= 1;
 			}
-			return ST_RANK | hc;
+		}
+		// [11111000000001]
+		while (x >= 31) {
+			if ((x & 31) == 31) {
+				return str;
+			}
+			x >>= 1;
+			str++;
 		}
 		return 0;
 	}
@@ -224,9 +221,9 @@ public abstract class Poker {
 	}
 
 	/**
-	 * Returns lowercase character representing suit, i.e. s, d, h or c
+	 * Returns lower case character representing suit, i.e. s, d, h or c
 	 */
-	public static final char suit(String card) {
+	public static char suit(String card) {
 		return card.charAt(1);
 	}
 
@@ -271,6 +268,11 @@ public abstract class Poker {
 
 	public static char face(String card) {
 		return card.charAt(0);
+	}
+	
+	/** return rank of hand, from 0 to 9 */
+	public static int rank(int value) {
+		return value >> 20;
 	}
 	
 }

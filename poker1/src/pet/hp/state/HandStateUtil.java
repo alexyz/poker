@@ -28,7 +28,7 @@ public class HandStateUtil {
 			hs.seats[seat.num - 1] = ss;
 		}
 		
-		Poker poker = PokerUtil.getPoker(hand.game.type);
+		Poker poker = GameUtil.getPoker(hand.game.type);
 		List<String[]> holes = new ArrayList<String[]>();
 		List<SeatState> holeSeats = new ArrayList<SeatState>();
 
@@ -51,6 +51,9 @@ public class HandStateUtil {
 					if (ss.hole != null && !ss.folded) {
 						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
 						ss.hole = hole;
+						xx
+						// FIXME need to make sure hand has minimum number of cards
+						// but should really pass as blockers...
 						holes.add(ss.hole);
 						holeSeats.add(ss);
 					}

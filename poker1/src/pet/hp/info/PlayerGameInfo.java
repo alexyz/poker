@@ -1,34 +1,53 @@
 package pet.hp.info;
 
+import pet.eq.*;
 import pet.hp.*;
 
+/**
+ * statistics for a particular player and game
+ */
 public class PlayerGameInfo {
+	/** the player in question */
 	public final PlayerInfo player;
+	/** the game in question (from the hand parser) */
 	public final Game game;
+	
+	/** how much rake this player contributed */
 	public int rake = 0;
-	/** hands in this game */
+	/** hands for this game */
 	public int hands;
 	/** hands where the player won something */
 	public int handswon = 0;
-	/** amount won and lost */
+	/** total amount won (not lost) */
 	public int won = 0;
+	/** number of hands won by rank */
+	public int[] rankwon = new int[Poker.RANKS];
+	/** number of hands lost by rank */
+	public int[] ranklost = new int[Poker.RANKS];
+	/** amount won - pip by rank */
+	public int[] rankam = new int[Poker.RANKS];
+	/** total amount put in pot (and called?) */
 	public int pip = 0;
-	
-	/** number of hands that were won at showdown */
+	/** number of hands that were won at show down */
 	private int handswonshow;
-	/** hands that went to showdown */
+	/** hands that went to show down */
 	private int showdownsseen;
+	/** number of times check/folded, called and raised */
 	private int checkfold, checkcall, checkraise;
 	/** number of times each action performed */
 	private final int[] actionCount = new int[Action.TYPES];
 	/** total amount of each action performed */
 	private final int[] actionAmount = new int[Action.TYPES];
+	/** number of times initiative was taken on each street */
 	private final int[] streetinits;
+	/** number of times each street was seen */
 	private final int[] streetsseen;
 	
+	/** create play game info for the given player and game */
 	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
 		this.game = game;
+		
 		int s = GameUtil.getMaxStreets(game.type);
 		streetinits = new int[s];
 		streetsseen = new int[s];
@@ -52,7 +71,17 @@ public class PlayerGameInfo {
 			handswon++;
 			won += seat.won;
 			// over counts rake if split
+			// TODO should just divide by number of winners
 			rake += hand.rake;
+		}
+		
+		// count winning rank.. if you dare!
+		if (seat.showdown) {
+			Poker p = GameUtil.getPoker(hand.game.type);
+			int v = p.value(hand.board, seat.hole);
+			int r = Poker.rank(v);
+			(seat.won > 0 ? rankwon : ranklost)[r]++;
+			rankam[r]+=seat.won-seat.pip;
 		}
 		
 		// update player game info with actions
@@ -217,7 +246,14 @@ public class PlayerGameInfo {
 			}
 		}
 		sb.append("Show downs:  " + showdownsseen + "\n");
-		sb.append("Showdown wins:  " + handswonshow + "\n");
+		sb.append("Show down wins:  " + handswonshow + "\n");
+		for (int n = 0; n < Poker.RANKS; n++) {
+			sb.append("rank ").append(Poker.ranknames[n]);
+			sb.append(" times won ").append(rankwon[n]);
+			sb.append(" times lost ").append(ranklost[n]);
+			sb.append(" amount ").append(rankam[n]);
+			sb.append("\n");
+		}
 		return sb.toString();
 	}
 

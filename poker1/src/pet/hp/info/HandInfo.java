@@ -6,10 +6,12 @@ import pet.hp.*;
 
 /**
  * Provides extra information about a hand suitable for displaying in table,
- * such as position, number to flop, etc
+ * such as position, number to flop, etc, particularly from the point of view of
+ * the current player
  */
 public class HandInfo {
 	
+	/** convert hands to hand infos */
 	public static List<HandInfo> getHandInfos(List<Hand> hands) {
 		List<HandInfo> handInfos = new ArrayList<HandInfo>();
 		for (Hand h : hands) {
@@ -19,11 +21,10 @@ public class HandInfo {
 	}
 	
 	public final Hand hand;
-	public HoleInfo hole;
+	/** the current players hole cards */
+	public final HoleInfo hole;
 	
-	public Seat winner;
-	public int wonOn;
-	
+	/** create hand info for the given hand */
 	public HandInfo(Hand hand) {
 		this.hand = hand;
 		this.hole = new HoleInfo(hand.myseat.hole);

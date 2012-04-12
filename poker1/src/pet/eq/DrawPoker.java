@@ -49,4 +49,12 @@ public class DrawPoker extends Poker {
 		return eqs;
 	}
 	
+	@Override
+	public int value(String[] board, String[] hole) {
+		if (board != null || hole.length != 5) {
+			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
+		}
+		return value(hole);
+	}
+	
 }

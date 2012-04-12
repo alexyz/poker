@@ -2,8 +2,6 @@ package pet.eq;
 
 import java.awt.Color;
 
-import pet.hp.Game;
-
 /**
  * General utility methods
  */
@@ -45,21 +43,6 @@ public class PokerUtil {
 	}
 
 	/**
-	 * Get poker equity function for game type
-	 */
-	public static Poker getPoker(char gametype) {
-		switch (gametype) {
-			case Game.FCD_TYPE:
-				return new DrawPoker();
-			case Game.HE_TYPE:
-				return new HEPoker(false);
-			case Game.OM_TYPE:
-				return new HEPoker(true);
-		}
-		throw new RuntimeException("no poker for type " + gametype);
-	}
-
-	/**
 	 * Return colour of suit
 	 */
 	public static Color suitColour (char s) {
@@ -84,8 +67,8 @@ public class PokerUtil {
 			//case Poker.H_SUIT: return heavy ? '\u2665' : '\u2661';
 			//case Poker.S_SUIT: return heavy ? '\u2660' : '\u2664';
 			case Poker.C_SUIT: return '\u2663';
-			case Poker.D_SUIT: return '\u2662';
-			case Poker.H_SUIT: return '\u2661';
+			case Poker.D_SUIT: return heavy ? '\u2666' : '\u2662';
+			case Poker.H_SUIT: return heavy ? '\u2665' : '\u2661';
 			case Poker.S_SUIT: return '\u2660';
 			default: return 0;
 		}
