@@ -1,6 +1,5 @@
 package pet.eq;
 
-import static pet.eq.MathsUtil.*;
 import java.util.Arrays;
 
 /**
@@ -39,28 +38,28 @@ public class HEPoker extends Poker {
 	 * Calc exact tex/omaha hand equity for each hand for given flop (can include turn and riv)
 	 */
 	private HandEq[] exactEquity(final String[] boardp, final String[][] holes, final String[] blockers) {
-		//println("flop size: " + flop.length);
+		// cards not used by hands or board
+		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, boardp, holes, blockers);
+		//println("cards remaining: " + deck.length);
 
-		// get current values
+		// return value
+		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
+		
+		// get current hand values (not equity)
 		final int[] vals = new int[holes.length];
 		for (int n = 0; n < holes.length; n++) {
 			vals[n] = value(boardp, holes[n]);
 		}
-
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, boardp, holes, blockers);
-		//println("cards remaining: " + deck.length);
-
-		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
 		HandEq.updateCurrent(eqs, vals);
 
 		// get equity
 		final String[] board = Arrays.copyOf(boardp, 5);
 		final int k = 5 - boardp.length;
 		//println("cards to deal: " + k);
-		final int combs = bincoff(deck.length, k);
+		final int combs = MathsUtil.bincoff(deck.length, k);
 		//println("combinations remaining: " + combs);
 		for (int p = 0; p < combs; p++) {
-			kcomb(k, p, deck, board, boardp.length);
+			MathsUtil.kcomb(k, p, deck, board, boardp.length);
 			for (int i = 0; i < holes.length; i++) {
 				vals[i] = value(board, holes[i]);
 			}
@@ -127,12 +126,12 @@ public class HEPoker extends Poker {
 		final int min = omaha ? 2 : 0;
 		int hv = 0;
 		for (int n = min; n <= 2; n++) {
-			final int nh = bincoff(hole.length, n);
-			final int nb = bincoff(board.length, 5 - n);
+			final int nh = MathsUtil.bincoff(hole.length, n);
+			final int nb = MathsUtil.bincoff(board.length, 5 - n);
 			for (int kh = 0; kh < nh; kh++) {
-				kcomb(n, kh, hole, hand, 0);
+				MathsUtil.kcomb(n, kh, hole, hand, 0);
 				for (int kb = 0; kb < nb; kb++) {
-					kcomb(5 - n, kb, board, hand, n);
+					MathsUtil.kcomb(5 - n, kb, board, hand, n);
 					final int v = value(hand);
 					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
 					if (v > hv) {

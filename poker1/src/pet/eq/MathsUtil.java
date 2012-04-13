@@ -59,6 +59,7 @@ public class MathsUtil {
 	 * Get the k combination at position p and write from 'from' into 'to' at offset.
 	 */
 	static void kcomb(final int k, int p, final Object[] from, Object[] to, final int off) {
+		//System.out.println("kcomb(" + k + "," + p + "," + from.length + "," + to.length + "," + off + ")");
 		// for each digit (starting at the last)
 		for (int b = k; b >= 1; b--) {
 			// find biggest bin coff that will fit p

@@ -3,6 +3,7 @@ package pet.hp;
 import java.util.*;
 
 import pet.eq.Cmp;
+import pet.eq.DrawPoker;
 
 /**
  * Utilities for hands (no analysis - see HandInfo)
@@ -47,7 +48,7 @@ public class HandUtil {
 	}
 	
 	/**
-	 * this method is tragically naive
+	 * get the hole cards the player kept
 	 */
 	private static String[] kept(String[] hole1, String[] hole2, int discards) {
 		String[] kept = new String[5 - discards];
@@ -80,10 +81,7 @@ public class HandUtil {
 					
 				} else if (seat.hole != null) {
 					// guess what cards the opponent kept
-					h = new String[5 - seat.discards];
-					for (int n = 0; n < h.length; n++) {
-						h[n] = seat.hole[n];
-					}
+					h = DrawPoker.getHand(seat.hole, seat.discards);
 				}
 				break;
 			case Game.HE_TYPE:
@@ -107,14 +105,13 @@ public class HandUtil {
 	public static String actionString(Hand hand, Action action) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Action.TYPENAME[action.type]);
-		if (action.amount != 0) {
+		if (action.type == Action.DRAW_TYPE) {
+			sb.append(" ").append(action.seat.discards);
+		} else if (action.amount != 0) {
 			sb.append(" ").append(GameUtil.formatMoney(hand.game.currency, action.amount));
-		}
-		if (action.seat.discards > 0) {
-			sb.append(" discards ").append(action.seat.discards);
-		}
-		if (action.allin) {
-			sb.append(" all in");
+			if (action.allin) {
+				sb.append(" all in");
+			}
 		}
 		return sb.toString();
 	}

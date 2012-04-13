@@ -8,12 +8,13 @@ import java.util.*;
 import javax.swing.*;
 
 import pet.hp.Hand;
-import pet.hp.state.HandState;
-import pet.hp.state.HandStateUtil;
+import pet.hp.state.*;
 import pet.hp.info.FollowListener;
-import pet.ui.ta.HandStateTableModel;
-import pet.ui.ta.MyJTable;
+import pet.ui.ta.*;
 
+/**
+ * displays a table with details for the last hand
+ */
 public class HUDPanel extends JPanel implements FollowListener {
 	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
 	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
@@ -92,9 +93,24 @@ public class HUDPanel extends JPanel implements FollowListener {
 	public void nextHand(Hand hand, boolean force) {
 		// create hand states, add to list
 		// display most recent in hud
+		DefaultComboBoxModel model = (DefaultComboBoxModel)stateCombo.getModel();
+		
+		if (force) {
+			for (int n = 0; n < model.getSize(); n++) {
+				HandStates hs = (HandStates) model.getElementAt(n);
+				if (hs.hand == hand) {
+					// already present, just select
+					stateCombo.setSelectedIndex(n);
+					return;
+				}
+			}
+		}
+		
 		if (force || hand.date.after(startDate)) {
-			// FIXME don't add if force and already present
-			((DefaultComboBoxModel)stateCombo.getModel()).addElement(new HandStates(hand));
+			if (model.getSize() > 100) {
+				model.removeElementAt(0);
+			}
+			model.addElement(new HandStates(hand));
 			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
 		}
 	}

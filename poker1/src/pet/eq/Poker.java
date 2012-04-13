@@ -10,16 +10,16 @@ public abstract class Poker {
 	/**
 	 * Rank masks (allowing 20 bits for hand value, i.e. 4 bits per card)
 	 */
-	private static final int H_RANK = 0;
-	private static final int P_RANK = 1 << 20;
-	private static final int TP_RANK = 2 << 20;
-	private static final int TK_RANK = 3 << 20;
-	private static final int ST_RANK = 4 << 20;
-	private static final int FL_RANK = 5 << 20;
-	private static final int FH_RANK = 6 << 20;
-	private static final int FK_RANK = 7 << 20;
-	private static final int SF_RANK = 8 << 20;
-	private static final int LOW_RANK = 9 << 20;
+	protected static final int H_RANK = 0;
+	protected static final int P_RANK = 1 << 20;
+	protected static final int TP_RANK = 2 << 20;
+	protected static final int TK_RANK = 3 << 20;
+	protected static final int ST_RANK = 4 << 20;
+	protected static final int FL_RANK = 5 << 20;
+	protected static final int FH_RANK = 6 << 20;
+	protected static final int FK_RANK = 7 << 20;
+	protected static final int SF_RANK = 8 << 20;
+	protected static final int LOW_RANK = 9 << 20;
 	/** number of ranks */
 	public static final int RANKS = 10;
 	/**
@@ -254,7 +254,7 @@ public abstract class Poker {
 		char c5 = valueFace(value >> 16);
 		switch (value & 0xf00000) {
 			case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
-			case SF_RANK: return "Straight Flush " + c1 + " high";
+			case SF_RANK: return "Straight Flush - " + c1 + " high";
 			case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
 			case FH_RANK: return "Full House " + c2 + " full of " + c1;
 			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;

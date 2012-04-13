@@ -75,7 +75,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 					String v = HandUtil.actionString(h.hand, h.action);
 					if (ss.amount > 0) {
 						if (ss.bpr > 0) {
-							v += String.format(" (%2.1f%% p)", ss.bpr);
+							v += String.format(" (%2.1f%%)", ss.bpr);
 						}
 					}
 					return v;

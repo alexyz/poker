@@ -1,6 +1,5 @@
 package pet.hp.impl;
 
-import java.io.*;
 import java.text.*;
 import java.util.*;
 
@@ -425,7 +424,7 @@ public class PSParser extends Parser {
 		Hand hand = new Hand();
 		int i1 = line.indexOf("#");
 		int i2 = line.indexOf(":", i1);
-		int ns = nextToken(line, i2);
+		//int ns = nextToken(line, i2);
 		int i4 = line.indexOf("-", i2);
 		int ds = nextToken(line, i4);
 
@@ -566,6 +565,7 @@ public class PSParser extends Parser {
 			case Action.DOESNTSHOW_TYPE:
 				// NSavov: checks 
 				// scotty912: doesn't show hand
+				// not sure what difference is between muck and doesn't show
 				break;
 
 			case Action.FOLD_TYPE: {

@@ -1,7 +1,5 @@
 package pet.hp.info;
 
-import java.util.List;
-
 import pet.eq.*;
 import pet.hp.*;
 

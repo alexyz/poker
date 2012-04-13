@@ -20,7 +20,9 @@ public class Action {
 	public static final byte SHOW_TYPE = 9;
 	public static final byte DRAW_TYPE = 10;
 	public static final byte STANDPAT_TYPE = 11;
+	/** uncalled bet returned to player */
 	public static final byte UNCALL_TYPE = 12;
+	/** win */
 	public static final byte COLLECT_TYPE = 13;
 	/** total number of types */
 	public static final int TYPES = 14;
