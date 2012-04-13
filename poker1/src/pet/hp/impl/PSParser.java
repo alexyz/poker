@@ -12,10 +12,9 @@ import pet.hp.*;
  * TODO file/line/offset link
  * TODO tournaments and oh/l
  */
-public class PSParser extends Parser implements Serializable {
+public class PSParser extends Parser {
 
 	private static final TimeZone ET = TimeZone.getTimeZone("US/Eastern");
-	private static final long serialVersionUID = 1;
 	private static final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
 	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
@@ -36,8 +35,6 @@ public class PSParser extends Parser implements Serializable {
 		actionMap.put("stands", Action.STANDPAT_TYPE);
 	}
 
-	// persisted fields
-
 	/** string cache to avoid multiple instances of same string */
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** list of completed hands */
@@ -45,27 +42,24 @@ public class PSParser extends Parser implements Serializable {
 	//private final Map<String,Game> games = new TreeMap<String,Game>();
 	private final List<Game> games = new ArrayList<Game>();
 
-	// transient fields - these probably shouldn't be final
+	public boolean debug;
 
 	/** map of player name to seat for current hand */
 	// TODO see if hashmap or array is faster
-	private transient final Map<String,Seat> seatsMap = new TreeMap<String,Seat>();
-	/** array of seat num to seat pip for this street */
-	private transient final int[] seatPip = new int[11];
-	private transient int pot;
-	/** list of seats for current hand */
-	//private transient final List<Seat> seatsList = new ArrayList<Seat>();
+	private final Map<String,Seat> seatsMap = new TreeMap<String,Seat>();
+	/** array of seat num to seat pip for this street. seat numbers are 1-10 */
+	private final int[] seatPip = new int[11];
+	private int pot;
 	/** streets of action for current hand */
 	private transient final List<List<Action>> streets = new ArrayList<List<Action>>();
 	/** current hand */
-	private transient Hand hand;
+	private Hand hand;
 	/** hand reached showdown */
-	private transient boolean showdown = false;
+	private boolean showdown = false;
 	/** is in summary phase */
-	private transient boolean summaryPhase = false;
-	private transient final List<String> debuglines = new ArrayList<String>();
-	public transient boolean debug;
-	private transient String handline;
+	private boolean summaryPhase = false;
+	private final List<String> debuglines = new ArrayList<String>();
+	private String handline;
 
 	public PSParser() {
 		//
@@ -230,19 +224,7 @@ public class PSParser extends Parser implements Serializable {
 			println("joins");
 
 		} else if (line.contains("collected")) {
-			// olasz53 collected $1.42 from main pot
-			// NightPred8or collected $1.41 from main pot
-			// olasz53 collected $0.56 from side pot
-			// NightPred8or collected $0.56 from side pot
-			int a = line.indexOf("collected");
-			String name = line.substring(0, a - 1);
-			Seat seat = seatsMap.get(name);
-			if (seat == null) {
-				throw new RuntimeException("could not find seat " + name);
-			}
-			int amount = parseMoney(line, a + 10);
-			seat.won += amount;
-			println("collected " + name + " " + amount);
+			parseCollect(line);
 
 		} else if (line.contains(": ")) {
 			parseAction(line);
@@ -256,6 +238,29 @@ public class PSParser extends Parser implements Serializable {
 		return ret;
 	}
 
+	private void parseCollect(String line) {
+		// olasz53 collected $1.42 from main pot
+		// NightPred8or collected $1.41 from main pot
+		// olasz53 collected $0.56 from side pot
+		// NightPred8or collected $0.56 from side pot
+		int a = line.indexOf("collected");
+		String name = line.substring(0, a - 1);
+		Seat seat = seatsMap.get(name);
+		if (seat == null) {
+			throw new RuntimeException("could not find seat " + name);
+		}
+		int amount = parseMoney(line, a + 10);
+		seat.won += amount;
+		
+		// add the collect as a fake action so the action amounts sum to pot size
+		Action act = new Action(seat);
+		act.amount = -amount;
+		act.type = Action.COLLECT_TYPE;
+		streets.get(streets.size() - 1).add(act);
+		
+		println("collected " + name + " " + amount);
+	}
+
 	private void parseTotal(final String line) {
 		// Total pot $0.30 | Rake $0.01 
 		// Total pot $4.15 Main pot $2.83. Side pot $1.12. | Rake $0.20 
@@ -266,6 +271,7 @@ public class PSParser extends Parser implements Serializable {
 		int a = line.indexOf("Rake");
 		hand.rake = parseMoney(line, a + 5);
 
+		// validate pot size
 		// FIXME remove these
 		int won = 0;
 		int lost = 0;
@@ -279,14 +285,14 @@ public class PSParser extends Parser implements Serializable {
 		if (won != (lost - hand.rake + hand.db)) {
 			throw new RuntimeException("won " + won + " not equal to lost " + lost);
 		}
-		int asum = 0;
+		int asum = hand.db - hand.rake;
 		for (List<Action> str : streets) {
 			for (Action ac : str) {
 				asum += ac.amount;
 			}
 		}
-		if ((asum - hand.uncall) != lost) {
-			throw new RuntimeException("actsum " + (asum - hand.uncall) + " not equal to lost " + lost);
+		if (asum != 0) {
+			throw new RuntimeException("actsum " + asum + " not zero");
 		}
 
 		println("total " + hand.pot + " rake " + hand.rake);
@@ -304,7 +310,13 @@ public class PSParser extends Parser implements Serializable {
 		}
 		//seat.uncalled = amount;
 		seatPip[seat.num] -= amount;
-		hand.uncall = amount;
+		
+		// add the uncall as a fake action so the action amounts sum to pot size
+		Action act = new Action(seat);
+		act.amount = -amount;
+		act.type = Action.UNCALL_TYPE;
+		streets.get(streets.size() - 1).add(act);
+		
 		println("uncalled " + name + " " + amount);
 	}
 
@@ -455,22 +467,22 @@ public class PSParser extends Parser implements Serializable {
 		int tableEnd = line.indexOf("'", tableStart + 1);
 		hand.tablename = cache(line.substring(tableStart + 1, tableEnd));
 		println("table " + hand.tablename);
-		
+
 		// fix limit real money holdem games can be 10 player
 		int maxStart = nextToken(line, tableEnd + 1);
 		int max = parseInt(line, maxStart);
 		if (max == 0 || max > 10) {
 			throw new RuntimeException("invalid max " + line);
 		}
-		
+
 		// FIXME zoom doesn't include play in text, only in file name
 		//boolean play = line.contains("Play Money");
 		hand.game = getGame(handline, max);
-		
+
 		int d = line.indexOf("Seat");
 		if (d > 0) {
 			hand.button = Integer.parseInt(line.substring(d + 6, d + 7));
-			
+
 		} else {
 			// assume button in seat one for zoom
 			hand.button = 1;
@@ -478,6 +490,7 @@ public class PSParser extends Parser implements Serializable {
 	}
 
 	private void parsePhase(final String line) {
+		// posts
 		// *** HOLE CARDS ***
 		// *** FLOP *** [6d 3s Qc]
 		// *** TURN *** [6d 3s Qc] [8s]
@@ -485,8 +498,10 @@ public class PSParser extends Parser implements Serializable {
 		// *** SHOW DOWN ***
 		// *** SUMMARY ***
 
+		// posts
 		// *** DEALING HANDS ***
 		// (discards)
+		// (bets)
 		// *** SHOW DOWN ***
 		// *** SUMMARY ***
 
@@ -541,8 +556,7 @@ public class PSParser extends Parser implements Serializable {
 
 		int actStart = nextToken(line, nameEnd);
 		int actEnd = endToken(line, actStart);
-		Action action = new Action();
-		action.seat = seat;
+		Action action = new Action(seat);
 		action.type = actionMap.get(line.substring(actStart, actEnd));
 		boolean draw = false;
 
@@ -611,7 +625,7 @@ public class PSParser extends Parser implements Serializable {
 						pot += amount;
 						amount = 0;
 					}
-					
+
 					seat.smallblind = true;
 
 				} else if (line.indexOf("small & big blinds", actEnd) > 0) {
@@ -870,7 +884,7 @@ public class PSParser extends Parser implements Serializable {
 		// PokerStars Zoom Hand #77405734487:  Omaha Pot Limit ($0.01/$0.02) - 2012/03/18 14:38:20 ET
 		// PokerStars Hand #75934682486:  Mixed NLH/PLO (Hold'em No Limit, 100/200) - 2012/02/20 16:16:13 ET
 		// PokerStars Game #64393043049:  5 Card Draw Pot Limit (5/10) - 2011/07/10 16:33:36 ET
-		
+
 		char mix = 0;
 		if (handline.contains("Mixed")) {
 			if (handline.contains("Mixed NLH/PLO")) {
@@ -879,7 +893,7 @@ public class PSParser extends Parser implements Serializable {
 				throw new RuntimeException("unknown mix type: " + handline);
 			}
 		}
-		
+
 		char type;
 		if (handline.contains("Hold'em")) {
 			type = Game.HE_TYPE;
@@ -890,7 +904,7 @@ public class PSParser extends Parser implements Serializable {
 		} else {
 			throw new RuntimeException("unknown game " + handline);
 		}
-		
+
 		char currency;
 		if (handline.indexOf("$") >= 0) {
 			currency = '$';
@@ -901,7 +915,7 @@ public class PSParser extends Parser implements Serializable {
 			currency = Game.PLAY_CURRENCY;
 			//throw new RuntimeException("unknown currency " + handline);
 		}
-		
+
 		char limit;
 		if (handline.contains("Pot Limit")) {
 			limit = Game.POT_LIMIT;
@@ -912,43 +926,43 @@ public class PSParser extends Parser implements Serializable {
 		} else {
 			throw new RuntimeException("unknown limit " + handline);
 		}
-		
+
 		char subtype = 0;
 		if (handline.contains("Zoom")) {
 			subtype = Game.ZOOM_SUBTYPE;
 		}
-		
+
 		int sbStart = handline.indexOf("(");
 		if (sbStart == -1) {
 			throw new RuntimeException("could not get small blind from " + handline);
 		}
 		sbStart += 1;
-		
+
 		// if there is a comma, move after it
 		// (Hold'em No Limit, 100/200)
 		int c = handline.indexOf(",", sbStart);
 		if (c > 0) {
 			sbStart = c + 2;
 		}
-		
+
 		int bbStart = handline.indexOf("/", sbStart);
 		if (bbStart == -1) {
 			throw new RuntimeException("could not get big blind from " + handline);
 		}
 		bbStart += 1;
-		
+
 		int sb = parseMoney(handline, sbStart);
 		int bb = parseMoney(handline, bbStart);
 		if (sb == 0 || bb == 0 || sb > bb) {
 			throw new RuntimeException("could not get blinds from " + handline);
 		}
-		
+
 		if (limit == Game.FIXED_LIMIT) {
 			// fixed limit has big bet and small bet not blinds
 			bb = sb;
 			sb = sb / 2;
 		}
-		
+
 		// find game, otherwise create it
 		for (Game game : games) {
 			if (game.currency == currency && game.type == type && game.limit == limit && game.max == max
@@ -956,7 +970,7 @@ public class PSParser extends Parser implements Serializable {
 				return game;
 			}
 		}
-		
+
 		Game game = new Game();
 		game.currency = currency;
 		game.type = type;
@@ -968,7 +982,7 @@ public class PSParser extends Parser implements Serializable {
 		game.mix = mix;
 		game.id = GameUtil.getGameId(game);
 		games.add(game);
-		
+
 		System.out.println("created game " + game);
 		return game;
 	}

@@ -116,6 +116,7 @@ public class GameUtil {
 
 	/** return the minimum number of hole cards required for an equity calculation for this game */
 	public static int getMinHoleCards(char gametype) {
+		// should probably get this from poker instance
 		switch (gametype) {
 			case Game.FCD_TYPE:
 				return 1;
@@ -129,7 +130,7 @@ public class GameUtil {
 	}
 
 	/** return a string representing unknown hole cards for this game */
-	public static String getHoleCardString(char gametype) {
+	public static String unknownCardsString(char gametype) {
 		switch (gametype) {
 			case Game.FCD_TYPE:
 				return "[ ][ ][ ][ ][ ]";

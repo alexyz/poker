@@ -6,6 +6,7 @@ import pet.eq.*;
 import pet.hp.*;
 
 public class HandStateUtil {
+	
 	/**
 	 * convert hand into list of hand states
 	 */
@@ -37,7 +38,6 @@ public class HandStateUtil {
 		// for each street
 		for (int s = 0; s < hand.streets.length; s++) {
 			// clear bets, place card
-			hs = hs.clone();
 			String[] board = HandUtil.getStreetBoard(hand, s);
 			hs.board = board;
 			hs.note = GameUtil.getStreetName(hand.game.type, s);
@@ -56,6 +56,7 @@ public class HandStateUtil {
 					// get hole cards of live hands
 					if (ss.hole != null && !ss.folded) {
 						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
+						Arrays.sort(hole, Cmp.revCardCmp);
 						ss.hole = hole;
 						// make sure hand has minimum number of cards, pass others as blockers
 						if (hole.length > GameUtil.getMinHoleCards(hand.game.type)) {
@@ -82,12 +83,14 @@ public class HandStateUtil {
 				ss.eq = eqs[n];
 			}
 			
-			states.add(hs);
+			states.add(hs.clone());
 			int trail = 0;
 			int lastbet = 0;
+			//int p = hs.pot;
 
 			// player actions for street
 			for (Action act : hand.streets[s]) {
+				System.out.println("act " + act);
 				hs = hs.clone();
 				hs.action = act;
 				hs.actionSeat = act.seat.num - 1;
@@ -99,44 +102,32 @@ public class HandStateUtil {
 				if (act.type == Action.FOLD_TYPE) {
 					ss.folded = true;
 					
-				} else if (act.amount > 0) {
-					ss.amount += act.amount;
-					if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
-						int potsz = (hs.pot + trail + 2 * lastbet);
-						if (potsz > 0) {
-							ss.bpr = (ss.amount * 100f) / potsz;
-						}
-					}
-					//System.out.println("act " + act);
-					//System.out.println("  pot=" + hs.pot + " trail=" + trail + " (2)lastbet=" + (2*lastbet) + " potsz=" + potsz + " bet=" + ss.amount + " bpr=" + ss.bpr);
+				} else if (act.amount != 0) {
+					// pot raise amount
+					int pr = hs.pot + trail + 2 * (lastbet - ss.amount);
+					//System.out.println("  p=" + hs.pot + " t=" + trail + " l=" + lastbet + " sa=" + ss.amount + " => pr=" + pr);
 					
+					ss.amount += act.amount;
+					
+					if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
+						if (pr > 0) {
+							ss.bpr = (act.amount * 100f) / pr;
+							//System.out.println("  aa=" + act.amount + " bpr=" + ss.bpr);
+						}
+						
+					} else if (act.type == Action.COLLECT_TYPE) {
+						ss.won = true;
+						ss.amount = -act.amount;
+					}
+					
+					lastbet = Math.max(lastbet, ss.amount);
 					ss.stack -= act.amount;
-					lastbet = Math.max(lastbet, act.amount);
 					trail += act.amount;
 				}
 				
-				
-				
-				states.add(hs);
+				states.add(hs.clone());
 			}
 		}
-		
-		// collect, return uncalled, showdown
-		hs = hs.clone();
-		hs.board = hand.board; // prob not needed
-		hs.note = "End";
-		hs.actionSeat = -1;
-		//hs.pot = hand.pot;
-		hs.pot = 0;
-		for (int s = 0; s < hand.seats.length; s++) {
-			Seat seat = hand.seats[s];
-			SeatState ss = hs.seats[seat.num - 1];
-			ss.amount = seat.won;
-			ss.won = seat.won > 0;
-			ss.spr = 0;
-			ss.bpr = 0;
-		}
-		states.add(hs);
 		
 		return states;
 	}

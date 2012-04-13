@@ -48,7 +48,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
 					if (ss.acts <= 1) {
-						return PokerUtil.cardsString(ss.seat.hole);
+						return PokerUtil.cardsString(ss.hole);
 					} else {
 						return "";
 					}
@@ -125,11 +125,7 @@ abstract class HandStateTableModelColumn<T,S> extends MyTableModelColumn<HandSta
 		if (hs.actionSeat == -1) {
 			return Color.lightGray;
 			
-			// FIXME bit of a hack to get around the lack of a win hand state
-		} else if ((hs.action.type == Action.SHOW_TYPE 
-				|| hs.action.type == Action.DOESNTSHOW_TYPE
-				|| hs.action.type == Action.MUCK_TYPE) 
-				&& hs.seats[hs.actionSeat].seat.won > 0) {
+		} else if (hs.action.type == Action.COLLECT_TYPE) {
 			return winColour;
 			
 		} else if (hs.seats[hs.actionSeat].seat == hs.hand.myseat) {

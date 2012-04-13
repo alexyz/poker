@@ -1,6 +1,5 @@
 package pet.hp;
 
-import java.text.NumberFormat;
 import java.util.*;
 
 import pet.eq.Cmp;
@@ -108,7 +107,7 @@ public class HandUtil {
 	public static String actionString(Hand hand, Action action) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Action.TYPENAME[action.type]);
-		if (action.amount > 0) {
+		if (action.amount != 0) {
 			sb.append(" ").append(GameUtil.formatMoney(hand.game.currency, action.amount));
 		}
 		if (action.seat.discards > 0) {

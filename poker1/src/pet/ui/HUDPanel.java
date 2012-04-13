@@ -93,6 +93,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 		// create hand states, add to list
 		// display most recent in hud
 		if (force || hand.date.after(startDate)) {
+			// FIXME don't add if force and already present
 			((DefaultComboBoxModel)stateCombo.getModel()).addElement(new HandStates(hand));
 			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
 		}

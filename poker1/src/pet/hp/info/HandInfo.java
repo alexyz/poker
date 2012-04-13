@@ -10,7 +10,7 @@ import pet.hp.*;
  * the current player
  */
 public class HandInfo {
-	
+
 	/** convert hands to hand infos */
 	public static List<HandInfo> getHandInfos(List<Hand> hands) {
 		List<HandInfo> handInfos = new ArrayList<HandInfo>();
@@ -19,17 +19,17 @@ public class HandInfo {
 		}
 		return handInfos;
 	}
-	
+
 	public final Hand hand;
 	/** the current players hole cards */
 	public final HoleInfo hole;
-	
+
 	/** create hand info for the given hand */
 	public HandInfo(Hand hand) {
 		this.hand = hand;
 		this.hole = new HoleInfo(hand.myseat.hole);
 	}
-	
+
 	/**
 	 * Calculate position of player where 0=button
 	 */
@@ -52,7 +52,7 @@ public class HandInfo {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Position and extra relative information
 	 */
@@ -72,7 +72,7 @@ public class HandInfo {
 		}
 		return p + (bb ? " (bb)" : "") + (sb ? " (sb)" : "") + (utg ? " (utg)" : "");
 	}
-	
+
 	/**
 	 * number of people who saw flop (second street)
 	 */
@@ -98,7 +98,7 @@ public class HandInfo {
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * was player last to act on flop?
 	 * return 0 = not in flop, 1 = last, -1 = not last
@@ -130,16 +130,16 @@ public class HandInfo {
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * amount player won in this hand
 	 */
 	public int myvalue() {
 		return hand.myseat.won - hand.myseat.pip;
 	}
-	
+
 	public String getDescription() {
-		StringBuilder sb= new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		sb.append("button " + hand.button + "\n");
 		sb.append("game " + hand.game + "\n");
 		sb.append("date " + hand.date + "\n");

@@ -41,8 +41,6 @@ public class Hand implements Serializable {
 	public String tablename;
 	/** button seat number */
 	public int button;
-	/** uncalled action amount */
-	public int uncall;
 	@Override
 	public String toString() {
 		return String.format("Hand[%s '%s' at '%s' on %s seats=%s str=%d]", 
