@@ -32,7 +32,8 @@ class DeckPanel extends JPanel {
 		for (char s : Poker.suits) {
 			for (String c : deck) {
 				if (Poker.suit(c) == s) {
-					CardLabel cl = new CardLabel(c);
+					CardLabel cl = new CardLabel();
+					cl.setCard(c);
 					cl.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, l);
 					cl.addPropertyChangeListener(CardLabel.CARD_DESEL_PROP_CHANGE, l);
 					add(cl);
@@ -56,26 +57,22 @@ class DeckPanel extends JPanel {
 		}
 	}
 	
-	public void selectCards(List<CardLabel> cls) {
-		for (CardLabel dcl : labels) {
-			for (CardLabel hcl : cls) {
-				if (hcl.getName() != null && dcl.getName().equals(hcl.getName())) {
-					dcl.setCardSelected(true);
-				}
-			}
-		}
-	}
-	
-	public String[] getCards(boolean sel) {
+	/**
+	 * get the unselected cards
+	 */
+	public String[] getCards() {
 		List<String> cards = new ArrayList<String>();
 		for (CardLabel cl : labels) {
-			if (cl.isCardSelected() == sel) {
+			if (!cl.isCardSelected()) {
 				cards.add(cl.getCard());
 			}
 		}
 		return cards.toArray(new String[cards.size()]);
 	}
 
+	/**
+	 * deselect all cards and select the given cards
+	 */
 	public void selectCards(String[] cards) {
 		deselectCards();
 		for (CardLabel cl : labels) {
@@ -87,6 +84,9 @@ class DeckPanel extends JPanel {
 		}
 	}
 
+	/**
+	 * deselect all cards
+	 */
 	public void deselectCards() {
 		for (CardLabel cl : labels) {
 			cl.setCardSelected(false);

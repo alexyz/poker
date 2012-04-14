@@ -10,9 +10,18 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+/**
+ * displays a deck and the game specific calc panel
+ */
 abstract class CalcPanel extends JPanel {
+	
+	/**
+	 * the list of card labels used by the board and player hole cards. subclass
+	 * should add its card labels to this
+	 */
 	protected final List<CardLabel> cardLabels = new ArrayList<CardLabel>();
-	protected final DeckPanel deckPanel = new DeckPanel();
+	private final DeckPanel deckPanel = new DeckPanel();
+	/** currently selected card */
 	private int selcard;
 	private GridBagConstraints c = new GridBagConstraints();
 
@@ -51,6 +60,7 @@ abstract class CalcPanel extends JPanel {
 		c.gridy++;
 	}
 
+	/** add selection listener to all the card labels */
 	protected void initCardLabels() {
 		for (final CardLabel cl : cardLabels) {
 			cl.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, new PropertyChangeListener() {
@@ -66,22 +76,40 @@ abstract class CalcPanel extends JPanel {
 	}
 
 	protected void selectCard(int n) {
+		System.out.println("select card " + n);
 		cardLabels.get(selcard).setCardSelected(false);
 		selcard = n % cardLabels.size();
 		cardLabels.get(selcard).setCardSelected(true);
 	}
 
+	/**
+	 * clear the deck
+	 */
 	protected void clear() {
 		deckPanel.deselectCards();
+	}
+	
+	/**
+	 * Select the deck cards according to cards displayed in the card labels
+	 */
+	protected void updateDeck() {
+		deckPanel.selectCards(CardLabel.getCards(cardLabels));
+	}
+	
+	/**
+	 * get unselected deck cards
+	 */
+	protected String[] getDeck() {
+		return deckPanel.getCards();
 	}
 
 	protected abstract void random(int num);
 
 	protected abstract void calc();
 
+	/** hide the cards in the deck. subclass should also hide opponents hole card */
 	protected void hideOpp(boolean hide) {
 		deckPanel.setCardsHidden(hide);
 	}
-
 
 }

@@ -2,7 +2,7 @@ package pet.ui.eq;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -16,7 +16,10 @@ class CardPanel extends JPanel {
 	private final CardLabel[] cardLabs;
 	private final int mincards;
 	
-	public CardPanel(String name, List<CardLabel> l, int mincards, int maxcards) {
+	/**
+	 * create a card panel with max cards cards
+	 */
+	public CardPanel(String name, int mincards, int maxcards) {
 		super(new BorderLayout());
 		this.mincards = mincards;
 		setBorder(BorderFactory.createTitledBorder(name));
@@ -25,10 +28,18 @@ class CardPanel extends JPanel {
 		for (int n = 0; n < cardLabs.length; n++) {
 			CardLabel cl = new CardLabel();
 			cardLabs[n] = cl;
-			l.add(cl);
 			p.add(cl);
 		}
 		add(p, BorderLayout.WEST);
+	}
+	
+	/**
+	 * Add the card labels to the list
+	 */
+	public void collectCardLabels(List<CardLabel> l) {
+		for (CardLabel cl : cardLabs) {
+			l.add(cl);
+		}
 	}
 	
 	public void clearCards() {
@@ -69,16 +80,10 @@ class CardPanel extends JPanel {
 	}
 	
 	/**
-	 * Get the cards displayed. never returns null
+	 * Get the cards displayed
 	 */
 	public String[] getCards() {
-		List<String> cards = new ArrayList<String>();
-		for (CardLabel cl : cardLabs) { 
-			if (cl.getCard() != null) {
-				cards.add(cl.getCard());
-			}
-		}
-		return cards.toArray(new String[cards.size()]);
+		return CardLabel.getCards(Arrays.asList(cardLabs));
 	}
 	
 	public void setCardsHidden(boolean hide) {

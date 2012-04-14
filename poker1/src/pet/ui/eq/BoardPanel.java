@@ -1,9 +1,7 @@
 package pet.ui.eq;
 
-import java.util.List;
-
 class BoardPanel extends CardPanel {
-	public BoardPanel(List<CardLabel> l) {
-		super("Community Cards", l, 0, 5);
+	public BoardPanel() {
+		super("Community Cards", 0, 5);
 	}
 }

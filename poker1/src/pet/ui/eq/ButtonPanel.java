@@ -15,7 +15,7 @@ class ButtonPanel extends JPanel {
 
 	public ButtonPanel(final CalcPanel t) {
 		// TODO ditch this, move to omahabuttonpanel
-		final JSpinner oppSpin = new JSpinner(new SpinnerNumberModel(2, 1, 3, 1));
+		final JSpinner oppSpin = new JSpinner(new SpinnerNumberModel(2, 1, 6, 1));
 		JCheckBox hideBox = new JCheckBox("Hide Opp.");
 		JButton clearBut = new JButton("Clear");
 		JButton randBut = new JButton("Random");

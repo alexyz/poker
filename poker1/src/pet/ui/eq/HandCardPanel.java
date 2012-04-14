@@ -39,8 +39,8 @@ class HandCardPanel extends CardPanel {
 	private final JLabel outsLab = new JLabel();
 	private final JLabel[] rankLabs = new JLabel[9];
 
-	public HandCardPanel(String name, List<CardLabel> cls, int mincards, int maxcards) {
-		super(name, cls, mincards, maxcards);
+	public HandCardPanel(String name, int mincards, int maxcards) {
+		super(name, mincards, maxcards);
 		equityLab.setFont(boldfont);
 		equityLab.setVerticalAlignment(SwingConstants.CENTER);
 		

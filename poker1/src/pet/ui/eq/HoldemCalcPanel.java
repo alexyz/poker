@@ -7,27 +7,38 @@ import pet.eq.*;
 
 public class HoldemCalcPanel extends CalcPanel {
 	private final BoardPanel boardPanel;
-	private final HandCardPanel[] handPanels = new HandCardPanel[4];
+	private final HandCardPanel[] handPanels = new HandCardPanel[6];
+	// TODO in a random panel
 	private final JCheckBox randHandsBox = new JCheckBox("Hands");
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
 	private final JCheckBox randRiverBox = new JCheckBox("River");
-	private final boolean isTexas;
+	private final boolean omaha;
 	private final int numHoleCards;
 
-	public HoldemCalcPanel(boolean tx) {
-		this.isTexas = tx;
-		this.numHoleCards = tx ? 2 : 4;
-		boardPanel = new BoardPanel(cardLabels);
+	public HoldemCalcPanel(boolean omaha) {
+		this.omaha = omaha;
+		this.numHoleCards = omaha ? 2 : 4;
+		
+		// create board and hands and collect card labels
+		boardPanel = new BoardPanel();
+		boardPanel.collectCardLabels(cardLabels);
 		for (int n = 0; n < handPanels.length; n++) {
-			handPanels[n] = new HoldemHandPanel(cardLabels, n + 1, tx);
+			handPanels[n] = new HoldemHandPanel(n + 1, omaha);
+			handPanels[n].collectCardLabels(cardLabels);
 		}
-		initCardLabels();
-		selectCard(5);
+		
+		// add to layout
 		addgb(boardPanel);
 		for (HandCardPanel hp : handPanels) {
 			addgb(hp);
 		}
+		
+		initCardLabels();
+		
+		// select first hole card
+		selectCard(5);
+		
 		randHandsBox.setSelected(true);
 		randFlopBox.setSelected(true);
 		JPanel p = new JPanel();
@@ -37,6 +48,18 @@ public class HoldemCalcPanel extends CalcPanel {
 		p.add(randRiverBox);
 		addgb(p);
 		addgb(new ButtonPanel(this));
+	}
+	
+	/**
+	 * display the given hand
+	 */
+	public void displayHand(String[] board, String[][] holes) {
+		clear();
+		boardPanel.setCards(board);
+		for (int n = 0; n < holes.length; n++) {
+			handPanels[n].setCards(holes[n]);
+		}
+		updateDeck();
 	}
 
 	@Override
@@ -64,10 +87,12 @@ public class HoldemCalcPanel extends CalcPanel {
 		if (randFlopBox.isSelected() || randTurnBox.isSelected() || randRiverBox.isSelected()) {
 			boardPanel.clearCards(4, 5);
 		}
-		deckPanel.deselectCards();
-		deckPanel.selectCards(cardLabels);
-		String[] deck = deckPanel.getCards(false);
+		
+		// update deck, get remaining cards
+		updateDeck();
+		String[] deck = getDeck();
 		RandomUtil.shuffle(deck);
+		
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
@@ -86,7 +111,8 @@ public class HoldemCalcPanel extends CalcPanel {
 		if (randRiverBox.isSelected()) {
 			boardPanel.setCard(deck[i++], 4);
 		}
-		deckPanel.selectCards(cardLabels);
+		
+		updateDeck();
 		selectCard(5);
 	}
 
@@ -124,7 +150,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 
 		String[][] hands = hl.toArray(new String[hl.size()][]);
-		HandEq[] eqs = new HEPoker(!isTexas).equity(board, hands, null);
+		HandEq[] eqs = new HEPoker(omaha).equity(board, hands, null);
 		for (int n = 0; n < eqs.length; n++) {
 			HandEq e = eqs[n];
 			pl.get(n).setHandEquity(e);
@@ -133,9 +159,11 @@ public class HoldemCalcPanel extends CalcPanel {
 
 	}
 
+	/**
+	 * clear the deck, the board and the hand panels and select first hole card
+	 */
 	@Override
 	public void clear() {
-		// XXX should be in super?
 		super.clear();
 		boardPanel.clearCards();
 		for (HandCardPanel hp : handPanels) {

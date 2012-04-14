@@ -67,7 +67,7 @@ public class DrawPoker extends Poker {
 	}
 
 	/**
-	 * Get the hand the player was drawing at
+	 * Get the players drawing hand
 	 */
 	public static String[] getHand(String[] hand, int drawn) {
 		switch (drawn) {

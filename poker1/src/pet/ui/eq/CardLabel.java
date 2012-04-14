@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -12,14 +14,32 @@ import javax.swing.JLabel;
 import pet.eq.*;
 
 /**
- * label to show individual card
+ * label to show blank or individual card. the name property of the component is the card
  */
 class CardLabel extends JLabel {
+	
 	public static final Font cardfont = new Font("SansSerif", Font.PLAIN, 24);
 	public static String CARD_SEL_PROP_CHANGE = "cardsel", CARD_DESEL_PROP_CHANGE = "carddesel";
 	
+	/**
+	 * get the cards for the card labels that have cards
+	 */
+	public static String[] getCards(List<CardLabel> cardLabels) {
+		List<String> cards = new ArrayList<String>();
+		for (CardLabel cl : cardLabels) {
+			if (cl.getCard() != null) {
+				cards.add(cl.getCard());
+			}
+		}
+		return cards.toArray(new String[cards.size()]);
+	}
+	
 	private boolean selected;
 	private boolean hidden;
+	
+	/**
+	 * create a blank card label
+	 */
 	public CardLabel() {
 		super("  ");
 		setFont(cardfont);
@@ -52,10 +72,6 @@ class CardLabel extends JLabel {
 	public void setCardSelected(boolean sel) {
 		selected = sel;
 		update();
-	}
-	public CardLabel(String c) {
-		this();
-		setCard(c);
 	}
 	public void setCard(String c) {
 		setName(c);

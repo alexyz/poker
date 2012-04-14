@@ -115,5 +115,19 @@ public class HandUtil {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Get all hole cards for hand
+	 */
+	public static String[][] getHoleCards(Hand hand) {
+		List<String[]> holes = new ArrayList<String[]>();
+		for (Seat seat : hand.seats) {
+			if (seat.hole != null && seat.hole.length > 0) {
+				holes.add(seat.hole);
+			}
+		}
+		String[][] holesArr = holes.toArray(new String[holes.size()][]);
+		return holesArr;
+	}
 
 }

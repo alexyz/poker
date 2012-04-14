@@ -36,6 +36,7 @@ public class MyJTable<T> extends JTable {
 		Component comp = super.prepareRenderer(renderer, r, c);
 		if (comp instanceof JComponent) {
 			JComponent jcomp = (JComponent)comp;
+			// need to convert before sending to table model
 			int r2 = convertRowIndexToModel(r);
 			int c2 = convertColumnIndexToModel(c);
 			if (!getSelectionModel().isSelectedIndex(r)) {

@@ -7,7 +7,7 @@ import java.util.*;
 
 import javax.swing.*;
 
-import pet.hp.Hand;
+import pet.hp.*;
 import pet.hp.state.*;
 import pet.hp.info.FollowListener;
 import pet.ui.ta.*;
@@ -20,9 +20,10 @@ public class HUDPanel extends JPanel implements FollowListener {
 	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
+	private final JButton equityButton = new JButton("Equity");
 	private final JButton replayButton = new JButton("Replay");
 	private final Date startDate = new Date();
-	
+
 	public HUDPanel() {
 		super(new BorderLayout());
 
@@ -33,7 +34,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 				handTable.getModel().setRows(states.states);
 			}
 		});
-		
+
 		prevButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -47,7 +48,29 @@ public class HUDPanel extends JPanel implements FollowListener {
 				selectState(1);
 			}
 		});
-		
+
+		equityButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				HandStates hs = (HandStates) stateCombo.getSelectedItem();
+				String[][] holes = HandUtil.getHoleCards(hs.hand);
+				PokerFrame pf = PokerFrame.getInstance();
+				switch (hs.hand.game.type) {
+					case Game.HE_TYPE:
+						pf.displayHoldemEquity(hs.hand.board, holes, false);
+						break;
+					case Game.OM_TYPE:
+						pf.displayHoldemEquity(hs.hand.board, holes, true);
+						break;
+					case Game.FCD_TYPE:
+						pf.displayDrawEquity(holes);
+						break;
+					default:
+						throw new RuntimeException("unknown game type " + hs.hand);
+				}
+			}
+		});
+
 		replayButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -62,16 +85,17 @@ public class HUDPanel extends JPanel implements FollowListener {
 		topPanel.add(prevButton);
 		topPanel.add(stateCombo);
 		topPanel.add(nextButton);
-		
+
 		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(equityButton);
 		bottomPanel.add(replayButton);
-		
+
 		JScrollPane tableScroller = new JScrollPane(handTable);
 		add(topPanel, BorderLayout.NORTH);
 		add(tableScroller, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
-	
+
 
 	private void selectState(int off) {
 		int i = stateCombo.getSelectedIndex();
@@ -86,15 +110,20 @@ public class HUDPanel extends JPanel implements FollowListener {
 	}
 
 	@Override
-	public void nextHand(Hand hand) {
-		nextHand(hand, false);
+	public void nextHand(final Hand hand) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				nextHand(hand, false);
+			}
+		});
 	}
-	
+
 	public void nextHand(Hand hand, boolean force) {
 		// create hand states, add to list
 		// display most recent in hud
 		DefaultComboBoxModel model = (DefaultComboBoxModel)stateCombo.getModel();
-		
+
 		if (force) {
 			for (int n = 0; n < model.getSize(); n++) {
 				HandStates hs = (HandStates) model.getElementAt(n);
@@ -105,7 +134,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 				}
 			}
 		}
-		
+
 		if (force || hand.date.after(startDate)) {
 			if (model.getSize() > 100) {
 				model.removeElementAt(0);
@@ -114,7 +143,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
 		}
 	}
-	
+
 	@Override
 	public void doneFile(int done, int total) {
 		//

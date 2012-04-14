@@ -28,6 +28,7 @@ public class PokerFrame extends JFrame {
 	}
 	
 	public static void main(String[] args) {
+		// os x assumes US if language is english...
 		Locale.setDefault(Locale.UK);
 		try {
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -39,6 +40,7 @@ public class PokerFrame extends JFrame {
 			@Override
 			public void run() {
 				// need to create and pack in awt thread otherwise it can deadlock
+				// due to the java console panel
 				instance = new PokerFrame();
 				instance.setVisible(true);
 			}
@@ -55,13 +57,16 @@ public class PokerFrame extends JFrame {
 	private final HUDPanel hudPanel = new HUDPanel();
 	private final HistoryPanel historyPanel = new HistoryPanel();
 	private final HandsPanel handsPanel = new HandsPanel();
+	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel(false);
+	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel(true);
+	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
 		
-		tabs.addTab("Hold'em", new HoldemCalcPanel(true));
-		tabs.addTab("Omaha", new HoldemCalcPanel(false));
-		tabs.addTab("Draw", new DrawCalcPanel());
+		tabs.addTab("Hold'em", holdemPanel);
+		tabs.addTab("Omaha", omahaPanel);
+		tabs.addTab("Draw", drawPanel);
 		tabs.addTab("History", historyPanel);
 		tabs.addTab("Players", new PlayerPanel());
 		tabs.addTab("Graph", bankrollPanel);
@@ -109,5 +114,15 @@ public class PokerFrame extends JFrame {
 		handsPanel.displayHands(name, gameid);
 		tabs.setSelectedComponent(handsPanel);
 	}
-
+	
+	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha) {
+		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
+		panel.displayHand(board, holes);
+		tabs.setSelectedComponent(panel);
+	}
+	
+	public void displayDrawEquity(String[][] holes) {
+		drawPanel.displayHand(holes);
+		tabs.setSelectedComponent(drawPanel);
+	}
 }
