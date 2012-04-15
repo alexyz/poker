@@ -19,7 +19,8 @@ public class ArrayUtil {
 	}
 
 	/**
-	 * Return array of cards that have not yet been dealt according to given board and hands
+	 * Return array of cards that have not yet been dealt according to given board and hands.
+	 * Always returns new array.
 	 */
 	public static String[] remove(String[] deck, String[] board, String[][] hands, String[] blockers) {
 		Set<String> s = new TreeSet<String>(Arrays.asList(deck));

@@ -3,67 +3,36 @@ package pet.eq;
 import java.util.Arrays;
 
 /**
- * Holdem and Omaha hand analysis, including a combinatorial number system.
- * TODO add hilo
+ * Hold'em and Omaha hand analysis, using a combinatorial number system.
  */
 public class HEPoker extends Poker {
 
-	private final boolean omaha;
-
 	/**
-	 * create equity calculator for given game type
+	 * Calc exact tex/omaha hand equity for each hand for given board
 	 */
-	public HEPoker(boolean omaha) {
-		this.omaha = omaha;
-	}
-
-	private final String[] hand = new String[5];
-
-	/**
-	 * Calculate holdem/omaha equity.
-	 * Preflop uses random sample boards.
-	 * Flop and later uses every possible combination of remaining cards.
-	 */
-	@Override
-	public HandEq[] equity(String[] board, String[][] holes, String[] blockers) {
-		// TODO validate here, not in value method
-		if (board != null && board.length >= 3) {
-			return exactEquity(board, holes, blockers);
-		} else {
-			return sampleEquity(holes, blockers);
-		}
-	}
-
-	/**
-	 * Calc exact tex/omaha hand equity for each hand for given flop (can include turn and riv)
-	 */
-	private HandEq[] exactEquity(final String[] boardp, final String[][] holes, final String[] blockers) {
+	private static HandEq[] exactEquity(final String[] board, final String[][] holes, final int min, final String[] blockers) {
 		// cards not used by hands or board
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, boardp, holes, blockers);
-		//println("cards remaining: " + deck.length);
-
-		// return value
+		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, board, holes, blockers);
 		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
+		final String[] tempHand = new String[5];
 		
 		// get current hand values (not equity)
 		final int[] vals = new int[holes.length];
 		for (int n = 0; n < holes.length; n++) {
-			vals[n] = value(boardp, holes[n]);
+			vals[n] = value(board, holes[n], min, tempHand);
 		}
 		HandEq.updateCurrent(eqs, vals);
 
 		// get equity
-		final String[] board = Arrays.copyOf(boardp, 5);
-		final int k = 5 - boardp.length;
-		//println("cards to deal: " + k);
+		final String[] tempBoard = Arrays.copyOf(board, 5);
+		final int k = 5 - board.length;
 		final int combs = MathsUtil.bincoff(deck.length, k);
-		//println("combinations remaining: " + combs);
 		for (int p = 0; p < combs; p++) {
-			MathsUtil.kcomb(k, p, deck, board, boardp.length);
+			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
 			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(board, holes[i]);
+				vals[i] = value(tempBoard, holes[i], min, tempHand);
 			}
-			HandEq.updateEquities(eqs, vals, board, boardp.length);
+			HandEq.updateEquities(eqs, vals, tempBoard, board.length);
 		}
 
 		HandEq.summariseEquities(eqs, combs);
@@ -72,12 +41,13 @@ public class HEPoker extends Poker {
 	}
 
 	/**
-	 * Calc sampled tex/omaha hand equity for each hand.
+	 * Calc sampled tex/omaha hand equity for each hand by generating random boards
 	 */
-	private HandEq[] sampleEquity(final String[][] holes, final String[] blockers) {
+	private static HandEq[] sampleEquity(final String[][] holes, int min, final String[] blockers) {
 		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, holes, blockers);
 		final String[] board = new String[5];
 		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, false);
+		final String[] temp = new String[5];
 
 		// hand values for a particular board
 		final int[] vals = new int[holes.length];
@@ -90,7 +60,7 @@ public class HEPoker extends Poker {
 				board[n] = RandomUtil.pick(deck, picked);
 			}
 			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(board, holes[i]);
+				vals[i] = value(board, holes[i], min, temp);
 			}
 			HandEq.updateEquities(eqs, vals);
 		}
@@ -99,40 +69,20 @@ public class HEPoker extends Poker {
 		return eqs;
 	}
 
-	private static void validateHand(String[] hole, String[] board, boolean omaha) {
-		if (board == null || board.length < 3 || board.length > 5) {
-			throw new RuntimeException("invalid board " + Arrays.toString(board));
-		}
-		if (omaha) {
-			// allow two or thre hole cards
-			if (hole.length < 2 || hole.length > 4) {
-				throw new RuntimeException("invalid omaha hand " + Arrays.toString(hole));
-			}
-		} else {
-			// allow one hole card
-			if (hole.length < 1 || hole.length > 2 || board.length + hole.length < 5) {
-				throw new RuntimeException("invalid holdem hand " + Arrays.toString(hole));
-			}
-		}
-	}
-
 	/**
-	 * Calculate value of holdem/omaha hand (must be at least 5 cards in total, and for omaha, at least 2 hole cards)
+	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 
+	 * Temp must be 5 element array
 	 */
-	@Override
-	public int value(String[] board, String[] hole) {
-		validateHand(hole, board, omaha);
-		//System.out.println("value(" + Arrays.asList(hole) +"," + Arrays.asList(board) +","+omaha+")");
-		final int min = omaha ? 2 : 0;
+	private static int value(String[] board, String[] hole, int min, String[] temp) {
 		int hv = 0;
 		for (int n = min; n <= 2; n++) {
 			final int nh = MathsUtil.bincoff(hole.length, n);
 			final int nb = MathsUtil.bincoff(board.length, 5 - n);
 			for (int kh = 0; kh < nh; kh++) {
-				MathsUtil.kcomb(n, kh, hole, hand, 0);
+				MathsUtil.kcomb(n, kh, hole, temp, 0);
 				for (int kb = 0; kb < nb; kb++) {
-					MathsUtil.kcomb(5 - n, kb, board, hand, n);
-					final int v = value(hand);
+					MathsUtil.kcomb(5 - n, kb, board, temp, n);
+					final int v = value(temp);
 					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
 					if (v > hv) {
 						hv = v;
@@ -142,5 +92,67 @@ public class HEPoker extends Poker {
 		}
 		return hv;
 	}
+	
+	/** check board is either null or 3-5 cards */
+	private static void validateBoard(String[] board) {
+		if (board != null && (board.length < 3 || board.length > 5)) {
+			throw new RuntimeException("invalid board: " + Arrays.toString(board));
+		}
+	}
+	
+	/** check hole has at least 1 or 2 cards and at most 2 or 4 cards */
+	private static void validateHole(String[] hole, boolean omaha) {
+		final int min = omaha ? 2 : 1;
+		final int max = omaha ? 4 : 2;
+		if (hole.length < min || hole.length > max) {
+			throw new RuntimeException("invalid hole: " + Arrays.toString(hole));
+		}
+	}
 
+	
+	//
+	// instance methods
+	//
+	
+	private final boolean omaha;
+
+	/**
+	 * create equity calculator for given game type
+	 */
+	public HEPoker(boolean omaha) {
+		this.omaha = omaha;
+	}
+	
+	@Override
+	public HandEq[] equity(String[] board, String[][] holes, String[] blockers) {
+		System.out.println("board=" + Arrays.toString(board));
+		validateBoard(board);
+		for (String[] hole : holes) {
+			validateHole(hole, omaha);
+		}
+		
+		final int min = omaha ? 2 : 0;
+		if (board == null) {
+			return sampleEquity(holes, min, blockers);
+			
+		} else {
+			return exactEquity(board, holes, min, blockers);
+		}
+	}
+
+	@Override
+	public int value(String[] board, String[] hole) {
+		validateBoard(board);
+		validateHole(hole, omaha);
+		
+		if (board == null) {
+			// could use the draw poker getPair method...
+			return 0;
+			
+		} else {
+			final int min = omaha ? 2 : 0;
+			return value(board, hole, min, new String[5]);
+		}
+	}
+	
 }

@@ -67,13 +67,14 @@ public class DrawPoker extends Poker {
 	}
 
 	/**
-	 * Get the players drawing hand
+	 * Get the players drawing hand.
+	 * Always returns new array.
 	 */
 	public static String[] getHand(String[] hand, int drawn) {
 		switch (drawn) {
 			case 0:
 				// stand pat
-				return hand;
+				return hand.clone();
 			case 1:
 			case 2:
 				// drawing at something

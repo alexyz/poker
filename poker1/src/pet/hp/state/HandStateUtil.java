@@ -60,7 +60,7 @@ public class HandStateUtil {
 						ss.hole = hole;
 						// make sure hand has minimum number of cards, pass others as blockers
 						if (hole.length > GameUtil.getMinHoleCards(hand.game.type)) {
-							holes.add(ss.hole);
+							holes.add(hole);
 							holeSeats.add(ss);
 						} else {
 							blockers.addAll(Arrays.asList(hole));

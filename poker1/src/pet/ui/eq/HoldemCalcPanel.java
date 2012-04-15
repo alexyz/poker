@@ -128,6 +128,9 @@ public class HoldemCalcPanel extends CalcPanel {
 			System.out.println("incomplete board");
 			return;
 		}
+		if (board.length == 0) {
+			board = null;
+		}
 		
 		List<HandCardPanel> pl = new ArrayList<HandCardPanel>();
 		for (HandCardPanel hp : handPanels) {

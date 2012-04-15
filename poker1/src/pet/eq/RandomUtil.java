@@ -4,6 +4,7 @@ import java.util.Random;
 
 public class RandomUtil {
 
+	// this is somewhat thread safe
 	private static final Random random = new Random();
 	
 	/**

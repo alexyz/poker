@@ -34,7 +34,8 @@ public class HandUtil {
 	};
 
 	/**
-	 * get board for street
+	 * get board for street.
+	 * Always returns new array.
 	 */
 	public static String[] getStreetBoard(Hand hand, int street) {
 		switch (hand.game.type) {
@@ -48,7 +49,8 @@ public class HandUtil {
 	}
 	
 	/**
-	 * get the hole cards the player kept
+	 * get the hole cards the player kept.
+	 * Always returns new array
 	 */
 	private static String[] kept(String[] hole1, String[] hole2, int discards) {
 		String[] kept = new String[5 - discards];
@@ -65,7 +67,8 @@ public class HandUtil {
 	}
 
 	/**
-	 * Get hole cards player had on this street (if they changed)
+	 * Get hole cards player had on this street (if they changed).
+	 * Always returns new array
 	 */
 	public static String[] getStreetHole(Hand hand, Seat seat, int street) {
 		String[] h = null;
