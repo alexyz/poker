@@ -24,12 +24,20 @@ public class History implements FollowListener {
 	 */
 	private final Set<Long> handIds = new TreeSet<Long>();
 	/**
+	 * games
+	 */
+	private final Map<String,Game> games = new TreeMap<String,Game>();
+	/**
 	 * the player info representing the whole population
 	 */
 	private final PlayerInfo population = new PlayerInfo("*");
 
 	public PlayerInfo getPopulation() {
 		return population;
+	}
+
+	public History() {
+		playerMap.put("*", population);
 	}
 
 	/**
@@ -46,6 +54,23 @@ public class History implements FollowListener {
 		}
 		System.out.println("got " + players.size() + " players");
 		return players;
+	}
+
+	public synchronized Map<String,Game> getGames() {
+		return Collections.unmodifiableMap(games);
+	}
+
+	public synchronized List<PlayerGameInfo> getGameInfos(Game game) {
+		System.out.println("get game infos for " + game);
+		List<PlayerGameInfo> gameinfos = new ArrayList<PlayerGameInfo>();
+		for (PlayerInfo pi : playerMap.values()) {
+			PlayerGameInfo pgi = pi.games.get(game.id);
+			if (pgi != null) {
+				gameinfos.add(pgi);
+			}
+		}
+		System.out.println("got " + gameinfos.size() + " game infos");
+		return gameinfos;
 	}
 
 	/**
@@ -118,6 +143,9 @@ public class History implements FollowListener {
 		}
 		hands.add(hand);
 		handIds.add(hand.id);
+		if (!games.containsKey(hand.game.id)) {
+			games.put(hand.game.id, hand.game);
+		}
 
 		// update player info with seat
 		for (Seat s : hand.seats) {
@@ -129,7 +157,7 @@ public class History implements FollowListener {
 		}
 
 	}
-	
+
 	@Override
 	public void doneFile(int done, int total) {
 		//

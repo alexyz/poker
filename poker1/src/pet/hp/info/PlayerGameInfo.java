@@ -72,9 +72,16 @@ public class PlayerGameInfo {
 		if (seat.won > 0) {
 			handswon++;
 			won += seat.won;
-			// over counts rake if split
-			// TODO should just divide by number of winners
-			rake += hand.rake;
+			if (hand.rake > 0) {
+				int winners = 0;
+				// divide rake if split pot
+				for (Seat s : hand.seats) {
+					if (s.won > 0) {
+						winners++;
+					}
+				}
+				rake += (hand.rake / winners);
+			}
 		}
 		
 		// count winning rank.. if you dare!
@@ -185,8 +192,12 @@ public class PlayerGameInfo {
 	/**
 	 * show downs won as percentage of all show downs
 	 */
-	public float sw() {
-		return (handswonshow * 100f) / showdownsseen;
+	public Float sw() {
+		if (showdownsseen > 0) {
+			return (handswonshow * 100f) / showdownsseen;
+		} else {
+			return null;
+		}
 	}
 	
 	/**
@@ -220,22 +231,26 @@ public class PlayerGameInfo {
 	}
 	
 	/** aggression factor count */
-	public float afcount() {
+	public Float afcount() {
 		return af(actionCount);
 	}
 	
 	/** aggression factor volume */
-	public float afam() {
+	public Float afam() {
 		return af(actionAmount);
 	}
 	
-	private float af(int[] a) {
+	private Float af(int[] a) {
 		// amount bet+raise / call
 		int b = a[Action.BET_TYPE];
 		int c = a[Action.CALL_TYPE];
 		int r = a[Action.RAISE_TYPE];
 		int ch = a[Action.CHECK_TYPE];
-		return (b + r + 0f) / (c + ch);
+		if (c + ch > 0) {
+			return (b + r + 0f) / (c + ch);
+		} else {
+			return null;
+		}
 	}
 	
 	@Override

@@ -1,7 +1,8 @@
 package pet.hp;
 
 /**
- * represents a type of poker game
+ * Represents a type of poker game.
+ * There should only be once instance of this class for each game.
  */
 public class Game implements Comparable<Game> {
 	

@@ -69,6 +69,7 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Draw", drawPanel);
 		tabs.addTab("History", historyPanel);
 		tabs.addTab("Players", new PlayerPanel());
+		tabs.addTab("Games", new GamesPanel());
 		tabs.addTab("Graph", bankrollPanel);
 		tabs.addTab("Hands", handsPanel);
 		tabs.addTab("Replay", replayPanel);

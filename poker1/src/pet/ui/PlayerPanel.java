@@ -49,16 +49,18 @@ public class PlayerPanel extends JPanel {
 					int r = playersTable.getSelectionModel().getMinSelectionIndex();
 					if (r >= 0) {
 						int sr = playersTable.convertRowIndexToModel(r);
-						PlayerInfo pi = ((PlayerInfoTableModel)playersTable.getModel()).getRow(sr);
+						PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
+						PlayerInfo pi = playersModel.getRow(sr);
 						System.out.println("selected " + r + " => " + sr + " => " + pi);
-						((GameInfoTableModel)gamesTable.getModel()).setRows(pi.games.values());
+						GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
+						gamesModel.setRows(pi.games.values());
 						revalidate();
 					}
 				}
 			}
 		});
 		
-		gamesTable.setModel(new GameInfoTableModel(GameInfoTableModel.pcols));
+		gamesTable.setModel(new GameInfoTableModel(GameInfoTableModel.playerCols));
 		gamesTable.setAutoCreateRowSorter(true);
 		gamesTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		gamesTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -68,7 +70,8 @@ public class PlayerPanel extends JPanel {
 					int r = gamesTable.getSelectionModel().getMinSelectionIndex();
 					if (r >= 0) {
 						int sr = gamesTable.convertRowIndexToModel(r);
-						PlayerGameInfo gi = ((GameInfoTableModel) gamesTable.getModel()).getRow(sr);
+						GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
+						PlayerGameInfo gi = gamesModel.getRow(sr);
 						System.out.println("selected " + r + " => " + sr + " => " + gi);
 						gameTextArea.setText(gi.toLongString());
 						revalidate();
@@ -87,7 +90,8 @@ public class PlayerPanel extends JPanel {
 				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
 				if (r >= 0) {
 					int sr = gamesTable.convertRowIndexToModel(r);
-					PlayerGameInfo gi = ((GameInfoTableModel) gamesTable.getModel()).getRow(sr);
+					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
+					PlayerGameInfo gi = gamesModel.getRow(sr);
 					System.out.println("selected " + r + " => " + sr + " => " + gi);
 					PokerFrame pf = PokerFrame.getInstance();
 					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.game.id);
@@ -102,7 +106,8 @@ public class PlayerPanel extends JPanel {
 				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
 				if (r >= 0) {
 					int sr = gamesTable.convertRowIndexToModel(r);
-					PlayerGameInfo gi = ((GameInfoTableModel) gamesTable.getModel()).getRow(sr);
+					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
+					PlayerGameInfo gi = gamesModel.getRow(sr);
 					PokerFrame.getInstance().displayHands(gi.player.name, gi.game.id);
 				}
 			}
@@ -139,9 +144,12 @@ public class PlayerPanel extends JPanel {
 		PokerFrame pf = PokerFrame.getInstance();
 		History his = pf.getHistory();
 		
-		((PlayerInfoTableModel)playersTable.getModel()).setRows(his.getPlayers(pattern));
-		((GameInfoTableModel)gamesTable.getModel()).setRows(Collections.<PlayerGameInfo>emptyList());
-		((GameInfoTableModel)gamesTable.getModel()).setPopulation(his.getPopulation());
+		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
+		playersModel.setRows(his.getPlayers(pattern));
+		
+		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
+		gamesModel.setRows(Collections.<PlayerGameInfo>emptyList());
+		gamesModel.setPopulation(his.getPopulation());
 		
 		System.out.println("players table now has " + playersTable.getRowCount() + " rows");
 		repaint();

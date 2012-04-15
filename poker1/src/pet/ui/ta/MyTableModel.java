@@ -23,14 +23,23 @@ public class MyTableModel<T> extends AbstractTableModel {
 		this.cols.addAll(cols);
 	}
 
+	/**
+	 * get all columns (not just displayed columns)
+	 */
 	public List<MyColumn<T>> getAllColumns() {
 		return allcols;
 	}
 
+	/**
+	 * is the given all-column currently displayed
+	 */
 	public boolean getAllColumn(int allc) {
 		return cols.contains(allcols.get(allc));
 	}
 
+	/**
+	 * add or remove the given column in all columns
+	 */
 	public void setAllColumn(int allc) {
 		MyColumn<T> mycol = allcols.get(allc);
 		System.out.println("toggle column " + mycol.name);
