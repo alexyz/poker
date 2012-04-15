@@ -17,7 +17,7 @@ import pet.ui.ta.*;
  */
 public class HUDPanel extends JPanel implements FollowListener {
 	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
-	private final MyJTable<HandState> handTable = new MyJTable<HandState>(new HandStateTableModel());
+	private final MyJTable handTable = new MyJTable();
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 	private final JButton equityButton = new JButton("Equity");
@@ -31,7 +31,7 @@ public class HUDPanel extends JPanel implements FollowListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				HandStates states = (HandStates) e.getItem();
-				handTable.getModel().setRows(states.states);
+				((HandStateTableModel)handTable.getModel()).setRows(states.states);
 			}
 		});
 
@@ -80,6 +80,9 @@ public class HUDPanel extends JPanel implements FollowListener {
 				}
 			}
 		});
+		
+		handTable.setModel(new HandStateTableModel());
+		handTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel topPanel = new JPanel();
 		topPanel.add(prevButton);

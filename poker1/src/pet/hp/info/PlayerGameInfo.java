@@ -42,6 +42,8 @@ public class PlayerGameInfo {
 	private final int[] streetinits;
 	/** number of times each street was seen */
 	private final int[] streetsseen;
+	/** number of hands where money voluntarily put in pot */
+	public int vpip;
 	
 	/** create play game info for the given player and game */
 	public PlayerGameInfo(PlayerInfo player, Game game) {
@@ -54,7 +56,7 @@ public class PlayerGameInfo {
 	}
 	
 	/**
-	 * add this hand to the players game info
+	 * add this hand at this seat to the players game info
 	 */
 	public void add(Hand hand, Seat seat) {
 		hands++;
@@ -84,18 +86,24 @@ public class PlayerGameInfo {
 			rankam[r]+=seat.won-seat.pip;
 		}
 		
+		boolean hasPip = false;
+		
 		// update player game info with actions
-		for (int streetno = 0; streetno < hand.streets.length; streetno++) {
-			Action[] street = hand.streets[streetno];
-			streetsseen[streetno]++;
+		for (int s = 0; s < hand.streets.length; s++) {
+			Action[] street = hand.streets[s];
+			streetsseen[s]++;
 			
 			Action init = null;
 			boolean hasChecked = false;
+			
 			for (Action act : street) {
 				if (act.seat == seat) {
 					addAction(act, hasChecked);
 					if (act.type == Action.CHECK_TYPE) {
 						hasChecked = true;
+					}
+					if (act.type != Action.POST_TYPE && act.amount > 0) {
+						hasPip = true;
 					}
 					if (act.type == Action.FOLD_TYPE) {
 						// no more actions for us
@@ -103,18 +111,22 @@ public class PlayerGameInfo {
 					}
 				}
 				if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
-					// last action on street with initiative
+					// get last action on street with initiative
 					init = act;
 				}
 			}
+			
 
 			// initiative
 			// TODO sustained initiative, fold to init?
 			if (init != null && init.seat == seat) {
-				streetinits[streetno]++;
+				streetinits[s]++;
 			}
 		}
 
+		if (hasPip) {
+			vpip++;
+		}
 	}
 	
 	/**
@@ -233,8 +245,14 @@ public class PlayerGameInfo {
 	
 	public String toLongString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("Hands:  %d  Won:  %d\n", hands, handswon));
-		sb.append(String.format("Amount won:  %d  Lost:  %d\n", won, pip));
+		sb.append(String.format("Hands:  %d  Hands Won:  %d\n", hands, handswon));
+		sb.append(String.format("Amount won:  %d  Lost:  %d  Rake:  %d\n", won, pip, rake));
+		sb.append("Check-x count: " + cx() + "\n");
+		sb.append("Check-x ratio: " + cxr() + "\n");
+		sb.append("Initiatives: " + isstr() + "\n");
+		sb.append("Show downs:  " + showdownsseen + "\n");
+		sb.append("Show down wins:  " + handswonshow + "\n");
+		
 		sb.append("Actions:\n");
 		for (int n = 0; n < actionCount.length; n++) {
 			if (actionCount[n] > 0) {
@@ -245,10 +263,9 @@ public class PlayerGameInfo {
 				sb.append("\n");
 			}
 		}
-		sb.append("Show downs:  " + showdownsseen + "\n");
-		sb.append("Show down wins:  " + handswonshow + "\n");
+		sb.append("Showdown ranks:\n");
 		for (int n = 0; n < Poker.RANKS; n++) {
-			sb.append("rank ").append(Poker.ranknames[n]);
+			sb.append("  ").append(Poker.ranknames[n]);
 			sb.append(" times won ").append(rankwon[n]);
 			sb.append(" times lost ").append(ranklost[n]);
 			sb.append(" amount ").append(rankam[n]);

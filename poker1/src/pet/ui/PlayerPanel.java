@@ -21,8 +21,8 @@ public class PlayerPanel extends JPanel {
 	// [table-name,games,hands,value]
 	// [pinfo]
 	private final JTextField nameField = new JTextField();
-	private final MyJTable<PlayerInfo> playersTable = new MyJTable<PlayerInfo>(new PlayerInfoTableModel());
-	private final MyJTable<PlayerGameInfo> gamesTable = new MyJTable<PlayerGameInfo>(new GameInfoTableModel());
+	private final MyJTable playersTable = new MyJTable();
+	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea gameTextArea = new JTextArea();
 	private final JButton bankrollButton = new JButton("Bankroll");
 	private final JButton handsButton = new JButton("Hands");
@@ -39,6 +39,7 @@ public class PlayerPanel extends JPanel {
 			}
 		});
 		
+		playersTable.setModel(new PlayerInfoTableModel());
 		playersTable.setAutoCreateRowSorter(true);
 		playersTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		playersTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -48,15 +49,16 @@ public class PlayerPanel extends JPanel {
 					int r = playersTable.getSelectionModel().getMinSelectionIndex();
 					if (r >= 0) {
 						int sr = playersTable.convertRowIndexToModel(r);
-						PlayerInfo pi = playersTable.getModel().getRow(sr);
+						PlayerInfo pi = ((PlayerInfoTableModel)playersTable.getModel()).getRow(sr);
 						System.out.println("selected " + r + " => " + sr + " => " + pi);
-						gamesTable.getModel().setRows(pi.games.values());
+						((GameInfoTableModel)gamesTable.getModel()).setRows(pi.games.values());
 						revalidate();
 					}
 				}
 			}
 		});
 		
+		gamesTable.setModel(new GameInfoTableModel(GameInfoTableModel.pcols));
 		gamesTable.setAutoCreateRowSorter(true);
 		gamesTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		gamesTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -75,7 +77,7 @@ public class PlayerPanel extends JPanel {
 			}
 		});
 		
-		gameTextArea.setRows(5);
+		gameTextArea.setRows(1);
 		gameTextArea.setLineWrap(true);
 		
 		bankrollButton.addActionListener(new ActionListener() {
@@ -137,8 +139,8 @@ public class PlayerPanel extends JPanel {
 		PokerFrame pf = PokerFrame.getInstance();
 		History his = pf.getHistory();
 		
-		playersTable.getModel().setRows(his.getPlayers(pattern));
-		gamesTable.getModel().setRows(Collections.<PlayerGameInfo>emptyList());
+		((PlayerInfoTableModel)playersTable.getModel()).setRows(his.getPlayers(pattern));
+		((GameInfoTableModel)gamesTable.getModel()).setRows(Collections.<PlayerGameInfo>emptyList());
 		((GameInfoTableModel)gamesTable.getModel()).setPopulation(his.getPopulation());
 		
 		System.out.println("players table now has " + playersTable.getRowCount() + " rows");

@@ -2,20 +2,63 @@ package pet.ui.ta;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
-// TODO type param should really be table model, not record
-public class MyJTable<T> extends JTable {
+/**
+ * JTable that uses a MyTableModel to get colour and tool tip information and
+ * provides configurable columns
+ */
+public class MyJTable extends JTable {
 	
 	public static final Color defcol = UIManager.getDefaults().getColor("Table.background");
 	public static final Font deffont = UIManager.getDefaults().getFont("Table.font");
 	
-	public MyJTable(MyTableModel<T> model) {
-		super(model);
+	public MyJTable() {
+		getTableHeader().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				popup(e);
+			}
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				popup(e);
+			}
+		});
+		// sun's default is 450*400 which makes app too tall
+		setPreferredScrollableViewportSize(new Dimension(100, 100));
+	}
+	
+	/** show configurable column menu */
+	private void popup(MouseEvent e) {
+		if (e.isPopupTrigger()) {
+			System.out.println("header clicked");
+			JPopupMenu menu = new JPopupMenu("Columns");
+			final MyTableModel<?> model = (MyTableModel<?>) getModel();
+			List<? extends MyColumn<?>> allcols = model.getAllColumns();
+			for (int c = 0; c < allcols.size(); c++) {
+				MyColumn<?> col = allcols.get(c);
+				JCheckBoxMenuItem cb = new JCheckBoxMenuItem(col.name);
+				cb.setSelected(model.getAllColumn(c));
+				final int fc = c;
+				cb.addItemListener(new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						model.setAllColumn(fc);
+					}
+				});
+				menu.add(cb);
+			}
+			menu.show(getTableHeader(), e.getX(), e.getY());
+		}
 	}
 	
 	@Override
@@ -26,11 +69,12 @@ public class MyJTable<T> extends JTable {
 			// calc tooltip on demand
 			int r2 = convertRowIndexToModel(r);
 			int c2 = convertColumnIndexToModel(c);
-			return getModel().getToolTip(r2, c2);
+			return ((MyTableModel<?>)getModel()).getToolTip(r2, c2);
 		} else {
 			return null;
 		}
 	}
+	
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int r, int c) {
 		Component comp = super.prepareRenderer(renderer, r, c);
@@ -40,16 +84,13 @@ public class MyJTable<T> extends JTable {
 			int r2 = convertRowIndexToModel(r);
 			int c2 = convertColumnIndexToModel(c);
 			if (!getSelectionModel().isSelectedIndex(r)) {
-				Color col = getModel().getColour(r2, c2);
+				Color col = ((MyTableModel<?>)getModel()).getColour(r2, c2);
 				jcomp.setBackground(col != null ? col : defcol);
 			}
-			Font font = getModel().getFont(r2, c2);
+			Font font = ((MyTableModel<?>)getModel()).getFont(r2, c2);
 			jcomp.setFont(font != null ? font : deffont);	
 		}
 		return comp;
 	}
-	@Override
-	public MyTableModel<T> getModel() {
-		return (MyTableModel<T>) super.getModel();
-	}
+	
 }

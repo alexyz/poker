@@ -3,22 +3,22 @@ package pet.ui.ta;
 import java.awt.Color;
 import java.awt.Font;
 
-public abstract class MyTableModelColumn<T,S> {
+public abstract class MyColumn<T> {
 	public final String name;
 	public final Class<?> cl;
 	public final String desc;
 
-	public MyTableModelColumn(Class<S> cl, String name, String desc) {
+	public MyColumn(Class<?> cl, String name, String desc) {
 		this.name = name;
 		this.desc = desc;
 		this.cl = cl;
 	}
 	
-	public S getPopValue(T row) {
+	public Object getPopValue(T row) {
 		return getValue(row);
 	}
 	
-	public abstract S getValue(T row);
+	public abstract Object getValue(T row);
 	
 	public Color getColour(T row) {
 		return null;

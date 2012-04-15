@@ -18,7 +18,7 @@ public class HoldemCalcPanel extends CalcPanel {
 
 	public HoldemCalcPanel(boolean omaha) {
 		this.omaha = omaha;
-		this.numHoleCards = omaha ? 2 : 4;
+		this.numHoleCards = omaha ? 4 : 2;
 		
 		// create board and hands and collect card labels
 		boardPanel = new BoardPanel();

@@ -34,11 +34,11 @@ public class GameUtil {
 	public static String getLimitName(char limittype) {
 		switch (limittype) {
 			case Game.POT_LIMIT: 
-				return "Pot Limit";
+				return "PL"; //"Pot Limit";
 			case Game.NO_LIMIT: 
-				return "No Limit";
+				return "NL"; //"No Limit";
 			case Game.FIXED_LIMIT: 
-				return "Fixed Limit";
+				return "FL"; //"Fixed Limit";
 			default: 
 				throw new RuntimeException("no such limit " + limittype);
 		}

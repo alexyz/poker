@@ -14,19 +14,12 @@ import pet.hp.info.*;
 import pet.ui.ta.*;
 
 /**
- * todo send to eq panel button
- * send to rep button
+ * displays a list of hands for a particular game
  */
 public class HandsPanel extends JPanel {
-	// name
-	// game
-	// from
-	// to
-	// table
-	// handinfo
 	private final JTextField nameField = new JTextField();
 	private final JComboBox gameCombo = new JComboBox();
-	private final MyJTable<HandInfo> handTable = new MyJTable<HandInfo>(new HandInfoTableModel());
+	private final MyJTable handTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
@@ -79,6 +72,7 @@ public class HandsPanel extends JPanel {
 			}
 		});
 
+		handTable.setModel(new HandInfoTableModel());
 		handTable.setDefaultRenderer(Date.class, new MyDateRenderer());
 		handTable.setDefaultRenderer(String[].class, new HandRenderer());
 		handTable.setAutoCreateRowSorter(true);
@@ -101,7 +95,7 @@ public class HandsPanel extends JPanel {
 					int r = handTable.rowAtPoint(e.getPoint());
 					if (r >= 0) {
 						int sr = handTable.convertRowIndexToModel(r);
-						HandInfo hi = handTable.getModel().getRow(sr);
+						HandInfo hi = ((HandInfoTableModel)handTable.getModel()).getRow(sr);
 						PokerFrame.getInstance().replayHand(hi.hand);
 					}
 					System.out.println("double click");
@@ -133,7 +127,7 @@ public class HandsPanel extends JPanel {
 		int r = handTable.getSelectionModel().getMinSelectionIndex();
 		if (r >= 0) {
 			int sr = handTable.convertRowIndexToModel(r);
-			HandInfo hi = handTable.getModel().getRow(sr);
+			HandInfo hi = ((HandInfoTableModel)handTable.getModel()).getRow(sr);
 			System.out.println("selected " + r + " => " + sr + " => " + hi);
 			return hi;
 		}
@@ -149,7 +143,7 @@ public class HandsPanel extends JPanel {
 		gameCombo.setModel(new DefaultComboBoxModel());
 		dateCombo.setModel(new DefaultComboBoxModel());
 		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands"));
-		handTable.getModel().setRows(Collections.<HandInfo>emptyList());
+		((HandInfoTableModel)handTable.getModel()).setRows(Collections.<HandInfo>emptyList());
 	}
 	
 	private void updateName(String selectGame) {
@@ -222,7 +216,7 @@ public class HandsPanel extends JPanel {
 		}
 		
 		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands (" + dateHandInfos.size() + ")"));
-		handTable.getModel().setRows(dateHandInfos);
+		((HandInfoTableModel)handTable.getModel()).setRows(dateHandInfos);
 		repaint();
 	}
 }

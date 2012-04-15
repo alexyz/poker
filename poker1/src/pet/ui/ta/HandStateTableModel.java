@@ -1,22 +1,19 @@
 package pet.ui.ta;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.util.*;
 
 import pet.eq.Poker;
 import pet.eq.PokerUtil;
-import pet.hp.Action;
 import pet.hp.GameUtil;
 import pet.hp.HandUtil;
 import pet.hp.state.*;
 
 public class HandStateTableModel extends MyTableModel<HandState> {
 
-	private static final List<MyTableModelColumn<HandState,?>> cols = new ArrayList<MyTableModelColumn<HandState,?>>();
+	private static final List<MyColumn<HandState>> cols = new ArrayList<MyColumn<HandState>>();
 	
 	static {
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Player", "Player name") {
+		cols.add(new HandStateColumn(String.class, "Player", "Player name") {
 			@Override
 			public String getValue(HandState hs) {
 				if (hs.actionSeat >= 0) {
@@ -26,7 +23,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				}
 			}
 		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Pot/Stack", "Player stack and SPR or pot") {
+		cols.add(new HandStateColumn(String.class, "Pot/Stack", "Player stack and SPR or pot") {
 			@Override
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
@@ -42,7 +39,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				}
 			}
 		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Board/Hole", "Players hole cards or board") {
+		cols.add(new HandStateColumn(String.class, "Board/Hole", "Players hole cards or board") {
 			@Override
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
@@ -67,7 +64,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				return null;
 			}
 		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Action", "Player action") {
+		cols.add(new HandStateColumn(String.class, "Action", "Player action") {
 			@Override
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
@@ -84,7 +81,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				}
 			}
 		});
-		cols.add(new HandStateTableModelColumn<HandState,String>(String.class, "Equity", "Hand equity") {
+		cols.add(new HandStateColumn(String.class, "Equity", "Hand equity") {
 			@Override
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
@@ -107,40 +104,4 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		super(cols);
 	}
 
-}
-
-
-abstract class HandStateTableModelColumn<T,S> extends MyTableModelColumn<HandState,S> {
-
-	private static final Color playerColour = new Color(192, 255, 192);
-	private static final Color winColour = new Color(255, 255, 128);
-	private static final Font boldfont = MyJTable.deffont.deriveFont(Font.BOLD);
-	
-	public HandStateTableModelColumn(Class<S> cl, String name, String desc) {
-		super(cl, name, desc);
-	}
-	
-	@Override
-	public Color getColour(HandState hs) {
-		if (hs.actionSeat == -1) {
-			return Color.lightGray;
-			
-		} else if (hs.action.type == Action.COLLECT_TYPE) {
-			return winColour;
-			
-		} else if (hs.seats[hs.actionSeat].seat == hs.hand.myseat) {
-			return playerColour;
-		} 
-		
-		return null;
-	}
-	
-	@Override
-	public Font getFont(HandState hs) {
-		if (hs.actionSeat == -1) {
-			return boldfont;
-		} 
-		return null;
-	}
-	
 }
