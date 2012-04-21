@@ -1,6 +1,6 @@
 package pet.hp.state;
 
-import pet.eq.HandEq;
+import pet.eq.*;
 import pet.hp.Seat;
 
 /**
@@ -24,7 +24,7 @@ public class SeatState implements Cloneable {
 	/** has won - only true at end, unlike seat.won > 0 */
 	public boolean won;
 	/** current hand equity, if any */
-	public HandEq eq;
+	public MEquity meq;
 	/** number of actions on this street starting at 1 */
 	public int acts;
 	

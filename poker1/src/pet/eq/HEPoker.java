@@ -7,92 +7,6 @@ import java.util.Arrays;
  */
 public class HEPoker extends Poker {
 
-	/**
-	 * Calc exact tex/omaha hand equity for each hand for given board
-	 */
-	private static HandEq[] exactEquity(final String[] board, final String[][] holes, final int min, final String[] blockers) {
-		// cards not used by hands or board
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, board, holes, blockers);
-		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, true);
-		final String[] tempHand = new String[5];
-		
-		// get current hand values (not equity)
-		final int[] vals = new int[holes.length];
-		for (int n = 0; n < holes.length; n++) {
-			vals[n] = value(board, holes[n], min, tempHand);
-		}
-		HandEq.updateCurrent(eqs, vals);
-
-		// get equity
-		final String[] tempBoard = Arrays.copyOf(board, 5);
-		final int k = 5 - board.length;
-		final int combs = MathsUtil.bincoff(deck.length, k);
-		for (int p = 0; p < combs; p++) {
-			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
-			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(tempBoard, holes[i], min, tempHand);
-			}
-			HandEq.updateEquities(eqs, vals, tempBoard, board.length);
-		}
-
-		HandEq.summariseEquities(eqs, combs);
-		HandEq.summariseOuts(eqs, k);
-		return eqs;
-	}
-
-	/**
-	 * Calc sampled tex/omaha hand equity for each hand by generating random boards
-	 */
-	private static HandEq[] sampleEquity(final String[][] holes, int min, final String[] blockers) {
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, holes, blockers);
-		final String[] board = new String[5];
-		final HandEq[] eqs = HandEq.makeHandEqs(holes.length, deck.length, false);
-		final String[] temp = new String[5];
-
-		// hand values for a particular board
-		final int[] vals = new int[holes.length];
-		final long[] picked = new long[1];
-		final int sz = 1000;
-
-		for (int p = 0; p < sz; p++) {
-			picked[0] = 0;
-			for (int n = 0; n < 5; n++) {
-				board[n] = RandomUtil.pick(deck, picked);
-			}
-			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(board, holes[i], min, temp);
-			}
-			HandEq.updateEquities(eqs, vals);
-		}
-
-		HandEq.summariseEquities(eqs, sz);
-		return eqs;
-	}
-
-	/**
-	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 
-	 * Temp must be 5 element array
-	 */
-	private static int value(String[] board, String[] hole, int min, String[] temp) {
-		int hv = 0;
-		for (int n = min; n <= 2; n++) {
-			final int nh = MathsUtil.bincoff(hole.length, n);
-			final int nb = MathsUtil.bincoff(board.length, 5 - n);
-			for (int kh = 0; kh < nh; kh++) {
-				MathsUtil.kcomb(n, kh, hole, temp, 0);
-				for (int kb = 0; kb < nb; kb++) {
-					MathsUtil.kcomb(5 - n, kb, board, temp, n);
-					final int v = value(temp);
-					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
-					if (v > hv) {
-						hv = v;
-					}
-				}
-			}
-		}
-		return hv;
-	}
-	
 	/** check board is either null or 3-5 cards */
 	private static void validateBoard(String[] board) {
 		if (board != null && (board.length < 3 || board.length > 5)) {
@@ -109,34 +23,38 @@ public class HEPoker extends Poker {
 		}
 	}
 
-	
 	//
-	// instance methods
+	// instance stuff
 	//
 	
+	private String[] temp = new String[5];
 	private final boolean omaha;
+	private final int min;
+	private final boolean hilo;
 
 	/**
-	 * create equity calculator for given game type
+	 * create holdem equity calculator for given game type
 	 */
-	public HEPoker(boolean omaha) {
+	public HEPoker(boolean omaha, boolean hilo) {
 		this.omaha = omaha;
+		this.min = omaha ? 2 : 0;
+		this.hilo = hilo;
 	}
 	
 	@Override
-	public HandEq[] equity(String[] board, String[][] holes, String[] blockers) {
-		System.out.println("board=" + Arrays.toString(board));
+	public MEquity[] equity(String[] board, String[][] holes, String[] blockers) {
 		validateBoard(board);
 		for (String[] hole : holes) {
 			validateHole(hole, omaha);
 		}
 		
-		final int min = omaha ? 2 : 0;
+		// cards not used by hands or board
+		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, board, holes, blockers);
+		
 		if (board == null) {
-			return sampleEquity(holes, min, blockers);
-			
+			return sampleEquity(deck, holes);
 		} else {
-			return exactEquity(board, holes, min, blockers);
+			return exactEquity(deck, board, holes);
 		}
 	}
 
@@ -150,9 +68,112 @@ public class HEPoker extends Poker {
 			return 0;
 			
 		} else {
-			final int min = omaha ? 2 : 0;
-			return value(board, hole, min, new String[5]);
+			return value(Poker.hi, board, hole);
 		}
+	}
+	
+	/**
+	 * Calc exact tex/omaha hand equity for each hand for given board
+	 */
+	private MEquity[] exactEquity(final String[] deck, final String[] board, final String[][] holes) {
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, deck.length, true);
+		final int[] vals = new int[holes.length];
+		
+		// get current high hand values (not equity)
+		for (int n = 0; n < holes.length; n++) {
+			vals[n] = value(Poker.hi, board, holes[n]);
+		}
+		MEquityUtil.updateCurrent(meqs, true, vals);
+		
+		// get current low values
+		if (hilo) {
+			for (int n = 0; n < holes.length; n++) {
+				vals[n] = value(Poker.lo, board, holes[n]);
+			}
+			MEquityUtil.updateCurrent(meqs, false, vals);
+		}
+		
+		// get equity
+		final String[] tempBoard = Arrays.copyOf(board, 5);
+		final int k = 5 - board.length;
+		final int combs = MathsUtil.bincoff(deck.length, k);
+		for (int p = 0; p < combs; p++) {
+			// hi equity
+			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
+			for (int i = 0; i < holes.length; i++) {
+				vals[i] = value(Poker.hi, tempBoard, holes[i]);
+			}
+			MEquityUtil.updateEquity(meqs, true, vals, tempBoard, board.length);
+			// low equity
+			if (hilo) {
+				for (int i = 0; i < holes.length; i++) {
+					vals[i] = value(Poker.lo, tempBoard, holes[i]);
+				}
+				MEquityUtil.updateEquity(meqs, false, vals, tempBoard, board.length);
+			}
+		}
+
+		MEquityUtil.summariseEquity(meqs, combs);
+		MEquityUtil.summariseOuts(meqs, k);
+		return meqs;
+	}
+
+	/**
+	 * Calc sampled tex/omaha hand equity for each hand by generating random boards
+	 */
+	private MEquity[] sampleEquity(final String[] deck, final String[][] holes) {
+		final String[] board = new String[5];
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, deck.length, false);
+		// hand values for a particular board
+		final int[] vals = new int[holes.length];
+		final long[] picked = new long[1];
+		final int sz = 1000;
+
+		for (int p = 0; p < sz; p++) {
+			picked[0] = 0;
+			for (int n = 0; n < 5; n++) {
+				// TODO should really pick straight into board
+				// should also use thread local random
+				board[n] = RandomUtil.pick(deck, picked);
+			}
+			for (int i = 0; i < holes.length; i++) {
+				vals[i] = value(Poker.hi, board, holes[i]);
+			}
+			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
+			if (hilo) {
+				for (int i = 0; i < holes.length; i++) {
+					vals[i] = value(Poker.lo, board, holes[i]);
+				}
+				MEquityUtil.updateEquity(meqs, false, vals, null, 0);
+			}
+		}
+
+		MEquityUtil.summariseEquity(meqs, sz);
+		return meqs;
+	}
+
+	/**
+	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 
+	 * Temp must be 5 element array
+	 */
+	private int value(Value v, String[] board, String[] hole) {
+		int hv = 0;
+		for (int n = min; n <= 2; n++) {
+			final int nh = MathsUtil.bincoff(hole.length, n);
+			final int nb = MathsUtil.bincoff(board.length, 5 - n);
+			for (int kh = 0; kh < nh; kh++) {
+				MathsUtil.kcomb(n, kh, hole, temp, 0);
+				for (int kb = 0; kb < nb; kb++) {
+					MathsUtil.kcomb(5 - n, kb, board, temp, n);
+					final int val = v.value(temp);
+					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
+					if (val > hv) {
+						hv = val;
+					}
+				}
+			}
+		}
+		return hv;
 	}
 	
 }

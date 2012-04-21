@@ -11,14 +11,14 @@ public class DrawPoker extends Poker {
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
-	public static HandEq[] equityImpl(String[][] hands, String[] blockers) {
+	public static MEquity[] equityImpl(String[][] hands, String[] blockers) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
 
 		// remaining cards in deck
 		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, hands, blockers);
 
 		// return value
-		final HandEq[] eqs = HandEq.makeHandEqs(hands.length, deck.length, false);
+		final MEquity[] meqs = MEquityUtil.makeMEquity(hands.length, false, deck.length, false);
 
 		// get current hand values (not equity)
 		final int[] vals = new int[hands.length];
@@ -27,7 +27,7 @@ public class DrawPoker extends Poker {
 				vals[n] = value(hands[n]);
 			}
 		}
-		HandEq.updateCurrent(eqs, vals);
+		MEquityUtil.updateCurrent(meqs, true, vals);
 
 		final String[] h = new String[5];
 
@@ -49,11 +49,11 @@ public class DrawPoker extends Poker {
 				int v = value(h);
 				vals[hn] = v;
 			}
-			HandEq.updateEquities(eqs, vals);
+			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
 		}
 
-		HandEq.summariseEquities(eqs, c);
-		return eqs;
+		MEquityUtil.summariseEquity(meqs, c);
+		return meqs;
 	}
 
 	public static void main(String[] args) {
@@ -157,10 +157,10 @@ public class DrawPoker extends Poker {
 	//
 
 	@Override
-	public HandEq[] equity(String[] board, String[][] hands, String[] blockers) {
+	public MEquity[] equity(String[] board, String[][] hands, String[] blockers) {
 		return equityImpl(hands, blockers);
 	}
-
+	
 	@Override
 	public int value(String[] board, String[] hole) {
 		if (board != null || hole.length != 5) {

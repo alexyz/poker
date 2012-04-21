@@ -30,7 +30,7 @@ public class HandStateUtil {
 		}
 		
 		// equity stuff
-		Poker poker = GameUtil.getPoker(hand.game.type);
+		Poker poker = GameUtil.getPoker(hand.game);
 		List<String[]> holes = new ArrayList<String[]>();
 		List<SeatState> holeSeats = new ArrayList<SeatState>();
 		Set<String> blockers = new TreeSet<String>();
@@ -51,7 +51,7 @@ public class HandStateUtil {
 				if (ss != null) {
 					hs.pot += ss.amount;
 					ss.amount = 0;
-					ss.eq = null;
+					ss.meq = null;
 					ss.acts = 0;
 					// get hole cards of live hands
 					if (ss.hole != null && !ss.folded) {
@@ -77,10 +77,12 @@ public class HandStateUtil {
 			
 			String[][] holesArr = holes.toArray(new String[holes.size()][]);
 			String[] blockersArr = blockers.toArray(new String[blockers.size()]);
-			HandEq[] eqs = poker.equity(hs.board, holesArr, blockersArr);
-			for (int n = 0; n < holeSeats.size(); n++) {
-				SeatState ss = holeSeats.get(n);
-				ss.eq = eqs[n];
+			synchronized (poker) {
+				MEquity[] eqs = poker.equity(hs.board, holesArr, blockersArr);
+				for (int n = 0; n < holeSeats.size(); n++) {
+					SeatState ss = holeSeats.get(n);
+					ss.meq = eqs[n];
+				}
 			}
 			
 			states.add(hs.clone());

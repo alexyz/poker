@@ -8,11 +8,8 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import pet.eq.Poker;
-import pet.eq.PokerUtil;
-import pet.hp.GameUtil;
-import pet.hp.Hand;
-import pet.hp.HandUtil;
+import pet.eq.*;
+import pet.hp.*;
 import pet.hp.state.*;
 
 /**
@@ -163,13 +160,9 @@ class TableComponent extends JComponent {
 				if (!ss.folded || ss.hole != null) {
 					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
 				}
-				if (ss.eq != null) {
-					lines.add(Poker.valueString(ss.eq.current));
-					if (ss.eq.tied == 0) {
-						lines.add(String.format("%2.1f%%", ss.eq.won));
-					} else {
-						lines.add(String.format("%2.1f%% (%2.1f%% tie)", ss.eq.won, ss.eq.tied));
-					}
+				if (ss.meq != null) {
+					lines.add(MEquityUtil.currentString(ss.meq));
+					lines.add(MEquityUtil.equityString(ss.meq));
 				}
 				if (ss.spr > 0) {
 					lines.add(String.format("SPR: %2.1f", ss.spr));

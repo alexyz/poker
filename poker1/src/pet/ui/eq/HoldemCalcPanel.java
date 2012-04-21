@@ -13,6 +13,7 @@ public class HoldemCalcPanel extends CalcPanel {
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
 	private final JCheckBox randRiverBox = new JCheckBox("River");
+	private final JCheckBox hiloBox = new JCheckBox("Hi/Lo");
 	private final boolean omaha;
 	private final int numHoleCards;
 
@@ -46,6 +47,9 @@ public class HoldemCalcPanel extends CalcPanel {
 		p.add(randFlopBox);
 		p.add(randTurnBox);
 		p.add(randRiverBox);
+		if (omaha) {
+			p.add(hiloBox);
+		}
 		addgb(p);
 		addgb(new ButtonPanel(this));
 	}
@@ -76,7 +80,7 @@ public class HoldemCalcPanel extends CalcPanel {
 			if (randHandsBox.isSelected()) {
 				hp.clearCards();
 			}
-			hp.clearHandEquity();
+			hp.setHandEquity(null);
 		}
 		if (randFlopBox.isSelected()) {
 			boardPanel.clearCards(0, 3);
@@ -118,9 +122,9 @@ public class HoldemCalcPanel extends CalcPanel {
 
 	@Override
 	public void calc() {
-		List<String[]> hl = new ArrayList<String[]>();
+		List<String[]> hs = new ArrayList<String[]>();
 		for (HandCardPanel hp : handPanels) {
-			hp.clearHandEquity();
+			hp.setHandEquity(null);
 		}
 		
 		String[] board = boardPanel.getCards();
@@ -132,7 +136,7 @@ public class HoldemCalcPanel extends CalcPanel {
 			board = null;
 		}
 		
-		List<HandCardPanel> pl = new ArrayList<HandCardPanel>();
+		List<HandCardPanel> hps = new ArrayList<HandCardPanel>();
 		for (HandCardPanel hp : handPanels) {
 			String[] hand = hp.getCards();
 			if (hand.length > 0) {
@@ -141,23 +145,23 @@ public class HoldemCalcPanel extends CalcPanel {
 					return;
 					
 				} else {
-					pl.add(hp);
-					hl.add(hand);
+					hps.add(hp);
+					hs.add(hand);
 				}
 			}
 		}
 
-		if (hl.size() == 0) {
+		if (hs.size() == 0) {
 			System.out.println("no hands");
 			return;
 		}
 
-		String[][] hands = hl.toArray(new String[hl.size()][]);
-		HandEq[] eqs = new HEPoker(omaha).equity(board, hands, null);
+		String[][] hands = hs.toArray(new String[hs.size()][]);
+		MEquity[] eqs = new HEPoker(omaha, hiloBox.isSelected()).equity(board, hands, null);
 		for (int n = 0; n < eqs.length; n++) {
-			HandEq e = eqs[n];
-			pl.get(n).setHandEquity(e);
-			System.out.println("outs: " + e.outs);
+			//HandEq e = eqs[n];
+			//pl.get(n).setHandEquity(e);
+			hps.get(n).setHandEquity(eqs[n]);
 		}
 
 	}

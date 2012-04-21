@@ -2,10 +2,8 @@ package pet.ui.ta;
 
 import java.util.*;
 
-import pet.eq.Poker;
-import pet.eq.PokerUtil;
-import pet.hp.GameUtil;
-import pet.hp.HandUtil;
+import pet.eq.*;
+import pet.hp.*;
 import pet.hp.state.*;
 
 public class HandStateTableModel extends MyTableModel<HandState> {
@@ -57,8 +55,8 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getToolTip(HandState hs) {
 				if (hs.actionSeat >= 0) {
 					SeatState ss = hs.seats[hs.actionSeat];
-					if (ss.eq != null) {
-						return Poker.valueString(ss.eq.current);
+					if (ss.meq != null) {
+						return MEquityUtil.currentString(ss.meq);
 					}
 				}
 				return null;
@@ -86,14 +84,9 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
-					if (ss.eq != null && ss.acts <= 1) {
-						String v = String.format("%2.1f%%", ss.eq.won);
-						if (ss.eq.tied > 0) {
-							v += String.format(" (%2.1f%% T)", ss.eq.tied);
-						}
-						return v;
+					if (ss.meq != null && ss.acts <= 1) {
+						return MEquityUtil.equityString(ss.meq);
 					}
-
 				}
 				return "";
 			}

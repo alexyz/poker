@@ -21,7 +21,7 @@ public abstract class Poker {
 	protected static final int SF_RANK = 8 << 20;
 	protected static final int LOW_RANK = 9 << 20;
 	/** number of ranks */
-	public static final int RANKS = 10;
+	public static final int RANKS = 9;
 	/**
 	 * short rank names (value >> 20)
 	 */
@@ -40,19 +40,29 @@ public abstract class Poker {
 	
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
+	
+	/**
+	 * calculates high value of hand
+	 */
+	public static final Value hi = new Value() {
+		@Override
+		public final int value(String[] hand) {
+			return Poker.value(hand);
+		}
+	};
+	
+	/**
+	 * Calculates low value of hand
+	 */
+	public static final Value lo = new Value() {
+		@Override
+		public final int value(String[] hand) {
+			return Poker.lowValue(hand);
+		}
+	};
 
 	/**
-	 * calculate equity for board and hands - implemented by subclass
-	 */
-	public abstract HandEq[] equity(String[] board, String[][] holes, String[] blockers);
-	
-	/**
-	 * Calculate value of exact hand
-	 */
-	public abstract int value(String[] board, String[] hole);
-	
-	/**
-	 * does the 5 card hand qualify for low
+	 * does the 5 card hand qualify for ace to five low
 	 */
 	private static boolean isLow(String[] hand) {
 		for (int n = 0; n < hand.length; n++) {
@@ -64,15 +74,18 @@ public abstract class Poker {
 	}
 
 	/**
-	 * get low value of hand... FIXME untested
+	 * get ace to five low value of hand
 	 */
 	public static int lowValue(String[] hand) {
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
-			if ((p & 0xf00000) == H_RANK) {
+			System.out.println("pair=" + p);
+			if (p < P_RANK) {
 				// no pairs
 				// invert value
-				return (LOW_RANK | 0xfffff) - (p & 0xfffff);
+				int v = LOW_RANK | (P_RANK - p);
+				System.out.println("low val of " + Arrays.toString(hand) + " is " + Integer.toHexString(v));
+				return v;
 			}
 		}
 		return 0;
@@ -99,7 +112,7 @@ public abstract class Poker {
 	public static int value(String[] hand) {
 		validate(hand);
 		int p = isPair(hand, true);
-		if ((p & 0xf00000) == H_RANK) {
+		if (p < P_RANK) {
 			boolean f = isFlush(hand);
 			int s = isStraight(hand);
 			if (f) {
@@ -276,4 +289,20 @@ public abstract class Poker {
 		return value >> 20;
 	}
 	
+	/**
+	 * Calculate equity for given board and hands.
+	 * This method is NOT thread safe.
+	 */
+	public abstract MEquity[] equity(String[] board, String[][] holes, String[] blockers);
+	
+	/**
+	 * Calculate value of exact hi hand.
+	 * This method is NOT thread safe.
+	 */
+	public abstract int value(String[] board, String[] hole);
+	
+}
+
+abstract class Value {
+	public abstract int value(String[] hand);
 }

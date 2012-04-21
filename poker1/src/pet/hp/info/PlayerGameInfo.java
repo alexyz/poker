@@ -11,7 +11,7 @@ public class PlayerGameInfo {
 	public final PlayerInfo player;
 	/** the game in question (from the hand parser) */
 	public final Game game;
-	
+
 	/** how much rake this player contributed */
 	public int rake = 0;
 	/** hands for this game */
@@ -44,31 +44,31 @@ public class PlayerGameInfo {
 	private final int[] streetsseen;
 	/** number of hands where money voluntarily put in pot */
 	public int vpip;
-	
+
 	/** create play game info for the given player and game */
 	public PlayerGameInfo(PlayerInfo player, Game game) {
 		this.player = player;
 		this.game = game;
-		
+
 		int s = GameUtil.getMaxStreets(game.type);
 		streetinits = new int[s];
 		streetsseen = new int[s];
 	}
-	
+
 	/**
 	 * add this hand at this seat to the players game info
 	 */
 	public void add(Hand hand, Seat seat) {
 		hands++;
 		pip += seat.pip;
-		
+
 		if (seat.showdown) {
 			showdownsseen++;
 			if (seat.won > 0) {
 				handswonshow++;
 			}
 		}
-		
+
 		if (seat.won > 0) {
 			handswon++;
 			won += seat.won;
@@ -83,26 +83,28 @@ public class PlayerGameInfo {
 				rake += (hand.rake / winners);
 			}
 		}
-		
+
 		// count winning rank.. if you dare!
 		if (seat.showdown) {
-			Poker p = GameUtil.getPoker(hand.game.type);
-			int v = p.value(hand.board, seat.hole);
-			int r = Poker.rank(v);
-			(seat.won > 0 ? rankwon : ranklost)[r]++;
-			rankam[r]+=seat.won-seat.pip;
+			Poker p = GameUtil.getPoker(hand.game);
+			synchronized (p) {
+				int v = p.value(hand.board, seat.hole);
+				int r = Poker.rank(v);
+				(seat.won > 0 ? rankwon : ranklost)[r]++;
+				rankam[r]+=seat.won-seat.pip;
+			}
 		}
-		
+
 		boolean hasPip = false;
-		
+
 		// update player game info with actions
 		for (int s = 0; s < hand.streets.length; s++) {
 			Action[] street = hand.streets[s];
 			streetsseen[s]++;
-			
+
 			Action init = null;
 			boolean hasChecked = false;
-			
+
 			for (Action act : street) {
 				if (act.seat == seat) {
 					addAction(act, hasChecked);
@@ -122,7 +124,7 @@ public class PlayerGameInfo {
 					init = act;
 				}
 			}
-			
+
 
 			// initiative
 			// TODO sustained initiative, fold to init?
@@ -135,7 +137,7 @@ public class PlayerGameInfo {
 			vpip++;
 		}
 	}
-	
+
 	/**
 	 * Add action on street
 	 */
@@ -152,14 +154,14 @@ public class PlayerGameInfo {
 			}
 		}
 	}
-	
+
 	//
 	// derived methods
 	//
-	
+
 	// initiative
 	// play cbet freq
-	
+
 	/**
 	 * initiatives per street
 	 */
@@ -174,21 +176,21 @@ public class PlayerGameInfo {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * flops seen as percentage of hands
 	 */
 	public float fs() {
 		return (streetsseen[1] * 100f) / hands;
 	}
-	
+
 	/**
 	 * show downs seen as percentage of all hands
 	 */
 	public float ss() {
 		return (showdownsseen * 100f) / hands;
 	}
-	
+
 	/**
 	 * show downs won as percentage of all show downs
 	 */
@@ -199,14 +201,14 @@ public class PlayerGameInfo {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * hands won as percentage of all hands
 	 */
 	public float hw() {
 		return (handswon*100f) / hands;
 	}
-	
+
 	/**
 	 * check, check fold, check call, check raise count
 	 */
@@ -214,7 +216,7 @@ public class PlayerGameInfo {
 		int checks = actionCount[Action.CHECK_TYPE];
 		return String.format("%d-%d-%d-%d", checks, checkfold, checkcall, checkraise);
 	}
-	
+
 	/**
 	 * check fold, check call, check raise to checks ratio
 	 */
@@ -229,17 +231,17 @@ public class PlayerGameInfo {
 			return "";
 		}
 	}
-	
+
 	/** aggression factor count */
 	public Float afcount() {
 		return af(actionCount);
 	}
-	
+
 	/** aggression factor volume */
 	public Float afam() {
 		return af(actionAmount);
 	}
-	
+
 	private Float af(int[] a) {
 		// amount bet+raise / call
 		int b = a[Action.BET_TYPE];
@@ -252,12 +254,12 @@ public class PlayerGameInfo {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return "PlayerGameInfo[game=" + game + " hands=" + hands + "]";
 	}
-	
+
 	public String toLongString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("Hands:  %d  Hands Won:  %d\n", hands, handswon));
@@ -267,7 +269,7 @@ public class PlayerGameInfo {
 		sb.append("Initiatives: " + isstr() + "\n");
 		sb.append("Show downs:  " + showdownsseen + "\n");
 		sb.append("Show down wins:  " + handswonshow + "\n");
-		
+
 		sb.append("Actions:\n");
 		for (int n = 0; n < actionCount.length; n++) {
 			if (actionCount[n] > 0) {

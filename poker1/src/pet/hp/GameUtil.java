@@ -11,8 +11,8 @@ public class GameUtil {
 
 	/** poker equity functions */
 	private static final Poker drawPoker = new DrawPoker();
-	private static final Poker holdemPoker = new HEPoker(false);
-	private static final Poker omahaPoker = new HEPoker(true);
+	private static final Poker holdemPoker = new HEPoker(false, false);
+	private static final Poker omahaPoker = new HEPoker(true, false);
 	private static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
@@ -194,16 +194,17 @@ public class GameUtil {
 	/**
 	 * Get poker equity function for game type
 	 */
-	public static Poker getPoker(char gametype) {
-		switch (gametype) {
+	public static Poker getPoker(Game game) {
+		switch (game.type) {
 			case Game.FCD_TYPE:
 				return drawPoker;
 			case Game.HE_TYPE:
 				return holdemPoker;
 			case Game.OM_TYPE:
+				// TODO hilo
 				return omahaPoker;
 		}
-		throw new RuntimeException("no poker for type " + gametype);
+		throw new RuntimeException("no poker for game " + game);
 	}
 
 }
