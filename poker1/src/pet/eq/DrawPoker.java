@@ -95,7 +95,8 @@ public class DrawPoker extends Poker {
 	}
 
 	/**
-	 * get the high card in the hand
+	 * get the high card in the hand.
+	 * always returns new array
 	 */
 	private static String[] getHigh(String[] hand) {
 		String[] a = hand.clone();
@@ -104,13 +105,14 @@ public class DrawPoker extends Poker {
 	}
 	
 	/**
-	 * get best two cards in hand
+	 * get best two cards in hand.
+	 * always returns new array
 	 */
 	private static String[] getPair(final String[] hand) {
 		String[] h = hand.clone();
 		Arrays.sort(h, Cmp.revCardCmp);
 		for (int n = 1; n < h.length; n++) {
-			if (faceValue(h[n-1]) == faceValue(h[n])) {
+			if (faceValue(h[n-1], true) == faceValue(h[n], true)) {
 				return new String[] { h[n-1], h[n] };
 			}
 		}

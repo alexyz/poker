@@ -43,6 +43,7 @@ public class HandUtil {
 				return null;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return street > 0 ? Arrays.copyOf(hand.board, street + 2) : null;
 		}
 		throw new RuntimeException("unknown game type " + hand.game.type);
@@ -89,6 +90,7 @@ public class HandUtil {
 				break;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				if (seat.hole != null) {
 					h = seat.hole.clone();
 				}

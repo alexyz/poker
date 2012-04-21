@@ -57,10 +57,13 @@ public class HUDPanel extends JPanel implements FollowListener {
 				PokerFrame pf = PokerFrame.getInstance();
 				switch (hs.hand.game.type) {
 					case Game.HE_TYPE:
-						pf.displayHoldemEquity(hs.hand.board, holes, false);
+						pf.displayHoldemEquity(hs.hand.board, holes, false, false);
 						break;
 					case Game.OM_TYPE:
-						pf.displayHoldemEquity(hs.hand.board, holes, true);
+						pf.displayHoldemEquity(hs.hand.board, holes, true, false);
+						break;
+					case Game.OMHL_TYPE:
+						pf.displayHoldemEquity(hs.hand.board, holes, true, true);
 						break;
 					case Game.FCD_TYPE:
 						pf.displayDrawEquity(holes);

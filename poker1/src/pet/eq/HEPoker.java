@@ -27,7 +27,7 @@ public class HEPoker extends Poker {
 	// instance stuff
 	//
 	
-	private String[] temp = new String[5];
+	private final String[] temp = new String[5];
 	private final boolean omaha;
 	private final int min;
 	private final boolean hilo;
@@ -98,12 +98,15 @@ public class HEPoker extends Poker {
 		final int k = 5 - board.length;
 		final int combs = MathsUtil.bincoff(deck.length, k);
 		for (int p = 0; p < combs; p++) {
-			// hi equity
+			// get board
 			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
+			
+			// hi equity
 			for (int i = 0; i < holes.length; i++) {
 				vals[i] = value(Poker.hi, tempBoard, holes[i]);
 			}
 			MEquityUtil.updateEquity(meqs, true, vals, tempBoard, board.length);
+			
 			// low equity
 			if (hilo) {
 				for (int i = 0; i < holes.length; i++) {
@@ -136,10 +139,14 @@ public class HEPoker extends Poker {
 				// should also use thread local random
 				board[n] = RandomUtil.pick(deck, picked);
 			}
+			
+			// high value
 			for (int i = 0; i < holes.length; i++) {
 				vals[i] = value(Poker.hi, board, holes[i]);
 			}
 			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
+			
+			// low value
 			if (hilo) {
 				for (int i = 0; i < holes.length; i++) {
 					vals[i] = value(Poker.lo, board, holes[i]);
@@ -154,9 +161,8 @@ public class HEPoker extends Poker {
 
 	/**
 	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 
-	 * Temp must be 5 element array
 	 */
-	private int value(Value v, String[] board, String[] hole) {
+	private int value(final Value v, final String[] board, final String[] hole) {
 		int hv = 0;
 		for (int n = min; n <= 2; n++) {
 			final int nh = MathsUtil.bincoff(hole.length, n);

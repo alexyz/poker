@@ -24,14 +24,14 @@ public class Equity {
 	/** percentage of hands tied but not won */
 	public float tied;
 	/** percentage of hands won or tied by rank (value >> 20) */
-	public final float[] wonrank = new float[9];
+	public final float[] wonrank = new float[Poker.RANKS];
 	/** percentage that each card will make best hand */
 	public final Map<String,Float> outs = new TreeMap<String,Float>();
 	
 	int woncount;
 	int tiedcount;
-	// FIXME hi only
-	final int[] wonrankcount = new int[9];
+	// XXX hi only
+	final int[] wonrankcount = new int[Poker.RANKS];
 	/** count that each card (as part of group of k cards) will make the best hand */
 	final Map<String,int[]> outcount = new TreeMap<String,int[]>();
 

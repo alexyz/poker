@@ -7,7 +7,7 @@ package pet.hp;
 public class Game implements Comparable<Game> {
 	
 	/** game type constants */
-	public static final char FCD_TYPE = 'F', HE_TYPE = 'H', OM_TYPE = 'O';
+	public static final char FCD_TYPE = 'F', HE_TYPE = 'H', OM_TYPE = 'O', OMHL_TYPE = '8';
 	/** limit type constants */
 	public static final char NO_LIMIT = 'N', POT_LIMIT = 'P', FIXED_LIMIT = 'F';
 	/** mix type constants */

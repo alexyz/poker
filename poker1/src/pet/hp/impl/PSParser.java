@@ -66,14 +66,14 @@ public class PSParser extends Parser {
 
 	private void println(String s) {
 		debuglines.add(s);
-		if (debug) {
-			System.out.println(s);
-		}
+		//if (debug) {
+		System.out.println(s);
+		//}
 	}
 
 	@Override
 	public boolean isHistoryFile(String name) {
-		if (!name.contains("H-L") && name.startsWith("HH") && name.endsWith(".txt")) {
+		if (name.startsWith("HH") && name.endsWith(".txt")) {
 			int a = name.indexOf(" ");
 			int b = name.indexOf(" ", a + 1);
 			String tname = name.substring(a + 1, b);
@@ -121,7 +121,7 @@ public class PSParser extends Parser {
 
 		line = line.trim();
 
-		println(">  " + line);
+		println("file>  " + line);
 
 		if (line.length() == 0) {
 			if (summaryPhase && hand != null) {
@@ -171,6 +171,13 @@ public class PSParser extends Parser {
 
 		} else if (line.startsWith("Total pot")) {
 			parseTotal(line);
+
+
+			// ------ equals ------------
+
+
+		} else if (line.equals("No low hand qualified")) {
+			println("no low");
 
 
 			/// ---------- ends with ----------
@@ -250,13 +257,13 @@ public class PSParser extends Parser {
 		}
 		int amount = parseMoney(line, a + 10);
 		seat.won += amount;
-		
+
 		// add the collect as a fake action so the action amounts sum to pot size
 		Action act = new Action(seat);
 		act.amount = -amount;
 		act.type = Action.COLLECT_TYPE;
 		streets.get(streets.size() - 1).add(act);
-		
+
 		println("collected " + name + " " + amount);
 	}
 
@@ -309,13 +316,13 @@ public class PSParser extends Parser {
 		}
 		//seat.uncalled = amount;
 		seatPip[seat.num] -= amount;
-		
+
 		// add the uncall as a fake action so the action amounts sum to pot size
 		Action act = new Action(seat);
 		act.amount = -amount;
 		act.type = Action.UNCALL_TYPE;
 		streets.get(streets.size() - 1).add(act);
-		
+
 		println("uncalled " + name + " " + amount);
 	}
 
@@ -417,7 +424,7 @@ public class PSParser extends Parser {
 		if (line.contains("Tournament")) {
 			throw new RuntimeException("no tournaments");
 		}
-		
+
 		// get game later
 		handline = line;
 
@@ -477,6 +484,7 @@ public class PSParser extends Parser {
 		// FIXME zoom doesn't include play in text, only in file name
 		//boolean play = line.contains("Play Money");
 		hand.game = getGame(handline, max);
+		println("game " + hand.game);
 
 		int d = line.indexOf("Seat");
 		if (d > 0) {
@@ -507,24 +515,29 @@ public class PSParser extends Parser {
 		int a = line.indexOf("***");
 		int b = line.indexOf("***", a + 3);
 		String name = line.substring(a + 4, b - 1);
-		boolean newstr = false;
-		boolean ignstr = false;
+		boolean newStreet = false;
+		boolean ignoreStreet = false;
 
-		if (hand.game.type == Game.HE_TYPE || hand.game.type == Game.OM_TYPE) {
-			if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
-				newstr = true;
-			} else if (name.equals("HOLE CARDS")) {
-				ignstr = true;
-			}
-
-
-		} else if (hand.game.type == Game.FCD_TYPE) {
-			if (name.equals("DEALING HANDS")) {
-				ignstr = true;
-			}
+		switch (hand.game.type) {
+			case Game.HE_TYPE:
+			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
+				if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
+					newStreet = true;
+				} else if (name.equals("HOLE CARDS")) {
+					ignoreStreet = true;
+				}
+				break;
+			case Game.FCD_TYPE:
+				if (name.equals("DEALING HANDS")) {
+					ignoreStreet = true;
+				}
+				break;
+			default: 
+				throw new RuntimeException("unknown game type " + hand.game.type);
 		}
 
-		if (newstr) {
+		if (newStreet) {
 			pip();
 			streets.add(new ArrayList<Action>());
 			println("new street " + streets.size());
@@ -539,7 +552,7 @@ public class PSParser extends Parser {
 			pip();
 			summaryPhase = true;
 
-		} else if (!ignstr) {
+		} else if (!ignoreStreet) {
 			throw new RuntimeException("unknown phase " + name);
 		}
 	}
@@ -884,7 +897,7 @@ public class PSParser extends Parser {
 		// PokerStars Zoom Hand #77405734487:  Omaha Pot Limit ($0.01/$0.02) - 2012/03/18 14:38:20 ET
 		// PokerStars Hand #75934682486:  Mixed NLH/PLO (Hold'em No Limit, 100/200) - 2012/02/20 16:16:13 ET
 		// PokerStars Game #64393043049:  5 Card Draw Pot Limit (5/10) - 2011/07/10 16:33:36 ET
-
+		// PokerStars Hand #79231124567:  Omaha Hi/Lo Pot Limit (25/50) - 2012/04/21 15:22:28 ET
 		char mix = 0;
 		if (handline.contains("Mixed")) {
 			if (handline.contains("Mixed NLH/PLO")) {
@@ -897,6 +910,8 @@ public class PSParser extends Parser {
 		char type;
 		if (handline.contains("Hold'em")) {
 			type = Game.HE_TYPE;
+		} else if (handline.contains("Omaha Hi/Lo")) {
+			type = Game.OMHL_TYPE;
 		} else if (handline.contains("Omaha")) {
 			type = Game.OM_TYPE;
 		} else if (handline.contains("5 Card Draw")) {

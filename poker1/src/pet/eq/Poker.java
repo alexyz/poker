@@ -79,12 +79,10 @@ public abstract class Poker {
 	public static int lowValue(String[] hand) {
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
-			System.out.println("pair=" + p);
 			if (p < P_RANK) {
 				// no pairs
 				// invert value
 				int v = LOW_RANK | (P_RANK - p);
-				System.out.println("low val of " + Arrays.toString(hand) + " is " + Integer.toHexString(v));
 				return v;
 			}
 		}
@@ -150,7 +148,7 @@ public abstract class Poker {
 		int str = 5;
 		for (int n = 0; n < hand.length; n++) {
 			// sub 1 so bottom bit equals ace low
-			int v = faceValue(hand[n]) - 1;
+			int v = faceValue(hand[n], true) - 1;
 			x |= (1 << v);
 			if (v == 13) {
 				// add ace low as well as ace high
@@ -213,25 +211,21 @@ public abstract class Poker {
 	}
 
 	/**
-	 * Return integer value of card face, ace high (from A = 14 to deuce = 2)
-	 */
-	static int faceValue(String card) {
-		int i = "23456789TJQKA".indexOf(face(card));
-		if (i >= 0) {
-			return i + 2;
-		}
-		throw new RuntimeException("unknown face " + card);
-	}
-
-	/**
 	 * Return integer value of card face, ace high or low (from A = 14 to 2 = 2 or K = 13 to A = 1)
 	 */
-	private static int faceValue(String card, boolean acehigh) {
-		int v = faceValue(card);
-		if (v == 14 && !acehigh) {
-			v = 1;
+	static int faceValue(String card, boolean acehigh) {
+		if (acehigh) {
+			int i = "23456789TJQKA".indexOf(face(card));
+			if (i >= 0) {
+				return i + 2;
+			}
+		} else {
+			int i = "A23456789TJQK".indexOf(face(card));
+			if (i >= 0) {
+				return i + 1;
+			}
 		}
-		return v;
+		throw new RuntimeException("unknown face " + card);
 	}
 
 	/**
@@ -246,8 +240,8 @@ public abstract class Poker {
 	 */
 	private static char valueFace(int x) {
 		int v = x & 0xf;
-		// allow 0 index
-		return "**23456789TJQKA".charAt(v);
+		// allow 0 index and ace low
+		return "?A23456789TJQKA".charAt(v);
 	}
 
 	/**
@@ -303,6 +297,12 @@ public abstract class Poker {
 	
 }
 
+/**
+ * 5 card hand value function
+ */
 abstract class Value {
+	/**
+	 * get hand value (high or low)
+	 */
 	public abstract int value(String[] hand);
 }

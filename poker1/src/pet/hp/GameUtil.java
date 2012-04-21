@@ -13,6 +13,7 @@ public class GameUtil {
 	private static final Poker drawPoker = new DrawPoker();
 	private static final Poker holdemPoker = new HEPoker(false, false);
 	private static final Poker omahaPoker = new HEPoker(true, false);
+	private static final Poker omahaHLPoker = new HEPoker(true, true);
 	private static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre draw", "Post draw" };
 
@@ -49,6 +50,8 @@ public class GameUtil {
 		switch (gametype) {
 			case Game.OM_TYPE: 
 				return "Omaha";
+			case Game.OMHL_TYPE:
+				return "Omaha H-L";
 			case Game.HE_TYPE: 
 				return "Hold'em";
 			case Game.FCD_TYPE: 
@@ -108,6 +111,7 @@ public class GameUtil {
 			case Game.HE_TYPE:
 				return 2;
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return 4;
 			default: 
 				throw new RuntimeException("unknown game type " + gametype);
@@ -123,6 +127,7 @@ public class GameUtil {
 			case Game.HE_TYPE:
 				return 1;
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return 2;
 			default: 
 				throw new RuntimeException("unknown game type " + gametype);
@@ -131,12 +136,14 @@ public class GameUtil {
 
 	/** return a string representing unknown hole cards for this game */
 	public static String unknownCardsString(char gametype) {
+		// return string constant instead of making string
 		switch (gametype) {
 			case Game.FCD_TYPE:
 				return "[ ][ ][ ][ ][ ]";
 			case Game.HE_TYPE:
 				return "[ ][ ]";
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return "[ ][ ][ ][ ]";
 		}
 		throw new RuntimeException("unknown game type " + gametype);
@@ -149,6 +156,7 @@ public class GameUtil {
 				return street == drawstreetnames.length - 1;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return street == hestreetnames.length - 1;
 		}
 		throw new RuntimeException("unknown game type " + gametype);
@@ -161,6 +169,7 @@ public class GameUtil {
 				return drawstreetnames.length;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return hestreetnames.length;
 		}
 		throw new RuntimeException("unknown game type " + gametype);
@@ -173,6 +182,7 @@ public class GameUtil {
 				return drawstreetnames[street];
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
 				return hestreetnames[street];
 		}
 		throw new RuntimeException("unknown game type " + gametype);
@@ -192,7 +202,8 @@ public class GameUtil {
 	}
 
 	/**
-	 * Get poker equity function for game type
+	 * Get poker equity function for game type.
+	 * Always synchronise on object!
 	 */
 	public static Poker getPoker(Game game) {
 		switch (game.type) {
@@ -201,8 +212,9 @@ public class GameUtil {
 			case Game.HE_TYPE:
 				return holdemPoker;
 			case Game.OM_TYPE:
-				// TODO hilo
 				return omahaPoker;
+			case Game.OMHL_TYPE:
+				return omahaHLPoker;
 		}
 		throw new RuntimeException("no poker for game " + game);
 	}

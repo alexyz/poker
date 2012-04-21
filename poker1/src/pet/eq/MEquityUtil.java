@@ -3,8 +3,8 @@ package pet.eq;
 public class MEquityUtil {
 	
 	/**
-	 * Make array of hand equities for given number of remaining cards and
-	 * calculation method
+	 * Make array of multiple hand equities for given number of remaining cards,
+	 * game type and calculation method
 	 */
 	static MEquity[] makeMEquity(int hands, boolean hilo, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
@@ -88,6 +88,9 @@ public class MEquityUtil {
 		}
 	}
 
+	/**
+	 * summarise equities (convert counts to percentages)
+	 */
 	static void summariseEquity(MEquity[] meqs, int samples) {
 		for (MEquity meq : meqs) {
 			meq.hi.summariseEquity(samples);
@@ -110,7 +113,6 @@ public class MEquityUtil {
 	 * Return string representing current value of hand
 	 */
 	public static String currentString(MEquity me) {
-		// TODO low value
 		String s = Poker.valueString(me.hi.current);
 		if (me.lo != null) {
 			s += " / " + Poker.valueString(me.lo.current);
@@ -124,17 +126,17 @@ public class MEquityUtil {
 	public static String equityString(MEquity me) {
 		String s;
 		if (me.lo == null) {
-			s = String.format("%2.1f%%", me.hi.won);
+			s = String.format("%.1f%%", me.hi.won);
 			if (me.hi.tied != 0) {
-				s += String.format(" (%2.1f%% T)", me.hi.tied);
+				s += String.format(" (%.1f%% T)", me.hi.tied);
 			}
 		} else {
-			s = String.format("%2f/%2f%%", me.hi.won, me.lo.won);
-			if (me.hi.tied != 0 || me.lo.tied == 0) {
-				s += String.format(" (%2f/%2f%% T)", me.hi.tied, me.lo.tied);
+			s = String.format("%.1f-%.1f%%", me.hi.won, me.lo.won);
+			if (me.hi.tied != 0 || me.lo.tied != 0) {
+				s += String.format(" (%.0f-%.0f T)", me.hi.tied, me.lo.tied);
 			}
 		}
 		return s;
 	}
-
+	
 }

@@ -33,7 +33,7 @@ public class PokerUtil {
 		int v = 0;
 		for (String card : cards) {
 			v *= 16;
-			v += Poker.faceValue(card);
+			v += Poker.faceValue(card, true);
 		}
 		for (String card : cards) {
 			v *= 4;

@@ -57,12 +57,13 @@ public class HoldemCalcPanel extends CalcPanel {
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(String[] board, String[][] holes) {
+	public void displayHand(String[] board, String[][] holes, boolean hilo) {
 		clear();
 		boardPanel.setCards(board);
 		for (int n = 0; n < holes.length; n++) {
 			handPanels[n].setCards(holes[n]);
 		}
+		hiloBox.setSelected(hilo);
 		updateDeck();
 	}
 

@@ -116,9 +116,9 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(handsPanel);
 	}
 	
-	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha) {
+	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
-		panel.displayHand(board, holes);
+		panel.displayHand(board, holes, hilo);
 		tabs.setSelectedComponent(panel);
 	}
 	
