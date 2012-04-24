@@ -26,6 +26,8 @@ public class GameUtil {
 				return "EUR";
 			case Game.PLAY_CURRENCY: 
 				return "Play";
+			case Game.TOURN_CURRENCY:
+				return "Tourn";
 			default: 
 				throw new RuntimeException("no such currency " + currency);
 		}
@@ -64,8 +66,8 @@ public class GameUtil {
 	/** get full name of mixed game type */
 	public static String getMixTypeName(char mixtype) {
 		switch (mixtype) {
-			case Game.NLHE_PLO_MIX: 
-				return "Mixed NLH/PLO";
+			case Game.HE_OM_MIX: 
+				return "Mixed HE/OM";
 			default: 
 				throw new RuntimeException("unknown mix type " + mixtype);
 		}
@@ -94,7 +96,7 @@ public class GameUtil {
 		}
 		sb.append(getGameTypeName(game.type)).append(" ");
 		sb.append(getLimitName(game.limit)).append(" ");
-		sb.append(game.max).append("-max ");
+		//sb.append(game.max).append("-max ");
 		if (game.subtype != 0) {
 			sb.append(getSubTypeName(game.subtype)).append(" ");
 		}
@@ -195,6 +197,7 @@ public class GameUtil {
 			case '€':
 				// TODO $2 instead of $2.00
 				return String.format("%c%.2f", currency, amount / 100f);
+			case Game.TOURN_CURRENCY:
 			case Game.PLAY_CURRENCY:
 				return nf.format(amount);
 			default: throw new RuntimeException("unknown currency " + currency);

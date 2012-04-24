@@ -24,7 +24,7 @@ public class HandState implements Cloneable {
 	public String note;
 	public HandState(Hand hand) {
 		this.hand = hand;
-		this.seats = new SeatState[hand.game.max];
+		this.seats = new SeatState[hand.max];
 	}
 
 	@Override

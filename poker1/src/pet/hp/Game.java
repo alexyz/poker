@@ -11,15 +11,15 @@ public class Game implements Comparable<Game> {
 	/** limit type constants */
 	public static final char NO_LIMIT = 'N', POT_LIMIT = 'P', FIXED_LIMIT = 'F';
 	/** mix type constants */
-	public static final char NLHE_PLO_MIX = 'M';
+	public static final char HE_OM_MIX = 'M';
 	/** currency type constants (excluding $ and €) */
-	public static final char PLAY_CURRENCY = 'p';
+	public static final char PLAY_CURRENCY = 'p', TOURN_CURRENCY = 't';
 	/** subtype constants */
 	public static final char ZOOM_SUBTYPE = 'Z';
 	
 	/** description string (unique for all games) */
 	public String id;
-	/** hand currency, $, € or P */
+	/** hand currency */
 	public char currency;
 	/** mixed game type */
 	public char mix;
@@ -27,11 +27,9 @@ public class Game implements Comparable<Game> {
 	public char type;
 	/** subtype of game (e.g. zoom) */
 	public char subtype;
-	/** max number of players at table */
-	public int max;
 	/** limit type */
 	public char limit;
-	/** blinds */
+	/** blinds XXX cash game only */
 	public int sb, bb;
 	
 	@Override

@@ -7,8 +7,8 @@ public class MEquity {
 	
 	public final Equity hi, lo;
 	// TODO add scoop, total eq
-	public boolean exact;
-	public int rem;
+	public final boolean exact;
+	public final int rem;
 
 	public MEquity(boolean hilo, int rem, boolean exact) {
 		this.hi = new Equity();

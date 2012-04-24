@@ -15,7 +15,7 @@ public class HandStateUtil {
 
 		// initial state (not displayed)
 		HandState hs = new HandState(hand);
-		hs.pot = hand.db;
+		hs.pot = hand.antes;
 		hs.button = hand.button - 1;
 		hs.actionSeat = -1;
 		for (Seat seat : hand.seats) {

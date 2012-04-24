@@ -8,19 +8,26 @@ import java.util.*;
  * No analysis - see HandUtil, HandInfo and HandState
  */
 public class Hand implements Serializable {
-	private static final long serialVersionUID = 1;
 	/** hand id */
-	public long id;
+	public final long id;
 	/** game type */
 	public Game game;
+	/** max number at table */
+	public int max;
+	/** tournament instance */
+	public Tourn tourn;
+	/** tournament round */
+	public int round;
+	/** tournament level */
+	public int level;
 	/** hand date */
 	public Date date;
-	/** big blind (if any?) */
+	/** big blind amount (may not be posted) */
 	public int bb;
-	/** small blind (if any?) */
+	/** small blind amount (may not be posted) */
 	public int sb;
-	/** dead blinds */
-	public int db;
+	/** dead blinds posted */
+	public int antes;
 	/** participants in hand in seat order */
 	public Seat[] seats;
 	/** current players seat */
@@ -41,6 +48,11 @@ public class Hand implements Serializable {
 	public String tablename;
 	/** button seat number */
 	public int button;
+	
+	public Hand(long id) {
+		this.id = id;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Hand[%s '%s' at '%s' on %s seats=%s str=%d]", 

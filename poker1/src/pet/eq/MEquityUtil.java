@@ -9,10 +9,7 @@ public class MEquityUtil {
 	static MEquity[] makeMEquity(int hands, boolean hilo, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
-			MEquity e = new MEquity(hilo, rem, exact);
-			e.exact = exact;
-			e.rem = rem;
-			meqs[n] = e;
+			meqs[n] = new MEquity(hilo, rem, exact);
 		}
 		return meqs;
 	}
