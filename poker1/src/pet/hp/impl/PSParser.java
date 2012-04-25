@@ -8,9 +8,7 @@ import pet.eq.ArrayUtil;
 import pet.hp.*;
 
 /**
- * PokerStars hand parser - primarily for Omaha/Holdem/Draw cash games.
- * TODO file/line/offset link
- * TODO tournaments and oh/l
+ * PokerStars hand parser - primarily for Omaha/Hold'em/Draw cash games.
  */
 public class PSParser extends Parser {
 
@@ -18,14 +16,21 @@ public class PSParser extends Parser {
 	private static final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
 	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
-	/** hand start pattern */
-	private static final Pattern hp;
-	/** hand pattern constants */
+
 	private static class H {
-		static final int zoom = 1, hid = 2, tid = 3, freeroll = 4, tbuyin = 5, tcost = 6, tcur = 7, mix = 8, game = 9,
+		/** hand start pattern */
+		static final Pattern p = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
+				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
+				+ "(?:(Mixed \\S+) )?"
+				+ "(Hold'em|Omaha|Omaha Hi/Lo|5 Card Draw) " 
+				+ "(No Limit|Pot Limit|Limit) "
+				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
+				+ "(\\S+?)/(\\S+?)(?: (USD))?");
+		/** hand pattern constants */
+		static final int zoom = 1, handid = 2, tournid = 3, freeroll = 4, tbuyin = 5, tcost = 6, tcur = 7, mix = 8, game = 9,
 				limit = 10, tround = 11, tlevel = 12, sb = 13, bb = 14, blindcur = 15;
 	}
-
+	
 	static {
 		// map stars terms to action constants
 		actionMap.put("checks", Action.CHECK_TYPE);
@@ -40,23 +45,18 @@ public class PSParser extends Parser {
 		actionMap.put("shows", Action.SHOW_TYPE);
 		actionMap.put("discards", Action.DRAW_TYPE);
 		actionMap.put("stands", Action.STANDPAT_TYPE);
-		hp = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
-				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
-				+ "(?:(Mixed \\S+) )?"
-				+ "(Hold'em|Omaha|Omaha Hi/Lo|5 Card Draw) " 
-				+ "(No Limit|Pot Limit|Limit) "
-				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
-				+ "(\\S+?)/(\\S+?)(?: (USD))?");
 	}
+	
+	// instance fields
 
+	public boolean debug;
+	
 	/** string cache to avoid multiple instances of same string */
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** game instances */
 	private final List<Game> games = new ArrayList<Game>();
-	/** tournaments */
+	/** tournament instances */
 	private final Map<Long,Tourn> tourns = new TreeMap<Long,Tourn>();
-
-	public boolean debug;
 
 	// stuff for current hand
 
@@ -153,7 +153,6 @@ public class PSParser extends Parser {
 			parseHand(line);
 
 		} else if (line.startsWith("Betting is capped")) {
-			// TODO
 			println("capped");
 
 		} else if (line.startsWith("Table ")) {
@@ -335,7 +334,7 @@ public class PSParser extends Parser {
 		hand.rake = ParseUtil.parseMoney(line, a + 5);
 
 		// validate pot size
-		// FIXME remove these
+		// TODO remove these
 		int won = 0;
 		int lost = 0;
 		for (Seat seat : seatsMap.values()) {
@@ -421,8 +420,7 @@ public class PSParser extends Parser {
 	}
 
 	private void parseSeat(final String line) {
-		int a = line.indexOf(":");
-		int seatno = ParseUtil.parseInt(line, a - 1);
+		int seatno = ParseUtil.parseInt(line, 5);
 
 		if (summaryPhase) {
 			// Seat 1: 777KTO777 folded before Flop (didn't bet)
@@ -455,14 +453,16 @@ public class PSParser extends Parser {
 		} else {
 			// Seat 2: tawvx ($2.96 in chips) 
 			// Seat 6: abs(EV) ($2.40 in chips) 
-			// FIXME Seat 5: OCTAVIAN 61 (2000 in chips) out of hand (moved from another table into small blind)
+			// Seat 5: OCTAVIAN 61 (2000 in chips) out of hand (moved from another table into small blind)
 			
-			int b = line.lastIndexOf("(");
+			int col = line.indexOf(": ");
+			int chEnd = line.indexOf(" in chips)");
+			int chStart = line.lastIndexOf("(", chEnd);
 
 			Seat seat = new Seat();
 			seat.num = (byte) seatno;
-			seat.name = cache(line.substring(a + 2, b - 1));
-			seat.chips = ParseUtil.parseMoney(line, b + 1);
+			seat.name = cache(line.substring(col + 2, chStart - 1));
+			seat.chips = ParseUtil.parseMoney(line, chStart + 1);
 			seatsMap.put(seat.name, seat);
 			//seatsList.add(seat);
 			println("seat " + seat);
@@ -489,7 +489,7 @@ public class PSParser extends Parser {
 		String dateline = line.substring(dateIndex + 2);
 		println("date line: " + dateline);
 		
-		Matcher m = hp.matcher(handline);
+		Matcher m = H.p.matcher(handline);
 		if (!m.matches()) {
 			throw new RuntimeException("could not match first line");
 		}
@@ -501,14 +501,14 @@ public class PSParser extends Parser {
 			subtype = Game.ZOOM_SUBTYPE;
 		}
 		
-		long hid = Long.parseLong(m.group(H.hid));
+		long hid = Long.parseLong(m.group(H.handid));
 		Hand hand = new Hand(hid);
 		
 		// hand currency (possibly tournament chips)
 		char currency = 0;
 		
 		// get all the tournament stuff if there is tourn id
-		String tids = m.group(H.tid);
+		String tids = m.group(H.tournid);
 		if (tids != null) {
 			currency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
@@ -597,20 +597,21 @@ public class PSParser extends Parser {
 			currency = parseCurrency(sbs, 0);
 		}
 		int sb = ParseUtil.parseMoney(sbs, 0);
-		hand.sb = sb;
 		
 		String bbs = m.group(H.bb);
 		int bb = ParseUtil.parseMoney(bbs, 0);
 		if (sb == 0 || bb == 0 || sb >= bb) {
 			throw new RuntimeException("invalid blinds " + sb + "/" + bb);
 		}
-		hand.bb = bb;
 		
 		if (limit == Game.FIXED_LIMIT) {
 			// fixed limit has big bet and small bet not blinds
 			bb = sb;
 			sb = sb / 2;
 		}
+		
+		hand.sb = sb;
+		hand.bb = bb;
 		
 		// get the game instance
 		Game game = getGame(currency, mix, type, subtype, limit, sb, bb);
