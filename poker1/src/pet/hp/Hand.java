@@ -5,7 +5,8 @@ import java.util.*;
 
 /**
  * represents a single hand at a table.
- * No analysis - see HandUtil, HandInfo and HandState
+ * No analysis - see HandUtil, HandInfo and HandState.
+ * This object should be considered immutable.
  */
 public class Hand implements Serializable {
 	/** hand id */

@@ -5,10 +5,12 @@ import java.util.*;
 import java.util.regex.*;
 
 import pet.eq.ArrayUtil;
+import pet.eq.Poker;
 import pet.hp.*;
 
 /**
- * PokerStars hand parser - primarily for Omaha/Hold'em/Draw cash games.
+ * PokerStars hand parser - primarily for Omaha/Hold'em/5 Card Draw PL/NL games but
+ * also tournaments and FL games.
  */
 public class PSParser extends Parser {
 
@@ -26,7 +28,7 @@ public class PSParser extends Parser {
 				+ "(No Limit|Pot Limit|Limit) "
 				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
 				+ "(\\S+?)/(\\S+?)(?: (USD))?");
-		/** hand pattern constants */
+		/** hand pattern capturing group constants */
 		static final int zoom = 1, handid = 2, tournid = 3, freeroll = 4, tbuyin = 5, tcost = 6, tcur = 7, mix = 8, game = 9,
 				limit = 10, tround = 11, tlevel = 12, sb = 13, bb = 14, blindcur = 15;
 	}
@@ -49,8 +51,10 @@ public class PSParser extends Parser {
 	
 	// instance fields
 
+	/** print everything to System.out */
 	public boolean debug;
 	
+	// would these be better in separate object for e.g. multithreaded parsing?
 	/** string cache to avoid multiple instances of same string */
 	private final Map<String,String> cache = new HashMap<String,String>();
 	/** game instances */
@@ -58,28 +62,31 @@ public class PSParser extends Parser {
 	/** tournament instances */
 	private final Map<Long,Tourn> tourns = new TreeMap<Long,Tourn>();
 
-	// stuff for current hand
+	// stuff for current hand, cleared on clear()
 
 	/** map of player name to seat for current hand */
 	private final Map<String,Seat> seatsMap = new TreeMap<String,Seat>();
 	/** array of seat num to seat pip for this street. seat numbers are 1-10 */
 	private final int[] seatPip = new int[11];
+	/** running pot - updated when pip() is called */
 	private int pot;
 	/** streets of action for current hand */
-	private transient final List<List<Action>> streets = new ArrayList<List<Action>>();
+	private final List<List<Action>> streets = new ArrayList<List<Action>>();
 	/** current hand */
 	private Hand hand;
 	/** hand reached showdown */
-	private boolean showdown = false;
+	private boolean showdown;
 	/** is in summary phase */
-	private boolean summaryPhase = false;
+	private boolean summaryPhase;
 	/** debug output in case of parse error */
 	private final List<String> debuglines = new ArrayList<String>();
 	/** has live sb been posted (others are dead) */
 	private boolean sbposted;
 
 	public PSParser() {
-		//
+		for (String c : Poker.FULL_DECK) {
+			cache(c);
+		}
 	}
 
 	private void println(String s) {
@@ -91,6 +98,7 @@ public class PSParser extends Parser {
 
 	@Override
 	public boolean isHistoryFile(String name) {
+		// TODO TS - tournament summaries
 		return name.startsWith("HH") && name.endsWith(".txt");
 	}
 
@@ -634,6 +642,10 @@ public class PSParser extends Parser {
 			boolean dst = ET.inDaylightTime(hdate);
 			Date hdatetime = dateFormat.parse(dateline.replace("ET", dst ? "EDT" : "EST"));
 			hand.date = hdatetime;
+			if (hand.tourn != null && (hand.tourn.date == null || hand.tourn.date.after(hdatetime))) {
+				// estimate tournament start date if it is not present
+				hand.tourn.date = hdatetime;
+			}
 		} catch (Exception e) {
 			throw new RuntimeException("could not parse date " + dateline, e);
 		}
@@ -922,7 +934,7 @@ public class PSParser extends Parser {
 	}
 
 	/**
-	 * update seat pip and running pot
+	 * put in pot - update running pot with seat pips
 	 */
 	private void pip() {
 		for (Seat seat : seatsMap.values()) {
@@ -937,6 +949,9 @@ public class PSParser extends Parser {
 		println("pot now " + pot);
 	}
 
+	/**
+	 * get cached string instance
+	 */
 	private String cache(String s) {
 		if (s != null) {
 			String s2 = cache.get(s);
@@ -949,6 +964,9 @@ public class PSParser extends Parser {
 		return s;
 	}
 
+	/**
+	 * get the cards
+	 */
 	private String[] parseHand(String line, int off) {
 		// [Jc 8h Js Ad]
 		if (line.charAt(off) == '[') {
@@ -957,6 +975,7 @@ public class PSParser extends Parser {
 			String[] cards = new String[num];
 			for (int n = 0; n < num; n++) {
 				int a = off + 1 + (n * 3);
+				// could validate this, but pretty unlikely to be invalid
 				cards[n] = cache(line.substring(a, a+2));
 			}
 			return cards;
@@ -1036,6 +1055,7 @@ public class PSParser extends Parser {
 	private Game getGame(char currency, char mix, char type, char subtype, char limit, int sb, int bb) { 
 
 		if (currency == Game.TOURN_CURRENCY) {
+			// don't store blinds for tournament hands as they are variable
 			sb = 0;
 			bb = 0;
 		}
@@ -1063,6 +1083,9 @@ public class PSParser extends Parser {
 		return game;
 	}
 
+	/**
+	 * get tournament instance, possibly creating it
+	 */
 	private Tourn getTourn(long id) {
 		Tourn t = tourns.get(id);
 		if (t == null) {

@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * A player sitting at a table (never sitting out) 
+ * A player sitting at a table (never sitting out).
+ * This object should be considered immutable.
  */
 public class Seat implements Serializable {
 	private static final long serialVersionUID = 1;

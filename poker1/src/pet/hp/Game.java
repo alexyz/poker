@@ -3,6 +3,7 @@ package pet.hp;
 /**
  * Represents a type of poker game.
  * There should only be once instance of this class for each game.
+ * This object should be considered immutable.
  */
 public class Game implements Comparable<Game> {
 	

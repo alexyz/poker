@@ -3,7 +3,8 @@ package pet.hp;
 import java.util.Date;
 
 /**
- * represents a tournament
+ * represents a tournament.
+ * This object should be considered immutable.
  */
 public class Tourn {
 	/** unique identifier */

@@ -1,7 +1,8 @@
 package pet.hp;
 
 /**
- * An action that a player performs during a hand
+ * An action that a player performs during a hand.
+ * This object should be considered immutable.
  */
 public class Action {
 	
