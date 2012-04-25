@@ -24,7 +24,6 @@ public class HandsPanel extends JPanel {
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
 	private final JButton hudButton = new JButton("HUD");
-	private final JScrollPane tableScroller = new JScrollPane(handTable);
 	private List<HandInfo> handInfos;
 
 	public HandsPanel() {
@@ -103,21 +102,22 @@ public class HandsPanel extends JPanel {
 			}
 		});
 
-		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands"));
-
-		textArea.setBorder(BorderFactory.createTitledBorder("Hand Info"));
-		JScrollPane textScroller = new JScrollPane(textArea);
-
 		JPanel topPanel = new JPanel();
 		topPanel.add(nameField);
 		topPanel.add(gameCombo);
 		topPanel.add(dateCombo);
 		
+		JScrollPane tableScroller = new JScrollPane(handTable);
+		tableScroller.setBorder(BorderFactory.createTitledBorder("Hand Infos"));
+		JScrollPane textScroller = new JScrollPane(textArea);
+		textScroller.setBorder(BorderFactory.createTitledBorder("Selected Hand Info"));
+		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textScroller);
+		split.setResizeWeight(0.5);
+
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(replayButton);
 		bottomPanel.add(hudButton);
-
-		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textScroller);
+		
 		add(topPanel, BorderLayout.NORTH);
 		add(split, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);
@@ -142,7 +142,6 @@ public class HandsPanel extends JPanel {
 	private void clear() {
 		gameCombo.setModel(new DefaultComboBoxModel());
 		dateCombo.setModel(new DefaultComboBoxModel());
-		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands"));
 		((HandInfoTableModel)handTable.getModel()).setRows(Collections.<HandInfo>emptyList());
 	}
 	
@@ -215,7 +214,6 @@ public class HandsPanel extends JPanel {
 			dateHandInfos = handInfos;
 		}
 		
-		tableScroller.setBorder(BorderFactory.createTitledBorder("Hands (" + dateHandInfos.size() + ")"));
 		((HandInfoTableModel)handTable.getModel()).setRows(dateHandInfos);
 		repaint();
 	}

@@ -64,10 +64,10 @@ public class GamesPanel extends JPanel {
 		add(topPanel, BorderLayout.NORTH);
 		
 		JScrollPane tableScroller = new JScrollPane(gamesTable);
-		tableScroller.setBorder(BorderFactory.createTitledBorder("Games"));
+		tableScroller.setBorder(BorderFactory.createTitledBorder("Player Game Infos"));
 		
 		JScrollPane textAreaScroller = new JScrollPane(textArea);
-		textAreaScroller.setBorder(BorderFactory.createTitledBorder("Player Game Info"));
+		textAreaScroller.setBorder(BorderFactory.createTitledBorder("Selected Player Game Info"));
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textAreaScroller);
 		splitPane.setResizeWeight(0.5);

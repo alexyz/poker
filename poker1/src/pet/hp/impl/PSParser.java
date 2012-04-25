@@ -10,7 +10,7 @@ import pet.hp.*;
 
 /**
  * PokerStars hand parser - primarily for Omaha/Hold'em/5 Card Draw PL/NL games but
- * also tournaments and FL games.
+ * also tournaments and FL games. 
  */
 public class PSParser extends Parser {
 
