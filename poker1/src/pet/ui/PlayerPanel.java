@@ -3,10 +3,12 @@ package pet.ui;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Collections;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
+import pet.hp.Hand;
 import pet.hp.info.*;
 import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
@@ -94,7 +96,8 @@ public class PlayerPanel extends JPanel {
 					PlayerGameInfo gi = gamesModel.getRow(sr);
 					System.out.println("selected " + r + " => " + sr + " => " + gi);
 					PokerFrame pf = PokerFrame.getInstance();
-					GraphData bankRoll = pf.getHistory().getBankRoll(gi.player.name, gi.game.id);
+					List<Hand> hands = pf.getHistory().getHands(gi.player.name, gi.game.id);
+					GraphData bankRoll = BankrollUtil.getBankRoll(hands, gi.player.name, gi.game.id);
 					pf.displayBankRoll(bankRoll);
 				}
 			}
@@ -142,14 +145,14 @@ public class PlayerPanel extends JPanel {
 	private void find() {
 		String pattern = nameField.getText();
 		PokerFrame pf = PokerFrame.getInstance();
-		History his = pf.getHistory();
+		Info info = pf.getInfo();
 		
 		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
-		playersModel.setRows(his.getPlayers(pattern));
+		playersModel.setRows(info.getPlayers(pattern));
 		
 		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 		gamesModel.setRows(Collections.<PlayerGameInfo>emptyList());
-		gamesModel.setPopulation(his.getPopulation());
+		gamesModel.setPopulation(info.getPopulation());
 		
 		System.out.println("players table now has " + playersTable.getRowCount() + " rows");
 		repaint();

@@ -6,22 +6,14 @@ import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.*;
 
-import pet.hp.*;
 import pet.hp.info.*;
 
 /**
- * TODO
- * [path text field] follow
- * [progress bar (hands, players)]
- * [add file (no follow)]
- * [rejected files]
- * dnd
- * 
+ * panel for parsing files
  */
 public class HistoryPanel extends JPanel implements FollowListener {
 	
@@ -31,8 +23,6 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final JProgressBar progressBar = new JProgressBar();
 	private final JButton addButton = new JButton("Add File");
 	private final ConsolePanel consolePanel = new ConsolePanel();
-	
-	private final Date now = new Date();
 	
 	public HistoryPanel() {
 		super(new BorderLayout());
@@ -125,14 +115,6 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		add(consolePanel, BorderLayout.CENTER);
 	}
 	
-	@Override
-	public void nextHand(Hand h) {
-		if (h.date.after(now)) {
-			System.out.println(h);
-			//HandInfo.printhand2(h);
-		}
-	}
-
 	@Override
 	public void doneFile(final int done, final int total) {
 		SwingUtilities.invokeLater(new Runnable() {

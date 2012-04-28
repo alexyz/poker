@@ -3,13 +3,11 @@ package pet.ui;
 import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
-import pet.hp.Game;
-import pet.hp.info.History;
+import pet.hp.info.Info;
 import pet.hp.info.PlayerGameInfo;
 import pet.ui.ta.*;
 
@@ -75,20 +73,19 @@ public class GamesPanel extends JPanel {
 	}
 	
 	private void initGames() {
-		Map<String, Game> games = PokerFrame.getInstance().getHistory().getGames();
-		String[] gameids = games.keySet().toArray(new String[games.size()]);
+		List<String> games = PokerFrame.getInstance().getHistory().getGames();
+		String[] gameids = games.toArray(new String[games.size()]);
 		gameCombo.setModel(new DefaultComboBoxModel(gameids));
 	}
 	
 	private void updateGame() {
 		System.out.println("update game");
-		History history = PokerFrame.getInstance().getHistory();
-		Object selected = gameCombo.getSelectedItem();
-		Game game = history.getGames().get(selected);
-		List<PlayerGameInfo> gameInfos = history.getGameInfos(game);
+		String selectedGameId = (String) gameCombo.getSelectedItem();
+		Info info = PokerFrame.getInstance().getInfo();
+		List<PlayerGameInfo> gameInfos = info.getGameInfos(selectedGameId);
 		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 		gamesModel.setRows(gameInfos);
-		gamesModel.setPopulation(history.getPopulation());
+		gamesModel.setPopulation(info.getPopulation());
 		repaint();
 	}
 	

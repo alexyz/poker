@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.regex.*;
 
 import pet.eq.ArrayUtil;
-import pet.eq.Poker;
 import pet.hp.*;
 
 /**
@@ -51,19 +50,12 @@ public class PSParser extends Parser {
 	
 	// instance fields
 
+	/** where to send parsed data */
+	private final History history;
 	/** print everything to System.out */
 	public boolean debug;
 	
-	// would these be better in separate object for e.g. multithreaded parsing?
-	/** string cache to avoid multiple instances of same string */
-	private final Map<String,String> cache = new HashMap<String,String>();
-	/** game instances */
-	private final List<Game> games = new ArrayList<Game>();
-	/** tournament instances */
-	private final Map<Long,Tourn> tourns = new TreeMap<Long,Tourn>();
-
 	// stuff for current hand, cleared on clear()
-
 	/** map of player name to seat for current hand */
 	private final Map<String,Seat> seatsMap = new TreeMap<String,Seat>();
 	/** array of seat num to seat pip for this street. seat numbers are 1-10 */
@@ -85,10 +77,8 @@ public class PSParser extends Parser {
 	private char gamecurrency, gamemix, gametype, gamelimit;
 	private int gamesubtype, gamesb, gamebb;
 
-	public PSParser() {
-		for (String c : Poker.FULL_DECK) {
-			cache(c);
-		}
+	public PSParser(History history) {
+		this.history = history;
 	}
 
 	private void println(String s) {
@@ -137,9 +127,7 @@ public class PSParser extends Parser {
 	 * if the line completes a hand, it is returned
 	 */
 	@Override
-	public Hand parseLine(String line) {
-		Hand ret = null;
-		
+	public boolean parseLine(String line) {
 		if (line.length() > 0 && line.charAt(0) == 0xfeff) {
 			line = line.substring(1);
 			println("skip bom");
@@ -162,8 +150,9 @@ public class PSParser extends Parser {
 				}
 				hand.showdown = showdown;
 				println("end of hand " + hand);
-				ret = hand;
+				history.addHand(hand);
 				clear();
+				return true;				
 			}
 
 		} else if (line.startsWith("PokerStars ")) {
@@ -314,8 +303,8 @@ public class PSParser extends Parser {
 			println("unknown line: " + line);
 			throw new RuntimeException("unknown line " + line);
 		}
-
-		return ret;
+		
+		return false;
 	}
 
 	private void parseCollect(String line, int a) {
@@ -478,7 +467,7 @@ public class PSParser extends Parser {
 
 			Seat seat = new Seat();
 			seat.num = (byte) seatno;
-			seat.name = cache(line.substring(col + 2, chStart - 1));
+			seat.name = history.getString(line.substring(col + 2, chStart - 1));
 			seat.chips = ParseUtil.parseMoney(line, chStart + 1);
 			seatsMap.put(seat.name, seat);
 			//seatsList.add(seat);
@@ -527,7 +516,7 @@ public class PSParser extends Parser {
 			gamecurrency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
 			long tid = Long.parseLong(tids);
-			Tourn t = getTourn(tid);
+			Tourn t = history.getTourn(tid);
 			
 			String tbuyins = m.group(H.tbuyin);
 			if (tbuyins != null) {
@@ -665,7 +654,7 @@ public class PSParser extends Parser {
 		// seat 1 is button if unspec
 		int tableStart = line.indexOf("'");
 		int tableEnd = line.indexOf("'", tableStart + 1);
-		hand.tablename = cache(line.substring(tableStart + 1, tableEnd));
+		hand.tablename = history.getString(line.substring(tableStart + 1, tableEnd));
 		println("table " + hand.tablename);
 
 		// fix limit real money holdem games can be 10 player
@@ -677,7 +666,7 @@ public class PSParser extends Parser {
 		println("max " + max);
 		
 		// get the game instance
-		Game game = getGame(gamecurrency, gamemix, gametype, gamesubtype, gamelimit, max, gamesb, gamebb);
+		Game game = history.getGame(gamecurrency, gamemix, gametype, gamesubtype, gamelimit, max, gamesb, gamebb);
 		hand.game = game;
 		println("game " + game);
 		
@@ -952,21 +941,6 @@ public class PSParser extends Parser {
 	}
 
 	/**
-	 * get cached string instance
-	 */
-	private String cache(String s) {
-		if (s != null) {
-			String s2 = cache.get(s);
-			if (s2 != null) {
-				return s2;
-			}
-			s = new String(s);
-			cache.put(s, s);
-		}
-		return s;
-	}
-
-	/**
 	 * get the cards
 	 */
 	private String[] parseHand(String line, int off) {
@@ -978,7 +952,7 @@ public class PSParser extends Parser {
 			for (int n = 0; n < num; n++) {
 				int a = off + 1 + (n * 3);
 				// could validate this, but pretty unlikely to be invalid
-				cards[n] = cache(line.substring(a, a+2));
+				cards[n] = history.getString(line.substring(a, a+2));
 			}
 			return cards;
 		} else {
@@ -1049,55 +1023,6 @@ public class PSParser extends Parser {
 				}
 			}
 		}
-	}
-
-	/**
-	 * get the game for the hand line and table details
-	 */
-	private Game getGame(char currency, char mix, char type, int subtype, char limit, int max, int sb, int bb) { 
-		if (type == 0 || limit == 0 || max == 0 || currency == 0) {
-			throw new RuntimeException("invalid game");
-		}
-		
-		if (currency == Game.TOURN_CURRENCY) {
-			// don't store blinds for tournament hands as they are variable
-			sb = 0;
-			bb = 0;
-		}
-		
-		// find game, otherwise create it
-		for (Game game : games) {
-			if (game.currency == currency && game.type == type && game.limit == limit
-					&& game.subtype == subtype && game.sb == sb && game.bb == bb && game.mix == mix) {
-				return game;
-			}
-		}
-
-		Game game = new Game();
-		game.currency = currency;
-		game.type = type;
-		game.limit = limit;
-		game.subtype = subtype;
-		game.sb = sb;
-		game.bb = bb;
-		game.max = max;
-		game.mix = mix;
-		game.id = GameUtil.getGameId(game);
-		games.add(game);
-
-		System.out.println("created game " + game);
-		return game;
-	}
-
-	/**
-	 * get tournament instance, possibly creating it
-	 */
-	private Tourn getTourn(long id) {
-		Tourn t = tourns.get(id);
-		if (t == null) {
-			tourns.put(id, t = new Tourn(id));
-		}
-		return t;
 	}
 
 }

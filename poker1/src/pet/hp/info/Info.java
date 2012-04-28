@@ -2,31 +2,16 @@ package pet.hp.info;
 
 import java.util.*;
 import pet.hp.*;
-import pet.ui.gr.DateGraphData;
-import pet.ui.gr.GraphData;
-import pet.ui.gr.GraphDataPoint;
 
 /**
- * Hand analysis gateway
+ * Analyses players and hands
  */
-public class History implements FollowListener {
+public class Info implements HistoryListener {
 
 	/**
 	 * players seen
 	 */
 	private final Map<String, PlayerInfo> playerMap = new TreeMap<String, PlayerInfo>();
-	/**
-	 * hands seen so far
-	 */
-	private final List<Hand> hands = new ArrayList<Hand>();
-	/**
-	 * hand ids seen so far
-	 */
-	private final Set<Long> handIds = new TreeSet<Long>();
-	/**
-	 * games
-	 */
-	private final Map<String,Game> games = new TreeMap<String,Game>();
 	/**
 	 * the player info representing the whole population
 	 */
@@ -36,7 +21,7 @@ public class History implements FollowListener {
 		return population;
 	}
 
-	public History() {
+	public Info() {
 		playerMap.put("*", population);
 	}
 
@@ -56,111 +41,17 @@ public class History implements FollowListener {
 		return players;
 	}
 
-	public synchronized Map<String,Game> getGames() {
-		return Collections.unmodifiableMap(games);
-	}
-
-	public synchronized List<PlayerGameInfo> getGameInfos(Game game) {
-		System.out.println("get game infos for " + game);
+	public synchronized List<PlayerGameInfo> getGameInfos(String gameid) {
+		System.out.println("get game infos for " + gameid);
 		List<PlayerGameInfo> gameinfos = new ArrayList<PlayerGameInfo>();
 		for (PlayerInfo pi : playerMap.values()) {
-			PlayerGameInfo pgi = pi.games.get(game.id);
+			PlayerGameInfo pgi = pi.games.get(gameid);
 			if (pgi != null) {
 				gameinfos.add(pgi);
 			}
 		}
 		System.out.println("got " + gameinfos.size() + " game infos");
 		return gameinfos;
-	}
-
-	/**
-	 * Get hands for the player
-	 */
-	public synchronized List<Hand> getHands(String player, String gameid) {
-		System.out.println("get hands for " + player + " gameid " + gameid);
-		List<Hand> hands = new ArrayList<Hand>();
-
-		for (Hand hand : this.hands) {
-			if (hand.game.id.equals(gameid)) {
-				for (Seat seat : hand.seats) {
-					if (seat.name.equals(player)) {
-						hands.add(hand);
-						break;
-					}
-				}
-			}
-		}
-
-		System.out.println("got " + hands.size() + " hands");
-		return hands;
-	}
-
-	/**
-	 * get the graph data for the players all time bankroll
-	 */
-	public GraphData getBankRoll(String player, String game) {
-		List<Hand> hands = getHands(player, game);
-		if (hands.size() <= 1) {
-			System.out.println("not enough hands for bankroll");
-			return null;
-		}
-
-		Hand fh = hands.get(0);
-		final char currency = fh.game.currency;
-		GraphData data = new DateGraphData() {
-			@Override
-			public String getYName(int y) {
-				return GameUtil.formatMoney(currency, y);
-			}
-		};
-		data.name = player + " * " + game;
-
-		Collections.sort(hands, HandUtil.idCmp);
-		int won = 0, day = 0;
-		for (Hand hand : hands) {
-			for (Seat seat : hand.seats) {
-				if (seat.name.equals(player)) {
-					int handDay = DateGraphData.getDayNumber(hand.date);
-					if (day != handDay) {
-						data.points.add(new GraphDataPoint(handDay, won));
-						day = handDay;
-					}
-					won += seat.won - seat.pip;
-				}
-			}
-		}
-		System.out.println("bank roll data points: " + data.points.size());
-		return data;
-	}
-
-	/**
-	 * Add one more hand to player info map
-	 */
-	@Override
-	public synchronized void nextHand(Hand hand) {
-		if (handIds.contains(hand.id)) {
-			throw new RuntimeException("already has hand " + hand);
-		}
-		hands.add(hand);
-		handIds.add(hand.id);
-		if (!games.containsKey(hand.game.id)) {
-			games.put(hand.game.id, hand.game);
-		}
-
-		// update player info with seat
-		for (Seat s : hand.seats) {
-			PlayerInfo pi = getPlayerInfo(s.name, true);
-			pi.add(hand, s);
-
-			// add to population, but XXX careful not to over count hand stuff
-			population.add(hand, s);
-		}
-
-	}
-
-	@Override
-	public void doneFile(int done, int total) {
-		//
 	}
 
 	public synchronized PlayerInfo getPlayerInfo(String player) {
@@ -173,6 +64,31 @@ public class History implements FollowListener {
 			playerMap.put(player, pi = new PlayerInfo(player));
 		}
 		return pi;
+	}
+
+	/**
+	 * Add just one more hand to player info map
+	 */
+	@Override
+	public void handAdded(Hand hand) {
+		// update player info with seat
+		for (Seat s : hand.seats) {
+			PlayerInfo pi = getPlayerInfo(s.name, true);
+			pi.add(hand, s);
+
+			// add to population, but XXX careful not to over count hand stuff
+			population.add(hand, s);
+		}
+	}
+
+	@Override
+	public void gameAdded(Game game) {
+		// yawn
+	}
+
+	@Override
+	public void tournAdded(Tourn tourn) {
+		//
 	}
 
 }

@@ -149,12 +149,9 @@ public class FollowThread extends Thread {
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
 			long pos = 0;
 			while ((line = br.readLine()) != null) {
-				Hand hand = parser.parseLine(line);
-				if (hand != null) {
-					for (FollowListener l : listeners) {
-						l.nextHand(hand);
-						pos = fis.getChannel().position();
-					}
+				boolean hand = parser.parseLine(line);
+				if (hand) {
+					pos = fis.getChannel().position();
 				}
 			}
 			
@@ -166,6 +163,7 @@ public class FollowThread extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace(System.out);
 			return offset;
+			
 		} catch (RuntimeException e) {
 			System.out.println("could not parse file " + file);
 			for (String l : parser.getDebug()) {

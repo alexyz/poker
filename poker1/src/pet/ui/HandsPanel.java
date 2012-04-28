@@ -9,7 +9,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import pet.hp.Hand;
+import pet.hp.*;
 import pet.hp.info.*;
 import pet.ui.ta.*;
 
@@ -67,7 +67,7 @@ public class HandsPanel extends JPanel {
 		hudButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				PokerFrame.getInstance().hudHand(getHandInfo().hand);
+				PokerFrame.getInstance().displayHud(getHandInfo().hand);
 			}
 		});
 
@@ -148,7 +148,7 @@ public class HandsPanel extends JPanel {
 	private void updateName(String selectGame) {
 		String name = nameField.getText();
 		System.out.println("update name " + name + " game " + selectGame);
-		PlayerInfo pi = PokerFrame.getInstance().getHistory().getPlayerInfo(name);
+		PlayerInfo pi = PokerFrame.getInstance().getInfo().getPlayerInfo(name);
 		clear();
 		if (pi != null) {
 			Vector<String> games = new Vector<String>(pi.games.keySet());

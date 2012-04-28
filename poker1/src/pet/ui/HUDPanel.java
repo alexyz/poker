@@ -9,20 +9,19 @@ import javax.swing.*;
 
 import pet.hp.*;
 import pet.hp.state.*;
-import pet.hp.info.FollowListener;
 import pet.ui.ta.*;
 
 /**
  * displays a table with details for the last hand
  */
-public class HUDPanel extends JPanel implements FollowListener {
+public class HUDPanel extends JPanel implements HistoryListener {
+	
 	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
 	private final MyJTable handTable = new MyJTable();
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 	private final JButton equityButton = new JButton("Equity");
 	private final JButton replayButton = new JButton("Replay");
-	private final Date startDate = new Date();
 
 	public HUDPanel() {
 		super(new BorderLayout());
@@ -114,46 +113,56 @@ public class HUDPanel extends JPanel implements FollowListener {
 			}
 		}
 	}
-
+	
 	@Override
-	public void nextHand(final Hand hand) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				nextHand(hand, false);
-			}
-		});
+	public void handAdded(final Hand hand) {
+		long t = System.currentTimeMillis() - (1000 * 60 * 10);
+		if (hand.date.getTime() > t) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					showHand(hand);
+				}
+			});
+		}
 	}
 
-	public void nextHand(Hand hand, boolean force) {
+	@Override
+	public void gameAdded(Game game) {
+		//
+	}
+
+	@Override
+	public void tournAdded(Tourn tourn) {
+		//
+	}
+
+	public void showHand(Hand hand) {
 		// create hand states, add to list
 		// display most recent in hud
 		DefaultComboBoxModel model = (DefaultComboBoxModel)stateCombo.getModel();
 
-		if (force) {
-			for (int n = 0; n < model.getSize(); n++) {
-				HandStates hs = (HandStates) model.getElementAt(n);
-				if (hs.hand == hand) {
-					// already present, just select
-					stateCombo.setSelectedIndex(n);
-					return;
-				}
+		for (int n = 0; n < model.getSize(); n++) {
+			HandStates hs = (HandStates) model.getElementAt(n);
+			if (hs.hand == hand) {
+				// already present, just select
+				stateCombo.setSelectedIndex(n);
+				return;
 			}
 		}
 
-		if (force || hand.date.after(startDate)) {
-			if (model.getSize() > 100) {
-				model.removeElementAt(0);
-			}
-			model.addElement(new HandStates(hand));
-			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+		if (model.getSize() > 100) {
+			model.removeElementAt(0);
 		}
+		
+		// FIXME may add out of order...
+		// XXX does equity sample calc on awt thread... 
+		model.addElement(new HandStates(hand));
+		stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
 	}
 
-	@Override
-	public void doneFile(int done, int total) {
-		//
-	}
+
+
 }
 
 /** represents a list of hand states for a hand */

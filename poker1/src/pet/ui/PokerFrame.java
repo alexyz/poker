@@ -5,9 +5,10 @@ import java.util.Locale;
 import javax.swing.*;
 
 import pet.hp.Hand;
+import pet.hp.History;
 import pet.hp.impl.PSParser;
 import pet.hp.info.FollowThread;
-import pet.hp.info.History;
+import pet.hp.info.Info;
 import pet.ui.eq.*;
 import pet.ui.gr.GraphData;
 import pet.ui.rep.ReplayPanel;
@@ -48,8 +49,9 @@ public class PokerFrame extends JFrame {
 		
 	}
 	
-	private final FollowThread followThread = new FollowThread(new PSParser());
 	private final History history = new History();
+	private final FollowThread followThread = new FollowThread(new PSParser(history));
+	private final Info info = new Info();
 	
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
@@ -75,14 +77,19 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Replay", replayPanel);
 		tabs.addTab("HUD", hudPanel);
 		
-		followThread.addListener(hudPanel);
+		history.addListener(info);
+		history.addListener(hudPanel);
+		
 		followThread.addListener(historyPanel);
-		followThread.addListener(history);
 		followThread.start();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
 		pack();
+	}
+	
+	public Info getInfo() {
+		return info;
 	}
 	
 	public History getHistory() {
@@ -96,8 +103,8 @@ public class PokerFrame extends JFrame {
 	}
 	
 	/** display hand in hud */
-	public void hudHand(Hand hand) {
-		hudPanel.nextHand(hand, true);
+	public void displayHud(Hand hand) {
+		hudPanel.showHand(hand);
 		tabs.setSelectedComponent(hudPanel);
 	}
 
