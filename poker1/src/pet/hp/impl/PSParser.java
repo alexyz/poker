@@ -21,7 +21,7 @@ public class PSParser extends Parser {
 
 	private static class H {
 		/** hand start pattern */
-		static final Pattern p = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
+		static final Pattern pat = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
 				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
 				+ "(?:(Mixed \\S+) )?"
 				+ "(Hold'em|Omaha|Omaha Hi/Lo|5 Card Draw) " 
@@ -82,6 +82,8 @@ public class PSParser extends Parser {
 	private final List<String> debuglines = new ArrayList<String>();
 	/** has live sb been posted (others are dead) */
 	private boolean sbposted;
+	private char gamecurrency, gamemix, gametype, gamelimit;
+	private int gamesubtype, gamesb, gamebb;
 
 	public PSParser() {
 		for (String c : Poker.FULL_DECK) {
@@ -116,6 +118,13 @@ public class PSParser extends Parser {
 		hand = null;
 		debuglines.clear();
 		sbposted = false;
+		gamecurrency = 0;
+		gamemix = 0;
+		gametype = 0;
+		gamelimit = 0;
+		gamesubtype = 0;
+		gamesb = 0;
+		gamebb = 0;
 	}
 
 	@Override
@@ -497,28 +506,25 @@ public class PSParser extends Parser {
 		String dateline = line.substring(dateIndex + 2);
 		println("date line: " + dateline);
 		
-		Matcher m = H.p.matcher(handline);
+		Matcher m = H.pat.matcher(handline);
 		if (!m.matches()) {
 			throw new RuntimeException("could not match first line");
 		}
 
-		// sub type - zoom or 0
-		char subtype = 0;
+		// sub type - currently just zoom
+		// in future maybe turbo, matrix etc
 		String zoom = m.group(H.zoom);
 		if (zoom != null && zoom.equals("Zoom")) {
-			subtype = Game.ZOOM_SUBTYPE;
+			gamesubtype |= Game.ZOOM_SUBTYPE;
 		}
 		
 		long hid = Long.parseLong(m.group(H.handid));
 		Hand hand = new Hand(hid);
 		
-		// hand currency (possibly tournament chips)
-		char currency = 0;
-		
 		// get all the tournament stuff if there is tourn id
 		String tids = m.group(H.tournid);
 		if (tids != null) {
-			currency = Game.TOURN_CURRENCY;
+			gamecurrency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
 			long tid = Long.parseLong(tids);
 			Tourn t = getTourn(tid);
@@ -551,38 +557,35 @@ public class PSParser extends Parser {
 		}
 		
 		// mixed game type, if any
-		char mix = 0;
 		String mixs = m.group(H.mix);
 		if (mixs != null) {
 			if (mixs.equals("Mixed NLH/PLO") || mixs.equals("Mixed PLH/PLO")) {
-				mix = Game.HE_OM_MIX;
+				gamemix = Game.HE_OM_MIX;
 			} else {
 				throw new RuntimeException("unknown mix type " + mixs);
 			}
 		}
 		
 		String games = m.group(H.game);
-		char type;
 		if (games.equals("Hold'em")) {
-			type = Game.HE_TYPE;
+			gametype = Game.HE_TYPE;
 		} else if (games.equals("Omaha Hi/Lo")) {
-			type = Game.OMHL_TYPE;
+			gametype = Game.OMHL_TYPE;
 		} else if (games.equals("Omaha")) {
-			type = Game.OM_TYPE;
+			gametype = Game.OM_TYPE;
 		} else if (games.equals("5 Card Draw")) {
-			type = Game.FCD_TYPE;
+			gametype = Game.FCD_TYPE;
 		} else {
 			throw new RuntimeException("unknown game");
 		}
 
 		String limits = m.group(H.limit);
-		char limit;
 		if (limits.equals("Pot Limit")) {
-			limit = Game.POT_LIMIT;
+			gamelimit = Game.POT_LIMIT;
 		} else if (limits.equals("No Limit")) {
-			limit = Game.NO_LIMIT;
+			gamelimit = Game.NO_LIMIT;
 		} else if (limits.equals("Limit")) {
-			limit = Game.FIXED_LIMIT;
+			gamelimit = Game.FIXED_LIMIT;
 		} else {
 			throw new RuntimeException("unknown limit");
 		}
@@ -600,31 +603,26 @@ public class PSParser extends Parser {
 		}
 		
 		String sbs = m.group(H.sb);
-		if (currency == 0) {
+		if (gamecurrency == 0) {
 			// if hand isn't tournament, set cash game currency
-			currency = parseCurrency(sbs, 0);
+			gamecurrency = parseCurrency(sbs, 0);
 		}
-		int sb = ParseUtil.parseMoney(sbs, 0);
+		gamesb = ParseUtil.parseMoney(sbs, 0);
 		
 		String bbs = m.group(H.bb);
-		int bb = ParseUtil.parseMoney(bbs, 0);
-		if (sb == 0 || bb == 0 || sb >= bb) {
-			throw new RuntimeException("invalid blinds " + sb + "/" + bb);
+		gamebb = ParseUtil.parseMoney(bbs, 0);
+		if (gamesb == 0 || gamebb == 0 || gamesb >= gamebb) {
+			throw new RuntimeException("invalid blinds " + gamesb + "/" + gamebb);
 		}
 		
-		if (limit == Game.FIXED_LIMIT) {
+		if (gamelimit == Game.FIXED_LIMIT) {
 			// fixed limit has big bet and small bet not blinds
-			bb = sb;
-			sb = sb / 2;
+			gamebb = gamesb;
+			gamesb = gamesb / 2;
 		}
 		
-		hand.sb = sb;
-		hand.bb = bb;
-		
-		// get the game instance
-		Game game = getGame(currency, mix, type, subtype, limit, sb, bb);
-		hand.game = game;
-		println("game " + game);
+		hand.sb = gamesb;
+		hand.bb = gamebb;
 		
 		// hand date
 		if (dateline.contains("[")) {
@@ -676,8 +674,12 @@ public class PSParser extends Parser {
 		if (max == 0 || max > 10) {
 			throw new RuntimeException("invalid max " + line);
 		}
-		hand.max = max;
 		println("max " + max);
+		
+		// get the game instance
+		Game game = getGame(gamecurrency, gamemix, gametype, gamesubtype, gamelimit, max, gamesb, gamebb);
+		hand.game = game;
+		println("game " + game);
 		
 		int d = line.indexOf("Seat");
 		if (d > 0) {
@@ -1052,8 +1054,11 @@ public class PSParser extends Parser {
 	/**
 	 * get the game for the hand line and table details
 	 */
-	private Game getGame(char currency, char mix, char type, char subtype, char limit, int sb, int bb) { 
-
+	private Game getGame(char currency, char mix, char type, int subtype, char limit, int max, int sb, int bb) { 
+		if (type == 0 || limit == 0 || max == 0 || currency == 0) {
+			throw new RuntimeException("invalid game");
+		}
+		
 		if (currency == Game.TOURN_CURRENCY) {
 			// don't store blinds for tournament hands as they are variable
 			sb = 0;
@@ -1075,6 +1080,7 @@ public class PSParser extends Parser {
 		game.subtype = subtype;
 		game.sb = sb;
 		game.bb = bb;
+		game.max = max;
 		game.mix = mix;
 		game.id = GameUtil.getGameId(game);
 		games.add(game);

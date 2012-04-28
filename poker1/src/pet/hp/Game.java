@@ -16,20 +16,23 @@ public class Game implements Comparable<Game> {
 	/** currency type constants (excluding $ and €) */
 	public static final char PLAY_CURRENCY = 'p', TOURN_CURRENCY = 't';
 	/** subtype constants */
-	public static final char ZOOM_SUBTYPE = 'Z';
+	public static final int ZOOM_SUBTYPE = 1;
 	
 	/** description string (unique for all games) */
 	public String id;
-	/** hand currency */
-	public char currency;
+	
 	/** mixed game type */
 	public char mix;
 	/** type of game for street and hand analysis purposes */
 	public char type;
-	/** subtype of game (e.g. zoom) */
-	public char subtype;
+	/** max players */
+	public int max;
 	/** limit type */
 	public char limit;
+	/** hand currency */
+	public char currency;
+	/** sub type, e.g. zoom */
+	public int subtype;
 	/** blinds XXX cash game only */
 	public int sb, bb;
 	

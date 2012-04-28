@@ -41,8 +41,10 @@ public class HEPoker extends Poker {
 		this.hilo = hilo;
 	}
 	
+	// sync to protect changes to temp
 	@Override
-	public MEquity[] equity(String[] board, String[][] holes, String[] blockers) {
+	public synchronized MEquity[] equity(String[] board, String[][] holes, String[] blockers) {
+		Arrays.fill(temp, null);
 		validateBoard(board);
 		for (String[] hole : holes) {
 			validateHole(hole, omaha);
@@ -58,8 +60,10 @@ public class HEPoker extends Poker {
 		}
 	}
 
+	// sync to protect changes to temp
 	@Override
-	public int value(String[] board, String[] hole) {
+	public synchronized int value(String[] board, String[] hole) {
+		Arrays.fill(temp, null);
 		validateBoard(board);
 		validateHole(hole, omaha);
 		

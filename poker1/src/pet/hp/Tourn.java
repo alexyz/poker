@@ -17,7 +17,7 @@ public class Tourn {
 	public int players;
 	/** prize pool - summary only */
 	public int pool;
-	/** tournament start date - summary only */
+	/** tournament start date */
 	public Date date;
 	/** buy in currency */
 	public char currency;
@@ -27,6 +27,9 @@ public class Tourn {
 	public int pos;
 	/** players win amount */
 	public int won;
+	/** max players at table */
+	public int max;
+	// TODO number of tables?
 	
 	public Tourn(long id) {
 		this.id = id;
@@ -34,8 +37,7 @@ public class Tourn {
 
 	@Override
 	public String toString() {
-		return "Tourn[id=" + id + " buyin=" + buyin + " cost=" + cost + " players=" + players + " pool=" + pool
-				+ " date=" + date + " currency=" + currency + "]";
+		return "Tourn[id=" + id + " date=" + date + "]";
 	}
 
 }

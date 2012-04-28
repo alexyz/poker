@@ -285,13 +285,11 @@ public abstract class Poker {
 	
 	/**
 	 * Calculate equity for given board and hands.
-	 * This method is NOT thread safe.
 	 */
 	public abstract MEquity[] equity(String[] board, String[][] holes, String[] blockers);
 	
 	/**
 	 * Calculate value of exact hi hand.
-	 * This method is NOT thread safe.
 	 */
 	public abstract int value(String[] board, String[] hole);
 	

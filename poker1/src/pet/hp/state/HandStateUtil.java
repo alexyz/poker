@@ -77,12 +77,10 @@ public class HandStateUtil {
 			
 			String[][] holesArr = holes.toArray(new String[holes.size()][]);
 			String[] blockersArr = blockers.toArray(new String[blockers.size()]);
-			synchronized (poker) {
-				MEquity[] eqs = poker.equity(hs.board, holesArr, blockersArr);
-				for (int n = 0; n < holeSeats.size(); n++) {
-					SeatState ss = holeSeats.get(n);
-					ss.meq = eqs[n];
-				}
+			MEquity[] eqs = poker.equity(hs.board, holesArr, blockersArr);
+			for (int n = 0; n < holeSeats.size(); n++) {
+				SeatState ss = holeSeats.get(n);
+				ss.meq = eqs[n];
 			}
 			
 			states.add(hs.clone());

@@ -13,8 +13,6 @@ public class Hand implements Serializable {
 	public final long id;
 	/** game type */
 	public Game game;
-	/** max number at table */
-	public int max;
 	/** tournament instance */
 	public Tourn tourn;
 	/** tournament round */

@@ -74,13 +74,12 @@ public class GameUtil {
 	}
 
 	/** get full name of game variant */
-	public static String getSubTypeName(char subtype) {
-		switch (subtype) {
-			case Game.ZOOM_SUBTYPE: 
-				return "Zoom";
-			default: 
-				throw new RuntimeException("unknown subtype type " + subtype);
+	public static String getSubTypeName(int subtype) {
+		String s = null;
+		if ((subtype & Game.ZOOM_SUBTYPE) != 0) {
+			s = "Zoom";
 		}
+		return s;
 	}
 
 	/**
@@ -96,7 +95,7 @@ public class GameUtil {
 		}
 		sb.append(getGameTypeName(game.type)).append(" ");
 		sb.append(getLimitName(game.limit)).append(" ");
-		//sb.append(game.max).append("-max ");
+		sb.append(game.max).append("-max ");
 		if (game.subtype != 0) {
 			sb.append(getSubTypeName(game.subtype)).append(" ");
 		}
@@ -206,7 +205,6 @@ public class GameUtil {
 
 	/**
 	 * Get poker equity function for game type.
-	 * Always synchronise on object!
 	 */
 	public static Poker getPoker(Game game) {
 		switch (game.type) {

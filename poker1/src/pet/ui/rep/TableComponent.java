@@ -90,7 +90,7 @@ class TableComponent extends JComponent {
 		if (hand != null) {
 			g2.setColor(Color.black);
 			g2.setFont(boldfont);
-			g2.drawString(String.format("%s %d-max", hand.game.id, hand.max), 18, 18);
+			g2.drawString(String.format("%s %d-max", hand.game.id, hand.game.max), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}
