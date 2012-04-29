@@ -6,21 +6,24 @@ import pet.eq.Poker;
 
 /**
  * stores hands, games and tournaments.
- * thread safe
+ * thread safe (all methods synchronized)
  */
 public class History {
 
 	/** string cache to avoid multiple instances of same string */
-	private final Map<String,String> cache = new HashMap<String,String>();
+	private final HashMap<String,String> cache = new HashMap<String,String>(1000);
 	/** game instances */
 	private final ArrayList<Game> games = new ArrayList<Game>();
 	/** tournament instances */
-	private final Map<Long,Tourn> tourns = new HashMap<Long,Tourn>();
+	private final TreeMap<Long,Tourn> tourns = new TreeMap<Long,Tourn>();
 	/** hands seen so far */
-	private final List<Hand> hands = new ArrayList<Hand>();
+	private final ArrayList<Hand> hands = new ArrayList<Hand>();
 	/** hand ids seen so far */
-	private final Set<Long> handIds = new HashSet<Long>();
-	private final List<HistoryListener> listeners = new ArrayList<HistoryListener>();
+	private final HashSet<Long> handIds = new HashSet<Long>();
+	/** listeners for history changes */
+	private final ArrayList<HistoryListener> listeners = new ArrayList<HistoryListener>();
+	/** tournament players seen - XXX inefficient hack */
+	private final TreeMap<Long,TreeSet<String>> tp = new TreeMap<Long,TreeSet<String>>();
 	
 	public History() {
 		for (String c : Poker.FULL_DECK) {
@@ -150,6 +153,25 @@ public class History {
 	}
 	
 	/**
+	 * Mark players as seen in tournament
+	 */
+	public synchronized void addTournPlayers(Long tournidobj, Collection<String> players) {
+		TreeSet<String> tps = tp.get(tournidobj);
+		if (tps == null) {
+			tp.put(tournidobj, tps = new TreeSet<String>());
+		}
+		for (String p : players) {
+			if (!tps.contains(p)) {
+				tps.add(p);
+			}
+		}
+		Tourn t = tourns.get(tournidobj);
+		if (t.players < tps.size()) {
+			t.players = tps.size();
+		}
+	}
+	
+	/**
 	 * Get hands for the player.
 	 * Always returns new list
 	 */
@@ -172,5 +194,22 @@ public class History {
 		return hands;
 	}
 
+	/**
+	 * Get hands for the tournament.
+	 * always returns new list
+	 */
+	public synchronized List<Hand> getHands(long tournid) {
+		System.out.println("get hands for tourn " + tournid);
+		List<Hand> hands = new ArrayList<Hand>();
+
+		for (Hand hand : this.hands) {
+			if (hand.tourn != null && hand.tourn.id == tournid) {
+				hands.add(hand);
+			}
+		}
+
+		System.out.println("got " + hands.size() + " hands");
+		return hands;
+	}
 
 }

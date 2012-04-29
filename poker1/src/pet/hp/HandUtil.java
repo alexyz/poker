@@ -16,10 +16,9 @@ public class HandUtil {
 	public static final Comparator<Hand> idCmp = new Comparator<Hand>() {
 		@Override
 		public int compare(Hand h1, Hand h2) {
-			long cl = h1.id - h2.id;
-			int c = cl > 0 ? 1 : cl == 0 ? 0 : -1;
+			int c = h1.id.compareTo(h2.id);
 			int d = h1.date.compareTo(h2.date);
-			if (d != 0 && c != d) {
+			if (c != d) {
 				throw new RuntimeException("date/id mismatch: " + h1 + " and " + h2);
 			}
 			return c;

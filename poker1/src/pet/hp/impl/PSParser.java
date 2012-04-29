@@ -149,8 +149,12 @@ public class PSParser extends Parser {
 					hand.streets[n] = street.toArray(new Action[street.size()]);
 				}
 				hand.showdown = showdown;
-				println("end of hand " + hand);
 				history.addHand(hand);
+				if (hand.tourn != null) {
+					history.addTournPlayers(hand.tourn.id, seatsMap.keySet());
+				}
+				println("end of hand " + hand);
+				
 				clear();
 				return true;				
 			}

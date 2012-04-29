@@ -9,10 +9,14 @@ import javax.swing.*;
 import pet.hp.info.TournInfo;
 import pet.ui.ta.*;
 
+/**
+ * Shows all the tournaments
+ */
 public class TournPanel extends JPanel {
+	
 	private final JButton refreshButton = new JButton("Refresh");
 	private final MyJTable tournTable = new MyJTable();
-	// TODO hands button, pgi table
+	private final JButton handsButton = new JButton("Hands");
 	
 	public TournPanel() {
 		super(new BorderLayout());
@@ -21,6 +25,19 @@ public class TournPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				refresh();
+			}
+		});
+		
+		handsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int r = tournTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					int sr = tournTable.convertRowIndexToModel(r);
+					TournInfoTableModel m = (TournInfoTableModel) tournTable.getModel();
+					TournInfo ti = m.getRow(sr);
+					PokerFrame.getInstance().displayHands(ti.tourn.id);
+				}
 			}
 		});
 		
@@ -36,6 +53,10 @@ public class TournPanel extends JPanel {
 		add(topPanel, BorderLayout.NORTH);
 		
 		add(tableScroller, BorderLayout.CENTER);
+		
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.add(handsButton);
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	public void refresh() {

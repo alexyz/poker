@@ -9,8 +9,8 @@ import java.util.*;
  * This object should be considered immutable.
  */
 public class Hand implements Serializable {
-	/** hand id */
-	public final long id;
+	/** hand id - object so it can be used in map/set */
+	public final Long id;
 	/** game type */
 	public Game game;
 	/** tournament instance */
@@ -49,7 +49,7 @@ public class Hand implements Serializable {
 	public int button;
 	
 	public Hand(long id) {
-		this.id = id;
+		this.id = new Long(id);
 	}
 
 	@Override

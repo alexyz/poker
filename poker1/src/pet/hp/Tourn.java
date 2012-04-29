@@ -8,8 +8,8 @@ import java.util.Date;
  * it might be updated by parser after creation
  */
 public class Tourn {
-	/** unique identifier */
-	public final long id;
+	/** unique identifier - object so it can be used in map/set */
+	public final Long id;
 	/** prize buy in */
 	public int buyin;
 	/** cost of joining */
@@ -33,7 +33,7 @@ public class Tourn {
 	// TODO number of tables?
 	
 	public Tourn(long id) {
-		this.id = id;
+		this.id = new Long(id);
 	}
 
 	@Override

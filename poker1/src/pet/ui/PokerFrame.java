@@ -52,10 +52,12 @@ public class PokerFrame extends JFrame {
 		
 	}
 	
+	/** all the parsed data */
 	private final History history = new History();
+	/** thread that feeds the parser */
 	private final FollowThread followThread = new FollowThread(new PSParser(history));
-	private final Info info = new Info();
-	
+	/** data analysis */
+	private final Info info = new Info(history);
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
@@ -82,7 +84,6 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Replay", replayPanel);
 		tabs.addTab("HUD", hudPanel);
 		
-		history.addListener(info);
 		history.addListener(hudPanel);
 		history.addListener(gamesPanel);
 		
@@ -128,6 +129,11 @@ public class PokerFrame extends JFrame {
 		handsPanel.displayHands(name, gameid);
 		tabs.setSelectedComponent(handsPanel);
 	}
+
+	public void displayHands(long tournid) {
+		handsPanel.displayHands(tournid);
+		tabs.setSelectedComponent(handsPanel);
+	}
 	
 	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
@@ -139,4 +145,5 @@ public class PokerFrame extends JFrame {
 		drawPanel.displayHand(holes);
 		tabs.setSelectedComponent(drawPanel);
 	}
+
 }
