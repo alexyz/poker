@@ -29,8 +29,11 @@ public class PokerFrame extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		// os x assumes US if language is english...
-		Locale.setDefault(Locale.UK);
+		// os x assumes US locale if system language is english...
+		String lang = System.getenv("LANG");
+		if (lang != null && lang.contains("en_") && !lang.contains("en_US")) {
+			Locale.setDefault(Locale.UK);
+		}
 		try {
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 		} catch (Exception e) {
@@ -62,6 +65,7 @@ public class PokerFrame extends JFrame {
 	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel(false);
 	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel(true);
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
+	private final GamesPanel gamesPanel = new GamesPanel();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -71,7 +75,8 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Draw", drawPanel);
 		tabs.addTab("History", historyPanel);
 		tabs.addTab("Players", new PlayerPanel());
-		tabs.addTab("Games", new GamesPanel());
+		tabs.addTab("Games", gamesPanel);
+		tabs.addTab("Tourns", new TournPanel());
 		tabs.addTab("Graph", bankrollPanel);
 		tabs.addTab("Hands", handsPanel);
 		tabs.addTab("Replay", replayPanel);
@@ -79,6 +84,7 @@ public class PokerFrame extends JFrame {
 		
 		history.addListener(info);
 		history.addListener(hudPanel);
+		history.addListener(gamesPanel);
 		
 		followThread.addListener(historyPanel);
 		followThread.start();

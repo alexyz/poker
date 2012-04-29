@@ -24,9 +24,49 @@ public class TournInfoTableModel extends MyTableModel<TournInfo> {
 		}
 	};
 	
+	private static final MyColumn<TournInfo> hands = new MyColumn<TournInfo>(Integer.class, "Hands", "Number of hands played") {
+		@Override
+		public Object getValue(TournInfo row) {
+			return row.hands;
+		}
+	};
+	
+	private static final MyColumn<TournInfo> cost = new MyColumn<TournInfo>(Integer.class, "Cost", "Buy-in plus cost") {
+		@Override
+		public Object getValue(TournInfo row) {
+			return row.tourn.buyin + row.tourn.cost;
+		}
+	};
+	
+	private static final MyColumn<TournInfo> won = new MyColumn<TournInfo>(Integer.class, "Won", "Amount won") {
+		@Override
+		public Object getValue(TournInfo row) {
+			return row.tourn.won;
+		}
+	};
+	
+	private static final MyColumn<TournInfo> pos = new MyColumn<TournInfo>(Integer.class, "Position", "Final position") {
+		@Override
+		public Object getValue(TournInfo row) {
+			return row.tourn.pos;
+		}
+	};
+	
+	private static final MyColumn<TournInfo> pl = new MyColumn<TournInfo>(Integer.class, "Players", "Number of players") {
+		@Override
+		public Object getValue(TournInfo row) {
+			return row.tourn.players;
+		}
+	};
+	
 	static {
-		allCols.add(id);
+		//allCols.add(id);
+		allCols.add(cost);
 		allCols.add(date);
+		allCols.add(hands);
+		allCols.add(pl);
+		allCols.add(pos);
+		allCols.add(won);
 	}
 
 	public TournInfoTableModel() {

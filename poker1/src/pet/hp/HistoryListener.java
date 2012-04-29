@@ -6,18 +6,13 @@ package pet.hp;
 public interface HistoryListener {
 	
 	/**
-	 * a hand has just been parsed
+	 * a hand has just been parsed (not on AWT thread!)
 	 */
 	public void handAdded(Hand hand);
 
 	/**
-	 * a new game has just been added
+	 * a new game has just been added (not on AWT thread!)
 	 */
 	public void gameAdded(Game game);
 	
-	/**
-	 * a new tournament has just been added
-	 */
-	public void tournAdded(Tourn tourn);
-
 }

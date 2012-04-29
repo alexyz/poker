@@ -84,6 +84,7 @@ public class History {
 		for (Game game : games) {
 			gameids.add(game.id);
 		}
+		Collections.sort(gameids);
 		return gameids;
 	}
 
@@ -121,23 +122,33 @@ public class History {
 		game.mix = mix;
 		game.id = GameUtil.getGameId(game);
 		games.add(game);
-
 		System.out.println("created game " + game);
+		
+		for (HistoryListener l : listeners) {
+			l.gameAdded(game);
+		}
+		
 		return game;
 	}
 
 	/**
 	 * get tournament instance, possibly creating it
 	 */
-	public synchronized Tourn getTourn(long id) {
+	public synchronized Tourn getTourn(long id, char cur, int buyin, int cost) {
 		Tourn t = tourns.get(id);
 		if (t == null) {
 			tourns.put(id, t = new Tourn(id));
+			t.currency = cur;
+			t.buyin = buyin;
+			t.cost = cost;
+		} else {
+			if (t.currency != cur || t.buyin != buyin || t.cost != cost) {
+				throw new RuntimeException();
+			}
 		}
 		return t;
 	}
 	
-
 	/**
 	 * Get hands for the player.
 	 * Always returns new list

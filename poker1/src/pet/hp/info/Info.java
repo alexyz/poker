@@ -16,7 +16,9 @@ public class Info implements HistoryListener {
 	 * the player info representing the whole population
 	 */
 	private final PlayerInfo population = new PlayerInfo("*");
-
+	
+	private final Map<Long,TournInfo> tournInfos = new TreeMap<Long,TournInfo>();
+	
 	public PlayerInfo getPopulation() {
 		return population;
 	}
@@ -65,12 +67,21 @@ public class Info implements HistoryListener {
 		}
 		return pi;
 	}
+	
+	/**
+	 * get list of tourn infos.
+	 * always returns new list
+	 */
+	public synchronized List<TournInfo> getTournInfos() {
+		ArrayList<TournInfo> l = new ArrayList<TournInfo>(tournInfos.values());
+		return l;
+	}
 
 	/**
 	 * Add just one more hand to player info map
 	 */
 	@Override
-	public void handAdded(Hand hand) {
+	public synchronized void handAdded(Hand hand) {
 		// update player info with seat
 		for (Seat s : hand.seats) {
 			PlayerInfo pi = getPlayerInfo(s.name, true);
@@ -78,17 +89,25 @@ public class Info implements HistoryListener {
 
 			// add to population, but XXX careful not to over count hand stuff
 			population.add(hand, s);
+			
+			// XXX if recent, fire pgi updated?
+		}
+		
+		Tourn t = hand.tourn;
+		if (t != null) {
+			TournInfo ti = tournInfos.get(t.id);
+			if (ti == null) {
+				tournInfos.put(t.id, ti = new TournInfo(t));
+			}
+			ti.addHand(hand);
+			
+			// XXX if recent, fire tourn info updated?
 		}
 	}
 
 	@Override
 	public void gameAdded(Game game) {
 		// yawn
-	}
-
-	@Override
-	public void tournAdded(Tourn tourn) {
-		//
 	}
 
 }

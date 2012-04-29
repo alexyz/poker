@@ -3,8 +3,9 @@ package pet.hp;
 import java.util.Date;
 
 /**
- * represents a tournament.
- * This object should be considered immutable.
+ * represents a tournament. 
+ * This object should be considered immutable - though
+ * it might be updated by parser after creation
  */
 public class Tourn {
 	/** unique identifier */
@@ -13,7 +14,7 @@ public class Tourn {
 	public int buyin;
 	/** cost of joining */
 	public int cost;
-	/** number of players - summary only */
+	/** number of players - summary only - TODO just guess*/
 	public int players;
 	/** prize pool - summary only */
 	public int pool;

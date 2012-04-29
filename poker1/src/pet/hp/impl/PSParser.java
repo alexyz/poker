@@ -511,35 +511,25 @@ public class PSParser extends Parser {
 		Hand hand = new Hand(hid);
 		
 		// get all the tournament stuff if there is tourn id
-		String tids = m.group(H.tournid);
-		if (tids != null) {
+		String tournids = m.group(H.tournid);
+		if (tournids != null) {
 			gamecurrency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
-			long tid = Long.parseLong(tids);
-			Tourn t = history.getTourn(tid);
+			long tournid = Long.parseLong(tournids);
 			
-			String tbuyins = m.group(H.tbuyin);
-			if (tbuyins != null) {
-				// not a freeroll
-				char tcur = parseCurrency(tbuyins, 0);
-				if (t.currency != 0 && t.currency != tcur) {
-					throw new RuntimeException("invalid cur");
-				}
-				t.currency = tcur;
-				
-				int tbuyin = ParseUtil.parseMoney(tbuyins, 0);
-				if (t.buyin > 0 && t.buyin != tbuyin) {
-					throw new RuntimeException("invalid buy in");
-				}
-				t.buyin = tbuyin;
-				
-				String tcosts = m.group(H.tcost);
-				int tcost = ParseUtil.parseMoney(tcosts, 0);
-				if (t.cost > 0 && t.cost != tcost) {
-					throw new RuntimeException("invalid cost");
-				}
-				t.cost = tcost;
+			String tournbuyins = m.group(H.tbuyin);
+			String tourncosts = m.group(H.tcost);
+			
+			char tourncurrency = 0;
+			int tournbuyin = 0, tourncost = 0;
+			
+			if (tournbuyins != null) {
+				tourncurrency = parseCurrency(tournbuyins, 0);
+				tournbuyin = ParseUtil.parseMoney(tournbuyins, 0);
+				tourncost = ParseUtil.parseMoney(tourncosts, 0);
 			}
+			
+			Tourn t = history.getTourn(tournid, tourncurrency, tournbuyin, tourncost);
 			
 			println("tourn " + t);
 			hand.tourn = t;
@@ -631,6 +621,7 @@ public class PSParser extends Parser {
 			hand.date = hdatetime;
 			if (hand.tourn != null && (hand.tourn.date == null || hand.tourn.date.after(hdatetime))) {
 				// estimate tournament start date if it is not present
+				// XXX the first hand will always have earliest date (unless a TS was parsed first)
 				hand.tourn.date = hdatetime;
 			}
 		} catch (Exception e) {

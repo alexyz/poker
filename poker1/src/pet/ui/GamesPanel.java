@@ -7,13 +7,13 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import pet.hp.info.Info;
-import pet.hp.info.PlayerGameInfo;
+import pet.hp.*;
+import pet.hp.info.*;
 import pet.ui.ta.*;
 
-public class GamesPanel extends JPanel {
+public class GamesPanel extends JPanel implements HistoryListener {
+	
 	private final JComboBox gameCombo = new JComboBox();
-	private final JButton refreshButton = new JButton("Refresh");
 	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
 	
@@ -49,15 +49,7 @@ public class GamesPanel extends JPanel {
 			}
 		});
 		
-		refreshButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				initGames();
-			}
-		});
-		
 		JPanel topPanel = new JPanel();
-		topPanel.add(refreshButton);
 		topPanel.add(gameCombo);
 		add(topPanel, BorderLayout.NORTH);
 		
@@ -72,12 +64,6 @@ public class GamesPanel extends JPanel {
 		add(splitPane, BorderLayout.CENTER);
 	}
 	
-	private void initGames() {
-		List<String> games = PokerFrame.getInstance().getHistory().getGames();
-		String[] gameids = games.toArray(new String[games.size()]);
-		gameCombo.setModel(new DefaultComboBoxModel(gameids));
-	}
-	
 	private void updateGame() {
 		System.out.println("update game");
 		String selectedGameId = (String) gameCombo.getSelectedItem();
@@ -87,6 +73,23 @@ public class GamesPanel extends JPanel {
 		gamesModel.setRows(gameInfos);
 		gamesModel.setPopulation(info.getPopulation());
 		repaint();
+	}
+
+	@Override
+	public void handAdded(Hand hand) {
+		// could update table...
+	}
+
+	@Override
+	public void gameAdded(Game game) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// update the game combo
+				List<String> games = PokerFrame.getInstance().getHistory().getGames();
+				gameCombo.setModel(new DefaultComboBoxModel(games.toArray(new String[games.size()])));
+			}
+		});
 	}
 	
 }

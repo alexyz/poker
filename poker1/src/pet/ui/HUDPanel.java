@@ -132,11 +132,6 @@ public class HUDPanel extends JPanel implements HistoryListener {
 		//
 	}
 
-	@Override
-	public void tournAdded(Tourn tourn) {
-		//
-	}
-
 	public void showHand(Hand hand) {
 		// create hand states, add to list
 		// display most recent in hud

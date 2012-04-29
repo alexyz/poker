@@ -8,9 +8,9 @@ import javax.swing.table.AbstractTableModel;
 
 public class MyTableModel<T> extends AbstractTableModel {
 
-	private final List<MyColumn<T>> cols = new ArrayList<MyColumn<T>>();
+	private final ArrayList<MyColumn<T>> cols = new ArrayList<MyColumn<T>>();
 
-	private final List<T> rows = new ArrayList<T>();
+	private final ArrayList<T> rows = new ArrayList<T>();
 
 	private final List<MyColumn<T>> allcols;
 
@@ -22,7 +22,12 @@ public class MyTableModel<T> extends AbstractTableModel {
 		this.allcols = allcols;
 		this.cols.addAll(cols);
 	}
-
+	
+	public void addRow(T row) {
+		rows.add(row);
+		fireTableDataChanged();
+	}
+	
 	/**
 	 * get all columns (not just displayed columns)
 	 */
