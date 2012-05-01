@@ -1,7 +1,7 @@
 package pet.eq;
 
 /**
- * represents the high and low equity of a hand
+ * multiple equity - represents the high and low equity of a hand
  */
 public class MEquity {
 	

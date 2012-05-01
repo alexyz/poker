@@ -14,9 +14,7 @@ import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
 
 /**
- * TODO send to bankroll button
- * update table model
- * add all time win/loss column
+ * player info and player game info panel
  */
 public class PlayerPanel extends JPanel {
 	// [name]
@@ -117,13 +115,13 @@ public class PlayerPanel extends JPanel {
 		});
 		
 		JScrollPane gamesTableScroller = new JScrollPane(gamesTable);
-		gamesTableScroller.setBorder(BorderFactory.createTitledBorder("Player Games"));
+		gamesTableScroller.setBorder(BorderFactory.createTitledBorder("Player Game Infos"));
 		
 		JScrollPane gameTextAreaScroller = new JScrollPane(gameTextArea);
-		gameTextAreaScroller.setBorder(BorderFactory.createTitledBorder("Player Game Info"));
+		gameTextAreaScroller.setBorder(BorderFactory.createTitledBorder("Selected Player Game Info"));
 		
 		JScrollPane playersTableScroller = new JScrollPane(playersTable);
-		playersTableScroller.setBorder(BorderFactory.createTitledBorder("Players"));
+		playersTableScroller.setBorder(BorderFactory.createTitledBorder("Player Infos"));
 		
 		JPanel mainPanel = new JPanel(new GridLayout(3, 1));
 		mainPanel.add(playersTableScroller);
@@ -142,6 +140,7 @@ public class PlayerPanel extends JPanel {
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
+	/** search for player and update table */
 	private void find() {
 		String pattern = nameField.getText();
 		PokerFrame pf = PokerFrame.getInstance();
@@ -156,6 +155,12 @@ public class PlayerPanel extends JPanel {
 		
 		System.out.println("players table now has " + playersTable.getRowCount() + " rows");
 		repaint();
+	}
+
+	/** search for the given player */
+	public void displayPlayer(String player) {
+		nameField.setText(player);
+		find();
 	}
 }
 

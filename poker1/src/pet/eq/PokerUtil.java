@@ -30,6 +30,9 @@ public class PokerUtil {
 	 * return integer value of cards (must be sorted, and no longer than 5)
 	 */
 	public static int cardsValue(String[] cards) {
+		if (cards.length > 5) {
+			throw new RuntimeException("too many cards");
+		}
 		int v = 0;
 		for (String card : cards) {
 			v *= 16;

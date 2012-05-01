@@ -7,7 +7,7 @@ import pet.hp.Seat;
  * represents current state of seat
  */
 public class SeatState implements Cloneable {
-	/** seat of seat */
+	/** seat of seat state */
 	public final Seat seat;
 	/** current stack */
 	public int stack;
@@ -17,7 +17,7 @@ public class SeatState implements Cloneable {
 	public int amount;
 	/** bet to pot ratio as percent (100 is pot bet) */
 	public float bpr;
-	/** current hole cards */
+	/** current hole cards (changes in games like draw) */
 	public String[] hole;
 	/** has folded yet */
 	public boolean folded;

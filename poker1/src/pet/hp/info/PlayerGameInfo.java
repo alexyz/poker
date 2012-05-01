@@ -28,6 +28,10 @@ public class PlayerGameInfo {
 	public int[] rankam = new int[Poker.RANKS];
 	/** total amount put in pot (and called?) */
 	public int pip = 0;
+	/** number of hands where money voluntarily put in pot */
+	public int vpip;
+	
+	
 	/** number of hands that were won at show down */
 	private int handswonshow;
 	/** hands that went to show down */
@@ -42,8 +46,6 @@ public class PlayerGameInfo {
 	private final int[] streetinits;
 	/** number of times each street was seen */
 	private final int[] streetsseen;
-	/** number of hands where money voluntarily put in pot */
-	public int vpip;
 
 	/** create play game info for the given player and game */
 	public PlayerGameInfo(PlayerInfo player, Game game) {
@@ -251,6 +253,13 @@ public class PlayerGameInfo {
 		} else {
 			return null;
 		}
+	}
+	
+	/**
+	 * return vpip as percentage of hands
+	 */
+	public float vp() {
+		return hands > 0 ? (vpip * 100f) / hands : 0;
 	}
 
 	@Override

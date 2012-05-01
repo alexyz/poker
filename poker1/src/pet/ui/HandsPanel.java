@@ -23,7 +23,8 @@ public class HandsPanel extends JPanel {
 	private final JTextArea textArea = new JTextArea();
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
-	private final JButton hudButton = new JButton("HUD");
+	private final JButton lastHandButton = new JButton("Last Hand");
+	private final JButton hud2Button = new JButton("HUD");
 	private List<HandInfo> handInfos;
 
 	public HandsPanel() {
@@ -59,15 +60,22 @@ public class HandsPanel extends JPanel {
 
 		replayButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
 				PokerFrame.getInstance().replayHand(getHandInfo().hand);
 			}
 		});
 		
-		hudButton.addActionListener(new ActionListener() {
+		lastHandButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				PokerFrame.getInstance().displayHud(getHandInfo().hand);
+			public void actionPerformed(ActionEvent e) {
+				PokerFrame.getInstance().displayHand(getHandInfo().hand);
+			}
+		});
+		
+		hud2Button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PokerFrame.getInstance().hudManager.showHand(getHandInfo().hand);
 			}
 		});
 
@@ -116,7 +124,8 @@ public class HandsPanel extends JPanel {
 
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(replayButton);
-		bottomPanel.add(hudButton);
+		bottomPanel.add(lastHandButton);
+		bottomPanel.add(hud2Button);
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(split, BorderLayout.CENTER);
@@ -141,7 +150,7 @@ public class HandsPanel extends JPanel {
 	public void displayHands(long tournid) {
 		playerField.setText("");
 		gameCombo.setModel(new DefaultComboBoxModel());
-		List<HandInfo> hands = PokerFrame.getInstance().getInfo().getHandInfos(tournid);
+		List<HandInfo> hands = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(tournid));
 		((HandInfoTableModel)handTable.getModel()).setRows(hands);
 		repaint();
 	}
@@ -179,7 +188,7 @@ public class HandsPanel extends JPanel {
 		System.out.println("update game");
 		String player = playerField.getText();
 		String gameId = (String) gameCombo.getSelectedItem();
-		handInfos = PokerFrame.getInstance().getInfo().getHandInfos(player, gameId);
+		handInfos = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(player, gameId));
 		
 		// build date lookup
 		Map<String,Date> dateMap = new TreeMap<String,Date>();

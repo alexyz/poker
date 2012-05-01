@@ -1,5 +1,6 @@
 package pet.ui;
 
+import java.awt.Font;
 import java.util.Locale;
 
 import javax.swing.*;
@@ -21,6 +22,8 @@ public class PokerFrame extends JFrame {
 	// left triangle 25c0, right triangle 25b6 
 	public static final String LEFT_TRI = "\u25c0";
 	public static final String RIGHT_TRI = "\u25b6";
+	public static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
+	public static final Font bigfont = new Font("SansSerif", Font.BOLD, 24);
 	
 	private static PokerFrame instance;
 	
@@ -30,10 +33,8 @@ public class PokerFrame extends JFrame {
 	
 	public static void main(String[] args) {
 		// os x assumes US locale if system language is english...
-		String lang = System.getenv("LANG");
-		if (lang != null && lang.contains("en_") && !lang.contains("en_US")) {
-			Locale.setDefault(Locale.UK);
-		}
+		// user needs to add british english to list of languages in system preferences/language and text
+		System.out.println("locale " + Locale.getDefault());
 		try {
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 		} catch (Exception e) {
@@ -57,17 +58,19 @@ public class PokerFrame extends JFrame {
 	/** thread that feeds the parser */
 	private final FollowThread followThread = new FollowThread(new PSParser(history));
 	/** data analysis */
-	private final Info info = new Info(history);
+	private final Info info = new Info();
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
-	private final HUDPanel hudPanel = new HUDPanel();
+	private final LastHandPanel lastHandPanel = new LastHandPanel();
 	private final HistoryPanel historyPanel = new HistoryPanel();
 	private final HandsPanel handsPanel = new HandsPanel();
 	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel(false);
 	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel(true);
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
 	private final GamesPanel gamesPanel = new GamesPanel();
+	private final PlayerPanel playerPanel = new PlayerPanel();
+	public final HUDManager hudManager = new HUDManager();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -76,16 +79,18 @@ public class PokerFrame extends JFrame {
 		tabs.addTab("Omaha", omahaPanel);
 		tabs.addTab("Draw", drawPanel);
 		tabs.addTab("History", historyPanel);
-		tabs.addTab("Players", new PlayerPanel());
+		tabs.addTab("Players", playerPanel);
 		tabs.addTab("Games", gamesPanel);
 		tabs.addTab("Tourns", new TournPanel());
-		tabs.addTab("Graph", bankrollPanel);
+		//tabs.addTab("Graph", bankrollPanel);
 		tabs.addTab("Hands", handsPanel);
 		tabs.addTab("Replay", replayPanel);
-		tabs.addTab("HUD", hudPanel);
+		tabs.addTab("Last Hand", lastHandPanel);
 		
-		history.addListener(hudPanel);
+		history.addListener(lastHandPanel);
 		history.addListener(gamesPanel);
+		history.addListener(info);
+		history.addListener(hudManager);
 		
 		followThread.addListener(historyPanel);
 		followThread.start();
@@ -109,12 +114,12 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(replayPanel);
 	}
 	
-	/** display hand in hud */
-	public void displayHud(Hand hand) {
-		hudPanel.showHand(hand);
-		tabs.setSelectedComponent(hudPanel);
+	/** display hand in hand panel */
+	public void displayHand(Hand hand) {
+		lastHandPanel.showHand(hand);
+		tabs.setSelectedComponent(lastHandPanel);
 	}
-
+	
 	public void displayBankRoll(GraphData bankRoll) {
 		bankrollPanel.setData(bankRoll);
 		tabs.setSelectedComponent(bankrollPanel);
@@ -144,6 +149,11 @@ public class PokerFrame extends JFrame {
 	public void displayDrawEquity(String[][] holes) {
 		drawPanel.displayHand(holes);
 		tabs.setSelectedComponent(drawPanel);
+	}
+
+	public void displayPlayer(String player) {
+		playerPanel.displayPlayer(player);
+		tabs.setSelectedComponent(playerPanel);
 	}
 
 }

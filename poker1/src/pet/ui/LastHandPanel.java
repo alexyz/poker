@@ -14,16 +14,17 @@ import pet.ui.ta.*;
 /**
  * displays a table with details for the last hand
  */
-public class HUDPanel extends JPanel implements HistoryListener {
+public class LastHandPanel extends JPanel implements HistoryListener {
 	
 	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
 	private final MyJTable handTable = new MyJTable();
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 	private final JButton equityButton = new JButton("Equity");
+	private final JButton playerButton = new JButton("Player");
 	private final JButton replayButton = new JButton("Replay");
 
-	public HUDPanel() {
+	public LastHandPanel() {
 		super(new BorderLayout());
 
 		stateCombo.addItemListener(new ItemListener() {
@@ -45,6 +46,24 @@ public class HUDPanel extends JPanel implements HistoryListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				selectState(1);
+			}
+		});
+		
+		playerButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// get player name for selected row
+				int r = handTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					// not really needed, can't be sorted
+					int sr = handTable.convertRowIndexToModel(r);
+					HandStateTableModel m = (HandStateTableModel) handTable.getModel();
+					HandState hs = m.getRow(sr);
+					if (hs.actionSeat >= 0) {
+						String player = hs.seats[hs.actionSeat].seat.name;
+						PokerFrame.getInstance().displayPlayer(player);
+					}
+				}
 			}
 		});
 
@@ -93,6 +112,7 @@ public class HUDPanel extends JPanel implements HistoryListener {
 
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(equityButton);
+		bottomPanel.add(playerButton);
 		bottomPanel.add(replayButton);
 
 		JScrollPane tableScroller = new JScrollPane(handTable);
@@ -170,6 +190,7 @@ class HandStates {
 	}
 	@Override
 	public String toString() {
-		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(hand.date);
+		// user readable description of hand
+		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(hand.date) + (hand.showdown ? " *" : "");
 	}
 }

@@ -7,20 +7,29 @@ import java.util.Arrays;
  */
 public abstract class Poker {
 	
-	/**
-	 * Rank masks (allowing 20 bits for hand value, i.e. 4 bits per card)
-	 */
-	protected static final int H_RANK = 0;
-	protected static final int P_RANK = 1 << 20;
-	protected static final int TP_RANK = 2 << 20;
-	protected static final int TK_RANK = 3 << 20;
-	protected static final int ST_RANK = 4 << 20;
-	protected static final int FL_RANK = 5 << 20;
-	protected static final int FH_RANK = 6 << 20;
-	protected static final int FK_RANK = 7 << 20;
-	protected static final int SF_RANK = 8 << 20;
-	protected static final int LOW_RANK = 9 << 20;
-	/** number of ranks */
+	/** any mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
+	protected static final int MASK = 0xf00000;
+	/** high card bit mask (always zero) */
+	protected static final int H_MASK = 0;
+	/** pair rank bit mask */
+	protected static final int P_MASK = 1 << 20;
+	/** two pair rank bit mask */
+	protected static final int TP_MASK = 2 << 20;
+	/** three of a kind rank bit mask */
+	protected static final int TK_MASK = 3 << 20;
+	/** straight bit mask */
+	protected static final int ST_MASK = 4 << 20;
+	/** flush bit mask */
+	protected static final int FL_MASK = 5 << 20;
+	/** full hosue bit mask */
+	protected static final int FH_MASK = 6 << 20;
+	/** four of a kind bit mask */
+	protected static final int FK_MASK = 7 << 20;
+	/** straight flush rank mask */
+	protected static final int SF_MASK = 8 << 20;
+	/** ace-five low rank mask */
+	protected static final int LOW_MASK = 9 << 20;
+	/** number of high ranks */
 	public static final int RANKS = 9;
 	/**
 	 * short rank names (value >> 20)
@@ -79,10 +88,10 @@ public abstract class Poker {
 	public static int lowValue(String[] hand) {
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
-			if (p < P_RANK) {
+			if (p < P_MASK) {
 				// no pairs
 				// invert value
-				int v = LOW_RANK | (P_RANK - p);
+				int v = LOW_MASK | (P_MASK - p);
 				return v;
 			}
 		}
@@ -91,11 +100,15 @@ public abstract class Poker {
 	
 	/** check non of the cards are duplicated */
 	private static void validate(String[] h) {
+		if (h.length != 5) {
+			throw new RuntimeException("invalid hand length: " + Arrays.toString(h));
+		}
 		for (int n = 0; n < h.length; n++) {
 			String c = h[n];
 			if ("23456789TJQKA".indexOf(face(c)) == -1 || "hdsc".indexOf(suit(c)) == -1) {
 				throw new RuntimeException("invalid hand " + Arrays.toString(h));
 			}
+			// check for dupe
 			for (int m = n + 1; m < h.length; m++) {
 				if (c.equals(h[m])) {
 					throw new RuntimeException("invalid hand " + Arrays.toString(h));
@@ -110,17 +123,17 @@ public abstract class Poker {
 	public static int value(String[] hand) {
 		validate(hand);
 		int p = isPair(hand, true);
-		if (p < P_RANK) {
+		if (p < P_MASK) {
 			boolean f = isFlush(hand);
 			int s = isStraight(hand);
 			if (f) {
 				if (s > 0) {
-					return SF_RANK | s;
+					return SF_MASK | s;
 				} else {
-					return FL_RANK | p;
+					return FL_MASK | p;
 				}
 			} else if (s > 0) {
-				return ST_RANK | s;
+				return ST_MASK | s;
 			}
 		}
 		return p;
@@ -194,19 +207,19 @@ public abstract class Poker {
 		}
 
 		if (fk != 0) {
-			return FK_RANK | (fk << 4) | hc;
+			return FK_MASK | (fk << 4) | hc;
 		} else if (tk != 0) {
 			if (pa != 0) {
-				return FH_RANK | (tk << 4) | pa;
+				return FH_MASK | (tk << 4) | pa;
 			} else {
-				return TK_RANK | (tk << 8) | hc;
+				return TK_MASK | (tk << 8) | hc;
 			}
 		} else if (pa >= 16) {
-			return TP_RANK | (pa << 4) | hc;
+			return TP_MASK | (pa << 4) | hc;
 		} else if (pa != 0) {
-			return P_RANK | (pa << 12) | hc;
+			return P_MASK | (pa << 12) | hc;
 		} else {
-			return H_RANK | hc;
+			return H_MASK | hc;
 		}
 	}
 
@@ -251,8 +264,8 @@ public abstract class Poker {
 		if (value == 0) {
 			return "nil";
 		}
-		if ((value & 0xf00000) == LOW_RANK) {
-			value = (LOW_RANK | 0xfffff) - value;
+		if ((value & MASK) == LOW_MASK) {
+			value = (LOW_MASK | 0xfffff) - value;
 		}
 		char c1 = valueFace(value);
 		char c2 = valueFace(value >> 4);
@@ -260,16 +273,16 @@ public abstract class Poker {
 		char c4 = valueFace(value >> 12);
 		char c5 = valueFace(value >> 16);
 		switch (value & 0xf00000) {
-			case LOW_RANK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
-			case SF_RANK: return "Straight Flush - " + c1 + " high";
-			case FK_RANK: return "Four of a Kind " + c2 + " - " + c1;
-			case FH_RANK: return "Full House " + c2 + " full of " + c1;
-			case FL_RANK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;
-			case ST_RANK: return "Straight - " + c1 + " high";
-			case TK_RANK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
-			case TP_RANK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;
-			case P_RANK: return "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
-			case H_RANK: return c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
+			case LOW_MASK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
+			case SF_MASK: return "Straight Flush - " + c1 + " high";
+			case FK_MASK: return "Four of a Kind " + c2 + " - " + c1;
+			case FH_MASK: return "Full House " + c2 + " full of " + c1;
+			case FL_MASK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;
+			case ST_MASK: return "Straight - " + c1 + " high";
+			case TK_MASK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
+			case TP_MASK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;
+			case P_MASK: return "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
+			case H_MASK: return c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
 			default: return "Unknown";
 		}
 	}
@@ -278,7 +291,7 @@ public abstract class Poker {
 		return card.charAt(0);
 	}
 	
-	/** return rank of hand, from 0 to 9 */
+	/** return rank of hand, from 0 to 9 (NOT the rank bitmask constants) */
 	public static int rank(int value) {
 		return value >> 20;
 	}

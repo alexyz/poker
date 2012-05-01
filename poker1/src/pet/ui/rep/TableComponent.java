@@ -11,14 +11,12 @@ import javax.swing.JComponent;
 import pet.eq.*;
 import pet.hp.*;
 import pet.hp.state.*;
+import pet.ui.PokerFrame;
 
 /**
  * Draws a table in the given state
  */
 class TableComponent extends JComponent {
-
-	private static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
-	private static final Font centrefont = new Font("SansSerif", Font.BOLD, 24);
 	
 	private HandState hs;
 	private Hand hand;
@@ -89,7 +87,7 @@ class TableComponent extends JComponent {
 		
 		if (hand != null) {
 			g2.setColor(Color.black);
-			g2.setFont(boldfont);
+			g2.setFont(PokerFrame.boldfont);
 			g2.drawString(String.format("%s %d-max", hand.game.id, hand.game.max), 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
@@ -102,7 +100,7 @@ class TableComponent extends JComponent {
 		{
 			int btx = w / 2;
 			int bty = h / 2 - 48;
-			g2.setFont(centrefont);
+			g2.setFont(PokerFrame.bigfont);
 			FontMetrics fm = g2.getFontMetrics();
 			String noteStr = String.valueOf(hs.note);
 			g2.drawString(noteStr, btx - fm.stringWidth(noteStr) / 2, bty);
@@ -173,7 +171,7 @@ class TableComponent extends JComponent {
 				
 				{
 					int texty = (int) (seaty - (lines.size() * 8) - 4);
-					g2.setFont(boldfont);
+					g2.setFont(PokerFrame.boldfont);
 					FontMetrics fm = g2.getFontMetrics();
 					for (String str : lines) {
 						g2.drawString(str, (int) seatx - fm.stringWidth(str) / 2, texty += 16);
@@ -184,7 +182,7 @@ class TableComponent extends JComponent {
 					double betx = seatX(angle, 0.36);
 					double bety = seatY(angle, 0.36);
 					g2.setColor(Color.black);
-					g2.setFont(boldfont);
+					g2.setFont(PokerFrame.boldfont);
 					String amountStr = GameUtil.formatMoney(hand.game.currency, ss.amount);
 					if (ss.bpr != 0) {
 						amountStr = String.format("%s (%2.1f%% pot)", amountStr, ss.bpr);
@@ -205,7 +203,7 @@ class TableComponent extends JComponent {
 				Shape but = new Ellipse2D.Double(butx - w * butrad, buty - h * butrad, w * butrad * 2, h * butrad * 2);
 				g2.fill(but);
 				g2.setColor(Color.black);
-				g2.setFont(boldfont);
+				g2.setFont(PokerFrame.boldfont);
 				g2.drawString("D", (int) butx - 5, (int) buty + 5);
 			}
 		}

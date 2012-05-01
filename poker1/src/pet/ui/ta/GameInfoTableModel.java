@@ -38,7 +38,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	private static final MyColumn<PlayerGameInfo> vpip = new MyColumn<PlayerGameInfo>(Float.class, "VP%", "Percentage of hands VPIP") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return (o.vpip * 100f) / o.hands;
+			return o.vp();
 		}
 	};
 	

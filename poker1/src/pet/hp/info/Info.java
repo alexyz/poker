@@ -18,15 +18,12 @@ public class Info implements HistoryListener {
 	private final PlayerInfo population = new PlayerInfo("*");
 	
 	private final Map<Long,TournInfo> tournInfos = new TreeMap<Long,TournInfo>();
-	private final History history;
 	
 	public PlayerInfo getPopulation() {
 		return population;
 	}
 
-	public Info(History history) {
-		this.history = history;
-		history.addListener(this);
+	public Info() {
 		playerMap.put("*", population);
 	}
 
@@ -69,22 +66,6 @@ public class Info implements HistoryListener {
 			playerMap.put(player, pi = new PlayerInfo(player));
 		}
 		return pi;
-	}
-	
-	/**
-	 * get hand infos for the player and game.
-	 * always returns new list
-	 */
-	public synchronized List<HandInfo> getHandInfos(String player, String gameid) {
-		return HandInfo.getHandInfos(history.getHands(player, gameid));
-	}
-	
-	/**
-	 * Get hand infos for the tournament.
-	 * always returns new list
-	 */
-	public synchronized List<HandInfo> getHandInfos(long tournid) {
-		return HandInfo.getHandInfos(history.getHands(tournid));
 	}
 	
 	/**
