@@ -5,13 +5,12 @@ import java.util.Locale;
 
 import javax.swing.*;
 
-import pet.hp.Hand;
-import pet.hp.History;
+import pet.hp.*;
 import pet.hp.impl.PSParser;
-import pet.hp.info.FollowThread;
-import pet.hp.info.Info;
+import pet.hp.info.*;
 import pet.ui.eq.*;
 import pet.ui.gr.GraphData;
+import pet.ui.hud.HUDManager;
 import pet.ui.rep.ReplayPanel;
 
 /**
