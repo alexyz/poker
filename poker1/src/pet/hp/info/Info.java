@@ -26,6 +26,14 @@ public class Info implements HistoryListener {
 	public Info() {
 		playerMap.put("*", population);
 	}
+	
+	/**
+	 * forget any players
+	 */
+	public synchronized void clear() {
+		playerMap.clear();
+		tournInfos.clear();
+	}
 
 	/**
 	 * Get the list of players matching the given pattern

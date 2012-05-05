@@ -38,7 +38,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	private static final MyColumn<PlayerGameInfo> vpip = new MyColumn<PlayerGameInfo>(Float.class, "VP%", "Percentage of hands VPIP") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.vp();
+			return o.vpip();
 		}
 	};
 	
@@ -86,17 +86,17 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		}
 	};
 	
-	private static final MyColumn<PlayerGameInfo> amtot = new MyColumn<PlayerGameInfo>(Integer.class, "AmTot", "Amount won minus amount put in pot") {
+	private static final MyColumn<PlayerGameInfo> amtot = new MyColumn<PlayerGameInfo>(Integer.class, "Am", "Amount won minus amount put in pot") {
 		@Override
 		public Integer getValue(PlayerGameInfo o) {
-			return o.won - o.pip;
+			return o.am();
 		}
 	};
 	
 	private static final MyColumn<PlayerGameInfo> amph = new MyColumn<PlayerGameInfo>(Float.class, "Am/H", "Amount won per hand") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return ((o.won - o.pip) * 1f) / o.hands;
+			return o.amph();
 		}
 	};
 	
@@ -107,17 +107,17 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		}
 	};
 	
-	private static final MyColumn<PlayerGameInfo> afcount = new MyColumn<PlayerGameInfo>(Float.class, "AF-Count", "Times bet+raise/check+call") {
+	private static final MyColumn<PlayerGameInfo> af = new MyColumn<PlayerGameInfo>(Float.class, "AF", "Times bet+raise/call") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.afcount();
+			return o.af();
 		}
 	};
 	
-	private static final MyColumn<PlayerGameInfo> afvol = new MyColumn<PlayerGameInfo>(Float.class, "AF-Vol", "Amount bet+raise/call") {
+	private static final MyColumn<PlayerGameInfo> afch = new MyColumn<PlayerGameInfo>(Float.class, "AFch", "Times bet+raise/check+call") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.afam();
+			return o.af(true);
 		}
 	};
 	
@@ -142,11 +142,19 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		}
 	};
 	
+	public static final MyColumn<PlayerGameInfo> pfr = new MyColumn<PlayerGameInfo>(Float.class, "PFR%", "Percentage of hands raised preflop") {
+		@Override
+		public Float getValue(PlayerGameInfo o) {
+			return o.pfr();
+		}
+	};
+	
 	static {
 		// can't do arrays.addAll without type warning
 		allCols.add(gameid);
 		allCols.add(hands);
 		allCols.add(vpip);
+		allCols.add(pfr);
 		allCols.add(showdownseen);
 		allCols.add(handswon);
 		allCols.add(showdownswon);
@@ -155,20 +163,20 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		allCols.add(amtot);
 		allCols.add(amph);
 		allCols.add(rake);
-		allCols.add(afcount);
-		allCols.add(afvol);
+		allCols.add(af);
+		allCols.add(afch);
 		allCols.add(cx);
 		allCols.add(cxr);
 		allCols.add(init);
 		
 		gameCols.add(player);
 		gameCols.add(hands);
-		gameCols.add(vpip);
-		gameCols.add(showdownseen);
 		gameCols.add(handswon);
+		gameCols.add(vpip);
+		gameCols.add(pfr);
+		gameCols.add(showdownseen);
 		gameCols.add(showdownswon);
-		gameCols.add(afcount);
-		gameCols.add(afvol);
+		gameCols.add(af);
 		gameCols.add(amtot);
 		gameCols.add(amph);
 		
@@ -178,8 +186,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 		playerCols.add(showdownseen);
 		playerCols.add(handswon);
 		playerCols.add(showdownswon);
-		playerCols.add(afcount);
-		playerCols.add(afvol);
+		playerCols.add(af);
 		playerCols.add(amtot);
 		playerCols.add(amph);
 	}
