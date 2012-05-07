@@ -18,7 +18,7 @@ public class PlayerInfoTableModel extends MyTableModel<PlayerInfo> {
 		cols.add(new MyColumn<PlayerInfo>(Integer.class, "Games", "Number of game types") {
 			@Override
 			public Integer getValue(PlayerInfo o) {
-				return o.games.size();
+				return o.getGameCount();
 			}
 		});
 		cols.add(new MyColumn<PlayerInfo>(Integer.class, "Hands", "Number of hands") {

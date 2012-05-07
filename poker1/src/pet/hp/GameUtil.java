@@ -176,7 +176,7 @@ public class GameUtil {
 		throw new RuntimeException("unknown game type " + gametype);
 	}
 
-	/** get the name of the street for this game type */
+	/** get the name of the street for this game type (starting at 0) */
 	public static String getStreetName (char gametype, int street) {
 		switch (gametype) {
 			case Game.FCD_TYPE:

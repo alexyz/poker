@@ -14,17 +14,21 @@ import pet.hp.info.*;
  */
 class HUDsFrame extends JFrame {
 	
+	/** the huds for each seat at the table */
 	private final HUDPanel[] hudPanels;
+	/** table statistics */
 	private final Info info = new Info();
 	private final HUDManager man;
+	/** whether the hud windows are always on top, NOT whether this frame is always on top */
 	private boolean hudsAlwaysOnTop = true;
 	
 	public HUDsFrame(HUDManager man, String title, int max) {
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setAlwaysOnTop(true);
-		setTitle(title + " (" + max + "-max)");
+		setTitle(title);
 		this.man = man;
 		this.hudPanels = new HUDPanel[max];
+		
 		JPanel p = new JPanel(null);
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		for (int n = 0; n < max; n++) {
@@ -34,7 +38,6 @@ class HUDsFrame extends JFrame {
 		}
 		setContentPane(p);
 		pack();
-		setVisible(true);
 	}
 	
 	/**
@@ -80,10 +83,13 @@ class HUDsFrame extends JFrame {
 		}
 	}
 	
+	/**
+	 * move the frame
+	 */
 	public void translateHudsFrame(int dx, int dy) {
 		Point l = getLocation();
 		setLocation(l.x + dx, l.y + dy);
-		// TODO close popup
+		// TODO close menu popup
 	}
 	
 	public void clearHuds() {
@@ -111,10 +117,10 @@ class HUDsFrame extends JFrame {
 	public void updateHuds(Hand hand) {
 		System.out.println("update huds with " + hand);
 		info.handAdded(hand);
-		// XXX clear those who have left (though they could be sitting out)
+		// XXX clear those who have left? (though they could be sitting out)
 		for (Seat seat : hand.seats) {
-			PlayerGameInfo pgi = info.getPlayerInfo(seat.name).games.get(hand.game.id);
-			hudPanels[seat.num - 1].updateHud(pgi);
+			PlayerGameInfo pgi = info.getPlayerInfo(seat.name).getGameInfo(hand.game.id);
+			hudPanels[seat.num - 1].updateHud(hand, pgi);
 		}
 		if (getContentPane().getComponentCount() > 0) {
 			pack();

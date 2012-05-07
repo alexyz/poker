@@ -169,7 +169,7 @@ public class HandsPanel extends JPanel {
 		
 		PlayerInfo pi = PokerFrame.getInstance().getInfo().getPlayerInfo(player);
 		if (pi != null) {
-			Vector<String> games = new Vector<String>(pi.games.keySet());
+			Vector<String> games = new Vector<String>(pi.getGames().keySet());
 			gameCombo.setModel(new DefaultComboBoxModel(games));
 			if (selectGameid != null) {
 				gameCombo.setSelectedItem(selectGameid);

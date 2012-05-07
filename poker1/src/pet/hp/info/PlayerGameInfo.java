@@ -110,10 +110,6 @@ public class PlayerGameInfo {
 			for (Action act : street) {
 				if (act.seat == seat) {
 					actionCount[act.type]++;
-					if (act.type == Action.FOLD_TYPE) {
-						// no more actions for us
-						break streets;
-					}
 					
 					// has previously checked this street
 					if (hasChecked) {
@@ -138,6 +134,11 @@ public class PlayerGameInfo {
 					// voluntarily put money in pot
 					if (act.type != Action.POST_TYPE && act.amount > 0) {
 						hasVpip = true;
+					}
+					
+					if (act.type == Action.FOLD_TYPE) {
+						// no more actions for us
+						break streets;
 					}
 				}
 				

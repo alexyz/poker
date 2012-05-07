@@ -4,7 +4,8 @@ import java.util.*;
 import pet.hp.*;
 
 /**
- * Analyses players and hands
+ * Analyses players and hands.
+ * This class is thread safe (all methods should be synchronized)
  */
 public class Info implements HistoryListener {
 
@@ -51,11 +52,14 @@ public class Info implements HistoryListener {
 		return players;
 	}
 
+	/**
+	 * get player game infos for all players for the given game
+	 */
 	public synchronized List<PlayerGameInfo> getGameInfos(String gameid) {
 		System.out.println("get game infos for " + gameid);
 		List<PlayerGameInfo> gameinfos = new ArrayList<PlayerGameInfo>();
 		for (PlayerInfo pi : playerMap.values()) {
-			PlayerGameInfo pgi = pi.games.get(gameid);
+			PlayerGameInfo pgi = pi.getGameInfo(gameid);
 			if (pgi != null) {
 				gameinfos.add(pgi);
 			}
@@ -65,9 +69,12 @@ public class Info implements HistoryListener {
 	}
 
 	public synchronized PlayerInfo getPlayerInfo(String player) {
-		return playerMap.get(player);
+		return getPlayerInfo(player, false);
 	}
 
+	/**
+	 * get player info for player, optionally creating
+	 */
 	private synchronized PlayerInfo getPlayerInfo(String player, boolean create) {
 		PlayerInfo pi = playerMap.get(player);
 		if (pi == null && create) {

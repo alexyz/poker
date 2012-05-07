@@ -26,7 +26,9 @@ public class SeatState implements Cloneable {
 	/** current hand equity, if any */
 	public MEquity meq;
 	/** number of actions on this street starting at 1 */
-	public int acts;
+	public int actionNum;
+	
+	public float ev;
 	
 	public SeatState(Seat seat) {
 		this.seat = seat;

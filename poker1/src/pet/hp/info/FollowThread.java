@@ -67,11 +67,14 @@ public class FollowThread extends Thread {
 		System.out.println("follow thread running");
 		while (true) {
 			synchronized (this) {
+				long t = System.nanoTime();
 				if (follow) {
 					collect();
 				}
 				if (files.size() > 0) {
 					process();
+					t = System.nanoTime() - t;
+					System.out.println("parsed in " + (t / 1000000000.0) + " seconds");
 				}
 			}
 

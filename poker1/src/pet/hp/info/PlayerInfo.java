@@ -13,33 +13,54 @@ public class PlayerInfo {
 
 	/** player name */
 	public final String name;
-	/** players games */
-	public final Map<String,PlayerGameInfo> games = new TreeMap<String,PlayerGameInfo>();
-	
 	/** player hands */
 	public int hands;
 	/** date last played */
 	public Date date;
 	
+	/** players games */
+	private final TreeMap<String,PlayerGameInfo> games = new TreeMap<String,PlayerGameInfo>();
+	
 	public PlayerInfo(String name) {
 		this.name = name;
 	}
 	
-	public PlayerGameInfo getGameInfo(Game game) {
-		PlayerGameInfo gi = games.get(game.id);
-		if (gi == null) {
-			games.put(game.id, gi = new PlayerGameInfo(this, game));
-		}
-		return gi;
+	/**
+	 * get player game info, returns null if there is no game info
+	 */
+	public synchronized PlayerGameInfo getGameInfo(String gameid) {
+		return games.get(gameid);
 	}
 	
-	public void add(Hand h, Seat s) {
+	/**
+	 * Get the number of games
+	 */
+	public synchronized int getGameCount() {
+		return games.size();
+	}
+	
+	/**
+	 * Get the games
+	 */
+	public synchronized Map<String, PlayerGameInfo> getGames() {
+		// not strictly thread safe...
+		return Collections.unmodifiableMap(games);
+	}
+	
+	/**
+	 * add hand to player
+	 */
+	public synchronized void add(Hand h, Seat s) {
 		hands++;
 		if (date == null || date.before(h.date)) {
 			date = h.date;
 		}
 		
-		PlayerGameInfo gi = getGameInfo(h.game);
+		Game game = h.game;
+		PlayerGameInfo gi = games.get(game.id);
+		if (gi == null) {
+			games.put(game.id, gi = new PlayerGameInfo(this, game));
+		}
 		gi.add(h, s);
 	}
 

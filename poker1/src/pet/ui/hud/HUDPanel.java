@@ -3,14 +3,19 @@ package pet.ui.hud;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
-import pet.hp.GameUtil;
+import pet.eq.*;
+import pet.hp.*;
 import pet.hp.info.PlayerGameInfo;
+import pet.hp.state.*;
 import pet.ui.PokerFrame;
 
-// TODO last hole cards, hand value, eq on each street...
+/**
+ * displays information for a player at a table
+ */
 class HUDPanel extends JPanel {
 
 	private static final Font boldfont = new Font("SansSerif", Font.BOLD, 11);
@@ -20,25 +25,30 @@ class HUDPanel extends JPanel {
 	private final HUDsFrame hudsFrame;
 	private final JLabel nameLabel = new JLabel();
 	private final ArrayList<JLabel> statLabels = new ArrayList<JLabel>();
-	/** the window the hud is displayed in, af any */
-	private JWindow window;
+	private final JLabel handLabel = new JLabel();
+	/** the window the hud is displayed in, if any */
+	private JFrame window;
 
 	public HUDPanel(HUDsFrame hudsFrame, int seat) {
 		super(new BorderLayout());
 		this.hudsFrame = hudsFrame;
 		this.seat = seat;
-
 		nameLabel.setText("" + seat);
 		nameLabel.setFont(boldfont);
 		add(nameLabel, BorderLayout.NORTH);
-		JPanel p = new JPanel(new GridLayout(3,3));
+		
+		JPanel statsPanel = new JPanel(new GridLayout(3,3));
 		for (int n = 0; n < 9; n++) {
 			JLabel l = new JLabel();
 			l.setFont(plainfont);
 			statLabels.add(l);
-			p.add(l);
+			statsPanel.add(l);
 		}
-		add(p, BorderLayout.CENTER);
+		add(statsPanel, BorderLayout.CENTER);
+		
+		handLabel.setFont(plainfont);
+		add(handLabel, BorderLayout.SOUTH);
+		
 		MouseAdapter a = new HUDMouseAdapter();
 		addMouseListener(a);
 		addMouseMotionListener(a);
@@ -74,7 +84,8 @@ class HUDPanel extends JPanel {
 			Point p = getLocationOnScreen();
 			hudsFrame.removeHud(this);
 			setBorder(BorderFactory.createLineBorder(Color.black));
-			window = new JWindow();
+			window = new JFrame();
+			window.setUndecorated(true);
 			window.setLocation(p);
 			window.setAlwaysOnTop(hudsFrame.isHudsAlwaysOnTop());
 			window.setContentPane(this);
@@ -91,12 +102,14 @@ class HUDPanel extends JPanel {
 		for (JLabel l : statLabels) {
 			l.setText("");
 		}
+		handLabel.setText("");
+		setToolTipText(null);
 	}
 
 	/**
 	 * update the information displayed in the hud
 	 */
-	public void updateHud(PlayerGameInfo pgi) {
+	public void updateHud(Hand hand, PlayerGameInfo pgi) {
 		System.out.println("update " + nameLabel.getText() + " with " + pgi);
 		nameLabel.setText(seat + ": " + pgi.player.name + " (" + pgi.hands + "h)");
 		// compare to table, player history and pop
@@ -112,6 +125,38 @@ class HUDPanel extends JPanel {
 		statLabels.get(i++).setText("Am: " + GameUtil.formatMoney(pgi.game.currency, pgi.am()));
 		statLabels.get(i++).setText("Am/H: " + GameUtil.formatMoney(pgi.game.currency, (int) pgi.amph()));
 		statLabels.get(i++).setText("Cxc: " + pgi.cx());
+		
+		List<HandState> hstates = HandStateUtil.getStates(hand);
+		List<SeatState> sstates = HandStateUtil.getFirst(hstates, seat);
+		
+		// hand information
+		StringBuilder text = new StringBuilder();
+		String curStr = null;
+		StringBuilder tip = new StringBuilder();
+		for (int n = 0; n < sstates.size(); n++) {
+			SeatState ss = sstates.get(n);
+			if (ss.meq != null) {
+				String eqStr = MEquityUtil.equityString(ss.meq);
+				curStr = MEquityUtil.currentString(ss.meq);
+				// label
+				text.append(text.length() > 0 ? ", " : "").append(eqStr.replaceAll("[T% ]", ""));
+				// tip
+				// TODO street no...
+				tip.append(PokerUtil.cardsString(ss.hole)).append(":  ");
+				tip.append(eqStr).append(":  ").append("<br>");
+				tip.append(curStr).append("<br>");
+			}
+		}
+		if (curStr != null) {
+			text.append(":  ").append(curStr);
+		}
+		
+		handLabel.setText(text.toString());
+		setToolTipText(tip.length() > 0 ? "<html>" + tip.toString() + "</html>" : null);
+		
+		if (window != null) {
+			window.pack();
+		}
 	}
 
 	public void setHudAlwaysOnTop(boolean top) {

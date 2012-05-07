@@ -42,7 +42,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
-					if (ss.acts <= 1) {
+					if (ss.actionNum <= 1) {
 						return PokerUtil.cardsString(ss.hole);
 					} else {
 						return "";
@@ -84,8 +84,20 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState h) {
 				if (h.actionSeat >= 0) {
 					SeatState ss = h.seats[h.actionSeat];
-					if (ss.meq != null && ss.acts <= 1) {
+					if (ss.meq != null && ss.actionNum <= 1) {
 						return MEquityUtil.equityString(ss.meq);
+					}
+				}
+				return "";
+			}
+		});
+		cols.add(new HandStateColumn(String.class, "EV", "Expected Value") {
+			@Override
+			public String getValue(HandState h) {
+				if (h.actionSeat >= 0) {
+					SeatState ss = h.seats[h.actionSeat];
+					if (ss.ev != 0) {
+						return GameUtil.formatMoney(h.hand.game.currency, (int) ss.ev);
 					}
 				}
 				return "";

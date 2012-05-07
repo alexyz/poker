@@ -21,7 +21,7 @@ public abstract class Poker {
 	protected static final int ST_MASK = 4 << 20;
 	/** flush bit mask */
 	protected static final int FL_MASK = 5 << 20;
-	/** full hosue bit mask */
+	/** full house bit mask */
 	protected static final int FH_MASK = 6 << 20;
 	/** four of a kind bit mask */
 	protected static final int FK_MASK = 7 << 20;
@@ -86,6 +86,7 @@ public abstract class Poker {
 	 * get ace to five low value of hand
 	 */
 	public static int lowValue(String[] hand) {
+		validate(hand);
 		if (isLow(hand)) {
 			int p = isPair(hand, false);
 			if (p < P_MASK) {
@@ -98,7 +99,7 @@ public abstract class Poker {
 		return 0;
 	}
 	
-	/** check non of the cards are duplicated */
+	/** check hand is 5 cards and non of the cards are duplicated */
 	private static void validate(String[] h) {
 		if (h.length != 5) {
 			throw new RuntimeException("invalid hand length: " + Arrays.toString(h));
@@ -306,14 +307,4 @@ public abstract class Poker {
 	 */
 	public abstract int value(String[] board, String[] hole);
 	
-}
-
-/**
- * 5 card hand value function
- */
-abstract class Value {
-	/**
-	 * get hand value (high or low)
-	 */
-	public abstract int value(String[] hand);
 }

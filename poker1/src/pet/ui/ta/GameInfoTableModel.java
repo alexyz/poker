@@ -204,7 +204,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	
 	@Override
 	public PlayerGameInfo getPopulation(PlayerGameInfo row) {
-		return population.getGameInfo(row.game);
+		return population.getGameInfo(row.game.id);
 	}
 	
 }

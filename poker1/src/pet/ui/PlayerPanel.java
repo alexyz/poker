@@ -53,7 +53,7 @@ public class PlayerPanel extends JPanel {
 						PlayerInfo pi = playersModel.getRow(sr);
 						System.out.println("selected " + r + " => " + sr + " => " + pi);
 						GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
-						gamesModel.setRows(pi.games.values());
+						gamesModel.setRows(pi.getGames().values());
 						revalidate();
 					}
 				}

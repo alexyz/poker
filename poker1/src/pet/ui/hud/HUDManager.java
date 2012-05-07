@@ -7,7 +7,7 @@ import javax.swing.*;
 import pet.hp.*;
 
 /**
- * Manages the hud frames for the tables
+ * Manages the hud frames for all tables
  */
 public class HUDManager implements HistoryListener {
 	
@@ -26,12 +26,16 @@ public class HUDManager implements HistoryListener {
 		}
 	}
 	
+	/**
+	 * show hud for hand
+	 */
 	public synchronized void showHand(final Hand hand) {
 		HUDsFrame f = hudsFrames.get(hand.tablename);
 		if (f == null) {
 			System.out.println("create hud group");
 			hudsFrames.put(hand.tablename, f = new HUDsFrame(this, hand.tablename, hand.game.max));
-			// TODO remove from map on close
+			// TODO don't display if table ignored
+			f.setVisible(true);
 		}
 		f.updateHuds(hand);
 	}
