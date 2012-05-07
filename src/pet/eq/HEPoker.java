@@ -89,6 +89,8 @@ public class HEPoker extends Poker {
 		}
 		MEquityUtil.updateCurrent(meqs, true, vals);
 		
+		// TODO find if low is possible from board (1/3, 2/4, 3/5 low) to avoid low calc
+		
 		// get current low values
 		if (hilo) {
 			for (int n = 0; n < holes.length; n++) {
@@ -100,8 +102,9 @@ public class HEPoker extends Poker {
 		// get equity
 		final String[] tempBoard = Arrays.copyOf(board, 5);
 		final int k = 5 - board.length;
-		final int combs = MathsUtil.bincoff(deck.length, k);
-		for (int p = 0; p < combs; p++) {
+		final int hiCount = MathsUtil.bincoff(deck.length, k);
+		int lowCount = 0;
+		for (int p = 0; p < hiCount; p++) {
 			// get board
 			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
 			
@@ -111,16 +114,24 @@ public class HEPoker extends Poker {
 			}
 			MEquityUtil.updateEquity(meqs, true, vals, tempBoard, board.length);
 			
-			// low equity
+			// low equity - only counts if at least one hand makes low
 			if (hilo) {
+				boolean hasLow = false;
 				for (int i = 0; i < holes.length; i++) {
-					vals[i] = value(Poker.lo, tempBoard, holes[i]);
+					int v = value(Poker.lo, tempBoard, holes[i]);
+					if (v > 0) {
+						hasLow = true;
+					}
+					vals[i] = v;
 				}
-				MEquityUtil.updateEquity(meqs, false, vals, tempBoard, board.length);
+				if (hasLow) {
+					MEquityUtil.updateEquity(meqs, false, vals, tempBoard, board.length);
+					lowCount++;
+				}
 			}
 		}
 
-		MEquityUtil.summariseEquity(meqs, combs);
+		MEquityUtil.summariseEquity(meqs, hiCount, lowCount);
 		MEquityUtil.summariseOuts(meqs, k);
 		return meqs;
 	}
@@ -134,9 +145,10 @@ public class HEPoker extends Poker {
 		// hand values for a particular board
 		final int[] vals = new int[holes.length];
 		final long[] picked = new long[1];
-		final int sz = 1000;
+		final int highCount = 1000;
+		int lowCount = 0;
 
-		for (int p = 0; p < sz; p++) {
+		for (int p = 0; p < highCount; p++) {
 			picked[0] = 0;
 			for (int n = 0; n < 5; n++) {
 				// TODO should really pick straight into board
@@ -150,16 +162,24 @@ public class HEPoker extends Poker {
 			}
 			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
 			
-			// low value
+			// low equity - only counts if at least one hand makes low
+			boolean hasLow = false;
 			if (hilo) {
 				for (int i = 0; i < holes.length; i++) {
-					vals[i] = value(Poker.lo, board, holes[i]);
+					int v = value(Poker.lo, board, holes[i]);
+					if (v > 0) {
+						hasLow = true;
+					}
+					vals[i] = v;
 				}
-				MEquityUtil.updateEquity(meqs, false, vals, null, 0);
+				if (hasLow) {
+					MEquityUtil.updateEquity(meqs, false, vals, null, 0);
+					lowCount++;
+				}
 			}
 		}
 
-		MEquityUtil.summariseEquity(meqs, sz);
+		MEquityUtil.summariseEquity(meqs, highCount, lowCount);
 		return meqs;
 	}
 

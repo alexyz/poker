@@ -18,13 +18,13 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 	
 	@Override
 	public Color getColour(HandState hs) {
-		if (hs.actionSeat == -1) {
+		if (hs.actionSeat == null) {
 			return Color.lightGray;
 			
 		} else if (hs.action.type == Action.COLLECT_TYPE) {
 			return winColour;
 			
-		} else if (hs.seats[hs.actionSeat].seat == hs.hand.myseat) {
+		} else if (hs.actionSeat.seat == hs.hand.myseat) {
 			return playerColour;
 		} 
 		
@@ -33,7 +33,7 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 	
 	@Override
 	public Font getFont(HandState hs) {
-		if (hs.actionSeat == -1) {
+		if (hs.actionSeat == null) {
 			return boldfont;
 		} 
 		return null;

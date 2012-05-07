@@ -88,11 +88,27 @@ public class MEquityUtil {
 	/**
 	 * summarise equities (convert counts to percentages)
 	 */
-	static void summariseEquity(MEquity[] meqs, int samples) {
+	static void summariseEquity(MEquity[] meqs, int highCount, int lowCount) {
 		for (MEquity meq : meqs) {
-			meq.hi.summariseEquity(samples);
-			if (meq.lo != null) {
-				meq.lo.summariseEquity(samples);
+			meq.hi.summariseEquity(highCount);
+			if (lowCount > 0) {
+				meq.lo.summariseEquity(lowCount);
+			}
+			
+			// get the total equity
+			// FIXME need to count ties
+			float hieq = meq.hi.won + (meq.hi.tied / 2);
+			if (lowCount > 0) {
+				meq.lowPossible = true;
+				float loeq = meq.lo.won + (meq.lo.tied / 2);
+				// weight the lows
+				// low=100 hi=100 w=0.5
+				// low=50 hi=100 w=0.25
+				// low=0 hi=100 w=0
+				float w = (lowCount * 0.5f) / highCount;
+				meq.totaleq = (hieq * (1 - w)) + (loeq * w);
+			} else {
+				meq.totaleq = hieq;
 			}
 		}
 	}

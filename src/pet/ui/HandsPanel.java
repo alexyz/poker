@@ -24,7 +24,7 @@ public class HandsPanel extends JPanel {
 	private final JComboBox dateCombo = new JComboBox();
 	private final JButton replayButton = new JButton("Replay");
 	private final JButton lastHandButton = new JButton("Last Hand");
-	private final JButton hud2Button = new JButton("HUD");
+	private final JButton hudButton = new JButton("HUD");
 	private List<HandInfo> handInfos;
 
 	public HandsPanel() {
@@ -72,10 +72,10 @@ public class HandsPanel extends JPanel {
 			}
 		});
 		
-		hud2Button.addActionListener(new ActionListener() {
+		hudButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PokerFrame.getInstance().hudManager.showHand(getHandInfo().hand);
+				PokerFrame.getInstance().getHudManager().showHand(getHandInfo().hand);
 			}
 		});
 
@@ -125,7 +125,7 @@ public class HandsPanel extends JPanel {
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(replayButton);
 		bottomPanel.add(lastHandButton);
-		bottomPanel.add(hud2Button);
+		bottomPanel.add(hudButton);
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(split, BorderLayout.CENTER);

@@ -12,6 +12,7 @@ import pet.hp.*;
 public class HUDManager implements HistoryListener {
 	
 	private final TreeMap<String,HUDsFrame> hudsFrames = new TreeMap<String,HUDsFrame>();
+	private boolean create = true;
 	
 	@Override
 	public synchronized void handAdded(final Hand hand) {
@@ -31,13 +32,15 @@ public class HUDManager implements HistoryListener {
 	 */
 	public synchronized void showHand(final Hand hand) {
 		HUDsFrame f = hudsFrames.get(hand.tablename);
-		if (f == null) {
+		if (f == null && create) {
 			System.out.println("create hud group");
 			hudsFrames.put(hand.tablename, f = new HUDsFrame(this, hand.tablename, hand.game.max));
 			// TODO don't display if table ignored
 			f.setVisible(true);
 		}
-		f.updateHuds(hand);
+		if (f != null) {
+			f.updateHuds(hand);
+		}
 	}
 	
 	public synchronized void remove(String table) {
@@ -48,6 +51,14 @@ public class HUDManager implements HistoryListener {
 	@Override
 	public void gameAdded(Game game) {
 		//
+	}
+	
+	public boolean isCreate() {
+		return create;
+	}
+
+	public void setCreate(boolean create) {
+		this.create = create;
 	}
 }
 

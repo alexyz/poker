@@ -52,7 +52,7 @@ public class DrawPoker extends Poker {
 			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
 		}
 
-		MEquityUtil.summariseEquity(meqs, c);
+		MEquityUtil.summariseEquity(meqs, c, 0);
 		return meqs;
 	}
 

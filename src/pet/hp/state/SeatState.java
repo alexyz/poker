@@ -4,11 +4,14 @@ import pet.eq.*;
 import pet.hp.Seat;
 
 /**
- * represents current state of seat
+ * represents current state of seat.
+ * can be cloned
  */
 public class SeatState implements Cloneable {
-	/** seat of seat state */
+	
+	/** seat of seat state, never null */
 	public final Seat seat;
+	
 	/** current stack */
 	public int stack;
 	/** stack to pot ratio */
@@ -27,8 +30,10 @@ public class SeatState implements Cloneable {
 	public MEquity meq;
 	/** number of actions on this street starting at 1 */
 	public int actionNum;
-	
+	/** expected value! */
 	public float ev;
+	/** total expected value! */
+	public float tev;
 	
 	public SeatState(Seat seat) {
 		this.seat = seat;

@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 import pet.eq.*;
 
@@ -34,30 +35,38 @@ class HandCardPanel extends CardPanel {
 
 	private final EquityPanel highEquityPanel = new EquityPanel(true);
 	private final EquityPanel lowEquityPanel = new EquityPanel(false);
+	private final JLabel totalLabel = new JLabel();
 
 	public HandCardPanel(String name, int mincards, int maxcards) {
 		super(name, mincards, maxcards);
 		lowEquityPanel.setVisible(false);
 		JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		//totalLabel.setHorizontalAlignment(JLabel.LEFT);
+		p.add(totalLabel);
+		totalLabel.setBorder(new LineBorder(Color.red));
 		p.add(highEquityPanel);
+		highEquityPanel.setBorder(new LineBorder(Color.red));
 		p.add(lowEquityPanel);
+		lowEquityPanel.setBorder(new LineBorder(Color.red));
 		// add to superclass layout
 		add(p, BorderLayout.CENTER);
 	}
 
 	public void setHandEquity(MEquity me) {
-		if (me != null && me.hi != null) {
-			highEquityPanel.setHandEquity(me, true);
-		} else {
-			highEquityPanel.clearHandEquity();
-		}
-		if (me != null && me.lo != null) {
-			lowEquityPanel.setVisible(true);
-			lowEquityPanel.setHandEquity(me, false);
-		} else {
-			lowEquityPanel.setVisible(false);
-			lowEquityPanel.clearHandEquity();
+		highEquityPanel.clearHandEquity();
+		lowEquityPanel.clearHandEquity();
+		lowEquityPanel.setVisible(false);
+		totalLabel.setText("");
+		if (me != null) {
+			if (me.hi != null) {
+				highEquityPanel.setHandEquity(me, true);
+			}
+			if (me.lo != null) {
+				lowEquityPanel.setHandEquity(me, false);
+				lowEquityPanel.setVisible(true);
+			}
+			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible);
 		}
 	}
 

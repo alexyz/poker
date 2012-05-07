@@ -18,8 +18,8 @@ public class HandState implements Cloneable {
 	public int pot;
 	/** seat index of button */
 	public int button;
-	/** seat index of current action, one less than seat number, -1 if no action */
-	public int actionSeat;
+	/** seat state of current action, null if no action */
+	public SeatState actionSeat;
 	/** current action */
 	public Action action;
 	/** information */
@@ -51,11 +51,8 @@ public class HandState implements Cloneable {
 	
 	@Override
 	public String toString() {
-		if (actionSeat >= 0) {
-			SeatState s = seats[actionSeat];
-			if (s != null) {
-				return String.valueOf(action);
-			}
+		if (actionSeat != null) {
+			return String.valueOf(action);
 		}
 		return note;
 	}

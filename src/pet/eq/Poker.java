@@ -83,7 +83,8 @@ public abstract class Poker {
 	}
 
 	/**
-	 * get ace to five low value of hand
+	 * get ace to five low value of hand.
+	 * returns 0 if no low.
 	 */
 	public static int lowValue(String[] hand) {
 		validate(hand);

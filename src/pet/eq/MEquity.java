@@ -9,6 +9,9 @@ public class MEquity {
 	// TODO add scoop, total eq
 	public final boolean exact;
 	public final int rem;
+	
+	public boolean lowPossible;
+	public float totaleq;
 
 	public MEquity(boolean hilo, int rem, boolean exact) {
 		this.hi = new Equity();

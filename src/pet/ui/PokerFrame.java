@@ -69,7 +69,7 @@ public class PokerFrame extends JFrame {
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
 	private final GamesPanel gamesPanel = new GamesPanel();
 	private final PlayerPanel playerPanel = new PlayerPanel();
-	public final HUDManager hudManager = new HUDManager();
+	private final HUDManager hudManager = new HUDManager();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -153,6 +153,10 @@ public class PokerFrame extends JFrame {
 	public void displayPlayer(String player) {
 		playerPanel.displayPlayer(player);
 		tabs.setSelectedComponent(playerPanel);
+	}
+
+	public HUDManager getHudManager() {
+		return hudManager;
 	}
 
 }

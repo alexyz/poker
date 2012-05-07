@@ -17,9 +17,9 @@ public class HandStateUtil {
 		ArrayList<SeatState> sss = new ArrayList<SeatState>();
 		int si = -1;
 		for (HandState hs : states) {
-			if (hs.actionSeat + 1 == seatNum) {
+			if (hs.actionSeat != null && hs.actionSeat.seat.num == seatNum) {
 				if (hs.streetIndex > si) {
-					sss.add(hs.seats[hs.actionSeat]);
+					sss.add(hs.actionSeat);
 					si = hs.streetIndex;
 				}
 			}
@@ -43,7 +43,7 @@ public class HandStateUtil {
 		HandState hs = new HandState(hand);
 		hs.pot = hand.antes;
 		hs.button = hand.button - 1;
-		hs.actionSeat = -1;
+		hs.actionSeat = null;
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState(seat);
 			if (seat.hole != null) {
@@ -72,7 +72,7 @@ public class HandStateUtil {
 			hs.note = GameUtil.getStreetName(hand.game.type, s);
 			hs.action = null;
 			hs.streetIndex = s;
-			hs.actionSeat = -1;
+			hs.actionSeat = null;
 			holes.clear();
 			holeSeats.clear();
 			blockers.clear();
@@ -122,12 +122,13 @@ public class HandStateUtil {
 			int trail = 0;
 			int lastbet = 0;
 			for (Action act : hand.streets[s]) {
+				System.out.println();
 				System.out.println("act " + act);
 				hs = hs.clone();
 				hs.action = act;
-				hs.actionSeat = act.seat.num - 1;
-
+				
 				SeatState ss = hs.seats[act.seat.num - 1];
+				hs.actionSeat = ss;
 				ss.bpr = 0;
 				ss.ev = 0;
 				ss.actionNum++;
@@ -137,27 +138,36 @@ public class HandStateUtil {
 					
 				} else if (act.amount != 0) {
 					// pot raise amount
-					int pr = hs.pot + trail + 2 * (lastbet - ss.amount);
-					//System.out.println("  p=" + hs.pot + " t=" + trail + " l=" + lastbet + " sa=" + ss.amount + " => pr=" + pr);
+					int potraise = hs.pot + trail + 2 * (lastbet - ss.amount);
+					System.out.println("MAX: pot=" + hs.pot + " trail=" + trail + " lastbet=" + lastbet + " committed=" + ss.amount + " => potraise " + potraise);
 					
 					ss.amount += act.amount;
+					int tocall = 0;
 					
-					if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE || act.type == Action.CALL_TYPE) {
-						ss.bpr = (act.amount * 100f) / pr;
-						
-						// FIXME need a better way of getting eq
-						float eq = ss.meq != null ? ss.meq.hi.won / 100f : 0;
-						int tocall = 0;
-						if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
-							tocall = act.amount;
-						}
-						// ev = tp * eq - cost;
-						ss.ev = (hs.pot + trail + tocall) * eq - act.amount;
-						
-					} else if (act.type == Action.COLLECT_TYPE) {
-						ss.won = true;
-						ss.amount = -act.amount;
+					switch (act.type) {
+						case Action.BET_TYPE:
+						case Action.RAISE_TYPE:
+							ss.bpr = (act.amount * 100f) / potraise;
+							// the opponent will need to call this much
+							tocall = act.amount - lastbet;
+							
+						case Action.CALL_TYPE:
+							// FIXME need a better way of getting eq, e.g. for hi/lo
+							float eq = ss.meq != null ? ss.meq.hi.won / 100f : 0;
+							int totalpot = hs.pot + act.amount + trail + tocall;
+							ss.ev = totalpot * eq - act.amount;
+							ss.tev += ss.ev;
+							
+							System.out.println("EV: pot=" + hs.pot + " actam=" + act.amount + " trail=" + trail + " tocall=" + tocall + " => total " + totalpot);
+							System.out.println("EV:   eq=" + eq + " p*eq=" + (totalpot*eq) + " cost=" + act.amount + " => ev " + ss.ev);
+							break;
+							
+						case Action.COLLECT_TYPE:
+							ss.won = true;
+							ss.amount = -act.amount;
+							break;
 					}
+					
 					
 					lastbet = Math.max(lastbet, ss.amount);
 					ss.stack -= act.amount;

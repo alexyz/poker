@@ -23,6 +23,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final JProgressBar progressBar = new JProgressBar();
 	private final JButton addButton = new JButton("Add File");
 	private final ConsolePanel consolePanel = new ConsolePanel();
+	private final JCheckBox hudBox = new JCheckBox("Create HUDs");
 	
 	public HistoryPanel() {
 		super(new BorderLayout());
@@ -97,6 +98,16 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			}
 		});
 		
+		// doesn't work because hud manager has not yet been created...
+		//hudBox.setSelected(PokerFrame.getInstance().getHudManager().isCreate());
+		hudBox.setSelected(true);
+		hudBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				PokerFrame.getInstance().getHudManager().setCreate(hudBox.isSelected());
+			}
+		});
+		
 		JPanel pathPanel = new JPanel();
 		pathPanel.add(pathField);
 		
@@ -104,6 +115,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		buttonPanel.add(pathButton);
 		buttonPanel.add(addButton);
 		buttonPanel.add(followButton);
+		buttonPanel.add(hudBox);
 		
 		JPanel topPanel = new JPanel(new GridLayout(3, 1));
 		topPanel.setBorder(BorderFactory.createTitledBorder("History"));
