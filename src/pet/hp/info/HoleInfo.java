@@ -22,6 +22,14 @@ public class HoleInfo implements Comparable<HoleInfo> {
 		return intValue - h.intValue;
 	}
 	@Override
+	public boolean equals(Object o) {
+		return o instanceof HoleInfo && ((HoleInfo)o).intValue == intValue;
+	}
+	@Override
+	public int hashCode() {
+		return intValue;
+	}
+	@Override
 	public String toString() {
 		return strValue;
 	}

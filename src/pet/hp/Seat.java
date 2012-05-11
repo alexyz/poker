@@ -8,7 +8,6 @@ import java.util.Arrays;
  * This object should be considered immutable.
  */
 public class Seat implements Serializable {
-	private static final long serialVersionUID = 1;
 	/** seat number */
 	public byte num;
 	/** player name */

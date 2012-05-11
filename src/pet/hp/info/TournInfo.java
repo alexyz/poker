@@ -11,6 +11,7 @@ public class TournInfo {
 	// all in eq product?
 	// no of hands
 	// aggr/vpip? playergameinfo of participants?
+	// to long string - print winner/max/pool
 	
 	public final Tourn tourn;
 	public int hands;

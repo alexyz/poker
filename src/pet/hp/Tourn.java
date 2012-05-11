@@ -1,5 +1,6 @@
 package pet.hp;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Date;
  * This object should be considered immutable - though
  * it might be updated by parser after creation
  */
-public class Tourn {
+public class Tourn implements Serializable {
 	/** unique identifier - object so it can be used in map/set */
 	public final Long id;
 	/** prize buy in */
@@ -33,7 +34,7 @@ public class Tourn {
 	// TODO number of tables?
 	
 	public Tourn(long id) {
-		this.id = new Long(id);
+		this.id = id;
 	}
 
 	@Override

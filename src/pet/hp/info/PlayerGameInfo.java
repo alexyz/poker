@@ -316,8 +316,8 @@ public class PlayerGameInfo {
 
 	public String toLongString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("Hands:  %d  Hands Won:  %d\n", hands, handswon));
-		sb.append(String.format("Amount won:  %d  Lost:  %d  Rake:  %d\n", won, pip, rake));
+		sb.append("Hands:  " + hands + "  Hands Won:  " + handswon + "\n");
+		sb.append("Amount won:  " + won + "  Put in pot:  " + pip + "  Rake:  " + rake + "\n");
 		sb.append("Check-x count: " + cx() + "\n");
 		sb.append("Check-x ratio: " + cxr() + "\n");
 		sb.append("Initiatives: " + isstr() + "\n");

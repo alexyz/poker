@@ -1,11 +1,13 @@
 package pet.hp;
 
+import java.io.Serializable;
+
 /**
  * Represents a type of poker game.
  * There should only be once instance of this class for each game.
  * This object should be considered immutable.
  */
-public class Game implements Comparable<Game> {
+public class Game implements Serializable {
 	
 	/** game type constants */
 	public static final char FCD_TYPE = 'F', HE_TYPE = 'H', OM_TYPE = 'O', OMHL_TYPE = '8';
@@ -35,11 +37,6 @@ public class Game implements Comparable<Game> {
 	public int subtype;
 	/** blinds XXX cash game only */
 	public int sb, bb;
-	
-	@Override
-	public int compareTo(Game o) {
-		return id.compareTo(o.id);
-	}
 	
 	@Override
 	public String toString() {

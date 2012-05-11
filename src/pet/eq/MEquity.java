@@ -6,11 +6,12 @@ package pet.eq;
 public class MEquity {
 	
 	public final Equity hi, lo;
-	// TODO add scoop, total eq
+	// TODO add scoop
 	public final boolean exact;
 	public final int rem;
-	
+	/** is any low possible */
 	public boolean lowPossible;
+	/** total equity, including hi/lo and ties */
 	public float totaleq;
 
 	public MEquity(boolean hilo, int rem, boolean exact) {

@@ -1,6 +1,7 @@
 package pet.hp;
 
 import java.text.NumberFormat;
+import java.util.Comparator;
 
 import pet.eq.*;
 
@@ -16,6 +17,13 @@ public class GameUtil {
 	private static final Poker omahaHLPoker = new HEPoker(true, true);
 	private static final String[] hestreetnames = { "Pre flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre draw", "Post draw" };
+	
+	public static Comparator<Game> idCmp = new Comparator<Game>() {
+		@Override
+		public int compare(Game g1, Game g2) {
+			return g1.id.compareTo(g2.id);
+		}
+	};
 
 	/** get full name of currency */
 	public static String getCurrencyName(char currency) {

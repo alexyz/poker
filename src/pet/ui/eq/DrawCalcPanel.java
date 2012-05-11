@@ -19,11 +19,7 @@ public class DrawCalcPanel extends CalcPanel {
 		
 		initCardLabels();
 		
-		for (HandCardPanel hp : handPanels) {
-			addgb(hp);
-		}
-
-		addgb(new ButtonPanel(this));
+		setHands(handPanels);
 	}
 	
 	/**

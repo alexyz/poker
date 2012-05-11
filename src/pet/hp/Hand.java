@@ -49,7 +49,7 @@ public class Hand implements Serializable {
 	public int button;
 	
 	public Hand(long id) {
-		this.id = new Long(id);
+		this.id = id;
 	}
 
 	@Override

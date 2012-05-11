@@ -46,6 +46,7 @@ public class PokerFrame extends JFrame {
 				// need to create and pack in awt thread otherwise it can deadlock
 				// due to the java console panel
 				instance = new PokerFrame();
+				instance.start();
 				instance.setVisible(true);
 			}
 		});
@@ -92,11 +93,14 @@ public class PokerFrame extends JFrame {
 		history.addListener(hudManager);
 		
 		followThread.addListener(historyPanel);
-		followThread.start();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
 		pack();
+	}
+	
+	public void start() {
+		followThread.start();
 	}
 	
 	public Info getInfo() {

@@ -1,12 +1,11 @@
 package pet.ui.eq;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 /**
  * A panel that shoes the given list of card labels in the west of a border layout
@@ -20,17 +19,30 @@ class CardPanel extends JPanel {
 	 * create a card panel with max cards cards
 	 */
 	public CardPanel(String name, int mincards, int maxcards) {
-		super(new BorderLayout());
+		super(new GridBagLayout());
 		this.mincards = mincards;
 		setBorder(BorderFactory.createTitledBorder(name));
 		cardLabs = new CardLabel[maxcards];
+		
 		JPanel p = new JPanel(new GridLayout(1, maxcards, 5, 5));
+		p.setBorder(new LineBorder(Color.green));
 		for (int n = 0; n < cardLabs.length; n++) {
 			CardLabel cl = new CardLabel();
 			cardLabs[n] = cl;
 			p.add(cl);
 		}
-		add(p, BorderLayout.WEST);
+		
+		GridBagConstraints g = new GridBagConstraints();
+		g.gridx = 0;
+		g.gridy = 0;
+		add(p, g);
+	}
+	
+	protected void addDetails(JComponent c) {
+		GridBagConstraints g = new GridBagConstraints();
+		g.gridx = 1;
+		g.gridy = 0;
+		add(c, g);
 	}
 	
 	/**

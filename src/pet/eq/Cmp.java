@@ -1,5 +1,6 @@
 package pet.eq;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 public class Cmp {
@@ -17,7 +18,7 @@ public class Cmp {
 	public static final Comparator<String> faceCmp = new FaceCmp();
 }
 
-class CardCmp implements Comparator<String> {
+class CardCmp implements Comparator<String>, Serializable {
 	
 	private final int polarity;
 	public CardCmp(boolean asc) {
@@ -34,7 +35,7 @@ class CardCmp implements Comparator<String> {
 	}
 }
 
-class FaceCmp implements Comparator<String> {
+class FaceCmp implements Comparator<String>, Serializable {
 
 	@Override
 	public int compare(String c1, String c2) {

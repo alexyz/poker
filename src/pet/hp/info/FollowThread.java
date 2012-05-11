@@ -145,12 +145,18 @@ public class FollowThread extends Thread {
 	
 	private long read(File file, long offset) {
 		System.out.println("parsing " + file.getName());
+		FileInputStream fis = null;
+		BufferedReader br = null;
+		
 		try {
-			FileInputStream fis = new FileInputStream(file);
-			fis.skip(offset);
-			String line;
-			BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+			fis = new FileInputStream(file);
+			long skip = fis.skip(offset);
+			if (skip != offset) {
+				System.out.println("skip " + offset + " of " + file + " actually skipped " + skip);
+			}
+			br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
 			long pos = 0;
+			String line;
 			while ((line = br.readLine()) != null) {
 				boolean hand = parser.parseLine(line);
 				if (hand) {
@@ -159,7 +165,6 @@ public class FollowThread extends Thread {
 			}
 			
 			// XXX should check if halfway though hand
-			br.close();
 			System.out.println("  read from " + offset + " to " + pos);
 			return pos;
 			
@@ -173,6 +178,23 @@ public class FollowThread extends Thread {
 				System.out.println(l);
 			}
 			throw e;
+			
+		} finally {
+			// gotta love java exception handling
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	

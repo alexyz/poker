@@ -40,17 +40,26 @@ class HandCardPanel extends CardPanel {
 	public HandCardPanel(String name, int mincards, int maxcards) {
 		super(name, mincards, maxcards);
 		lowEquityPanel.setVisible(false);
-		JPanel p = new JPanel();
-		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		//totalLabel.setHorizontalAlignment(JLabel.LEFT);
-		p.add(totalLabel);
+		
+		JPanel p = new JPanel(new GridBagLayout());
+		p.setBorder(new LineBorder(Color.green));
+		GridBagConstraints g = new GridBagConstraints();
+		
 		totalLabel.setBorder(new LineBorder(Color.red));
-		p.add(highEquityPanel);
+		g.gridx = 0;
+		g.gridy = 0;
+		p.add(totalLabel, g);
+		
 		highEquityPanel.setBorder(new LineBorder(Color.red));
-		p.add(lowEquityPanel);
+		g.gridy++;
+		p.add(highEquityPanel, g);
+		
 		lowEquityPanel.setBorder(new LineBorder(Color.red));
+		g.gridy++;
+		p.add(lowEquityPanel, g);
+		
 		// add to superclass layout
-		add(p, BorderLayout.CENTER);
+		addDetails(p);
 	}
 
 	public void setHandEquity(MEquity me) {

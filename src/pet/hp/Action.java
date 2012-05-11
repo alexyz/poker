@@ -1,10 +1,12 @@
 package pet.hp;
 
+import java.io.Serializable;
+
 /**
  * An action that a player performs during a hand.
  * This object should be considered immutable.
  */
-public class Action {
+public class Action implements Serializable {
 	
 	public static final String[] TYPENAME = new String[] { 
 		null, "check", "fold", "raise", "call", "bet", "post",

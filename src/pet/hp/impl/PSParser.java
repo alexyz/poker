@@ -14,8 +14,6 @@ import pet.hp.*;
 public class PSParser extends Parser {
 
 	private static final TimeZone ET = TimeZone.getTimeZone("US/Eastern");
-	private static final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
 	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
 
 	private static class H {
@@ -52,6 +50,10 @@ public class PSParser extends Parser {
 
 	/** where to send parsed data */
 	private final History history;
+	/** instance field for thread safety */
+	private final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+	/** instance field for thread safety */
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
 	/** print everything to System.out */
 	public boolean debug;
 	

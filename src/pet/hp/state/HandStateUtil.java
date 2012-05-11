@@ -32,7 +32,7 @@ public class HandStateUtil {
 	 */
 	public static synchronized List<HandState> getStates(Hand hand) {
 		for (List<HandState> l : cache) {
-			if (l.get(0).hand.id == hand.id) {
+			if (l.get(0).hand.id.equals(hand.id)) {
 				return l;
 			}
 		}
@@ -153,7 +153,7 @@ public class HandStateUtil {
 							
 						case Action.CALL_TYPE:
 							// FIXME need a better way of getting eq, e.g. for hi/lo
-							float eq = ss.meq != null ? ss.meq.hi.won / 100f : 0;
+							float eq = ss.meq != null ? ss.meq.totaleq / 100f : 0;
 							int totalpot = hs.pot + act.amount + trail + tocall;
 							ss.ev = totalpot * eq - act.amount;
 							ss.tev += ss.ev;

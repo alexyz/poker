@@ -6,9 +6,9 @@ import javax.swing.*;
 import pet.eq.*;
 
 public class HoldemCalcPanel extends CalcPanel {
-	private final BoardPanel boardPanel;
-	private final HandCardPanel[] handPanels = new HandCardPanel[6];
-	// TODO in a random panel
+	
+	private final CardPanel boardPanel;
+	private final HandCardPanel[] handPanels = new HandCardPanel[10];
 	private final JCheckBox randHandsBox = new JCheckBox("Hands");
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
@@ -22,7 +22,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		this.numHoleCards = omaha ? 4 : 2;
 		
 		// create board and hands and collect card labels
-		boardPanel = new BoardPanel();
+		boardPanel = new CardPanel("Community Cards", 0, 5);
 		boardPanel.collectCardLabels(cardLabels);
 		for (int n = 0; n < handPanels.length; n++) {
 			handPanels[n] = new HoldemHandPanel(n + 1, omaha);
@@ -30,28 +30,24 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 		
 		// add to layout
-		addgb(boardPanel);
-		for (HandCardPanel hp : handPanels) {
-			addgb(hp);
-		}
+		setBoard(boardPanel);
+		setHands(handPanels);
 		
 		initCardLabels();
 		
 		// select first hole card
 		selectCard(5);
-		
+
 		randHandsBox.setSelected(true);
 		randFlopBox.setSelected(true);
-		JPanel p = new JPanel();
-		p.add(randHandsBox);
-		p.add(randFlopBox);
-		p.add(randTurnBox);
-		p.add(randRiverBox);
+		
+		addRandOpt(randHandsBox);
+		addRandOpt(randFlopBox);
+		addRandOpt(randTurnBox);
+		addRandOpt(randRiverBox);
 		if (omaha) {
-			p.add(hiloBox);
+			addCalcOpt(hiloBox);
 		}
-		addgb(p);
-		addgb(new ButtonPanel(this));
 	}
 	
 	/**

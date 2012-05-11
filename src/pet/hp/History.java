@@ -60,6 +60,8 @@ public class History {
 			if (s2 != null) {
 				return s2;
 			}
+			// create a new string that does not share the potentially large
+			// backing array of the original
 			s = new String(s);
 			cache.put(s, s);
 		}

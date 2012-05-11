@@ -155,7 +155,7 @@ public class HandInfo {
 		}
 		
 		for (int s = 0; s < hand.streets.length; s++) {
-			sb.append("street " + s + " board " + HandUtil.getStreetBoard(hand, s) + "\n");
+			sb.append("street " + s + " board " + Arrays.toString(HandUtil.getStreetBoard(hand, s)) + "\n");
 			for (Action a : hand.streets[s]) {
 				sb.append("  act " + a + "\n");
 			}

@@ -38,6 +38,7 @@ public abstract class Poker {
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
 	/** complete deck */
+	// FIXME should be immutable list, along with other arrays
 	public static final String[] FULL_DECK = new String[] { 
 		"2h", "2s", "2c", "2d",
 		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
