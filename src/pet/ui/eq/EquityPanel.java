@@ -19,30 +19,33 @@ class EquityPanel extends JPanel {
 	private static final Font font = UIManager.getFont("Label.font");
 	private static final Font boldfont = font.deriveFont(Font.BOLD);
 
+	private final JLabel typeLab = new JLabel();
 	private final JLabel equityLab = new JLabel();
 	private final JLabel valueLab = new JLabel();
-	private final JLabel outsLab = new JLabel();
 
 	public EquityPanel() {
 		setLayout(new GridLayout(1, 3));
+		
+		typeLab.setFont(boldfont);
 
 		equityLab.setFont(boldfont);
 		equityLab.setVerticalAlignment(SwingConstants.CENTER);
 
+		add(typeLab);
 		add(equityLab);
 		add(valueLab);
-		add(outsLab);
 
 	}
 
 	public void clearHandEquity() {
+		typeLab.setText("");
 		equityLab.setText("");
 		valueLab.setText("");
-		outsLab.setText("");
 		setToolTipText(null);
 	}
 
 	public void setHandEquity(MEquity me, Equity e) {
+		typeLab.setText(e.type);
 		String s = String.format("Win: %.1f%%", e.won);
 		if (e.tied != 0) {
 			s += String.format("  Tie: %.1f%%", e.tied);
@@ -57,7 +60,7 @@ class EquityPanel extends JPanel {
 			valueLab.setFont(e.curwin ? boldfont : font);
 			valueLab.setText(Poker.valueString(e.current));
 		}
-
+		/*
 		if (e.current == 0 || e.curwin) {
 			outsLab.setText("");
 			setToolTipText(null);
@@ -83,6 +86,7 @@ class EquityPanel extends JPanel {
 				setToolTipText("<html><b>Minor outs</b><br/>" + minl + "</html>");
 			}
 		}
+		*/
 	}
 	
 }

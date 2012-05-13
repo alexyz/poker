@@ -6,7 +6,6 @@ package pet.eq;
 public class MEquity {
 	
 	public static final int HIONLY = 0, HIHALF = 1, LOHALF = 2;
-	/** 0 - hi only, 1 - hi half, 2 - lo half */
 	public final Equity[] eq;
 	public final boolean exact;
 	public final int remCards;
@@ -16,13 +15,14 @@ public class MEquity {
 	public float totaleq;
 	public float scoop;
 	
+	/** number of times won all pots, no ties */
 	int scoopcount;
 
 	public MEquity(boolean hilo, int rem, boolean exact) {
 		if (hilo) {
-			eq = new Equity[] { new Equity(), new Equity(), new Equity() };
+			eq = new Equity[] { new Equity("Hi Only"), new Equity("Hi Half"), new Equity("Lo Half") };
 		} else {
-			eq = new Equity[] { new Equity() };
+			eq = new Equity[] { new Equity("Hi Only") };
 		}
 		this.remCards = rem;
 		this.exact = exact;

@@ -52,14 +52,14 @@ public class HEPoker extends Poker {
 		}
 		
 		// cards not used by hands or board
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, board, holes, blockers);
+		final String[] deck = Poker.remdeck(holes, board, blockers);
 		
 		if (board == null) {
 			// monte carlo (random sample boards)
-			return equityImpl(new HESample(deck), holes);
+			return equityImpl(new HEBoardSample(deck, 10000), holes);
 		} else {
 			// all possible boards
-			return equityImpl(new HEExact(deck, board), holes);
+			return equityImpl(new HEBoardEnum(deck, board), holes);
 		}
 	}
 
@@ -88,8 +88,13 @@ public class HEPoker extends Poker {
 		final int[] hivals = new int[holes.length];
 		final int[] lovals = new int[holes.length];
 		
-		// TODO find if low is possible from board (1/3, 2/4, 3/5 low) to avoid low calc
 		boolean lowPossible = hilo;
+		if (hilo) {
+			if (heboard.current != null) {
+				// only possible if there are no more than 2 high cards on board
+				lowPossible = heboard.current.length - lowCount(heboard.current, false) <= 2;
+			}
+		}
 		
 		// get current high hand values (not equity)
 		if (heboard.current != null) {
@@ -184,72 +189,3 @@ public class HEPoker extends Poker {
 	}
 	
 }
-
-abstract class HEBoard {
-	/** starting board, never changes */
-	final String[] current;
-	/** remaining cards in deck, never changes */
-	final String[] deck;
-	/** next board after call to next() */
-	final String[] board = new String[5];
-	public HEBoard(String[] deck, String[] current) {
-		this.deck = deck;
-		this.current = current;
-	}
-	/** how many boards are there */
-	abstract int count();
-	/** create the next board */
-	abstract void next();
-}
-
-class HESample extends HEBoard {
-	private final long[] picked = new long[1];
-	
-	public HESample(String[] deck) {
-		super(deck, null);
-	}
-	
-	@Override
-	int count() {
-		return 10000;
-	}
-
-	@Override
-	void next() {
-		picked[0] = 0;
-		for (int n = 0; n < 5; n++) {
-			// TODO should really pick straight into board
-			// should also use thread local random
-			board[n] = RandomUtil.pick(deck, picked);
-		}
-	}
-	
-}
-
-class HEExact extends HEBoard {
-	
-	private final int count;
-	private final int k;
-	private int p = 0;
-	
-	public HEExact(String[] deck, String[] current) {
-		super(deck, current);
-		for (int n = 0; n < current.length; n++) {
-			board[n] = current[n];
-		}
-		k = 5 - current.length;
-		count = MathsUtil.bincoff(deck.length, k);
-	}
-	
-	@Override
-	int count() {
-		return count;
-	}
-	
-	@Override
-	void next() {
-		// get board combination
-		MathsUtil.kcomb(k, p++, deck, board, current.length);
-	}
-}
-	

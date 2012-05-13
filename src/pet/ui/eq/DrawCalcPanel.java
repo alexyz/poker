@@ -1,6 +1,8 @@
 package pet.ui.eq;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import pet.eq.*;
 
@@ -28,7 +30,7 @@ public class DrawCalcPanel extends CalcPanel {
 	public void displayHand(String[][] holes) {
 		clear();
 		for (int n = 0; n < holes.length; n++) {
-			handPanels[n].setCards(holes[n]);
+			handPanels[n].setCards(Arrays.asList(holes[n]));
 		}
 		updateDeck();
 	}
@@ -49,10 +51,10 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void random(int num) {
-		String[] deck = Poker.FULL_DECK.clone();
-		RandomUtil.shuffle(deck);
+		ArrayList<String> deck = new ArrayList<String>(Poker.deck);
+		Collections.shuffle(deck);
 		for (int n = 0; n < num; n++) {
-			handPanels[n].setCards(Arrays.copyOfRange(deck, n * 5, n * 5 + 5));
+			handPanels[n].setCards(deck.subList(n * 5, n * 5 + 5));
 		}
 		updateDeck();
 	}

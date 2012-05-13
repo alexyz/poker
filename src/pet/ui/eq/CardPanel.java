@@ -25,7 +25,6 @@ class CardPanel extends JPanel {
 		cardLabs = new CardLabel[maxcards];
 		
 		JPanel p = new JPanel(new GridLayout(1, maxcards, 5, 5));
-		p.setBorder(new LineBorder(Color.green));
 		for (int n = 0; n < cardLabs.length; n++) {
 			CardLabel cl = new CardLabel();
 			cardLabs[n] = cl;
@@ -72,10 +71,10 @@ class CardPanel extends JPanel {
 		cardLabs[n].setCard(c);
 	}
 	
-	public void setCards(String[] cs) {
+	public void setCards(List<String> cards) {
 		clearCards();
 		for (int n = 0; n < cardLabs.length; n++) {
-			cardLabs[n].setCard(n < cs.length ? cs[n] : null);
+			cardLabs[n].setCard(n < cards.size() ? cards.get(n) : null);
 		}
 	}
 	

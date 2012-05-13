@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 
 import pet.eq.*;
 
@@ -40,41 +39,39 @@ class HandCardPanel extends CardPanel {
 
 	private final JLabel totalLabel = new JLabel();
 	private final EquityPanel hiOnlyEquityPanel = new EquityPanel();
-	private final RanksPanel highRanks = new RanksPanel();
-	private final EquityPanel hiEquityPanel = new EquityPanel();
-	private final EquityPanel loEquityPanel = new EquityPanel();
+	private final RanksPanel hiOnlyRanks = new RanksPanel();
+	private final EquityPanel hiHalfEquityPanel = new EquityPanel();
+	private final RanksPanel hiHalfRanks = new RanksPanel();
+	private final EquityPanel loHalfEquityPanel = new EquityPanel();
 
 	public HandCardPanel(String name, int mincards, int maxcards) {
 		super(name, mincards, maxcards);
-		hiEquityPanel.setVisible(false);
-		loEquityPanel.setVisible(false);
+		hiHalfEquityPanel.setVisible(false);
+		loHalfEquityPanel.setVisible(false);
 		
 		JPanel p = new JPanel(new GridBagLayout());
-		p.setBorder(new LineBorder(Color.green));
 		GridBagConstraints g = new GridBagConstraints();
 		g.gridx = 0;
 		g.fill = GridBagConstraints.HORIZONTAL;
 		g.weightx = 1;
 		
-		totalLabel.setBorder(new LineBorder(Color.red));
 		g.gridy = 0;
 		p.add(totalLabel, g);
 		
-		hiOnlyEquityPanel.setBorder(new LineBorder(Color.red));
 		g.gridy++;
 		p.add(hiOnlyEquityPanel, g);
 		
-		highRanks.setBorder(new LineBorder(Color.red));
 		g.gridy++;
-		p.add(highRanks, g);
+		p.add(hiOnlyRanks, g);
 		
-		hiEquityPanel.setBorder(new LineBorder(Color.red));
 		g.gridy++;
-		p.add(hiEquityPanel, g);
+		p.add(hiHalfEquityPanel, g);
 		
-		loEquityPanel.setBorder(new LineBorder(Color.red));
 		g.gridy++;
-		p.add(loEquityPanel, g);
+		p.add(hiHalfRanks, g);
+		
+		g.gridy++;
+		p.add(loHalfEquityPanel, g);
 		
 		// add to superclass layout
 		addDetails(p);
@@ -82,11 +79,13 @@ class HandCardPanel extends CardPanel {
 	
 	private void clearHandEquity() {
 		hiOnlyEquityPanel.clearHandEquity();
-		highRanks.clearHandEquity();
-		hiEquityPanel.clearHandEquity();
-		hiEquityPanel.setVisible(false);
-		loEquityPanel.clearHandEquity();
-		loEquityPanel.setVisible(false);
+		hiOnlyRanks.clearHandEquity();
+		hiHalfEquityPanel.clearHandEquity();
+		hiHalfEquityPanel.setVisible(false);
+		hiHalfRanks.clearHandEquity();
+		hiHalfRanks.setVisible(false);
+		loHalfEquityPanel.clearHandEquity();
+		loHalfEquityPanel.setVisible(false);
 		totalLabel.setText("");
 	}
 
@@ -95,15 +94,17 @@ class HandCardPanel extends CardPanel {
 		if (me != null) {
 			if (me.hionly() != null) {
 				hiOnlyEquityPanel.setHandEquity(me, me.hionly());
-				highRanks.setHandEquity(me.hionly());
+				hiOnlyRanks.setHandEquity(me.hionly());
 			}
 			if (me.hihalf() != null) {
-				hiEquityPanel.setHandEquity(me, me.hihalf());
-				hiEquityPanel.setVisible(true);
+				hiHalfEquityPanel.setHandEquity(me, me.hihalf());
+				hiHalfEquityPanel.setVisible(true);
+				hiHalfRanks.setHandEquity(me.hihalf());
+				hiHalfRanks.setVisible(true);
 			}
 			if (me.lohalf() != null) {
-				loEquityPanel.setHandEquity(me, me.lohalf());
-				loEquityPanel.setVisible(true);
+				loHalfEquityPanel.setHandEquity(me, me.lohalf());
+				loHalfEquityPanel.setVisible(true);
 			}
 			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);
 		}

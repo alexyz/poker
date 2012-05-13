@@ -15,7 +15,7 @@ public class DrawPoker extends Poker {
 		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
 
 		// remaining cards in deck
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, hands, blockers);
+		final String[] deck = Poker.remdeck(hands, blockers);
 
 		// return value
 		final MEquity[] meqs = MEquityUtil.makeMEquity(hands.length, false, deck.length, false);
@@ -206,7 +206,7 @@ public class DrawPoker extends Poker {
 	 */
 	private static String[] getDraw(final String[] hand, final int drawn) {
 		// from players pov, all other cards are possible
-		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, null, null, hand);
+		final String[] deck = Poker.remdeck(null, hand);
 		final String[] h = new String[5];
 		final String[] maxh = new String[5 - drawn];
 		final int pmax = MathsUtil.bincoff(5, 5 - drawn);

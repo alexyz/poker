@@ -11,6 +11,7 @@ public class RandomUtil {
 	 * pick a value from a (max length 64) that hasn't been picked before
 	 * according to picked[0] and update picked[0]
 	 */
+	@Deprecated
 	static String pick(String[] a, long[] picked) {
 		int i;
 		do {
@@ -18,20 +19,6 @@ public class RandomUtil {
 		} while ((picked[0] & (1L << i)) != 0);
 		picked[0] |= (1L << i);
 		return a[i];
-	}
-
-	/**
-	 * Shuffle array contents
-	 */
-	public static void shuffle(Object[] a) {
-		for (int n = 0; n < 2; n++) {
-			for (int m = 0; m < a.length; m++) {
-				int i = random.nextInt(a.length);
-				Object t = a[m];
-				a[m] = a[i];
-				a[i] = t;
-			}
-		}
 	}
 
 }

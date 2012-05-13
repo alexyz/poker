@@ -195,9 +195,10 @@ abstract class CalcPanel extends JPanel {
 	}
 	
 	/**
-	 * get unselected deck cards
+	 * get unselected deck cards.
+	 * always returns a new list
 	 */
-	protected String[] getDeck() {
+	protected List<String> getDeck() {
 		return deckPanel.getCards();
 	}
 

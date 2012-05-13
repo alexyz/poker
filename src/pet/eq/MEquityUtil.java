@@ -78,8 +78,10 @@ public class MEquityUtil {
 					e.wonrankcount[Poker.rank(max)]++;
 				}
 				
+				// FIXME need to do this for mequity, not equity
 				// count the cards as outs if this turns losing hand into
 				// win/tie or tying hand into win
+				/*
 				if (cards != null && (!e.curwin || (e.curtie && maxcount == 1))) {
 					for (int c = off; c < cards.length; c++) {
 						String card = cards[c];
@@ -90,18 +92,11 @@ public class MEquityUtil {
 						count[0]++;
 					}
 				}
+				*/
 			}
 		}
 		
 		return winner;
-	}
-	
-	static void updateScoop(MEquity[] meqs, int mask) {
-		for (int n = 0; mask != 0; n++, mask >>= 1) {
-			if ((mask & 1) == 1) {
-				meqs[n].scoopcount++;
-			}
-		}
 	}
 	
 	/**

@@ -26,7 +26,7 @@ public class History {
 	private final TreeMap<Long,TreeSet<String>> tp = new TreeMap<Long,TreeSet<String>>();
 	
 	public History() {
-		for (String c : Poker.FULL_DECK) {
+		for (String c : Poker.deck) {
 			getString(c);
 		}
 	}

@@ -60,9 +60,9 @@ public class HoldemCalcPanel extends CalcPanel {
 	 */
 	public void displayHand(String[] board, String[][] holes, boolean hilo) {
 		clear();
-		boardPanel.setCards(board);
+		boardPanel.setCards(Arrays.asList(board));
 		for (int n = 0; n < holes.length; n++) {
-			handPanels[n].setCards(holes[n]);
+			handPanels[n].setCards(Arrays.asList(holes[n]));
 		}
 		hiloBox.setSelected(hilo);
 		updateDeck();
@@ -96,26 +96,26 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// update deck, get remaining cards
 		updateDeck();
-		String[] deck = getDeck();
-		RandomUtil.shuffle(deck);
+		List<String> deck = getDeck();
+		Collections.shuffle(deck);
 		
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
-				handPanels[n].setCards(Arrays.copyOfRange(deck, i, i + numHoleCards));
+				handPanels[n].setCards(deck.subList(i, i + numHoleCards));
 				i += numHoleCards;
 			}
 		}
 		if (randFlopBox.isSelected()) {
-			boardPanel.setCard(deck[i++], 0);
-			boardPanel.setCard(deck[i++], 1);
-			boardPanel.setCard(deck[i++], 2);
+			boardPanel.setCard(deck.get(i++), 0);
+			boardPanel.setCard(deck.get(i++), 1);
+			boardPanel.setCard(deck.get(i++), 2);
 		}
 		if (randTurnBox.isSelected()) {
-			boardPanel.setCard(deck[i++], 3);
+			boardPanel.setCard(deck.get(i++), 3);
 		}
 		if (randRiverBox.isSelected()) {
-			boardPanel.setCard(deck[i++], 4);
+			boardPanel.setCard(deck.get(i++), 4);
 		}
 		
 		updateDeck();

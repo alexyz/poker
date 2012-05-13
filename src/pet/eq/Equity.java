@@ -7,17 +7,13 @@ import java.util.*;
  */
 public class Equity {
 	
-	/**
-	 * current value
-	 */
+	/** equity type description */
+	public final String type;
+	/** current value */
 	public int current;
-	/**
-	 * Currently winning and not tying
-	 */
+	/** Currently winning and not tying */
 	public boolean curwin;
-	/**
-	 * currently tying
-	 */
+	/** currently tying */
 	public boolean curtie;
 	/** percentage of hands won but not tied */
 	public float won;
@@ -30,13 +26,23 @@ public class Equity {
 	/** percentage that each card will make best hand */
 	public final Map<String,Float> outs = new TreeMap<String,Float>();
 	
+	// transient stuff
+	
+	/** number of samples won */
 	int woncount;
+	/** number of samples tied */
 	int tiedcount;
+	/** number of people tied with including self */
 	int tiedwithcount;
 	// XXX hi only
+	/** winning ranks */
 	final int[] wonrankcount = new int[Poker.RANKS];
 	/** count that each card (as part of group of k cards) will make the best hand */
 	final Map<String,int[]> outcount = new TreeMap<String,int[]>();
+	
+	public Equity(String type) {
+		this.type = type;
+	}
 
 	/**
 	 * update percentage won, tied and by rank

@@ -1,6 +1,9 @@
 package pet.eq;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Poker hand valuation.
@@ -34,19 +37,19 @@ public abstract class Poker {
 	/**
 	 * short rank names (value >> 20)
 	 */
-	public static final String[] ranknames = { "H", "P", "2P", "3K", "S", "F", "FH", "4K", "SF", "L" };
+	public static final String[] ranknames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
 	/** complete deck */
 	// FIXME should be immutable list, along with other arrays
-	public static final String[] FULL_DECK = new String[] { 
+	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(
 		"2h", "2s", "2c", "2d",
 		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
 		"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
 		"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
 		"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
 		"Ah", "As", "Ac", "Ad" 
-	};
+	));
 	
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
@@ -72,15 +75,16 @@ public abstract class Poker {
 	};
 
 	/**
-	 * does the 5 card hand qualify for ace to five low
+	 * count low cards
 	 */
-	private static boolean isLow(String[] hand) {
+	public static int lowCount(String[] hand, boolean acehigh) {
+		int count = 0;
 		for (int n = 0; n < hand.length; n++) {
-			if (faceValue(hand[n], false) > 8) {
-				return false;
+			if (faceValue(hand[n], acehigh) <= 8) {
+				count++;
 			}
 		}
-		return true;
+		return count;
 	}
 
 	/**
@@ -89,7 +93,7 @@ public abstract class Poker {
 	 */
 	public static int lowValue(String[] hand) {
 		validate(hand);
-		if (isLow(hand)) {
+		if (lowCount(hand, false) ==  5) {
 			int p = isPair(hand, false);
 			if (p < P_MASK) {
 				// no pairs
@@ -297,6 +301,35 @@ public abstract class Poker {
 	/** return rank of hand, from 0 to 9 (NOT the rank bitmask constants) */
 	public static int rank(int value) {
 		return value >> 20;
+	}
+	
+	/**
+	 * return the remaining cards in the deck.
+	 * always returns new array
+	 */
+	public static String[] remdeck(String[][] aa, String[]... a) {
+		ArrayList<String> list = new ArrayList<String>(deck);
+		if (aa != null) {
+			for (String[] x : aa) {
+				rem1(list, x);
+			}
+		}
+		if (a != null) {
+			for (String[] x : a) {
+				rem1(list, x);
+			}
+		}
+		return list.toArray(new String[list.size()]);
+	}
+	
+	private static void rem1(List<String> list, String[] a) {
+		if (a != null) {
+			for (String s : a) {
+				if (!list.remove(s)) {
+					throw new RuntimeException();
+				}
+			}
+		}
 	}
 	
 	/**

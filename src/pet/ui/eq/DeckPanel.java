@@ -27,8 +27,8 @@ class DeckPanel extends JPanel {
 				firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
 			}
 		};
-		String[] deck = Poker.FULL_DECK.clone();
-		Collections.reverse(Arrays.asList(deck));
+		List<String> deck = new ArrayList<String>(Poker.deck);
+		Collections.reverse(deck);
 		for (char s : Poker.suits) {
 			for (String c : deck) {
 				if (Poker.suit(c) == s) {
@@ -58,16 +58,17 @@ class DeckPanel extends JPanel {
 	}
 	
 	/**
-	 * get the unselected cards
+	 * get the unselected cards.
+	 * always returns a new list
 	 */
-	public String[] getCards() {
+	public List<String> getCards() {
 		List<String> cards = new ArrayList<String>();
 		for (CardLabel cl : labels) {
 			if (!cl.isCardSelected()) {
 				cards.add(cl.getCard());
 			}
 		}
-		return cards.toArray(new String[cards.size()]);
+		return cards;
 	}
 
 	/**
