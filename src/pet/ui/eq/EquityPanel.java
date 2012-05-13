@@ -22,40 +22,16 @@ class EquityPanel extends JPanel {
 	private final JLabel equityLab = new JLabel();
 	private final JLabel valueLab = new JLabel();
 	private final JLabel outsLab = new JLabel();
-	private final JLabel[] rankLabs;
 
-	public EquityPanel(boolean high) {
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+	public EquityPanel() {
+		setLayout(new GridLayout(1, 3));
 
 		equityLab.setFont(boldfont);
 		equityLab.setVerticalAlignment(SwingConstants.CENTER);
 
-		// eq and val labels
-		JPanel valcolsPan = new JPanel(new GridLayout(1, 3));
-		valcolsPan.add(equityLab);
-		valcolsPan.add(valueLab);
-		valcolsPan.add(outsLab);
-
-		add(valcolsPan);
-
-		if (high) {
-			// high value rank labels
-			rankLabs = new JLabel[Poker.RANKS];
-			JPanel rankcolsPan = new JPanel(new GridLayout(1, rankLabs.length));
-			for (int n = 0; n < rankLabs.length; n++) {
-				JLabel l = new JLabel();
-				l.setVerticalAlignment(SwingConstants.CENTER);
-				l.setPreferredSize(new Dimension(boldfont.getSize() * 4, boldfont.getSize() + 4));
-				l.setMinimumSize(l.getPreferredSize());
-				rankLabs[n] = l;
-				rankcolsPan.add(rankLabs[n]);
-			}
-			add(rankcolsPan);
-			
-		} else {
-			rankLabs = new JLabel[0];
-		}
+		add(equityLab);
+		add(valueLab);
+		add(outsLab);
 
 	}
 
@@ -64,17 +40,12 @@ class EquityPanel extends JPanel {
 		valueLab.setText("");
 		outsLab.setText("");
 		setToolTipText(null);
-		for (JLabel rl : rankLabs) {
-			rl.setFont(font);
-			rl.setText("");
-		}
 	}
 
-	public void setHandEquity(MEquity me, boolean high) {
-		Equity e = high ? me.hi : me.lo;
+	public void setHandEquity(MEquity me, Equity e) {
 		String s = String.format("Win: %.1f%%", e.won);
 		if (e.tied != 0) {
-			s += String.format("  Split: %.1f%%", e.tied);
+			s += String.format("  Tie: %.1f%%", e.tied);
 		}
 		if (!me.exact) {
 			s += " (est)";
@@ -105,21 +76,13 @@ class EquityPanel extends JPanel {
 			}
 			Collections.sort(majl, Cmp.cardCmp);
 			Collections.sort(minl, Cmp.cardCmp);
-			outsLab.setText("Outs: " + majl.size() + " out of " + me.rem);
+			outsLab.setText("Outs: " + majl.size() + " out of " + me.remCards);
 			if (majl.size() > 0) {
 				setToolTipText("<html><b>Major outs</b><br/>" + majl + "</html>");
 			} else if (minl.size() > 0) {
 				setToolTipText("<html><b>Minor outs</b><br/>" + minl + "</html>");
 			}
 		}
-
-		for (int n = 0; n < rankLabs.length; n++) {
-			JLabel rl = rankLabs[n];
-			rl.setForeground(e.wonrank[n] > 0 ? Color.black : Color.darkGray);
-			rl.setFont(e.wonrank[n] > 0 ? boldfont : font);
-			rl.setText(String.format("%s: %.0f", Poker.ranknames[n], e.wonrank[n]));
-		}
-
 	}
 	
 }

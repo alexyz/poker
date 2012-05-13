@@ -13,7 +13,7 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	public DrawCalcPanel() {
 		for (int n = 0; n < handPanels.length; n++) {
-			handPanels[n] = new DrawHandPanel(n + 1);
+			handPanels[n] = new HandCardPanel("Draw hand " + (n + 1), 1, 5);
 			handPanels[n].collectCardLabels(cardLabels);
 		}
 		

@@ -23,6 +23,8 @@ public class Equity {
 	public float won;
 	/** percentage of hands tied but not won */
 	public float tied;
+	/** total equity percentage */
+	public float total;
 	/** percentage of hands won or tied by rank (value >> 20) */
 	public final float[] wonrank = new float[Poker.RANKS];
 	/** percentage that each card will make best hand */
@@ -30,6 +32,7 @@ public class Equity {
 	
 	int woncount;
 	int tiedcount;
+	int tiedwithcount;
 	// XXX hi only
 	final int[] wonrankcount = new int[Poker.RANKS];
 	/** count that each card (as part of group of k cards) will make the best hand */
@@ -38,12 +41,19 @@ public class Equity {
 	/**
 	 * update percentage won, tied and by rank
 	 */
-	void summariseEquity(int nb) {
-		float total = woncount + tiedcount;
-		won = (woncount * 100f) / nb;
-		tied = (tiedcount * 100f) / nb;
+	void summariseEquity(int hands) {
+		int wontiedcount = woncount + tiedcount;
+		won = (woncount * 100f) / hands;
+		tied = (tiedcount * 100f) / hands;
 		for (int n = 0; n < wonrankcount.length; n++) {
-			wonrank[n] = total != 0 ? (wonrankcount[n] * 100) / total : 0;
+			wonrank[n] = wontiedcount != 0 ? (wonrankcount[n] * 100f) / wontiedcount : 0;
+		}
+		
+		total = (woncount * 100f) / hands;
+		System.out.println("    hands=" + hands + " woncount=" + woncount + " totalpc=" + total);
+		if (tiedcount > 0) {
+			total += (tied * ((tiedcount * 1f) / tiedwithcount));
+			System.out.println("    hands=" + hands + " woncount=" + woncount + " tiedcount=" + tiedcount + " tiedwithcount=" + tiedwithcount + " totalpc=" + total);
 		}
 	}
 
@@ -72,9 +82,4 @@ public class Equity {
 		return c;
 	}
 	
-	@Override
-	public String toString() {
-		return String.format("Eq[win %-2.1f tie %-2.1f outs=%d %s]", won, tied, outs(75f), Poker.valueString(current));
-	}
-
 }

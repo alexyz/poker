@@ -27,7 +27,8 @@ public class HEPoker extends Poker {
 	// instance stuff
 	//
 	
-	private final String[] temp = new String[5];
+	/** temporary hand for the value method */
+	private final String[] valueTemp = new String[5];
 	private final boolean omaha;
 	private final int min;
 	private final boolean hilo;
@@ -44,7 +45,7 @@ public class HEPoker extends Poker {
 	// sync to protect changes to temp
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] holes, String[] blockers) {
-		Arrays.fill(temp, null);
+		Arrays.fill(valueTemp, null);
 		validateBoard(board);
 		for (String[] hole : holes) {
 			validateHole(hole, omaha);
@@ -54,16 +55,18 @@ public class HEPoker extends Poker {
 		final String[] deck = ArrayUtil.remove(Poker.FULL_DECK, board, holes, blockers);
 		
 		if (board == null) {
-			return sampleEquity(deck, holes);
+			// monte carlo (random sample boards)
+			return equityImpl(new HESample(deck), holes);
 		} else {
-			return exactEquity(deck, board, holes);
+			// all possible boards
+			return equityImpl(new HEExact(deck, board), holes);
 		}
 	}
 
 	// sync to protect changes to temp
 	@Override
 	public synchronized int value(String[] board, String[] hole) {
-		Arrays.fill(temp, null);
+		Arrays.fill(valueTemp, null);
 		validateBoard(board);
 		validateHole(hole, omaha);
 		
@@ -79,107 +82,81 @@ public class HEPoker extends Poker {
 	/**
 	 * Calc exact tex/omaha hand equity for each hand for given board
 	 */
-	private MEquity[] exactEquity(final String[] deck, final String[] board, final String[][] holes) {
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, deck.length, true);
-		final int[] vals = new int[holes.length];
+	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holes) {
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, heboard.deck.length, true);
 		
-		// get current high hand values (not equity)
-		for (int n = 0; n < holes.length; n++) {
-			vals[n] = value(Poker.hi, board, holes[n]);
-		}
-		MEquityUtil.updateCurrent(meqs, true, vals);
+		final int[] hivals = new int[holes.length];
+		final int[] lovals = new int[holes.length];
 		
 		// TODO find if low is possible from board (1/3, 2/4, 3/5 low) to avoid low calc
+		boolean lowPossible = hilo;
 		
-		// get current low values
-		if (hilo) {
+		// get current high hand values (not equity)
+		if (heboard.current != null) {
 			for (int n = 0; n < holes.length; n++) {
-				vals[n] = value(Poker.lo, board, holes[n]);
+				if (heboard.current.length >= 3) {
+					hivals[n] = value(Poker.hi, heboard.current, holes[n]);
+				}
 			}
-			MEquityUtil.updateCurrent(meqs, false, vals);
+			MEquityUtil.updateCurrent(meqs, MEquity.HIONLY, hivals);
+			
+			// get current low values
+			if (lowPossible) {
+				for (int n = 0; n < holes.length; n++) {
+					lovals[n] = value(Poker.lo, heboard.current, holes[n]);
+				}
+				MEquityUtil.updateCurrent(meqs, MEquity.LOHALF, lovals);
+			}
 		}
 		
 		// get equity
-		final String[] tempBoard = Arrays.copyOf(board, 5);
-		final int k = 5 - board.length;
-		final int hiCount = MathsUtil.bincoff(deck.length, k);
-		int lowCount = 0;
-		for (int p = 0; p < hiCount; p++) {
+		final int count = heboard.count();
+		int hiloCount = 0;
+		
+		for (int p = 0; p < count; p++) {
 			// get board
-			MathsUtil.kcomb(k, p, deck, tempBoard, board.length);
+			heboard.next();
+			//System.out.println("board p: " + p + " current: " + Arrays.toString(heboard.current) + " next: " + Arrays.toString(heboard.board));
 			
 			// hi equity
 			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(Poker.hi, tempBoard, holes[i]);
+				hivals[i] = value(Poker.hi, heboard.board, holes[i]);
 			}
-			MEquityUtil.updateEquity(meqs, true, vals, tempBoard, board.length);
-			
-			// low equity - only counts if at least one hand makes low
-			if (hilo) {
-				boolean hasLow = false;
-				for (int i = 0; i < holes.length; i++) {
-					int v = value(Poker.lo, tempBoard, holes[i]);
-					if (v > 0) {
-						hasLow = true;
-					}
-					vals[i] = v;
-				}
-				if (hasLow) {
-					MEquityUtil.updateEquity(meqs, false, vals, tempBoard, board.length);
-					lowCount++;
-				}
-			}
-		}
-
-		MEquityUtil.summariseEquity(meqs, hiCount, lowCount);
-		MEquityUtil.summariseOuts(meqs, k);
-		return meqs;
-	}
-
-	/**
-	 * Calc sampled tex/omaha hand equity for each hand by generating random boards
-	 */
-	private MEquity[] sampleEquity(final String[] deck, final String[][] holes) {
-		final String[] board = new String[5];
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, deck.length, false);
-		// hand values for a particular board
-		final int[] vals = new int[holes.length];
-		final long[] picked = new long[1];
-		final int highCount = 1000;
-		int lowCount = 0;
-
-		for (int p = 0; p < highCount; p++) {
-			picked[0] = 0;
-			for (int n = 0; n < 5; n++) {
-				// TODO should really pick straight into board
-				// should also use thread local random
-				board[n] = RandomUtil.pick(deck, picked);
-			}
-			
-			// high value
-			for (int i = 0; i < holes.length; i++) {
-				vals[i] = value(Poker.hi, board, holes[i]);
-			}
-			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
 			
 			// low equity - only counts if at least one hand makes low
 			boolean hasLow = false;
-			if (hilo) {
+			if (lowPossible) {
 				for (int i = 0; i < holes.length; i++) {
-					int v = value(Poker.lo, board, holes[i]);
+					int v = value(Poker.lo, heboard.board, holes[i]);
 					if (v > 0) {
 						hasLow = true;
 					}
-					vals[i] = v;
+					lovals[i] = v;
 				}
-				if (hasLow) {
-					MEquityUtil.updateEquity(meqs, false, vals, null, 0);
-					lowCount++;
+			}
+			
+			if (hasLow) {
+				hiloCount++;
+				// high winner
+				int hw = MEquityUtil.updateEquity(meqs, MEquity.HIHALF, hivals, null, 0);
+				// low winner
+				int lw = MEquityUtil.updateEquity(meqs, MEquity.LOHALF, lovals, null, 0);
+				if (hw >= 0 && hw == lw) {
+					meqs[hw].scoopcount++;
+				}
+				
+			} else {
+				// high winner
+				int hw = MEquityUtil.updateEquity(meqs, MEquity.HIONLY, hivals, null, 0);
+				if (hw >= 0) {
+					meqs[hw].scoopcount++;
 				}
 			}
 		}
 
-		MEquityUtil.summariseEquity(meqs, highCount, lowCount);
+		MEquityUtil.summariseEquity(meqs, count, hiloCount);
+		// TODO
+		//MEquityUtil.summariseOuts(meqs, k);
 		return meqs;
 	}
 
@@ -192,10 +169,10 @@ public class HEPoker extends Poker {
 			final int nh = MathsUtil.bincoff(hole.length, n);
 			final int nb = MathsUtil.bincoff(board.length, 5 - n);
 			for (int kh = 0; kh < nh; kh++) {
-				MathsUtil.kcomb(n, kh, hole, temp, 0);
+				MathsUtil.kcomb(n, kh, hole, valueTemp, 0);
 				for (int kb = 0; kb < nb; kb++) {
-					MathsUtil.kcomb(5 - n, kb, board, temp, n);
-					final int val = v.value(temp);
+					MathsUtil.kcomb(5 - n, kb, board, valueTemp, n);
+					final int val = v.value(valueTemp);
 					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
 					if (val > hv) {
 						hv = val;
@@ -207,3 +184,72 @@ public class HEPoker extends Poker {
 	}
 	
 }
+
+abstract class HEBoard {
+	/** starting board, never changes */
+	final String[] current;
+	/** remaining cards in deck, never changes */
+	final String[] deck;
+	/** next board after call to next() */
+	final String[] board = new String[5];
+	public HEBoard(String[] deck, String[] current) {
+		this.deck = deck;
+		this.current = current;
+	}
+	/** how many boards are there */
+	abstract int count();
+	/** create the next board */
+	abstract void next();
+}
+
+class HESample extends HEBoard {
+	private final long[] picked = new long[1];
+	
+	public HESample(String[] deck) {
+		super(deck, null);
+	}
+	
+	@Override
+	int count() {
+		return 10000;
+	}
+
+	@Override
+	void next() {
+		picked[0] = 0;
+		for (int n = 0; n < 5; n++) {
+			// TODO should really pick straight into board
+			// should also use thread local random
+			board[n] = RandomUtil.pick(deck, picked);
+		}
+	}
+	
+}
+
+class HEExact extends HEBoard {
+	
+	private final int count;
+	private final int k;
+	private int p = 0;
+	
+	public HEExact(String[] deck, String[] current) {
+		super(deck, current);
+		for (int n = 0; n < current.length; n++) {
+			board[n] = current[n];
+		}
+		k = 5 - current.length;
+		count = MathsUtil.bincoff(deck.length, k);
+	}
+	
+	@Override
+	int count() {
+		return count;
+	}
+	
+	@Override
+	void next() {
+		// get board combination
+		MathsUtil.kcomb(k, p++, deck, board, current.length);
+	}
+}
+	

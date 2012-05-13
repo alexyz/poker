@@ -27,7 +27,7 @@ public class DrawPoker extends Poker {
 				vals[n] = value(hands[n]);
 			}
 		}
-		MEquityUtil.updateCurrent(meqs, true, vals);
+		MEquityUtil.updateCurrent(meqs, MEquity.HIONLY, vals);
 
 		final String[] h = new String[5];
 
@@ -49,7 +49,7 @@ public class DrawPoker extends Poker {
 				int v = value(h);
 				vals[hn] = v;
 			}
-			MEquityUtil.updateEquity(meqs, true, vals, null, 0);
+			MEquityUtil.updateEquity(meqs, MEquity.HIONLY, vals, null, 0);
 		}
 
 		MEquityUtil.summariseEquity(meqs, c, 0);

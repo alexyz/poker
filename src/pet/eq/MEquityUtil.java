@@ -17,7 +17,7 @@ public class MEquityUtil {
 	/**
 	 * Set the current value of the hands, not the equity
 	 */
-	public static void updateCurrent(MEquity[] meqs, boolean hi, int[] vals) {
+	static void updateCurrent(MEquity[] meqs, int eqtype, int[] vals) {
 		int max = 0, times = 0;
 		for (int i = 0; i < vals.length; i++) {
 			int v = vals[i];
@@ -29,7 +29,7 @@ public class MEquityUtil {
 			}
 		}
 		for (int i = 0; i < vals.length; i++) {
-			Equity e = hi ? meqs[i].hi : meqs[i].lo;
+			Equity e = meqs[i].eq[eqtype];
 			e.current = vals[i];
 			if (e.current == max) {
 				if (times == 1) {
@@ -43,9 +43,11 @@ public class MEquityUtil {
 
 	/**
 	 * Update equities win, tie and win rank with given hand values for the
-	 * given cards
+	 * given cards.
+	 * Return single winner, if any, or -1
 	 */
-	static void updateEquity(MEquity[] meqs, boolean hi, int[] vals, String[] cards, int off) {
+	static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards, int off) {
+		// find highest hand and number of times it occurs
 		int max = 0, maxcount = 0;
 		for (int i = 0; i < vals.length; i++) {
 			int v = vals[i];
@@ -56,19 +58,26 @@ public class MEquityUtil {
 				maxcount++;
 			}
 		}
+		
+		int winner = -1;
+		
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i] == max) {
-				Equity e = hi ? meqs[i].hi : meqs[i].lo;
+				// update the win/tied/rank count
+				Equity e = meqs[i].eq[eqtype];
 				if (maxcount == 1) {
+					// update mask
+					winner = i;
 					e.woncount++;
 				} else {
 					e.tiedcount++;
+					e.tiedwithcount += maxcount;
 				}
-				if (hi) {
+				if (max < Poker.LOW_MASK) {
 					// FIXME hi only
 					e.wonrankcount[Poker.rank(max)]++;
 				}
-
+				
 				// count the cards as outs if this turns losing hand into
 				// win/tie or tying hand into win
 				if (cards != null && (!e.curwin || (e.curtie && maxcount == 1))) {
@@ -83,41 +92,60 @@ public class MEquityUtil {
 				}
 			}
 		}
+		
+		return winner;
 	}
-
+	
+	static void updateScoop(MEquity[] meqs, int mask) {
+		for (int n = 0; mask != 0; n++, mask >>= 1) {
+			if ((mask & 1) == 1) {
+				meqs[n].scoopcount++;
+			}
+		}
+	}
+	
 	/**
 	 * summarise equities (convert counts to percentages)
 	 */
-	static void summariseEquity(MEquity[] meqs, int highCount, int lowCount) {
+	static void summariseEquity(MEquity[] meqs, int count, int hiloCount) {
+		System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
 		for (MEquity meq : meqs) {
-			meq.hi.summariseEquity(highCount);
-			if (lowCount > 0) {
-				meq.lo.summariseEquity(lowCount);
-			}
+			System.out.println("meq " + meq);
 			
-			// get the total equity
-			// FIXME need to count ties
-			float hieq = meq.hi.won + (meq.hi.tied / 2);
-			if (lowCount > 0) {
-				meq.lowPossible = true;
-				float loeq = meq.lo.won + (meq.lo.tied / 2);
-				// weight the lows
-				// low=100 hi=100 w=0.5
-				// low=50 hi=100 w=0.25
-				// low=0 hi=100 w=0
-				float w = (lowCount * 0.5f) / highCount;
-				meq.totaleq = (hieq * (1 - w)) + (loeq * w);
+			Equity hionly = meq.hionly();
+			hionly.summariseEquity(count);
+			System.out.println("  hionly won: " + hionly.won + " tied: " + hionly.tied + " total: " + hionly.total);
+			
+			if (hiloCount == 0) {
+				meq.totaleq = hionly.total;
+				
 			} else {
-				meq.totaleq = hieq;
+				Equity hihalf = meq.hihalf();
+				// high count as it applies to every hand not just hi/lo hands
+				hihalf.summariseEquity(count);
+				System.out.println("  hihalf won: " + hihalf.won + " tied: " + hihalf.tied + " total: " + hihalf.total);
+				System.out.println("  hionly+hihalf won: " + (hionly.won + hihalf.won) + " tied: " + (hionly.tied+hihalf.tied) + " total: " + (hionly.total+hihalf.total));
+				
+				Equity lohalf = meq.lohalf();
+				lohalf.summariseEquity(count);
+				System.out.println("  lohalf won: " + lohalf.won + " tied: " + lohalf.tied + " total: " + lohalf.total);
+				
+				meq.lowPossible = (hiloCount * 100f) / count;
+				System.out.println("  low possible: " + meq.lowPossible);
+				
+				meq.totaleq = hionly.total + (hihalf.total + lohalf.total) / 2;
 			}
+			System.out.println("  total eq: " + meq.totaleq);
+			
+			meq.scoop = (meq.scoopcount * 100f) / count;
+			System.out.println("  scoop count: " + meq.scoopcount + " scoop: " + meq.scoop);
 		}
 	}
 
 	static void summariseOuts(MEquity[] meqs, int k) {
 		for (MEquity meq : meqs) {
-			meq.hi.summariseOuts(meq.rem, k);
-			if (meq.lo != null) {
-				meq.lo.summariseOuts(meq.rem, k);
+			for (Equity eq : meq.eq) {
+				eq.summariseOuts(meq.remCards, k);
 			}
 		}
 	}
@@ -126,29 +154,36 @@ public class MEquityUtil {
 	 * Return string representing current value of hand
 	 */
 	public static String currentString(MEquity me) {
-		String s = Poker.valueString(me.hi.current);
-		if (me.lo != null) {
-			s += " / " + Poker.valueString(me.lo.current);
+		String s = Poker.valueString(me.hionly().current);
+		if (me.hilo()) {
+			s += " / " + Poker.valueString(me.lohalf().current);
 		}
 		return s;
 	}
 
 	/**
 	 * Return string representing current equity of hand
+	 * TODO short equity string, just use total
 	 */
 	public static String equityString(MEquity me) {
 		String s;
-		if (me.lo == null) {
-			s = String.format("%.1f%%", me.hi.won);
-			if (me.hi.tied != 0) {
-				s += String.format(" (%.1f%% T)", me.hi.tied);
+		Equity hionly = me.hionly();
+		
+		if (me.hilo()) {
+			Equity hihalf = me.hihalf();
+			Equity lohalf = me.lohalf();
+			s = String.format("%.1f-%.1f-%.1f%%", hionly, hihalf, lohalf);
+			if (hionly.tied + hihalf.tied + lohalf.tied != 0) {
+				s += String.format(" (%.0f-%.0f-%.0f T)", hionly.tied, hihalf.tied, lohalf.tied);
 			}
+			
 		} else {
-			s = String.format("%.1f-%.1f%%", me.hi.won, me.lo.won);
-			if (me.hi.tied != 0 || me.lo.tied != 0) {
-				s += String.format(" (%.0f-%.0f T)", me.hi.tied, me.lo.tied);
+			s = String.format("%.1f%%", hionly.won);
+			if (hionly.tied != 0) {
+				s += String.format(" (%.1f%% T)", hionly.tied);
 			}
 		}
+		
 		return s;
 	}
 	

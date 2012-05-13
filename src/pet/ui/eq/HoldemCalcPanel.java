@@ -24,9 +24,14 @@ public class HoldemCalcPanel extends CalcPanel {
 		// create board and hands and collect card labels
 		boardPanel = new CardPanel("Community Cards", 0, 5);
 		boardPanel.collectCardLabels(cardLabels);
+		
+		String name = omaha ? "Omaha" : "Hold'em";
+		int min = omaha ? 2 : 1;
+		int max = omaha ? 4 : 2;
 		for (int n = 0; n < handPanels.length; n++) {
-			handPanels[n] = new HoldemHandPanel(n + 1, omaha);
-			handPanels[n].collectCardLabels(cardLabels);
+			HandCardPanel cp = new HandCardPanel(name + " hand " + (n+1), min, max);
+			cp.collectCardLabels(cardLabels);
+			handPanels[n] = cp;
 		}
 		
 		// add to layout

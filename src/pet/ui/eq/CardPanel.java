@@ -42,6 +42,8 @@ class CardPanel extends JPanel {
 		GridBagConstraints g = new GridBagConstraints();
 		g.gridx = 1;
 		g.gridy = 0;
+		g.weightx = 1;
+		g.fill = GridBagConstraints.BOTH;
 		add(c, g);
 	}
 	
