@@ -1,28 +1,33 @@
 PET - Poker Equity Tool
 
-PET is written in Java 1.6 using Swing for platform independence (should run on both Windows and OS X).
+PET is written in Java 1.6 using Swing, and will run on any major OS 
+with Java installed.
 
 It includes
 
 - A poker equity calculator for 
-  - hold'em, omaha, omaha hi/lo - estimated pre-flop, and exact post flop
+  - hold'em, omaha, omaha hi/lo - estimated pre-flop, and exact post 
+    flop
   - 5 card draw, always estimated
 
 - A fast (2MB/s) PokerStars hand parser, with
    - searchable/sortable lists of players, games, tournaments and hands
-   - Two hand replayers, both including hand equity and SPR (stack to pot ratio)
-   - a floating HUD for tables currently being played at, with statistics like 
+   - Two hand replayers, both including hand equity and SPR (stack to 
+     pot ratio)
+   - a floating HUD for tables currently being played at, with 
+     statistics like
      - VPIP (voluntarily put in pot)
      - AF (aggression factor)
      - PFR (preflop/first street raises)
      - FS (flops seen), SS (showdowns seen), SW (showdowns won)
 
-PET does not modify, move or copy parsed hand history files, or share them with others (as doing so would be against the PokerStars TOS).
+PET does not modify, move or copy parsed hand history files, or share 
+them with others (as doing so would be against the PokerStars TOS).
 
 Limitations
 - The parser is too strict
 - History files can't be filtered before parsing
 - Some of the stats may be wrong
-- Omaha hi/lo equity calculations are a bit minimal
+- Omaha hi/lo equity calculations are a bit complicated
 - The GUI layout is rough in places, and no keyboard controls
 - Various other bugs from lack of testing
