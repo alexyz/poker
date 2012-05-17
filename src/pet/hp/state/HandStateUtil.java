@@ -135,6 +135,7 @@ public class HandStateUtil {
 				
 				if (act.type == Action.FOLD_TYPE) {
 					ss.folded = true;
+					ss.spr = 0;
 					
 				} else if (act.amount != 0) {
 					// pot raise amount
@@ -163,11 +164,11 @@ public class HandStateUtil {
 							break;
 							
 						case Action.COLLECT_TYPE:
+							// XXX should clear amounts of others who arn't winning, also remove from pot (leave rake)
 							ss.won = true;
 							ss.amount = -act.amount;
 							break;
 					}
-					
 					
 					lastbet = Math.max(lastbet, ss.amount);
 					ss.stack -= act.amount;

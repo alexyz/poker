@@ -24,7 +24,7 @@ public class HandState implements Cloneable {
 	public Action action;
 	/** information */
 	public String note;
-	/** current street */
+	/** current street, starting at 0 */
 	public int streetIndex;
 	
 	public HandState(Hand hand) {

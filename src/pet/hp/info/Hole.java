@@ -7,10 +7,10 @@ import pet.eq.*;
 /**
  * comparable wrapper for hole cards
  */
-public class HoleInfo implements Comparable<HoleInfo> {
+public class Hole implements Comparable<Hole> {
 	private final String strValue;
 	private final int intValue;
-	public HoleInfo(String[] hand) {
+	public Hole(String[] hand) {
 		// sort the hand, but don't modify
 		hand = hand.clone();
 		Arrays.sort(hand, Cmp.revCardCmp);
@@ -18,12 +18,12 @@ public class HoleInfo implements Comparable<HoleInfo> {
 		intValue = PokerUtil.cardsValue(hand);
 	}
 	@Override
-	public int compareTo(HoleInfo h) {
+	public int compareTo(Hole h) {
 		return intValue - h.intValue;
 	}
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof HoleInfo && ((HoleInfo)o).intValue == intValue;
+		return o instanceof Hole && ((Hole)o).intValue == intValue;
 	}
 	@Override
 	public int hashCode() {

@@ -155,6 +155,10 @@ public class MEquityUtil {
 		}
 		return s;
 	}
+	
+	public static String equityStringShort(MEquity me) {
+		return String.format("%.1f", me.totaleq);
+	}
 
 	/**
 	 * Return string representing current equity of hand
@@ -167,7 +171,7 @@ public class MEquityUtil {
 		if (me.hilo()) {
 			Equity hihalf = me.hihalf();
 			Equity lohalf = me.lohalf();
-			s = String.format("%.1f-%.1f-%.1f%%", hionly, hihalf, lohalf);
+			s = String.format("%.1f-%.1f-%.1f%%", hionly.won, hihalf.won, lohalf.won);
 			if (hionly.tied + hihalf.tied + lohalf.tied != 0) {
 				s += String.format(" (%.0f-%.0f-%.0f T)", hionly.tied, hihalf.tied, lohalf.tied);
 			}

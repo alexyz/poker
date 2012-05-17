@@ -2,6 +2,7 @@ package pet.hp.info;
 
 import java.util.*;
 
+import pet.eq.Poker;
 import pet.hp.*;
 
 /**
@@ -22,12 +23,29 @@ public class HandInfo {
 
 	public final Hand hand;
 	/** the current players hole cards */
-	public final HoleInfo hole;
+	private Hole hole;
+	/** the current players hand rank */
+	private Rank rank;
 
 	/** create hand info for the given hand */
 	public HandInfo(Hand hand) {
 		this.hand = hand;
-		this.hole = new HoleInfo(hand.myseat.hole);
+	}
+	
+	public Hole hole() {
+		if (hole == null) {
+			hole = new Hole(hand.myseat.hole);
+		}
+		return hole;
+	}
+	
+	public Rank rank() {
+		if (rank == null) {
+			Poker p = GameUtil.getPoker(hand.game);
+			int v = p.value(hand.board, hand.myseat.hole);
+			rank = new Rank(v);
+		}
+		return rank;
 	}
 
 	/**

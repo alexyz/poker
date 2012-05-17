@@ -18,10 +18,10 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.hand.date;
 			}
 		});
-		cols.add(new MyColumn<HandInfo>(HoleInfo.class, "MyHole", "Final hole cards") {
+		cols.add(new MyColumn<HandInfo>(Hole.class, "MyHole", "Final hole cards") {
 			@Override
-			public HoleInfo getValue(HandInfo o) {
-				return o.hole;
+			public Hole getValue(HandInfo o) {
+				return o.hole();
 			}
 		});
 		cols.add(new MyColumn<HandInfo>(String[].class, "Board", "Community cards") {
@@ -52,7 +52,8 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 		cols.add(new MyColumn<HandInfo>(Integer.class, "N-Flop", "Number of players to flop") {
 			@Override
 			public Integer getValue(HandInfo o) {
-				return o.numtoflop();
+				int n = o.numtoflop();
+				return n != 0 ? n : null;
 			}
 		});
 		cols.add(new MyColumn<HandInfo>(String.class, "Show", "Show down") {
@@ -73,8 +74,12 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.myvalue();
 			}
 		});
-		//, "pip", "af", "av"
-		// handtype (ss, ds, P, 2P, (A)--1), floptype (P, F, S)
+		cols.add(new MyColumn<HandInfo>(Rank.class, "Hand", "Players final hand") {
+			@Override
+			public Rank getValue(HandInfo o) {
+				return o.rank();
+			}
+		});
 	}
 	
 	public HandInfoTableModel() {

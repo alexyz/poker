@@ -127,6 +127,7 @@ class HUDPanel extends JPanel {
 		statLabels.get(i++).setText("Cxc: " + pgi.cx());
 		
 		List<HandState> hstates = HandStateUtil.getStates(hand);
+		// may not include all streets even at showdown
 		List<SeatState> sstates = HandStateUtil.getFirst(hstates, seat);
 		
 		// hand information
@@ -136,10 +137,12 @@ class HUDPanel extends JPanel {
 		for (int n = 0; n < sstates.size(); n++) {
 			SeatState ss = sstates.get(n);
 			if (ss.meq != null) {
+				String eqStrSh = MEquityUtil.equityStringShort(ss.meq);
 				String eqStr = MEquityUtil.equityString(ss.meq);
 				curStr = MEquityUtil.currentString(ss.meq);
+				
 				// label
-				text.append(text.length() > 0 ? ", " : "").append(eqStr.replaceAll("[T% ]", ""));
+				text.append(text.length() > 0 ? ", " : "").append(eqStrSh);
 				// tip
 				// TODO street no...
 				tip.append(PokerUtil.cardsString(ss.hole)).append(":  ");
