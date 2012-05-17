@@ -4,10 +4,11 @@ import pet.hp.Action;
 import pet.hp.Hand;
 
 /**
- * represents current state of hand
+ * represents current state of hand.
+ * cloned - do not duplicate references
  */
 public class HandState implements Cloneable {
-	
+	public static final int NO_SEAT = -1;
 	/** the hand the states were derived from */
 	public final Hand hand;
 	/** seats in hand (where seat 1 is index 0), elements can be null */
@@ -18,8 +19,8 @@ public class HandState implements Cloneable {
 	public int pot;
 	/** seat index of button */
 	public int button;
-	/** seat state of current action, null if no action */
-	public SeatState actionSeat;
+	/** index of seat state of current action, NO_SEAT if no action */
+	public int actionSeat;
 	/** current action */
 	public Action action;
 	/** information */
@@ -30,6 +31,10 @@ public class HandState implements Cloneable {
 	public HandState(Hand hand) {
 		this.hand = hand;
 		this.seats = new SeatState[hand.game.max];
+	}
+	
+	public SeatState actionSeat() {
+		return actionSeat >= 0 ? seats[actionSeat] : null;
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class HandState implements Cloneable {
 	
 	@Override
 	public String toString() {
-		if (actionSeat != null) {
+		if (actionSeat >= 0) {
 			return String.valueOf(action);
 		}
 		return note;

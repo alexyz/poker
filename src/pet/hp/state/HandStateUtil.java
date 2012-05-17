@@ -13,23 +13,25 @@ public class HandStateUtil {
 	/**
 	 * Get the first seat state for each street for the given seat
 	 */
-	public static List<SeatState> getFirst(List<HandState> states, int seatNum) {
-		ArrayList<SeatState> sss = new ArrayList<SeatState>();
-		int si = -1;
-		for (HandState hs : states) {
-			if (hs.actionSeat != null && hs.actionSeat.seat.num == seatNum) {
-				if (hs.streetIndex > si) {
-					sss.add(hs.actionSeat);
-					si = hs.streetIndex;
+	public static List<SeatState> getFirst(List<HandState> handStates, int seatNum) {
+		ArrayList<SeatState> seatStates = new ArrayList<SeatState>();
+		int s = -1;
+		for (HandState hs : handStates) {
+			SeatState as = hs.actionSeat();
+			if (as != null && as.seat.num == seatNum) {
+				if (hs.streetIndex > s) {
+					seatStates.add(as);
+					s = hs.streetIndex;
 				}
 			}
 		}
-		return sss;
+		return seatStates;
 	}
 	
 	/**
 	 * convert hand into list of hand states
 	 */
+	// synchronize for cache, but sampled equity calc can be slow...
 	public static synchronized List<HandState> getStates(Hand hand) {
 		for (List<HandState> l : cache) {
 			if (l.get(0).hand.id.equals(hand.id)) {
@@ -43,7 +45,7 @@ public class HandStateUtil {
 		HandState hs = new HandState(hand);
 		hs.pot = hand.antes;
 		hs.button = hand.button - 1;
-		hs.actionSeat = null;
+		hs.actionSeat = HandState.NO_SEAT;
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState(seat);
 			if (seat.hole != null) {
@@ -72,7 +74,7 @@ public class HandStateUtil {
 			hs.note = GameUtil.getStreetName(hand.game.type, s);
 			hs.action = null;
 			hs.streetIndex = s;
-			hs.actionSeat = null;
+			hs.actionSeat = HandState.NO_SEAT;
 			holes.clear();
 			holeSeats.clear();
 			blockers.clear();
@@ -127,8 +129,8 @@ public class HandStateUtil {
 				hs = hs.clone();
 				hs.action = act;
 				
-				SeatState ss = hs.seats[act.seat.num - 1];
-				hs.actionSeat = ss;
+				hs.actionSeat = act.seat.num - 1;
+				SeatState ss = hs.actionSeat();
 				ss.bpr = 0;
 				ss.ev = 0;
 				ss.actionNum++;

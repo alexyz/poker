@@ -124,7 +124,7 @@ class TableComponent extends JComponent {
 				seatCol = Color.darkGray;
 			} else if (ss.folded) {
 				seatCol = Color.gray;
-			} else if (hs.actionSeat == ss) {
+			} else if (hs.actionSeat == s) {
 				seatCol = Color.yellow;
 			} else if (ss.won) {
 				seatCol = Color.orange;
@@ -165,7 +165,7 @@ class TableComponent extends JComponent {
 				if (ss.spr > 0) {
 					lines.add(String.format("SPR: %2.1f", ss.spr));
 				}
-				if (hs.actionSeat == ss || ss.won) {
+				if (hs.actionSeat == s || ss.won) {
 					lines.add(ss.won ? "wins" : String.valueOf(HandUtil.actionString(hs.hand, hs.action)));
 				}
 				

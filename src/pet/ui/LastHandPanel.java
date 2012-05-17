@@ -59,8 +59,9 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 					int sr = handTable.convertRowIndexToModel(r);
 					HandStateTableModel m = (HandStateTableModel) handTable.getModel();
 					HandState hs = m.getRow(sr);
-					if (hs.actionSeat != null) {
-						String player = hs.actionSeat.seat.name;
+					SeatState as = hs.actionSeat();
+					if (as != null) {
+						String player = as.seat.name;
 						PokerFrame.getInstance().displayPlayer(player);
 					}
 				}

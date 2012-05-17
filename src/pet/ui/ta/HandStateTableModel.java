@@ -18,7 +18,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "Player", "Player name") {
 			@Override
 			public String getValue(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					return ss.seat.name;
 				} else {
@@ -29,7 +29,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "Pot/Stack", "Player stack and SPR or pot") {
 			@Override
 			public String getValue(HandState h) {
-				SeatState ss = h.actionSeat;
+				SeatState ss = h.actionSeat();
 				if (ss != null) {
 					String v = GameUtil.formatMoney(h.hand.game.currency, ss.stack);
 					if (ss.spr > 0) {
@@ -45,7 +45,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "Board/Hole", "Players hole cards or board") {
 			@Override
 			public String getValue(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					if (ss.actionNum <= 1) {
 						return PokerUtil.cardsString(ss.hole);
@@ -58,7 +58,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			}
 			@Override
 			public String getToolTip(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					if (ss.meq != null) {
 						return MEquityUtil.currentString(ss.meq);
@@ -70,7 +70,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "Action", "Player action") {
 			@Override
 			public String getValue(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					String v = HandUtil.actionString(hs.hand, hs.action);
 					if (ss.amount > 0) {
@@ -87,7 +87,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "Equity", "Hand equity") {
 			@Override
 			public String getValue(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					if (ss.meq != null && ss.actionNum <= 1) {
 						return MEquityUtil.equityString(ss.meq);
@@ -99,7 +99,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		cols.add(new HandStateColumn(String.class, "EV", "Expected Value") {
 			@Override
 			public String getValue(HandState hs) {
-				SeatState ss = hs.actionSeat;
+				SeatState ss = hs.actionSeat();
 				if (ss != null) {
 					if (hs.action.type == Action.COLLECT_TYPE && ss.tev != 0) {
 						return GameUtil.formatMoney(hs.hand.game.currency, (int) ss.tev);
