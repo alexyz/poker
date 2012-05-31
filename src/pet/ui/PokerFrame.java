@@ -1,8 +1,11 @@
 package pet.ui;
 
 import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.Locale;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import pet.hp.*;
@@ -75,6 +78,15 @@ public class PokerFrame extends JFrame {
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
+		try {
+			InputStream iconIs = getClass().getResourceAsStream("/pet32.png");
+			BufferedImage icon = ImageIO.read(iconIs);
+		    setIconImage(icon);
+		    //com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
+		    //app.setDockIconImage (icon);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		tabs.addTab("Hold'em", holdemPanel);
 		tabs.addTab("Omaha", omahaPanel);
