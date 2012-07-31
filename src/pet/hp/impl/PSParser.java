@@ -92,8 +92,8 @@ public class PSParser extends Parser {
 
 	@Override
 	public boolean isHistoryFile(String name) {
-		// TODO TS - tournament summaries
-		return name.startsWith("HH") && name.endsWith(".txt");
+		// TS - tournament summaries
+		return name.startsWith("HH") && name.endsWith(".txt") && !name.contains("8-Game") && !name.contains("Triple Stud");
 	}
 
 	/**

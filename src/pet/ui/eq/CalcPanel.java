@@ -83,7 +83,6 @@ abstract class CalcPanel extends JPanel {
 		randButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO shouldn't need number
 				int num = ((SpinnerNumberModel)numOppSpinner.getModel()).getNumber().intValue();
 				random(num);
 			}
@@ -125,7 +124,10 @@ abstract class CalcPanel extends JPanel {
 		add(board, c);
 	}
 	
-	protected void setHands(CardPanel[] cardPanels) {
+	/**
+	 * Set the card panels created by the subclass (not the actual hands)
+	 */
+	protected void setCardPanels(CardPanel[] cardPanels) {
 		numOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
 		
 		JPanel p = new JPanel(new GridBagLayout());
@@ -173,6 +175,7 @@ abstract class CalcPanel extends JPanel {
 		}
 	}
 
+	/** select the given board/hole card number */
 	protected void selectCard(int n) {
 		System.out.println("select card " + n);
 		cardLabels.get(selcard).setCardSelected(false);

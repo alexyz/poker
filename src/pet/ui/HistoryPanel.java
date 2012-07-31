@@ -24,6 +24,9 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final JButton addButton = new JButton("Add File");
 	private final ConsolePanel consolePanel = new ConsolePanel();
 	private final JCheckBox hudBox = new JCheckBox("Create HUDs");
+	private final JButton funcButton = new JButton("Function");
+	private final JButton clearButton = new JButton("Clear");
+	private final JPanel buttonPanel = new JPanel();
 	
 	public HistoryPanel() {
 		super(new BorderLayout());
@@ -107,6 +110,24 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				PokerFrame.getInstance().getHudManager().setCreate(hudBox.isSelected());
 			}
 		});
+		
+		clearButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				consolePanel.clear();
+			}
+		});
+		
+		funcButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PokerFrame.getInstance().f();
+			}
+		});
+		
+		buttonPanel.add(clearButton);
+		buttonPanel.add(funcButton);
+		add(buttonPanel, BorderLayout.SOUTH);
 		
 		JPanel pathPanel = new JPanel();
 		pathPanel.add(pathField);

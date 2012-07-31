@@ -62,16 +62,16 @@ public class DrawPoker extends Poker {
 		//String[] x = new String[] { "Ah", "Kh", "Kc", "2h", "3h" };
 		//String[] x = new String[] { "4c", "5h", "6d", "7s", "9h" };
 		for (int n = 0; n <= 5; n++) {
-			String[] y = getHand(x, n);
+			String[] y = getDrawingHand(x, n);
 			System.out.println("draw " + n + " => " + Arrays.toString(y));
 		}
 	}
 
 	/**
-	 * Get the players drawing hand.
+	 * Guess the players drawing hand.
 	 * Always returns new array.
 	 */
-	public static String[] getHand(String[] hand, int drawn) {
+	public static String[] getDrawingHand(String[] hand, int drawn) {
 		switch (drawn) {
 			case 0:
 				// stand pat
@@ -85,7 +85,7 @@ public class DrawPoker extends Poker {
 				return getPair(hand);
 			case 4: {
 				// keep high card
-				return getHigh(hand);
+				return getHighCard(hand);
 			}
 			case 5:
 				// discard all
@@ -99,7 +99,7 @@ public class DrawPoker extends Poker {
 	 * get the high card in the hand.
 	 * always returns new array
 	 */
-	private static String[] getHigh(String[] hand) {
+	private static String[] getHighCard(String[] hand) {
 		String[] a = hand.clone();
 		Arrays.sort(a, Cmp.revCardCmp);
 		return new String[] { a[0] };
@@ -114,6 +114,7 @@ public class DrawPoker extends Poker {
 		Arrays.sort(h, Cmp.revCardCmp);
 		for (int n = 1; n < h.length; n++) {
 			if (faceValue(h[n-1], true) == faceValue(h[n], true)) {
+				// return highest pair
 				return new String[] { h[n-1], h[n] };
 			}
 		}
@@ -202,10 +203,13 @@ public class DrawPoker extends Poker {
 
 	/**
 	 * Get the trips/st/fl draw by brute force
-	 * FIXME ignores oesd to draw at higher gutty
+	 * FIXME
+	 * draw 1 with oesd and higher gutty -> assume oesd, not gutty
+	 * draw 2 with 3-flush and 3-broad -> assume high cards, not back door flush
+	 * draw 2 with 3-str -> keep 3-str not higher back door gutty
 	 */
 	private static String[] getDraw(final String[] hand, final int drawn) {
-		// from players pov, all other cards are possible
+		// from players point of view, all other cards are possible
 		final String[] deck = Poker.remdeck(null, hand);
 		final String[] h = new String[5];
 		final String[] maxh = new String[5 - drawn];

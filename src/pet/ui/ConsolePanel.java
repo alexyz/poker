@@ -1,8 +1,6 @@
 package pet.ui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -12,8 +10,7 @@ public class ConsolePanel extends JPanel {
 	private static final OutputStream out = System.out;
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JTextArea textArea = new JTextArea();
-	private final JPanel buttonPanel = new JPanel();
-	private final JButton clearButton = new JButton("Clear");
+	
 	
 	public ConsolePanel() {
 		super(new BorderLayout());
@@ -21,18 +18,9 @@ public class ConsolePanel extends JPanel {
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
 		
-		clearButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				textArea.setText("");
-			}
-		});
-		
 		scrollPane.setViewportView(textArea);
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Java Console"));
 		add(scrollPane, BorderLayout.CENTER);
-		buttonPanel.add(clearButton);
-		add(buttonPanel, BorderLayout.SOUTH);
 		
 		// TODO start this sooner?
 		OutputStream os = new OutputStream() {
@@ -66,5 +54,9 @@ public class ConsolePanel extends JPanel {
 				textArea.setCaretPosition(textArea.getDocument().getLength());
 			}
 		});
+	}
+
+	public void clear() {
+		textArea.setText("");
 	}
 }

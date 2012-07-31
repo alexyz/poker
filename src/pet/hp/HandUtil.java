@@ -84,7 +84,7 @@ public class HandUtil {
 					
 				} else if (seat.hole != null) {
 					// guess what cards the opponent kept
-					h = DrawPoker.getHand(seat.hole, seat.discards);
+					h = DrawPoker.getDrawingHand(seat.hole, seat.discards);
 				}
 				break;
 			case Game.HE_TYPE:

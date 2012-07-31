@@ -36,7 +36,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// add to layout
 		setBoard(boardPanel);
-		setHands(handPanels);
+		setCardPanels(handPanels);
 		
 		initCardLabels();
 		

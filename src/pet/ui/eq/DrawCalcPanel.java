@@ -21,7 +21,7 @@ public class DrawCalcPanel extends CalcPanel {
 		
 		initCardLabels();
 		
-		setHands(handPanels);
+		setCardPanels(handPanels);
 	}
 	
 	/**
@@ -33,6 +33,7 @@ public class DrawCalcPanel extends CalcPanel {
 			handPanels[n].setCards(Arrays.asList(holes[n]));
 		}
 		updateDeck();
+		// should update value in num opp spinner also
 	}
 	
 	@Override

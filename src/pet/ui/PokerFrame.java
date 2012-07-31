@@ -3,11 +3,15 @@ package pet.ui;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import pet.eq.DrawPoker;
+import pet.eq.PokerUtil;
 import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.info.*;
@@ -64,6 +68,8 @@ public class PokerFrame extends JFrame {
 	/** data analysis */
 	private final Info info = new Info();
 	private final JTabbedPane tabs = new JTabbedPane();
+	private final JTabbedPane eqTabs = new JTabbedPane();
+	private final JTabbedPane hisTabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
 	private final LastHandPanel lastHandPanel = new LastHandPanel();
@@ -81,6 +87,7 @@ public class PokerFrame extends JFrame {
 		try {
 			InputStream iconIs = getClass().getResourceAsStream("/pet32.png");
 			BufferedImage icon = ImageIO.read(iconIs);
+			iconIs.close();
 		    setIconImage(icon);
 		    //com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
 		    //app.setDockIconImage (icon);
@@ -88,17 +95,21 @@ public class PokerFrame extends JFrame {
 			e.printStackTrace();
 		}
 		
-		tabs.addTab("Hold'em", holdemPanel);
-		tabs.addTab("Omaha", omahaPanel);
-		tabs.addTab("Draw", drawPanel);
-		tabs.addTab("History", historyPanel);
-		tabs.addTab("Players", playerPanel);
-		tabs.addTab("Games", gamesPanel);
-		tabs.addTab("Tourns", new TournPanel());
-		//tabs.addTab("Graph", bankrollPanel);
-		tabs.addTab("Hands", handsPanel);
-		tabs.addTab("Replay", replayPanel);
-		tabs.addTab("Last Hand", lastHandPanel);
+		tabs.addTab("Equity", eqTabs);
+		tabs.addTab("History", hisTabs);
+		
+		eqTabs.addTab("Hold'em", holdemPanel);
+		eqTabs.addTab("Omaha", omahaPanel);
+		eqTabs.addTab("Draw", drawPanel);
+		
+		hisTabs.addTab("History", historyPanel);
+		hisTabs.addTab("Players", playerPanel);
+		hisTabs.addTab("Games", gamesPanel);
+		hisTabs.addTab("Tournaments", new TournPanel());
+		hisTabs.addTab("Graph", bankrollPanel);
+		hisTabs.addTab("Hands", handsPanel);
+		hisTabs.addTab("Replay", replayPanel);
+		hisTabs.addTab("Last Hand", lastHandPanel);
 		
 		history.addListener(lastHandPanel);
 		history.addListener(gamesPanel);
@@ -127,18 +138,18 @@ public class PokerFrame extends JFrame {
 	/** display hand in replayer */
 	public void replayHand(Hand hand) {
 		replayPanel.setHand(hand);
-		tabs.setSelectedComponent(replayPanel);
+		hisTabs.setSelectedComponent(replayPanel);
 	}
 	
 	/** display hand in hand panel */
 	public void displayHand(Hand hand) {
 		lastHandPanel.showHand(hand);
-		tabs.setSelectedComponent(lastHandPanel);
+		hisTabs.setSelectedComponent(lastHandPanel);
 	}
 	
 	public void displayBankRoll(GraphData bankRoll) {
 		bankrollPanel.setData(bankRoll);
-		tabs.setSelectedComponent(bankrollPanel);
+		hisTabs.setSelectedComponent(bankrollPanel);
 	}
 	
 	public FollowThread getFollow() {
@@ -148,32 +159,70 @@ public class PokerFrame extends JFrame {
 	/** display hands in hands tab */
 	public void displayHands(String name, String gameid) {
 		handsPanel.displayHands(name, gameid);
-		tabs.setSelectedComponent(handsPanel);
+		hisTabs.setSelectedComponent(handsPanel);
 	}
 
 	public void displayHands(long tournid) {
 		handsPanel.displayHands(tournid);
-		tabs.setSelectedComponent(handsPanel);
+		hisTabs.setSelectedComponent(handsPanel);
 	}
 	
 	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
 		panel.displayHand(board, holes, hilo);
-		tabs.setSelectedComponent(panel);
+		eqTabs.setSelectedComponent(panel);
 	}
 	
 	public void displayDrawEquity(String[][] holes) {
 		drawPanel.displayHand(holes);
-		tabs.setSelectedComponent(drawPanel);
+		eqTabs.setSelectedComponent(drawPanel);
 	}
 
 	public void displayPlayer(String player) {
 		playerPanel.displayPlayer(player);
-		tabs.setSelectedComponent(playerPanel);
+		hisTabs.setSelectedComponent(playerPanel);
 	}
 
 	public HUDManager getHudManager() {
 		return hudManager;
 	}
+	
+
+	public void f() {
+		// get all draw hands with hole cards
+		// compare predicted draw with actual draw
+		for (String gid : history.getGames()) {
+			if (gid.contains(GameUtil.getGameTypeName(Game.FCD_TYPE))) {
+				List<Hand> hands = history.getHands("tawvx", gid);
+				for (Hand hand : hands) {
+					// get pre-draw and post draw hands
+					String[] h1 = hand.myhole;
+					String[] h2 = hand.myseat.hole;
+					int d = hand.myseat.discards;
+					if (h1 != null && h2 != null) {
+						String[] pre = DrawPoker.getDrawingHand(h1, d);
+						// were drawing cards in final hand?
+						for (String c1 : pre) {
+							find: {
+								for (String c2 : h2) {
+									if (c1.equals(c2)) {
+										break find;
+									}
+								}
+								System.out.println();
+								System.out.println("hand " + hand);
+								System.out.println("hole " + Arrays.toString(h1) + " drawn " + d);
+								System.out.println("predicted " + Arrays.toString(pre));
+								System.out.println("actual " + Arrays.toString(h2));
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
 
 }
