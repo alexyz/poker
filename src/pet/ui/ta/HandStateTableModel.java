@@ -11,7 +11,7 @@ import pet.hp.state.*;
  * action seat, or the player/stack/holecards/equity if there is an action seat.
  */
 public class HandStateTableModel extends MyTableModel<HandState> {
-
+	
 	private static final List<MyColumn<HandState>> cols = new ArrayList<MyColumn<HandState>>();
 	
 	static {
@@ -46,15 +46,28 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			@Override
 			public String getValue(HandState hs) {
 				SeatState ss = hs.actionSeat();
-				if (ss != null) {
-					if (ss.actionNum <= 1) {
-						return PokerUtil.cardsString(ss.hole);
-					} else {
-						return "";
-					}
-				} else {
+				if (ss == null) {
 					return PokerUtil.cardsString(hs.board);
 				}
+				
+				if (ss.actionNum > 1) {
+					return "";
+				}
+				
+				if (ss.holeObj != null) {
+					if (ss.holeObj.guess) {
+						return "(" + PokerUtil.cardsString(ss.holeObj.hole) + ")";
+						
+					} else {
+						String s = PokerUtil.cardsString(ss.holeObj.hole);
+						if (ss.holeObj.discarded != null) {
+							s += " (" + PokerUtil.cardsString(ss.holeObj.discarded) + ")";
+						}
+						return s;
+					}
+				}
+				
+				return "";
 			}
 			@Override
 			public String getToolTip(HandState hs) {
@@ -111,9 +124,9 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			}
 		});
 	}
-
+	
 	public HandStateTableModel() {
 		super(cols);
 	}
-
+	
 }

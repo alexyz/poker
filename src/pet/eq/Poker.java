@@ -40,8 +40,8 @@ public abstract class Poker {
 	public static final String[] ranknames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
-	/** complete deck */
-	// FIXME should be immutable list, along with other arrays
+	/** complete deck in face then suit order, lowest first */
+	// TODO other arrays should be immutable
 	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(
 		"2h", "2s", "2c", "2d",
 		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",

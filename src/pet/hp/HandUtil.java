@@ -10,6 +10,26 @@ import pet.eq.DrawPoker;
  */
 public class HandUtil {
 	
+	public static class Hole {
+		/** hole cards for display/equity purposes */
+		public final String[] hole;
+		/** discarded cards if any */
+		public final String[] discarded;
+		/** are hole cards guessed */
+		public final boolean guess;
+		public Hole(String[] hole, String[] discarded, boolean guess) {
+			this.hole = hole;
+			this.discarded = discarded;
+			this.guess = guess;
+		}
+		public Hole(int numHole, int numDiscarded) {
+			this(new String[numHole], numDiscarded > 0 ? new String[numDiscarded] : null, false);
+		}
+		public Hole(String[] hole) {
+			this(hole, null, false);
+		}
+	}
+	
 	/**
 	 * Compare hands by id
 	 */
@@ -31,7 +51,7 @@ public class HandUtil {
 			return s1.num - s2.num;
 		}
 	};
-
+	
 	/**
 	 * get board for street.
 	 * Always returns new array.
@@ -44,65 +64,73 @@ public class HandUtil {
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
 				return street > 0 ? Arrays.copyOf(hand.board, street + 2) : null;
+			default:
+				throw new RuntimeException("unknown game type " + hand.game.type);
 		}
-		throw new RuntimeException("unknown game type " + hand.game.type);
 	}
 	
 	/**
-	 * get the hole cards the player kept.
-	 * Always returns new array
+	 * get the hole cards the current player kept and discarded
 	 */
-	private static String[] kept(String[] hole1, String[] hole2, int discards) {
-		String[] kept = new String[5 - discards];
-		int i = 0;
-		for (int n = 0; n < 5; n++) {
-			for (int m = 0; m < 5; m++) {
-				if (hole1[n].equals(hole2[m])) {
-					kept[i++] = hole1[n];
-					break;
+	private static Hole kept(String[] hole1, String[] hole2, int discards) {
+		Hole h = new Hole(5 - discards, discards);
+		int i = 0, j = 0;
+		for (int n1 = 0; n1 < 5; n1++) {
+			find: {
+				for (int n2 = 0; n2 < 5; n2++) {
+					if (hole1[n1].equals(hole2[n2])) {
+						h.hole[i++] = hole1[n1];
+						break find;
+					}
 				}
+				h.discarded[j++] = hole1[n1];
 			}
 		}
-		return kept;
+		return h;
 	}
-
+	
 	/**
 	 * Get hole cards player had on this street (if they changed).
-	 * Always returns new array
 	 */
-	public static String[] getStreetHole(Hand hand, Seat seat, int street) {
-		String[] h = null;
+	public static HandUtil.Hole getStreetHole(Hand hand, Seat seat, int street) {
+		Hole h = null;
 		switch (hand.game.type) {
 			case Game.FCD_TYPE:
 				if (street == 1) {
 					// return final hand
-					h = seat.hole.clone();
+					h = new Hole(seat.hole.clone());
 					
 				} else if (hand.myseat == seat) {
 					// return starting hand
+					// XXX should also return discarded
 					h = kept(hand.myhole, seat.hole, seat.discards);
 					
 				} else if (seat.hole != null) {
 					// guess what cards the opponent kept
-					h = DrawPoker.getDrawingHand(seat.hole, seat.discards);
+					h = new Hole(DrawPoker.getDrawingHand(seat.hole, seat.discards), null, true);
 				}
 				break;
+				
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
 				if (seat.hole != null) {
-					h = seat.hole.clone();
+					h = new Hole(seat.hole);
 				}
 				break;
+				
 			default:
 				throw new RuntimeException("unknown game type " + hand.game);
 		}
 		if (h != null) {
-			Arrays.sort(h, Cmp.revCardCmp);
+			Arrays.sort(h.hole, Cmp.revCardCmp);
+			if (h.discarded != null) {
+				Arrays.sort(h.discarded, Cmp.revCardCmp);
+			}
 		}
 		return h;
 	}
-
+	
 	/**
 	 * Return string describing action (but not player)
 	 */
@@ -133,5 +161,9 @@ public class HandUtil {
 		String[][] holesArr = holes.toArray(new String[holes.size()][]);
 		return holesArr;
 	}
-
+	
+	private HandUtil() {
+		//
+	}
+	
 }

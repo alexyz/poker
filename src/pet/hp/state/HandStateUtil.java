@@ -87,15 +87,14 @@ public class HandStateUtil {
 					ss.actionNum = 0;
 					// get hole cards of live hands
 					if (ss.hole != null && !ss.folded) {
-						String[] hole = HandUtil.getStreetHole(hand, ss.seat, s);
-						Arrays.sort(hole, Cmp.revCardCmp);
-						ss.hole = hole;
+						ss.holeObj = HandUtil.getStreetHole(hand, ss.seat, s);
+						ss.hole = ss.holeObj.hole;
 						// make sure hand has minimum number of cards, pass others as blockers
-						if (hole.length >= GameUtil.getMinHoleCards(hand.game.type)) {
-							holes.add(hole);
+						if (ss.hole.length >= GameUtil.getMinHoleCards(hand.game.type)) {
+							holes.add(ss.hole);
 							holeSeats.add(ss);
 						} else {
-							blockers.addAll(Arrays.asList(hole));
+							blockers.addAll(Arrays.asList(ss.hole));
 						}
 					}
 				}

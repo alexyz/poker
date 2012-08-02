@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import pet.eq.DrawPoker;
+import pet.eq.DrawPoker2;
 import pet.eq.PokerUtil;
 import pet.hp.*;
 import pet.hp.impl.PSParser;
@@ -139,17 +140,20 @@ public class PokerFrame extends JFrame {
 	public void replayHand(Hand hand) {
 		replayPanel.setHand(hand);
 		hisTabs.setSelectedComponent(replayPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 	
 	/** display hand in hand panel */
 	public void displayHand(Hand hand) {
 		lastHandPanel.showHand(hand);
 		hisTabs.setSelectedComponent(lastHandPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 	
 	public void displayBankRoll(GraphData bankRoll) {
 		bankrollPanel.setData(bankRoll);
 		hisTabs.setSelectedComponent(bankrollPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 	
 	public FollowThread getFollow() {
@@ -160,27 +164,32 @@ public class PokerFrame extends JFrame {
 	public void displayHands(String name, String gameid) {
 		handsPanel.displayHands(name, gameid);
 		hisTabs.setSelectedComponent(handsPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 
 	public void displayHands(long tournid) {
 		handsPanel.displayHands(tournid);
 		hisTabs.setSelectedComponent(handsPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 	
 	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
 		panel.displayHand(board, holes, hilo);
 		eqTabs.setSelectedComponent(panel);
+		tabs.setSelectedComponent(eqTabs);
 	}
 	
 	public void displayDrawEquity(String[][] holes) {
 		drawPanel.displayHand(holes);
 		eqTabs.setSelectedComponent(drawPanel);
+		tabs.setSelectedComponent(eqTabs);
 	}
 
 	public void displayPlayer(String player) {
 		playerPanel.displayPlayer(player);
 		hisTabs.setSelectedComponent(playerPanel);
+		tabs.setSelectedComponent(hisTabs);
 	}
 
 	public HUDManager getHudManager() {
@@ -200,8 +209,7 @@ public class PokerFrame extends JFrame {
 					String[] h2 = hand.myseat.hole;
 					int d = hand.myseat.discards;
 					if (h1 != null && h2 != null) {
-						String[] pre = DrawPoker.getDrawingHand(h1, d);
-						// were drawing cards in final hand?
+						String[] pre = DrawPoker2.getDraw(h1, d);
 						for (String c1 : pre) {
 							find: {
 								for (String c2 : h2) {

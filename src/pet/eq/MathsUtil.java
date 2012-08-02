@@ -46,7 +46,7 @@ public class MathsUtil {
 	 * Return cached binomial coefficient (n pick k).
 	 * I.e. how many ways can you pick k objects from n
 	 */
-	static int bincoff(int n, int k) {
+	public static int bincoff(int n, int k) {
 		int c = C[n][k];
 		if (c == -1) {
 			throw new RuntimeException();
@@ -58,7 +58,7 @@ public class MathsUtil {
 	 * Combinatorial number system.
 	 * Get the k combination at position p and write from 'from' into 'to' at offset.
 	 */
-	static void kcomb(final int k, int p, final Object[] from, Object[] to, final int off) {
+	public static void kcomb(final int k, int p, final Object[] from, Object[] to, final int off) {
 		//System.out.println("kcomb(" + k + "," + p + "," + from.length + "," + to.length + "," + off + ")");
 		// for each digit (starting at the last)
 		for (int b = k; b >= 1; b--) {

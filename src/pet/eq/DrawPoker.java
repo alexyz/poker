@@ -122,85 +122,6 @@ public class DrawPoker extends Poker {
 		return new String[] { h[0], h[1] };
 	}
 	
-	/** get the flush draw, if any */
-	private String[] fd(String[] hand) {
-		int[] suit = new int[4];
-		String[][] draw = new String[4][4];
-		for (String c : hand) {
-			int s = "cdhs".indexOf(suit(c));
-			draw[s][suit[s]] = c;
-			if (suit[s] == 4) {
-				return draw[s];
-			} else {
-				suit[s]++;
-			}
-		}
-		return null;
-	}
-	
-	private String[] sd(String[] hand) {
-		// get oesd, then gs
-		// a23456789tjqka
-		// 01111000100000
-		// 01111100000000
-		// 11111000000001
-		// 11101000000001
-		// 10000000011111
-		// count, 4/5 sd, 5/5 s - avoid ace
-		return null;
-	}
-	
-	private static String[] getDraw1(final String[] hand) {
-		int v = value(hand);
-		int r = rank(v);
-		switch (r) {
-			case 0:
-			case 1:
-				// fd, oesd, gs, hc
-			case 2:
-				// 2p
-			case 3:
-				// tk+k
-			case 4:
-				// oesd, gs
-			case 5:
-				// hc
-			case 6:
-				// tk+k (or 2p, depending on aggr/num opp)
-			case 7:
-				// tk+k
-			case 8:
-				// oesd, gs
-		}
-		return null;
-	}
-	
-	private static String[] getDraw2(final String[] hand) {
-		int v = value(hand);
-		int r = rank(v);
-		switch (r) {
-			case 0:
-				// hc (boesd) (bfd)
-			case 1:
-				// p+k
-			case 2:
-				// p+k
-			case 3:
-				// tk
-			case 4:
-				// (boesd), hc
-			case 5:
-				// hc
-			case 6:
-				// tk
-			case 7:
-				// tk
-			case 8:
-				// (boesd), hc
-		}
-		return null;
-	}
-
 	/**
 	 * Get the trips/st/fl draw by brute force
 	 * FIXME
@@ -208,7 +129,7 @@ public class DrawPoker extends Poker {
 	 * draw 2 with 3-flush and 3-broad -> assume high cards, not back door flush
 	 * draw 2 with 3-str -> keep 3-str not higher back door gutty
 	 */
-	private static String[] getDraw(final String[] hand, final int drawn) {
+	public static String[] getDraw(final String[] hand, final int drawn) {
 		// from players point of view, all other cards are possible
 		final String[] deck = Poker.remdeck(null, hand);
 		final String[] h = new String[5];

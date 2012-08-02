@@ -1,6 +1,7 @@
 package pet.hp.state;
 
 import pet.eq.*;
+import pet.hp.HandUtil;
 import pet.hp.Seat;
 
 /**
@@ -22,6 +23,7 @@ public class SeatState implements Cloneable {
 	public float bpr;
 	/** current hole cards (changes in games like draw) */
 	public String[] hole;
+	public HandUtil.Hole holeObj;
 	/** has folded yet */
 	public boolean folded;
 	/** has won - only true at end, unlike seat.won > 0 */
