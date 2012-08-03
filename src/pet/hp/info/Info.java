@@ -51,6 +51,19 @@ public class Info implements HistoryListener {
 		System.out.println("got " + players.size() + " players");
 		return players;
 	}
+	
+	public synchronized List<PlayerInfo> getPlayers(Collection<String> names) {
+		System.out.println("get players " + names);
+		List<PlayerInfo> pinfos = new ArrayList<PlayerInfo>();
+		for (String name : names) {
+			PlayerInfo pinfo = playerMap.get(name);
+			if (pinfo != null) {
+				pinfos.add(pinfo);
+			}
+		}
+		System.out.println("got " + pinfos.size() + " players");
+		return pinfos;
+	}
 
 	/**
 	 * get player game infos for all players for the given game

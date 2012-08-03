@@ -8,6 +8,8 @@ import pet.hp.Seat;
 
 /**
  * overall statistics for player. not much to say that isn't game specific
+ * 
+ * methods are synchronized because they may be called from awt thread while parsing is taking place in background
  */
 public class PlayerInfo {
 

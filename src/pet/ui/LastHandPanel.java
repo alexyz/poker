@@ -23,6 +23,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	private final JButton equityButton = new JButton("Equity");
 	private final JButton playerButton = new JButton("Player");
 	private final JButton replayButton = new JButton("Replay");
+	private final JToggleButton updateButton = new JToggleButton("Update");
 
 	public LastHandPanel() {
 		super(new BorderLayout());
@@ -106,10 +107,13 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		handTable.setModel(new HandStateTableModel());
 		handTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+		updateButton.setSelected(true);
+		
 		JPanel topPanel = new JPanel();
 		topPanel.add(prevButton);
 		topPanel.add(stateCombo);
 		topPanel.add(nextButton);
+		topPanel.add(updateButton);
 
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(equityButton);
@@ -174,7 +178,9 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		// FIXME may add out of order...
 		// XXX does equity sample calc on awt thread... 
 		model.addElement(new HandStates(hand));
-		stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+		if (updateButton.isSelected()) {
+			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+		}
 	}
 
 

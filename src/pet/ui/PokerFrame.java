@@ -209,7 +209,7 @@ public class PokerFrame extends JFrame {
 					String[] h2 = hand.myseat.hole;
 					int d = hand.myseat.discards;
 					if (h1 != null && h2 != null) {
-						String[] pre = DrawPoker2.getDraw(h1, d);
+						String[] pre = DrawPoker2.getDrawingHand(null, h1, d, 2f);
 						for (String c1 : pre) {
 							find: {
 								for (String c2 : h2) {

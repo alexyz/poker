@@ -9,12 +9,15 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import pet.hp.Hand;
+import pet.hp.History;
 import pet.hp.info.*;
 import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
 
 /**
  * player info and player game info panel
+ * 
+ * ( ) Self ( ) [Name] [Search]
  */
 public class PlayerPanel extends JPanel {
 	// [name]
@@ -27,14 +30,49 @@ public class PlayerPanel extends JPanel {
 	private final JButton bankrollButton = new JButton("Bankroll");
 	private final JButton handsButton = new JButton("Hands");
 	
+	private final JRadioButton selfButton = new JRadioButton("Self");
+	private final JRadioButton nameButton = new JRadioButton("Name:");
+	private final JButton searchButton = new JButton("Search");
+	
 	public PlayerPanel() {
 		super(new BorderLayout());
 		
 		nameField.setColumns(10);
-		nameField.setBorder(BorderFactory.createTitledBorder("Player Name"));
+		//nameField.setBorder(BorderFactory.createTitledBorder("Player Name"));
 		nameField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				find();
+			}
+		});
+		
+		
+		ButtonGroup bg = new ButtonGroup();
+		selfButton.getModel().setGroup(bg);
+		nameButton.getModel().setGroup(bg);
+		
+		selfButton.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					nameField.setEnabled(false);
+				}
+			}
+		});
+		
+		nameButton.setSelected(true);
+		nameButton.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					nameField.setEnabled(true);
+				}
+			}
+		});
+		
+		searchButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
 				find();
 			}
 		});
@@ -129,7 +167,10 @@ public class PlayerPanel extends JPanel {
 		mainPanel.add(gameTextAreaScroller);
 		
 		JPanel topPanel = new JPanel();
+		topPanel.add(selfButton);
+		topPanel.add(nameButton);
 		topPanel.add(nameField);
+		topPanel.add(searchButton);
 		
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(handsButton);
@@ -142,12 +183,17 @@ public class PlayerPanel extends JPanel {
 	
 	/** search for player and update table */
 	private void find() {
-		String pattern = nameField.getText();
 		PokerFrame pf = PokerFrame.getInstance();
 		Info info = pf.getInfo();
 		
 		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
-		playersModel.setRows(info.getPlayers(pattern));
+		if (nameButton.isSelected()) {
+			String pattern = nameField.getText();
+			playersModel.setRows(info.getPlayers(pattern));
+		} else {
+			History history = pf.getHistory();
+			playersModel.setRows(info.getPlayers(history.getSelf()));
+		}
 		
 		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 		gamesModel.setRows(Collections.<PlayerGameInfo>emptyList());

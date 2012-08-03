@@ -24,6 +24,8 @@ public class History {
 	private final ArrayList<HistoryListener> listeners = new ArrayList<HistoryListener>();
 	/** tournament players seen - XXX inefficient hack */
 	private final TreeMap<Long,TreeSet<String>> tp = new TreeMap<Long,TreeSet<String>>();
+	/** current player names - i.e. the names of players the hand is played from the perspective of */
+	private final Set<String> self = new TreeSet<String>();
 	
 	public History() {
 		for (String c : Poker.deck) {
@@ -45,6 +47,7 @@ public class History {
 		if (handIds.contains(hand.id)) {
 			throw new RuntimeException("duplicate hand id");
 		}
+		self.add(hand.myseat.name);
 		hands.add(hand);
 		for (HistoryListener l : listeners) {
 			l.handAdded(hand);
@@ -212,6 +215,13 @@ public class History {
 
 		System.out.println("got " + hands.size() + " hands");
 		return hands;
+	}
+	
+	/**
+	 * return names of current player
+	 */
+	public synchronized Collection<String> getSelf() {
+		return Arrays.asList(self.toArray(new String[self.size()]));
 	}
 
 }

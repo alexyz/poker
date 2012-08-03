@@ -5,11 +5,7 @@ import java.util.*;
 
 public class DrawPoker2 {
 	
-	private static final int[] uniqueValues;
-	
-	static {
-		uniqueValues = getUniqueValues();
-	}
+	private static int[] uniqueValues;
 	
 	public static void main(String[] args) {
 		/*
@@ -28,15 +24,25 @@ public class DrawPoker2 {
 		//String[] x = new String[] { "4h", "5s", "6d", "9c", "Th" };
 		
 		//String[] x = new String[] { "3h", "4c", "2d", "5c", "2s" };
-		//String[] x = new String[] { "2h", "2d", "5h", "8h", "Jh" };
+		//String[] x = new String[] { "2h", "2d", "5h", "9h", "Jh" };
 		//String[] x = new String[] { "8h", "7c", "6c", "5s", "4s" };
-		String[] x = new String[] { "2d", "4h", "6d", "Qd", "7c" };
+		//String[] x = new String[] { "Kc", "Ac", "Js", "3h", "7c" };
+		//String[] x = new String[] { "4d", "6d", "5c", "3h", "5h" };
+		String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
+		
+		List<Draw> l = new ArrayList<Draw>();
 		
 		for (int n = 0; n <= 5; n++) {
-			String[] y = getDraw(x, n);
+			String[] y = getDrawingHand(l, x, n, 4f);
 			String[] z = DrawPoker.getDraw(x, n);
 			System.out.println("draw " + n + " old: " + Arrays.toString(z));
 			System.out.println("       new: " + Arrays.toString(y));
+		}
+		
+		Collections.sort(l);
+		Collections.reverse(l);
+		for (Draw d : l) {
+			System.out.println(String.format("%.6f -> %s", d.value, Arrays.toString(d.hole)));
 		}
 		
 	}
@@ -45,8 +51,11 @@ public class DrawPoker2 {
 	 * Go through every possible 5 card hand and collect the unique hand values in order
 	 */
 	private static int[] getUniqueValues() {
-		// TODO this is not very efficient, could just serialise/deserialise array
+		if (uniqueValues != null) {
+			return uniqueValues;
+		}
 		
+		// TODO this is not very efficient, could just serialise/deserialise array
 		Set<Integer> uniqueValueSet = new TreeSet<Integer>();
 		String[] deck = Poker.deck.toArray(new String[Poker.deck.size()]);
 		String[] hand = new String[5];
@@ -71,13 +80,14 @@ public class DrawPoker2 {
 		System.out.println("values: " + valueCount);
 		System.out.println("unique values: " + uniqueValueSet.size());
 		
-		int[] uniqueValues = new int[uniqueValueSet.size()];
+		int[] a = new int[uniqueValueSet.size()];
 		int i = 0;
 		for (int v : uniqueValueSet) {
-			uniqueValues[i++] = v;
+			a[i++] = v;
 		}
-		Arrays.sort(uniqueValues);
-		return uniqueValues;
+		Arrays.sort(a);
+		uniqueValues = a;
+		return a;
 	}
 	
 	private static void avghand() {
@@ -118,79 +128,82 @@ public class DrawPoker2 {
 		
 	}
 	
+	public static class Draw implements Comparable<Draw> {
+		public final String[] hole;
+		public float value;
+		public Draw(String[] hole, float value) {
+			this.hole = hole;
+			this.value = value;
+		}
+		@Override
+		public int compareTo(Draw other) {
+			return (int) Math.signum(value - other.value);
+		}
+	}
 	
-	public static String[] getDraw(final String[] hand, final int drawn) {
+	private static float getScore(int v, float bigPlay) {
+		int[] uniqueValues = getUniqueValues();
+		final int p = Arrays.binarySearch(uniqueValues, v);
+		if (p < 0) {
+			throw new RuntimeException();
+		}
+		return (float) Math.pow((1f * p) / (uniqueValues.length - 1f), bigPlay);
+	}
+
+	public static String[] getDrawingHand(List<Draw> draws, final String[] hand, final int drawn, float bigPlay) {
 		if (drawn < 0 || drawn > 5) {
 			throw new RuntimeException();
 		}
-		
-		//if (drawn == 0) {
-		//return hand.clone();
-		//}
 		
 		if (drawn == 5) {
 			return new String[0];
 		}
 		
-		if (uniqueValues == null) {
-			getUniqueValues();
-		}
-		
-		// FIXME if they draw 1 and result is hc/pa then assume they were drawing to str/fl
-		// assuming there is a str/fl draw...
-		final int minv;
-		final int handv = Poker.value(hand);
-		if (drawn == 1 && handv < Poker.TP_MASK) {
-			minv = Poker.ST_MASK;
-		} else {
-			minv = 0;
+		if (drawn == 0) {
+			if (draws != null) {
+				draws.add(new Draw(hand, getScore(Poker.value(hand), bigPlay)));
+			}
+			return hand.clone();
 		}
 		
 		// from players point of view, all other cards are possible
 		final String[] deck = Poker.remdeck(null, hand);
-		final String[] h = new String[5];
-		final String[] maxh = new String[5 - drawn];
-		final int pmax = MathsUtil.bincoff(5, 5 - drawn);
-		final int qmax = MathsUtil.bincoff(deck.length, drawn);
-		int maxscore = 0;
+		final String[] drawnHand = new String[5];
+		final int imax = MathsUtil.bincoff(5, 5 - drawn);
+		final int jmax = MathsUtil.bincoff(deck.length, drawn);
 		
-		for (int p = 0; p < pmax; p++) {
-			Arrays.fill(h, null);
+		String[] maxDrawingHand = null;
+		float maxScore = -1f;
+		
+		for (int i = 0; i < imax; i++) {
+			Arrays.fill(drawnHand, null);
 			// pick kept from hand
-			MathsUtil.kcomb(5 - drawn, p, hand, h, 0);
-			int score = 0;
+			MathsUtil.kcomb(5 - drawn, i, hand, drawnHand, 0);
+			float score = 0;
 			
-			for (int q = 0; q < qmax; q++) {
+			for (int j = 0; j < jmax; j++) {
 				// pick drawn from deck
-				MathsUtil.kcomb(drawn, q, deck, h, 5 - drawn);
-				int v = Poker.value(h);
-				if (v > minv) {
-					int v2 = Arrays.binarySearch(uniqueValues, v);
-					if (v2 < 0) {
-						throw new RuntimeException();
-					}
-					score += v2;
-				}
+				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
+				int value = Poker.value(drawnHand);
+				score += getScore(value, bigPlay);
 			}
 			
-			if (score > maxscore) {
+			float averageScore = score / (1.0f * jmax);
+			String[] drawingHand = Arrays.copyOf(drawnHand, 5 - drawn);
+			//System.out.println("hand: " + Arrays.toString(drawingHand) + " score: " + score + " mean value: " + meanval);
+			if (draws != null) {
+				draws.add(new Draw(drawingHand, averageScore));
+			}
+					
+			if (score > maxScore) {
 				// copy new max hole cards
-				for (int n = 0; n < 5 - drawn; n++) {
-					maxh[n] = h[n];
-				}
-				maxscore = score;
-				System.out.println("hand " + Arrays.toString(maxh) + " score " + score + " avg: " + (score / (1.0 * qmax * (uniqueValues.length - 1))));
-			}
-			
-		}
-		
-		for (String c : maxh) {
-			if (c == null) {
-				throw new RuntimeException("could not get draw for " + Arrays.toString(hand) + " drawn " + drawn);
+				maxDrawingHand = drawingHand;
+				maxScore = score;
 			}
 		}
 		
-		//System.out.println("hand " + Arrays.toString(maxh));
-		return maxh;
+		//System.out.println("hand " + Arrays.toString(maxh2));
+		return maxDrawingHand;
 	}
+	
 }
