@@ -177,7 +177,7 @@ abstract class CalcPanel extends JPanel {
 
 	/** select the given board/hole card number */
 	protected void selectCard(int n) {
-		System.out.println("select card " + n);
+		System.out.println("calc panel select card " + n);
 		cardLabels.get(selcard).setCardSelected(false);
 		selcard = n % cardLabels.size();
 		cardLabels.get(selcard).setCardSelected(true);

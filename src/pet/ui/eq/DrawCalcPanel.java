@@ -22,6 +22,8 @@ public class DrawCalcPanel extends CalcPanel {
 		initCardLabels();
 		
 		setCardPanels(handPanels);
+		
+		selectCard(0);
 	}
 	
 	/**

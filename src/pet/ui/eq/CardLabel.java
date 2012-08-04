@@ -57,6 +57,7 @@ class CardLabel extends JLabel {
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				System.out.println("card label mouse clicked");
 				if (!hidden) {
 					setCardSelected(!selected);
 					firePropertyChange(selected ? CARD_SEL_PROP_CHANGE : CARD_DESEL_PROP_CHANGE, "", getName());

@@ -2,6 +2,7 @@ package pet.ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,57 +17,24 @@ import pet.ui.ta.*;
 
 /**
  * player info and player game info panel
- * 
- * ( ) Self ( ) [Name] [Search]
  */
 public class PlayerPanel extends JPanel {
-	// [name]
-	// [table-name,games,hands,value]
-	// [pinfo]
-	private final JTextField nameField = new JTextField();
+
+	private final PlayerField playerField = new PlayerField();
+	private final JButton searchButton = new JButton("Search");
 	private final MyJTable playersTable = new MyJTable();
 	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea gameTextArea = new JTextArea();
 	private final JButton bankrollButton = new JButton("Bankroll");
 	private final JButton handsButton = new JButton("Hands");
 	
-	private final JRadioButton selfButton = new JRadioButton("Self");
-	private final JRadioButton nameButton = new JRadioButton("Name:");
-	private final JButton searchButton = new JButton("Search");
-	
 	public PlayerPanel() {
 		super(new BorderLayout());
 		
-		nameField.setColumns(10);
-		//nameField.setBorder(BorderFactory.createTitledBorder("Player Name"));
-		nameField.addActionListener(new ActionListener() {
+		playerField.addPropertyChangeListener(PlayerField.FIND_PROP_CHANGE, new PropertyChangeListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
+			public void propertyChange(PropertyChangeEvent e) {
 				find();
-			}
-		});
-		
-		
-		ButtonGroup bg = new ButtonGroup();
-		selfButton.getModel().setGroup(bg);
-		nameButton.getModel().setGroup(bg);
-		
-		selfButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					nameField.setEnabled(false);
-				}
-			}
-		});
-		
-		nameButton.setSelected(true);
-		nameButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					nameField.setEnabled(true);
-				}
 			}
 		});
 		
@@ -167,9 +135,7 @@ public class PlayerPanel extends JPanel {
 		mainPanel.add(gameTextAreaScroller);
 		
 		JPanel topPanel = new JPanel();
-		topPanel.add(selfButton);
-		topPanel.add(nameButton);
-		topPanel.add(nameField);
+		topPanel.add(playerField);
 		topPanel.add(searchButton);
 		
 		JPanel bottomPanel = new JPanel();
@@ -187,12 +153,12 @@ public class PlayerPanel extends JPanel {
 		Info info = pf.getInfo();
 		
 		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
-		if (nameButton.isSelected()) {
-			String pattern = nameField.getText();
-			playersModel.setRows(info.getPlayers(pattern));
-		} else {
+		if (playerField.isSelfSelected()) {
 			History history = pf.getHistory();
 			playersModel.setRows(info.getPlayers(history.getSelf()));
+		} else {
+			String pattern = playerField.getPlayerName();
+			playersModel.setRows(info.getPlayers(pattern));
 		}
 		
 		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
@@ -204,8 +170,8 @@ public class PlayerPanel extends JPanel {
 	}
 
 	/** search for the given player */
-	public void displayPlayer(String player) {
-		nameField.setText(player);
+	public void displayPlayer(String name) {
+		playerField.setPlayerName(name);
 		find();
 	}
 }
