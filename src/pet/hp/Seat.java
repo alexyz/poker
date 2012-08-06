@@ -15,7 +15,7 @@ public class Seat implements Serializable {
 	/** starting chips */
 	public int chips;
 	/** seats final hole cards */
-	public String[] holeCards;
+	public String[] finalHoleCards;
 	/** amount won */
 	public int won;
 	/**
@@ -57,8 +57,8 @@ public class Seat implements Serializable {
 	@Override
 	public String toString() {
 		String s = num + ":" + name + "(" + chips + ")";
-		if (holeCards != null) {
-			s += " " + Arrays.asList(holeCards);
+		if (finalHoleCards != null) {
+			s += " " + Arrays.asList(finalHoleCards);
 		}
 		if (drawn0 > 0) {
 			s += " discards " + drawn0;

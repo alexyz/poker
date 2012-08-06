@@ -65,6 +65,28 @@ public class Hand implements Serializable {
 			default: throw new RuntimeException();
 		}
 	}
+	
+	public void addMyHoleCards(String[] h) {
+		if (myHoleCards0 == null) {
+			// first hand for all games
+			myHoleCards0 = h;
+			
+		} else if (myHoleCards1 == null) {
+			// second hand for draw and triple draw
+			myHoleCards1 = h;
+			
+		} else if (myHoleCards2 == null) {
+			// third hand for triple draw
+			myHoleCards2 = h;
+			
+		} else if (myHoleCards3 == null) {
+			// fourth and final hand for triple draw
+			myHoleCards3 = h;
+			
+		} else {
+			throw new RuntimeException("too many hole cards");
+		}
+	}
 
 	@Override
 	public String toString() {

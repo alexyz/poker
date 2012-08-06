@@ -101,19 +101,22 @@ public class HandUtil {
 			case Game.DSTD_TYPE:
 				if (street == GameUtil.getMaxStreets(hand.game.type) - 1) {
 					// on final street just return final hand from seat
-					hc = new HoleCards(seat.holeCards.clone());
+					hc = new HoleCards(seat.finalHoleCards.clone());
 					
 				} else if (hand.myseat == seat) {
 					// get current player cards but also see which ones were kept
-					String[] x = hand.myHoleCards(street + 1);
-					if (x == null) {
-						x = hand.myseat.holeCards;
+					String[] x = hand.myHoleCards(street);
+					String[] y = hand.myHoleCards(street + 1);
+					System.out.println("my hole cards for street " + street + " are " + Arrays.toString(x) + " and " + Arrays.toString(y));
+					if (y == null) {
+						y = hand.myseat.finalHoleCards;
+						System.out.println("using final hole cards " + Arrays.toString(y));
 					}
-					hc = kept(hand.myHoleCards(street), x, seat.drawn(street));
+					hc = kept(x, y, seat.drawn(street));
 					
 				} else {
 					// guess opponents hole cards based on final hand
-					String[] h = DrawPoker2.getDrawingHand(seat.holeCards, seat.drawn(street), false);
+					String[] h = DrawPoker2.getDrawingHand(seat.finalHoleCards, seat.drawn(street), false);
 					hc = new HoleCards(h, null, true);
 				}
 				break;
@@ -121,24 +124,24 @@ public class HandUtil {
 			case Game.FCD_TYPE:
 				if (street == 1) {
 					// return final hand
-					hc = new HoleCards(seat.holeCards.clone());
+					hc = new HoleCards(seat.finalHoleCards.clone());
 					
 				} else if (hand.myseat == seat) {
 					// return starting hand
 					// XXX should also return discarded
-					hc = kept(hand.myHoleCards0, seat.holeCards, seat.drawn0);
+					hc = kept(hand.myHoleCards0, seat.finalHoleCards, seat.drawn0);
 					
-				} else if (seat.holeCards != null) {
+				} else if (seat.finalHoleCards != null) {
 					// guess what cards the opponent kept
-					hc = new HoleCards(DrawPoker.getDrawingHand(seat.holeCards, seat.drawn0), null, true);
+					hc = new HoleCards(DrawPoker.getDrawingHand(seat.finalHoleCards, seat.drawn0), null, true);
 				}
 				break;
 				
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
-				if (seat.holeCards != null) {
-					hc = new HoleCards(seat.holeCards);
+				if (seat.finalHoleCards != null) {
+					hc = new HoleCards(seat.finalHoleCards);
 				}
 				break;
 				
@@ -160,8 +163,8 @@ public class HandUtil {
 	public static String[][] getHoleCards(Hand hand) {
 		List<String[]> holes = new ArrayList<String[]>();
 		for (Seat seat : hand.seats) {
-			if (seat.holeCards != null && seat.holeCards.length > 0) {
-				holes.add(seat.holeCards);
+			if (seat.finalHoleCards != null && seat.finalHoleCards.length > 0) {
+				holes.add(seat.finalHoleCards);
 			}
 		}
 		String[][] holesArr = holes.toArray(new String[holes.size()][]);

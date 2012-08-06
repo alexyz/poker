@@ -206,7 +206,7 @@ public class PokerFrame extends JFrame {
 				for (Hand hand : hands) {
 					// get pre-draw and post draw hands
 					String[] h1 = hand.myHoleCards0;
-					String[] h2 = hand.myseat.holeCards;
+					String[] h2 = hand.myseat.finalHoleCards;
 					int d = hand.myseat.drawn0;
 					if (h1 != null && h2 != null) {
 						String[] pre = DrawPoker2.getDrawingHand(h1, d, true);

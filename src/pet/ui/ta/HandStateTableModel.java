@@ -50,7 +50,11 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 					return PokerUtil.cardsString(hs.board);
 				}
 				
-				// show hole cards if first non draw action
+				// show hole cards if first action
+				// this does make the draw actions a bit confusing as it
+				// displays the hand after, not before the draw
+				// but there might not be any other actions to display the
+				// equity against
 				
 				if (ss.actionNum == 1) {
 					if (ss.holeObj != null) {

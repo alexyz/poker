@@ -431,28 +431,10 @@ public class PSParser extends Parser {
 
 		println("dealt " + Arrays.asList(h));
 		
-		if (hand.myHoleCards0 == null) {
-			// first hand for all games
-			hand.myHoleCards0 = h;
-			
-		} else if (hand.myHoleCards1 == null) {
-			// second hand for draw and triple draw
-			hand.myHoleCards1 = h;
-			
-		} else if (hand.myHoleCards2 == null) {
-			// third hand for triple draw
-			hand.myHoleCards2 = h;
-			
-		} else if (hand.myHoleCards3 == null) {
-			// fourth and final hand for triple draw
-			hand.myHoleCards3 = h;
-			
-		} else {
-			throw new RuntimeException("unexpected deal");
-		}
+		hand.addMyHoleCards(h);
 		
 		// last hand
-		myseat.holeCards = h;
+		myseat.finalHoleCards = h;
 	}
 
 	private void parseSeat(final String line) {
@@ -476,8 +458,8 @@ public class PSParser extends Parser {
 				for (Seat seat : seatsMap.values()) {
 					if (seat.num == seatno) {
 						// could be mucking more than they showed
-						checkMuckedHand(seat.holeCards, hand);
-						seat.holeCards = hand;
+						checkMuckedHand(seat.finalHoleCards, hand);
+						seat.finalHoleCards = hand;
 					}
 				}
 				println("seat summary " + seatno + " hand " + Arrays.asList(hand));
@@ -805,8 +787,8 @@ public class PSParser extends Parser {
 				int handStart = line.indexOf("[");
 				if (handStart > 0) {
 					String[] hand = parseHand(line, handStart);
-					checkNewHand(seat.holeCards, hand);
-					seat.holeCards = hand;
+					checkNewHand(seat.finalHoleCards, hand);
+					seat.finalHoleCards = hand;
 				}
 				break;
 			}
@@ -908,8 +890,8 @@ public class PSParser extends Parser {
 				//showdown = true;
 				int handStart = ParseUtil.nextToken(line, actEnd);
 				String[] hand = parseHand(line, handStart);
-				checkNewHand(seat.holeCards, hand);
-				seat.holeCards = hand;
+				checkNewHand(seat.finalHoleCards, hand);
+				seat.finalHoleCards = hand;
 				break;
 			}
 
@@ -921,17 +903,22 @@ public class PSParser extends Parser {
 				// five card draw: always draw 0
 				// street 0 (size 1): no draw
 				// street 1 (size 2): draw 0, etc
-				int draw = gametype == Game.DSTD_TYPE ? streets.size() - 2 : 0;
+				int draw = hand.game.type == Game.DSTD_TYPE ? streets.size() - 2 : 0;
 				if (seat.drawn(draw) > 0) {
 					throw new RuntimeException("already discarded " + seat.drawn(draw));
 				}
 				int discardsStart = ParseUtil.nextToken(line, actEnd);
 				seat.setDrawn(draw, (byte) ParseUtil.parseInt(line, discardsStart));
+				// the actual cards will be set in parseDeal
 				break;
 			}
 
 			case Action.STANDPAT_TYPE: {
 				// stands pat
+				if (hand.myseat == seat) {
+					// there is no deal so push previous hole cards here
+					hand.addMyHoleCards(seat.finalHoleCards);
+				}
 				drawAct = true;
 				println("stands");
 				break;

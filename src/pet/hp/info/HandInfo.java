@@ -34,7 +34,7 @@ public class HandInfo {
 	
 	public Hole hole() {
 		if (hole == null) {
-			hole = new Hole(hand.myseat.holeCards);
+			hole = new Hole(hand.myseat.finalHoleCards);
 		}
 		return hole;
 	}
@@ -42,7 +42,7 @@ public class HandInfo {
 	public Rank rank() {
 		if (rank == null) {
 			Poker p = GameUtil.getPoker(hand.game);
-			int v = p.value(hand.board, hand.myseat.holeCards);
+			int v = p.value(hand.board, hand.myseat.finalHoleCards);
 			rank = new Rank(v);
 		}
 		return rank;

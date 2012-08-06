@@ -5,6 +5,9 @@ package pet.eq;
  */
 public class MEquity {
 	
+	/**
+	 * equity instances (0 = first, 1 = hi half, 2 = lo half)
+	 */
 	public final Equity[] eqs;
 	/** is this equity exact or sampled */
 	public final boolean exact;
