@@ -4,9 +4,7 @@ import java.awt.*;
 
 import javax.swing.*;
 
-import pet.eq.Equity;
-import pet.eq.MEquity;
-import pet.eq.Poker;
+import pet.eq.*;
 
 public class RanksPanel extends JPanel {
 
@@ -40,11 +38,16 @@ public class RanksPanel extends JPanel {
 	}
 
 	public void setHandEquity(Equity e) {
-		for (int n = 0; n < rankLabs.length; n++) {
-			JLabel rl = rankLabs[n];
-			rl.setForeground(e.wonrank[n] > 0 ? Color.black : Color.darkGray);
-			rl.setFont(e.wonrank[n] > 0 ? boldfont : font);
-			rl.setText(String.format("%s: %.0f", Poker.ranknames[n], e.wonrank[n]));
+		if (e.eqtype == Equity.HI_ONLY || e.eqtype == Equity.HILO_HI_HALF) {
+			for (int n = 0; n < rankLabs.length; n++) {
+				JLabel rl = rankLabs[n];
+				rl.setForeground(e.wonrank[n] > 0 ? Color.black : Color.darkGray);
+				rl.setFont(e.wonrank[n] > 0 ? boldfont : font);
+				rl.setText(String.format("%s: %.0f", Poker.ranknames[n], e.wonrank[n]));
+			}
+		} else {
+			// TODO ranks for other equity types
+			rankLabs[0].setText("?");
 		}
 	}
 

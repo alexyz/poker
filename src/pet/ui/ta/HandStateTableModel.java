@@ -50,20 +50,20 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 					return PokerUtil.cardsString(hs.board);
 				}
 				
-				if (ss.actionNum > 1) {
-					return "";
-				}
+				// show hole cards if first non draw action
 				
-				if (ss.holeObj != null) {
-					if (ss.holeObj.guess) {
-						return "(" + PokerUtil.cardsString(ss.holeObj.hole) + ")";
-						
-					} else {
-						String s = PokerUtil.cardsString(ss.holeObj.hole);
-						if (ss.holeObj.discarded != null) {
-							s += " (" + PokerUtil.cardsString(ss.holeObj.discarded) + ")";
+				if (ss.actionNum == 1) {
+					if (ss.holeObj != null) {
+						if (ss.holeObj.guess) {
+							return "(" + PokerUtil.cardsString(ss.holeObj.hole) + ")";
+							
+						} else {
+							String s = PokerUtil.cardsString(ss.holeObj.hole);
+							if (ss.holeObj.discarded != null) {
+								s += " (" + PokerUtil.cardsString(ss.holeObj.discarded) + ")";
+							}
+							return s;
 						}
-						return s;
 					}
 				}
 				
@@ -85,7 +85,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState hs) {
 				SeatState ss = hs.actionSeat();
 				if (ss != null) {
-					String v = HandUtil.actionString(hs.hand, hs.action);
+					String v = hs.actionString();
 					if (ss.amount > 0) {
 						if (ss.bpr > 0) {
 							v += String.format(" (%2.1f%%)", ss.bpr);
@@ -102,7 +102,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			public String getValue(HandState hs) {
 				SeatState ss = hs.actionSeat();
 				if (ss != null) {
-					if (ss.meq != null && ss.actionNum <= 1) {
+					if (ss.meq != null && ss.actionNum == 1) {
 						return MEquityUtil.equityString(ss.meq);
 					}
 				}

@@ -11,23 +11,23 @@ public class DrawPoker extends Poker {
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
-	public static MEquity[] equityImpl(String[][] hands, String[] blockers) {
+	private static MEquity[] equityImpl(Value value, String[][] hands, String[] blockers) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
 
 		// remaining cards in deck
 		final String[] deck = Poker.remdeck(hands, blockers);
 
 		// return value
-		final MEquity[] meqs = MEquityUtil.makeMEquity(hands.length, false, deck.length, false);
+		final MEquity[] meqs = MEquityUtil.makeMEquity(hands.length, false, value.eqtype, deck.length, false);
 
 		// get current hand values (not equity)
 		final int[] vals = new int[hands.length];
 		for (int n = 0; n < hands.length; n++) {
 			if (hands[n].length == 5) {
-				vals[n] = value(hands[n]);
+				vals[n] = value.value(hands[n]);
 			}
 		}
-		MEquityUtil.updateCurrent(meqs, MEquity.HIONLY, vals);
+		MEquityUtil.updateCurrent(meqs, value.eqtype, vals);
 
 		final String[] h = new String[5];
 
@@ -46,10 +46,10 @@ public class DrawPoker extends Poker {
 						h[n] = RandomUtil.pick(deck, pick);
 					}
 				}
-				int v = value(h);
+				int v = value.value(h);
 				vals[hn] = v;
 			}
-			MEquityUtil.updateEquity(meqs, MEquity.HIONLY, vals, null, 0);
+			MEquityUtil.updateEquity(meqs, value.eqtype, vals, null, 0);
 		}
 
 		MEquityUtil.summariseEquity(meqs, c, 0);
@@ -163,10 +163,16 @@ public class DrawPoker extends Poker {
 	//
 	// instance methods
 	//
+	
+	private final boolean high;
+	
+	public DrawPoker(boolean high) {
+		this.high = high;
+	}
 
 	@Override
 	public MEquity[] equity(String[] board, String[][] hands, String[] blockers) {
-		return equityImpl(hands, blockers);
+		return equityImpl(high ? hiValue : dsLowValue, hands, blockers);
 	}
 	
 	@Override

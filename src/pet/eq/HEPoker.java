@@ -75,7 +75,7 @@ public class HEPoker extends Poker {
 			return 0;
 			
 		} else {
-			return value(Poker.hi, board, hole);
+			return value(Poker.hiValue, board, hole);
 		}
 	}
 	
@@ -83,7 +83,8 @@ public class HEPoker extends Poker {
 	 * Calc exact tex/omaha hand equity for each hand for given board
 	 */
 	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holes) {
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, heboard.deck.length, true);
+		// equity type is ignored if hilo is true
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, Equity.HI_ONLY, heboard.deck.length, true);
 		
 		final int[] hivals = new int[holes.length];
 		final int[] lovals = new int[holes.length];
@@ -100,17 +101,17 @@ public class HEPoker extends Poker {
 		if (heboard.current != null) {
 			for (int n = 0; n < holes.length; n++) {
 				if (heboard.current.length >= 3) {
-					hivals[n] = value(Poker.hi, heboard.current, holes[n]);
+					hivals[n] = value(Poker.hiValue, heboard.current, holes[n]);
 				}
 			}
-			MEquityUtil.updateCurrent(meqs, MEquity.HIONLY, hivals);
+			MEquityUtil.updateCurrent(meqs, Equity.HI_ONLY, hivals);
 			
 			// get current low values
 			if (lowPossible) {
 				for (int n = 0; n < holes.length; n++) {
-					lovals[n] = value(Poker.lo, heboard.current, holes[n]);
+					lovals[n] = value(Poker.afLowValue, heboard.current, holes[n]);
 				}
-				MEquityUtil.updateCurrent(meqs, MEquity.LOHALF, lovals);
+				MEquityUtil.updateCurrent(meqs, Equity.HILO_LO_HALF, lovals);
 			}
 		}
 		
@@ -125,14 +126,14 @@ public class HEPoker extends Poker {
 			
 			// hi equity
 			for (int i = 0; i < holes.length; i++) {
-				hivals[i] = value(Poker.hi, heboard.board, holes[i]);
+				hivals[i] = value(Poker.hiValue, heboard.board, holes[i]);
 			}
 			
 			// low equity - only counts if at least one hand makes low
 			boolean hasLow = false;
 			if (lowPossible) {
 				for (int i = 0; i < holes.length; i++) {
-					int v = value(Poker.lo, heboard.board, holes[i]);
+					int v = value(Poker.afLowValue, heboard.board, holes[i]);
 					if (v > 0) {
 						hasLow = true;
 					}
@@ -143,16 +144,16 @@ public class HEPoker extends Poker {
 			if (hasLow) {
 				hiloCount++;
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, MEquity.HIHALF, hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, null, 0);
 				// low winner
-				int lw = MEquityUtil.updateEquity(meqs, MEquity.LOHALF, lovals, null, 0);
+				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_LO_HALF, lovals, null, 0);
 				if (hw >= 0 && hw == lw) {
 					meqs[hw].scoopcount++;
 				}
 				
 			} else {
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, MEquity.HIONLY, hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, Equity.HI_ONLY, hivals, null, 0);
 				if (hw >= 0) {
 					meqs[hw].scoopcount++;
 				}

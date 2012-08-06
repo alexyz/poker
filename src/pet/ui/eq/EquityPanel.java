@@ -45,7 +45,7 @@ class EquityPanel extends JPanel {
 	}
 
 	public void setHandEquity(MEquity me, Equity e) {
-		typeLab.setText(e.type);
+		typeLab.setText(Equity.getEqTypeName(e.eqtype));
 		String s = String.format("Win: %.1f%%", e.won);
 		if (e.tied != 0) {
 			s += String.format("  Tie: %.1f%%", e.tied);

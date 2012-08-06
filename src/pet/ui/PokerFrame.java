@@ -180,8 +180,8 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(eqTabs);
 	}
 	
-	public void displayDrawEquity(String[][] holes) {
-		drawPanel.displayHand(holes);
+	public void displayDrawEquity(String[][] holes, String type) {
+		drawPanel.displayHand(holes, type);
 		eqTabs.setSelectedComponent(drawPanel);
 		tabs.setSelectedComponent(eqTabs);
 	}
@@ -205,11 +205,11 @@ public class PokerFrame extends JFrame {
 				List<Hand> hands = history.getHands("tawvx", gid);
 				for (Hand hand : hands) {
 					// get pre-draw and post draw hands
-					String[] h1 = hand.myhole;
-					String[] h2 = hand.myseat.hole;
-					int d = hand.myseat.discards;
+					String[] h1 = hand.myHoleCards0;
+					String[] h2 = hand.myseat.holeCards;
+					int d = hand.myseat.drawn0;
 					if (h1 != null && h2 != null) {
-						String[] pre = DrawPoker2.getDrawingHand(null, h1, d, 2f);
+						String[] pre = DrawPoker2.getDrawingHand(h1, d, true);
 						for (String c1 : pre) {
 							find: {
 								for (String c2 : h2) {

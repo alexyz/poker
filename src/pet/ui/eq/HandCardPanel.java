@@ -91,21 +91,23 @@ class HandCardPanel extends CardPanel {
 
 	public void setHandEquity(MEquity me) {
 		clearHandEquity();
+		
 		if (me != null) {
-			if (me.hionly() != null) {
-				hiOnlyEquityPanel.setHandEquity(me, me.hionly());
-				hiOnlyRanks.setHandEquity(me.hionly());
-			}
-			if (me.hihalf() != null) {
-				hiHalfEquityPanel.setHandEquity(me, me.hihalf());
+			hiOnlyEquityPanel.setHandEquity(me, me.eqs[0]);
+			hiOnlyRanks.setHandEquity(me.eqs[0]);
+			
+			if (me.eqs.length >= 2) {
+				hiHalfEquityPanel.setHandEquity(me, me.eqs[1]);
 				hiHalfEquityPanel.setVisible(true);
-				hiHalfRanks.setHandEquity(me.hihalf());
+				hiHalfRanks.setHandEquity(me.eqs[1]);
 				hiHalfRanks.setVisible(true);
 			}
-			if (me.lohalf() != null) {
-				loHalfEquityPanel.setHandEquity(me, me.lohalf());
+			
+			if (me.eqs.length >= 3) {
+				loHalfEquityPanel.setHandEquity(me, me.eqs[2]);
 				loHalfEquityPanel.setVisible(true);
 			}
+			
 			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);
 		}
 	}

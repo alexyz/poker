@@ -33,7 +33,7 @@ public class Hand implements Serializable {
 	public Seat myseat;
 	/** action on each street */
 	public Action[][] streets;
-	/** did hand reach showdown (could have folded on river) */
+	/** did hand reach showdown (can't just count streets as could have folded on river) */
 	public boolean showdown;
 	/** community cards if any */
 	public String[] board;
@@ -41,8 +41,12 @@ public class Hand implements Serializable {
 	public int pot;
 	/** pokerstars wealth delta */
 	public int rake;
-	/** original hole cards dealt to player */
-	public String[] myhole;
+	/**
+	 * original (all games) and subsequent (draw games) hole cards dealt to
+	 * player. since we only ever know the original cards for current player,
+	 * this is on hand and not seat.
+	 */
+	public String[] myHoleCards0, myHoleCards1, myHoleCards2, myHoleCards3;
 	/** name of table */
 	public String tablename;
 	/** button seat number */
@@ -50,6 +54,16 @@ public class Hand implements Serializable {
 	
 	public Hand(long id) {
 		this.id = id;
+	}
+	
+	public String[] myHoleCards(int n) {
+		switch (n) {
+			case 0: return myHoleCards0;
+			case 1: return myHoleCards1;
+			case 2: return myHoleCards2;
+			case 3: return myHoleCards3;
+			default: throw new RuntimeException();
+		}
 	}
 
 	@Override

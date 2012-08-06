@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import pet.hp.*;
 import pet.hp.state.*;
+import pet.ui.eq.DrawCalcPanel;
 import pet.ui.ta.*;
 
 /**
@@ -23,7 +24,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	private final JButton equityButton = new JButton("Equity");
 	private final JButton playerButton = new JButton("Player");
 	private final JButton replayButton = new JButton("Replay");
-	private final JToggleButton updateButton = new JToggleButton("Update");
+	private final JToggleButton updateButton = new JToggleButton("Auto Select");
 
 	public LastHandPanel() {
 		super(new BorderLayout());
@@ -86,7 +87,10 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 						pf.displayHoldemEquity(hs.hand.board, holes, true, true);
 						break;
 					case Game.FCD_TYPE:
-						pf.displayDrawEquity(holes);
+						pf.displayDrawEquity(holes, DrawCalcPanel.HIGH);
+						break;
+					case Game.DSTD_TYPE:
+						pf.displayDrawEquity(holes, DrawCalcPanel.DSLOW);
 						break;
 					default:
 						throw new RuntimeException("unknown game type " + hs.hand);

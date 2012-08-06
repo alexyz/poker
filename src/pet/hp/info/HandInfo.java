@@ -34,7 +34,7 @@ public class HandInfo {
 	
 	public Hole hole() {
 		if (hole == null) {
-			hole = new Hole(hand.myseat.hole);
+			hole = new Hole(hand.myseat.holeCards);
 		}
 		return hole;
 	}
@@ -42,7 +42,7 @@ public class HandInfo {
 	public Rank rank() {
 		if (rank == null) {
 			Poker p = GameUtil.getPoker(hand.game);
-			int v = p.value(hand.board, hand.myseat.hole);
+			int v = p.value(hand.board, hand.myseat.holeCards);
 			rank = new Rank(v);
 		}
 		return rank;
@@ -161,7 +161,7 @@ public class HandInfo {
 		sb.append("button " + hand.button + "\n");
 		sb.append("game " + hand.game + "\n");
 		sb.append("date " + hand.date + "\n");
-		sb.append("original hole " + Arrays.toString(hand.myhole) + "\n");
+		sb.append("original hole " + Arrays.toString(hand.myHoleCards0) + "\n");
 		sb.append("id " + hand.id + "\n");
 		sb.append("pot " + hand.pot + "\n");
 		sb.append("rake " + hand.rake + "\n");

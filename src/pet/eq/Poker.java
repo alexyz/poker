@@ -1,39 +1,60 @@
 package pet.eq;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Poker hand valuation.
  */
 public abstract class Poker {
 	
-	/** any mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
-	protected static final int MASK = 0xf00000;
+	/* 
+	 * poker hand values are represented by 7 x 4 bit values (28 bits total):
+	 * 0x7654321
+	 * 7 - hand type (high, a-5 low, 2-7 low)
+	 * 6 - rank
+	 * 5 - most significant card (if any)
+	 * ...
+	 * 1 - least significant card
+	 */
+	
+	/** hand value type mask */
+	protected static final int TYPE = 0xf000000;
+	/** high hand value type */
+	protected static final int HI_TYPE = 0;
+	/** deuce to seven low hand value type */
+	protected static final int DS_LOW_TYPE = 0x1000000;
+	/** ace to five low hand value type */
+	protected static final int AF_LOW_TYPE = 0x2000000;
+	
+	/** rank mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
+	protected static final int RANK = 0xf00000;
+	/** rank and hand value mask */
+	protected static final int HAND = 0xffffff;
+	
 	/** high card bit mask (always zero) */
 	protected static final int H_MASK = 0;
 	/** pair rank bit mask */
-	protected static final int P_MASK = 1 << 20;
+	protected static final int P_MASK = 0x100000;
 	/** two pair rank bit mask */
-	protected static final int TP_MASK = 2 << 20;
+	protected static final int TP_MASK = 0x200000;
 	/** three of a kind rank bit mask */
-	protected static final int TK_MASK = 3 << 20;
+	protected static final int TK_MASK = 0x300000;
 	/** straight bit mask */
-	protected static final int ST_MASK = 4 << 20;
+	protected static final int ST_MASK = 0x400000;
 	/** flush bit mask */
-	protected static final int FL_MASK = 5 << 20;
+	protected static final int FL_MASK = 0x500000;
 	/** full house bit mask */
-	protected static final int FH_MASK = 6 << 20;
+	protected static final int FH_MASK = 0x600000;
 	/** four of a kind bit mask */
-	protected static final int FK_MASK = 7 << 20;
+	protected static final int FK_MASK = 0x700000;
 	/** straight flush rank mask */
-	protected static final int SF_MASK = 8 << 20;
-	/** ace-five low rank mask */
-	protected static final int LOW_MASK = 9 << 20;
+	protected static final int SF_MASK = 0x800000;
+	/** impossible rank higher than straight flush */
+	protected static final int INV_MASK = 0x900000;
+	
 	/** number of high ranks */
 	public static final int RANKS = 9;
+	
 	/**
 	 * short rank names (value >> 20)
 	 */
@@ -43,41 +64,66 @@ public abstract class Poker {
 	/** complete deck in face then suit order, lowest first */
 	// TODO other arrays should be immutable
 	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(
-		"2h", "2s", "2c", "2d",
-		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
-		"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
-		"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
-		"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
-		"Ah", "As", "Ac", "Ad" 
-	));
+			"2h", "2s", "2c", "2d",
+			"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
+			"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
+			"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
+			"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
+			"Ah", "As", "Ac", "Ad" 
+			));
 	
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
 	
+	/** array of all possible unique hi hand values (there are only approx 7500) */
+	private static int[] uniqueValues;
+	
 	/**
 	 * calculates high value of hand
 	 */
-	public static final Value hi = new Value() {
+	public static final Value hiValue = new Value(Equity.HI_ONLY) {
 		@Override
 		public final int value(String[] hand) {
 			return Poker.value(hand);
 		}
+		@Override
+		public float score(String[] hand, float bias) {
+			return DrawPoker2.score(value(hand), bias, true);
+		}
 	};
 	
 	/**
-	 * Calculates low value of hand
+	 * Calculates ace to five low value of hand
 	 */
-	public static final Value lo = new Value() {
+	public static final Value afLowValue = new Value(Equity.AFLO_ONLY) {
 		@Override
 		public final int value(String[] hand) {
 			return Poker.lowValue(hand);
 		}
+		@Override
+		public float score(String[] hand, float bias) {
+			throw new RuntimeException("not yet implemented");
+		}
 	};
-
+	
+	/**
+	 * deuce to seven low value function
+	 */
+	protected static final Value dsLowValue = new Value(Equity.DSLO_ONLY) {
+		@Override
+		public int value(String[] hand) {
+			return dsValue(hand);
+		}
+		@Override
+		public float score(String[] hand, float bias) {
+			return DrawPoker2.score(Poker.value(hand), bias, false);
+		}
+	};
+	
 	/**
 	 * count low cards
 	 */
-	public static int lowCount(String[] hand, boolean acehigh) {
+	static int lowCount(String[] hand, boolean acehigh) {
 		int count = 0;
 		for (int n = 0; n < hand.length; n++) {
 			if (faceValue(hand[n], acehigh) <= 8) {
@@ -86,19 +132,20 @@ public abstract class Poker {
 		}
 		return count;
 	}
-
+	
 	/**
 	 * get ace to five low value of hand.
 	 * returns 0 if no low.
+	 * FIXME this isn't proper low, as low can have pairs (though not str/fl)
 	 */
-	public static int lowValue(String[] hand) {
+	static int lowValue(String[] hand) {
 		validate(hand);
 		if (lowCount(hand, false) ==  5) {
 			int p = isPair(hand, false);
 			if (p < P_MASK) {
 				// no pairs
 				// invert value
-				int v = LOW_MASK | (P_MASK - p);
+				int v = AF_LOW_TYPE | (INV_MASK - p);
 				return v;
 			}
 		}
@@ -123,11 +170,11 @@ public abstract class Poker {
 			}
 		}
 	}
-
+	
 	/**
 	 * Get high value of 5 card hand
 	 */
-	public static int value(String[] hand) {
+	static int value(String[] hand) {
 		validate(hand);
 		int p = isPair(hand, true);
 		if (p < P_MASK) {
@@ -158,7 +205,7 @@ public abstract class Poker {
 		}
 		return true;
 	}
-
+	
 	/** 
 	 * return value of high card of straight or 0 
 	 */
@@ -185,7 +232,7 @@ public abstract class Poker {
 		}
 		return 0;
 	}
-
+	
 	/**
 	 * Return pair value or high cards.
 	 * Does not require sorted hand
@@ -212,7 +259,7 @@ public abstract class Poker {
 				fk = f;
 			}
 		}
-
+		
 		if (fk != 0) {
 			return FK_MASK | (fk << 4) | hc;
 		} else if (tk != 0) {
@@ -229,7 +276,14 @@ public abstract class Poker {
 			return H_MASK | hc;
 		}
 	}
-
+	
+	/**
+	 * deuce to seven value - exact opposite of high value
+	 */
+	static int dsValue(String[] hand) {
+		return Poker.DS_LOW_TYPE | (Poker.INV_MASK - Poker.value(hand));
+	}
+	
 	/**
 	 * Return integer value of card face, ace high or low (from A = 14 to 2 = 2 or K = 13 to A = 1)
 	 */
@@ -247,14 +301,14 @@ public abstract class Poker {
 		}
 		throw new RuntimeException("unknown face " + card);
 	}
-
+	
 	/**
 	 * Returns lower case character representing suit, i.e. s, d, h or c
 	 */
 	public static char suit(String card) {
 		return card.charAt(1);
 	}
-
+	
 	/**
 	 * Return character symbol of face value
 	 */
@@ -263,37 +317,59 @@ public abstract class Poker {
 		// allow 0 index and ace low
 		return "?A23456789TJQKA".charAt(v);
 	}
-
+	
 	/**
 	 * Return string representation of hand value
 	 */
 	public static String valueString(int value) {
-		if (value == 0) {
+		if (value <= 0) {
 			return "nil";
 		}
-		if ((value & MASK) == LOW_MASK) {
-			value = (LOW_MASK | 0xfffff) - value;
+		
+		boolean hi;
+		String type;
+		switch (value & TYPE) {
+			case HI_TYPE:
+				hi = true;
+				type = null;
+				break;
+			case DS_LOW_TYPE:
+				hi = false;
+				type = "27Lo";
+				value = INV_MASK - (value & HAND);
+				break;
+			case AF_LOW_TYPE:
+				hi = false;
+				type = "A5Lo";
+				value = INV_MASK - (value & HAND);
+				break;
+			default:
+				throw new RuntimeException();
 		}
-		char c1 = valueFace(value);
-		char c2 = valueFace(value >> 4);
-		char c3 = valueFace(value >> 8);
-		char c4 = valueFace(value >> 12);
-		char c5 = valueFace(value >> 16);
+		
+		final char c1 = valueFace(value);
+		final char c2 = valueFace(value >> 4);
+		final char c3 = valueFace(value >> 8);
+		final char c4 = valueFace(value >> 12);
+		final char c5 = valueFace(value >> 16);
+		
+		String s;
 		switch (value & 0xf00000) {
-			case LOW_MASK: return c1 + " " + c2 + " " + c3 + " " + c4 + " " + c5 + " low";
-			case SF_MASK: return "Straight Flush - " + c1 + " high";
-			case FK_MASK: return "Four of a Kind " + c2 + " - " + c1;
-			case FH_MASK: return "Full House " + c2 + " full of " + c1;
-			case FL_MASK: return "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;
-			case ST_MASK: return "Straight - " + c1 + " high";
-			case TK_MASK: return "Three of a Kind " + c3 + " - " + c2 + " " + c1;
-			case TP_MASK: return "Two Pair " + c3 + " and " + c2 + " - " + c1;
-			case P_MASK: return "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
-			case H_MASK: return c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + " high";
-			default: return "Unknown";
+			case SF_MASK: s = "Straight Flush - " + c1 + " high"; break;
+			case FK_MASK: s = "Four of a Kind " + c2 + " - " + c1; break;
+			case FH_MASK: s = "Full House " + c2 + " full of " + c1; break;
+			case FL_MASK: s = "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1; break;
+			case ST_MASK: s = "Straight - " + c1 + " high"; break;
+			case TK_MASK: s = "Three of a Kind " + c3 + " - " + c2 + " " + c1; break;
+			case TP_MASK: s = "Two Pair " + c3 + " and " + c2 + " - " + c1; break;
+			case P_MASK: s = "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1; break;
+			case H_MASK: s = c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + (hi ? " high" : " low"); break;
+			default: s = "Unknown";
 		}
+		
+		return hi ? s : type + ": " + s;
 	}
-
+	
 	public static char face(String card) {
 		return card.charAt(0);
 	}
@@ -331,6 +407,53 @@ public abstract class Poker {
 			}
 		}
 	}
+	
+	/**
+	 * Go through every possible 5 card hand and collect the unique hand values in order
+	 */
+	static int[] uniqueValues() {
+		if (uniqueValues != null) {
+			return uniqueValues;
+		}
+		
+		// TODO this is not very efficient, could just serialise/deserialise array
+		Set<Integer> uniqueValueSet = new TreeSet<Integer>();
+		String[] deck = Poker.deck.toArray(new String[Poker.deck.size()]);
+		String[] hand = new String[5];
+		int valueCount = 0;
+		for (int n0 = 0; n0 < deck.length; n0++) {
+			hand[0] = deck[n0];
+			for (int n1 = n0 + 1; n1 < deck.length; n1++) {
+				hand[1] = deck[n1];
+				for (int n2 = n1 + 1; n2 < deck.length; n2++) {
+					hand[2] = deck[n2];
+					for (int n3 = n2 + 1; n3 < deck.length; n3++) {
+						hand[3] = deck[n3];
+						for (int n4 = n3 + 1; n4 < deck.length; n4++) {
+							hand[4] = deck[n4];
+							uniqueValueSet.add(Poker.value(hand));
+							valueCount++;
+						}
+					}
+				}
+			}
+		}
+		System.out.println("values: " + valueCount);
+		System.out.println("unique values: " + uniqueValueSet.size());
+		
+		int[] a = new int[uniqueValueSet.size()];
+		int i = 0;
+		for (int v : uniqueValueSet) {
+			a[i++] = v;
+		}
+		Arrays.sort(a);
+		uniqueValues = a;
+		return a;
+	}
+	
+	//
+	// instance methods
+	//
 	
 	/**
 	 * Calculate equity for given board and hands.

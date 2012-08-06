@@ -17,11 +17,12 @@ public class PSParser extends Parser {
 	private static final Map<String,Byte> actionMap = new HashMap<String,Byte>();
 
 	private static class H {
-		/** hand start pattern */
+		/** hand start pattern - no punctuation */
+		// PokerStars Hand #84322807903:  Triple Draw 2-7 Lowball No Limit (5/10) - 2012/08/05 14:07:58 ET
 		static final Pattern pat = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
 				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
 				+ "(?:(Mixed \\S+) )?"
-				+ "(Hold'em|Omaha|Omaha Hi/Lo|5 Card Draw) " 
+				+ "(Hold'em|Omaha|Omaha Hi/Lo|5 Card Draw|Triple Draw 27 Lowball) " 
 				+ "(No Limit|Pot Limit|Limit) "
 				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
 				+ "(\\S+?)/(\\S+?)(?: (USD))?");
@@ -93,7 +94,13 @@ public class PSParser extends Parser {
 	@Override
 	public boolean isHistoryFile(String name) {
 		// TS - tournament summaries
-		return name.startsWith("HH") && name.endsWith(".txt") && !name.contains("8-Game") && !name.contains("Triple Stud");
+		if (name.startsWith("HH") && name.endsWith(".txt")) {
+			return name.contains("5-Card Draw") 
+					|| name.contains("Omaha") 
+					|| name.contains("Hold'em")
+					|| name.contains("Triple Draw");
+		}
+		return false;
 	}
 
 	/**
@@ -197,6 +204,10 @@ public class PSParser extends Parser {
 
 		} else if (line.equals("No low hand qualified")) {
 			println("no low");
+			
+		} else if (line.equals("The deck is reshuffled")) {
+			// XXX HandStateUtil better not think discarded cards are blockers anymore...
+			println("reshuf");
 
 
 			/// ---------- ends with ----------
@@ -418,17 +429,30 @@ public class PSParser extends Parser {
 			h = ArrayUtil.join(h, parseHand(line, b));
 		}
 
-		if (hand.myhole == null) {
-			// first hand
-			println("dealt " + Arrays.asList(h));
-			hand.myhole = h;
+		println("dealt " + Arrays.asList(h));
+		
+		if (hand.myHoleCards0 == null) {
+			// first hand for all games
+			hand.myHoleCards0 = h;
+			
+		} else if (hand.myHoleCards1 == null) {
+			// second hand for draw and triple draw
+			hand.myHoleCards1 = h;
+			
+		} else if (hand.myHoleCards2 == null) {
+			// third hand for triple draw
+			hand.myHoleCards2 = h;
+			
+		} else if (hand.myHoleCards3 == null) {
+			// fourth and final hand for triple draw
+			hand.myHoleCards3 = h;
+			
+		} else {
+			throw new RuntimeException("unexpected deal");
 		}
-
+		
 		// last hand
-		if (myseat.hole != null) {
-			println("dealt new hand " + Arrays.asList(h));
-		}
-		myseat.hole = h;
+		myseat.holeCards = h;
 	}
 
 	private void parseSeat(final String line) {
@@ -452,8 +476,8 @@ public class PSParser extends Parser {
 				for (Seat seat : seatsMap.values()) {
 					if (seat.num == seatno) {
 						// could be mucking more than they showed
-						checkMuckedHand(seat.hole, hand);
-						seat.hole = hand;
+						checkMuckedHand(seat.holeCards, hand);
+						seat.holeCards = hand;
 					}
 				}
 				println("seat summary " + seatno + " hand " + Arrays.asList(hand));
@@ -551,17 +575,19 @@ public class PSParser extends Parser {
 			}
 		}
 		
-		String games = m.group(H.game);
-		if (games.equals("Hold'em")) {
+		String gameStr = m.group(H.game);
+		if (gameStr.equals("Hold'em")) {
 			gametype = Game.HE_TYPE;
-		} else if (games.equals("Omaha Hi/Lo")) {
+		} else if (gameStr.equals("Omaha Hi/Lo")) {
 			gametype = Game.OMHL_TYPE;
-		} else if (games.equals("Omaha")) {
+		} else if (gameStr.equals("Omaha")) {
 			gametype = Game.OM_TYPE;
-		} else if (games.equals("5 Card Draw")) {
+		} else if (gameStr.equals("5 Card Draw")) {
 			gametype = Game.FCD_TYPE;
+		} else if (gameStr.equals("Triple Draw 27 Lowball")) {
+			gametype = Game.DSTD_TYPE;
 		} else {
-			throw new RuntimeException("unknown game");
+			throw new RuntimeException("unknown game " + gameStr);
 		}
 
 		String limits = m.group(H.limit);
@@ -714,6 +740,18 @@ public class PSParser extends Parser {
 					ignoreStreet = true;
 				}
 				break;
+			case Game.DSTD_TYPE:
+				//*** DEALING HANDS ***
+				// in 5 card draw you don't get these so have to hack the new street in parse action
+				//*** FIRST DRAW ***
+				//*** SECOND DRAW ***
+				//*** THIRD DRAW ***
+				if (name.equals("DEALING HANDS")) {
+					ignoreStreet = true;
+				} else if (name.equals("FIRST DRAW") || name.equals("SECOND DRAW") || name.equals("THIRD DRAW")) {
+					newStreet = true;
+				}
+				break;
 			default: 
 				throw new RuntimeException("unknown game type " + hand.game.type);
 		}
@@ -750,7 +788,7 @@ public class PSParser extends Parser {
 		int actEnd = endToken(line, actStart);
 		Action action = new Action(seat);
 		action.type = actionMap.get(line.substring(actStart, actEnd));
-		boolean draw = false;
+		boolean drawAct = false;
 
 		switch (action.type) {
 			case Action.CHECK_TYPE:
@@ -767,8 +805,8 @@ public class PSParser extends Parser {
 				int handStart = line.indexOf("[");
 				if (handStart > 0) {
 					String[] hand = parseHand(line, handStart);
-					checkNewHand(seat.hole, hand);
-					seat.hole = hand;
+					checkNewHand(seat.holeCards, hand);
+					seat.holeCards = hand;
 				}
 				break;
 			}
@@ -870,26 +908,31 @@ public class PSParser extends Parser {
 				//showdown = true;
 				int handStart = ParseUtil.nextToken(line, actEnd);
 				String[] hand = parseHand(line, handStart);
-				checkNewHand(seat.hole, hand);
-				seat.hole = hand;
+				checkNewHand(seat.holeCards, hand);
+				seat.holeCards = hand;
 				break;
 			}
 
 			case Action.DRAW_TYPE: {
-				draw = true;
+				drawAct = true;
 				// tawvx: discards 1 card [Ah]
 				// joven2010: discards 3 cards
-				if (seat.discards > 0) {
-					throw new RuntimeException("already discarded " + seat.discards);
+				
+				// five card draw: always draw 0
+				// street 0 (size 1): no draw
+				// street 1 (size 2): draw 0, etc
+				int draw = gametype == Game.DSTD_TYPE ? streets.size() - 2 : 0;
+				if (seat.drawn(draw) > 0) {
+					throw new RuntimeException("already discarded " + seat.drawn(draw));
 				}
 				int discardsStart = ParseUtil.nextToken(line, actEnd);
-				seat.discards = (byte) ParseUtil.parseInt(line, discardsStart);
+				seat.setDrawn(draw, (byte) ParseUtil.parseInt(line, discardsStart));
 				break;
 			}
 
 			case Action.STANDPAT_TYPE: {
 				// stands pat
-				draw = true;
+				drawAct = true;
 				println("stands");
 				break;
 			}
@@ -910,7 +953,7 @@ public class PSParser extends Parser {
 
 		println("action " + action);
 
-		if (draw && streets.size() == 1) {
+		if (drawAct && streets.size() == 1) {
 			// there is no draw phase, so pip and fake a new street
 			println("new street for draw");
 			pip();

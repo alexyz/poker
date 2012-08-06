@@ -1,6 +1,7 @@
 package pet.hp.state;
 
 import pet.hp.Action;
+import pet.hp.GameUtil;
 import pet.hp.Hand;
 
 /**
@@ -52,6 +53,23 @@ public class HandState implements Cloneable {
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Return string describing action (but not player)
+	 */
+	public String actionString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Action.TYPENAME[action.type]);
+		if (action.type == Action.DRAW_TYPE) {
+			sb.append(" ").append(action.seat.drawn(streetIndex - 1));
+		} else if (action.amount != 0) {
+			sb.append(" ").append(GameUtil.formatMoney(hand.game.currency, action.amount));
+			if (action.allin) {
+				sb.append(" all in");
+			}
+		}
+		return sb.toString();
 	}
 	
 	@Override

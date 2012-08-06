@@ -166,7 +166,7 @@ class TableComponent extends JComponent {
 					lines.add(String.format("SPR: %2.1f", ss.spr));
 				}
 				if (hs.actionSeat == s || ss.won) {
-					lines.add(ss.won ? "wins" : String.valueOf(HandUtil.actionString(hs.hand, hs.action)));
+					lines.add(ss.won ? "wins" : hs.actionString());
 				}
 				
 				{

@@ -6,10 +6,10 @@ public class MEquityUtil {
 	 * Make array of multiple hand equities for given number of remaining cards,
 	 * game type and calculation method
 	 */
-	static MEquity[] makeMEquity(int hands, boolean hilo, int rem, boolean exact) {
+	static MEquity[] makeMEquity(int hands, boolean hilo, int eqtype, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
-			meqs[n] = new MEquity(hilo, rem, exact);
+			meqs[n] = new MEquity(hilo, eqtype, rem, exact);
 		}
 		return meqs;
 	}
@@ -29,7 +29,8 @@ public class MEquityUtil {
 			}
 		}
 		for (int i = 0; i < vals.length; i++) {
-			Equity e = meqs[i].eq[eqtype];
+			//Equity e = meqs[i].eq[eqtype];
+			Equity e = meqs[i].getEq(eqtype);
 			e.current = vals[i];
 			if (e.current == max) {
 				if (times == 1) {
@@ -64,7 +65,8 @@ public class MEquityUtil {
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i] == max) {
 				// update the win/tied/rank count
-				Equity e = meqs[i].eq[eqtype];
+				//Equity e = meqs[i].eq[eqtype];
+				Equity e = meqs[i].getEq(eqtype);
 				if (maxcount == 1) {
 					// update mask
 					winner = i;
@@ -73,7 +75,7 @@ public class MEquityUtil {
 					e.tiedcount++;
 					e.tiedwithcount += maxcount;
 				}
-				if (max < Poker.LOW_MASK) {
+				if (eqtype == Equity.HI_ONLY || eqtype == Equity.HILO_HI_HALF) {
 					// FIXME hi only
 					e.wonrankcount[Poker.rank(max)]++;
 				}
@@ -107,7 +109,7 @@ public class MEquityUtil {
 		for (MEquity meq : meqs) {
 			System.out.println("meq " + meq);
 			
-			Equity hionly = meq.hionly();
+			Equity hionly = meq.eqs[0];
 			hionly.summariseEquity(count);
 			System.out.println("  hionly won: " + hionly.won + " tied: " + hionly.tied + " total: " + hionly.total);
 			
@@ -115,13 +117,13 @@ public class MEquityUtil {
 				meq.totaleq = hionly.total;
 				
 			} else {
-				Equity hihalf = meq.hihalf();
+				Equity hihalf = meq.eqs[1];
 				// high count as it applies to every hand not just hi/lo hands
 				hihalf.summariseEquity(count);
 				System.out.println("  hihalf won: " + hihalf.won + " tied: " + hihalf.tied + " total: " + hihalf.total);
 				System.out.println("  hionly+hihalf won: " + (hionly.won + hihalf.won) + " tied: " + (hionly.tied+hihalf.tied) + " total: " + (hionly.total+hihalf.total));
 				
-				Equity lohalf = meq.lohalf();
+				Equity lohalf = meq.eqs[2];
 				lohalf.summariseEquity(count);
 				System.out.println("  lohalf won: " + lohalf.won + " tied: " + lohalf.tied + " total: " + lohalf.total);
 				
@@ -139,7 +141,7 @@ public class MEquityUtil {
 
 	static void summariseOuts(MEquity[] meqs, int k) {
 		for (MEquity meq : meqs) {
-			for (Equity eq : meq.eq) {
+			for (Equity eq : meq.eqs) {
 				eq.summariseOuts(meq.remCards, k);
 			}
 		}
@@ -149,9 +151,10 @@ public class MEquityUtil {
 	 * Return string representing current value of hand
 	 */
 	public static String currentString(MEquity me) {
-		String s = Poker.valueString(me.hionly().current);
-		if (me.hilo()) {
-			s += " / " + Poker.valueString(me.lohalf().current);
+		String s = Poker.valueString(me.eqs[0].current);
+		if (me.hilo) {
+			s += " / " + Poker.valueString(me.eqs[1].current);
+			s += " / " + Poker.valueString(me.eqs[2].current);
 		}
 		return s;
 	}
@@ -166,11 +169,11 @@ public class MEquityUtil {
 	 */
 	public static String equityString(MEquity me) {
 		String s;
-		Equity hionly = me.hionly();
+		Equity hionly = me.eqs[0];
 		
-		if (me.hilo()) {
-			Equity hihalf = me.hihalf();
-			Equity lohalf = me.lohalf();
+		if (me.hilo) {
+			Equity hihalf = me.eqs[1];
+			Equity lohalf = me.eqs[2];
 			s = String.format("%.1f-%.1f-%.1f%%", hionly.won, hihalf.won, lohalf.won);
 			if (hionly.tied + hihalf.tied + lohalf.tied != 0) {
 				s += String.format(" (%.0f-%.0f-%.0f T)", hionly.tied, hihalf.tied, lohalf.tied);

@@ -3,9 +3,26 @@ package pet.eq;
 
 import java.util.*;
 
-public class DrawPoker2 {
+/**
+ * experimental draw poker functions
+ */
+public abstract class DrawPoker2 extends Poker {
+
+	/** represents a possible draw and its average score */
+	public static class Draw implements Comparable<Draw> {
+		public final String[] hole;
+		public float score;
+		public Draw(String[] hole, float score) {
+			this.hole = hole;
+			this.score = score;
+		}
+		@Override
+		public int compareTo(Draw other) {
+			return (int) Math.signum(score - other.score);
+		}
+	}
 	
-	private static int[] uniqueValues;
+	
 	
 	public static void main(String[] args) {
 		/*
@@ -28,12 +45,14 @@ public class DrawPoker2 {
 		//String[] x = new String[] { "8h", "7c", "6c", "5s", "4s" };
 		//String[] x = new String[] { "Kc", "Ac", "Js", "3h", "7c" };
 		//String[] x = new String[] { "4d", "6d", "5c", "3h", "5h" };
-		String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
+		//String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
+		
+		String[] x = new String[] { "2c", "5d", "4h", "8d", "4c" };
 		
 		List<Draw> l = new ArrayList<Draw>();
 		
 		for (int n = 0; n <= 5; n++) {
-			String[] y = getDrawingHand(l, x, n, 4f);
+			String[] y = getDrawingHand(l, x, n, dsLowValue, 2f);
 			String[] z = DrawPoker.getDraw(x, n);
 			System.out.println("draw " + n + " old: " + Arrays.toString(z));
 			System.out.println("       new: " + Arrays.toString(y));
@@ -42,54 +61,12 @@ public class DrawPoker2 {
 		Collections.sort(l);
 		Collections.reverse(l);
 		for (Draw d : l) {
-			System.out.println(String.format("%.6f -> %s", d.value, Arrays.toString(d.hole)));
+			System.out.println(String.format("%.6f -> %s", d.score, Arrays.toString(d.hole)));
 		}
 		
 	}
 	
-	/**
-	 * Go through every possible 5 card hand and collect the unique hand values in order
-	 */
-	private static int[] getUniqueValues() {
-		if (uniqueValues != null) {
-			return uniqueValues;
-		}
-		
-		// TODO this is not very efficient, could just serialise/deserialise array
-		Set<Integer> uniqueValueSet = new TreeSet<Integer>();
-		String[] deck = Poker.deck.toArray(new String[Poker.deck.size()]);
-		String[] hand = new String[5];
-		int valueCount = 0;
-		for (int n0 = 0; n0 < deck.length; n0++) {
-			hand[0] = deck[n0];
-			for (int n1 = n0 + 1; n1 < deck.length; n1++) {
-				hand[1] = deck[n1];
-				for (int n2 = n1 + 1; n2 < deck.length; n2++) {
-					hand[2] = deck[n2];
-					for (int n3 = n2 + 1; n3 < deck.length; n3++) {
-						hand[3] = deck[n3];
-						for (int n4 = n3 + 1; n4 < deck.length; n4++) {
-							hand[4] = deck[n4];
-							uniqueValueSet.add(Poker.value(hand));
-							valueCount++;
-						}
-					}
-				}
-			}
-		}
-		System.out.println("values: " + valueCount);
-		System.out.println("unique values: " + uniqueValueSet.size());
-		
-		int[] a = new int[uniqueValueSet.size()];
-		int i = 0;
-		for (int v : uniqueValueSet) {
-			a[i++] = v;
-		}
-		Arrays.sort(a);
-		uniqueValues = a;
-		return a;
-	}
-	
+	/*
 	private static void avghand() {
 		String[] deck = Poker.deck.toArray(new String[52]);
 		String[] hand = new String[5];
@@ -127,44 +104,50 @@ public class DrawPoker2 {
 		}
 		
 	}
+	*/
 	
-	public static class Draw implements Comparable<Draw> {
-		public final String[] hole;
-		public float value;
-		public Draw(String[] hole, float value) {
-			this.hole = hole;
-			this.value = value;
-		}
-		@Override
-		public int compareTo(Draw other) {
-			return (int) Math.signum(value - other.value);
-		}
-	}
-	
-	private static float getScore(int v, float bigPlay) {
-		int[] uniqueValues = getUniqueValues();
-		final int p = Arrays.binarySearch(uniqueValues, v);
+	/**
+	 * get normalised score of high hand (i.e. hand value is 0-1), optionally inverted
+	 */
+	protected static float score(int value, float bias, boolean high) {
+		int[] uniqueValues = uniqueValues();
+		int p = Arrays.binarySearch(uniqueValues, value);
 		if (p < 0) {
 			throw new RuntimeException();
 		}
-		return (float) Math.pow((1f * p) / (uniqueValues.length - 1f), bigPlay);
+		if (!high) {
+			// invert score for deuce to seven low
+			p = uniqueValues.length - 1 - p;
+		}
+		return (float) Math.pow((1f * p) / (uniqueValues.length - 1f), bias);
+	}
+	
+	public static String[] getDrawingHand(final String[] hand, final int drawn, boolean hi) {
+		return getDrawingHand(null, hand, drawn, hi ? Poker.hiValue : Poker.dsLowValue, 2f);
 	}
 
-	public static String[] getDrawingHand(List<Draw> draws, final String[] hand, final int drawn, float bigPlay) {
+	/**
+	 * get the best drawing hand for the given hand, number drawn, hand valuation and big hand bias.
+	 * optionally returns score of all possible drawing hands.
+	 */
+	private static String[] getDrawingHand(List<Draw> draws, final String[] hand, final int drawn, Value value, float bias) {
+
 		if (drawn < 0 || drawn > 5) {
 			throw new RuntimeException();
-		}
-		
-		if (drawn == 5) {
+			
+		} else if (drawn == 5) {
+			// special case, no draw and no meaningful score
 			return new String[0];
-		}
-		
-		if (drawn == 0) {
+			
+		} else if (drawn == 0) {
+			// special case, nothing to test other than given hand
 			if (draws != null) {
-				draws.add(new Draw(hand, getScore(Poker.value(hand), bigPlay)));
+				draws.add(new Draw(hand, value.score(hand, bias)));
 			}
 			return hand.clone();
 		}
+		
+		// drawing 1-4
 		
 		// from players point of view, all other cards are possible
 		final String[] deck = Poker.remdeck(null, hand);
@@ -184,13 +167,11 @@ public class DrawPoker2 {
 			for (int j = 0; j < jmax; j++) {
 				// pick drawn from deck
 				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
-				int value = Poker.value(drawnHand);
-				score += getScore(value, bigPlay);
+				score += value.score(drawnHand, bias);
 			}
 			
 			float averageScore = score / (1.0f * jmax);
 			String[] drawingHand = Arrays.copyOf(drawnHand, 5 - drawn);
-			//System.out.println("hand: " + Arrays.toString(drawingHand) + " score: " + score + " mean value: " + meanval);
 			if (draws != null) {
 				draws.add(new Draw(drawingHand, averageScore));
 			}
@@ -202,7 +183,6 @@ public class DrawPoker2 {
 			}
 		}
 		
-		//System.out.println("hand " + Arrays.toString(maxh2));
 		return maxDrawingHand;
 	}
 	

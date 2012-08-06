@@ -23,14 +23,14 @@ public class SeatState implements Cloneable {
 	public float bpr;
 	/** current hole cards (changes in games like draw) */
 	public String[] hole;
-	public HandUtil.Hole holeObj;
+	public HandUtil.HoleCards holeObj;
 	/** has folded yet */
 	public boolean folded;
 	/** has won - only true at end, unlike seat.won > 0 */
 	public boolean won;
 	/** current hand equity, if any */
 	public MEquity meq;
-	/** number of actions on this street starting at 1 */
+	/** number of non-draw actions on this street starting at 1 (draw/standpat is 0) */
 	public int actionNum;
 	/** expected value! */
 	public float ev;

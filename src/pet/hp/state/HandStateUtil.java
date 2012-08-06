@@ -48,8 +48,8 @@ public class HandStateUtil {
 		hs.actionSeat = HandState.NO_SEAT;
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState(seat);
-			if (seat.hole != null) {
-				String[] hole = seat.hole.clone();
+			if (seat.holeCards != null) {
+				String[] hole = seat.holeCards.clone();
 				Arrays.sort(hole, Cmp.revCardCmp);
 				ss.hole = hole;
 			}
@@ -132,7 +132,10 @@ public class HandStateUtil {
 				SeatState ss = hs.actionSeat();
 				ss.bpr = 0;
 				ss.ev = 0;
-				ss.actionNum++;
+				
+				if (act.type != Action.DRAW_TYPE && act.type != Action.STANDPAT_TYPE) {
+					ss.actionNum++;
+				}
 				
 				if (act.type == Action.FOLD_TYPE) {
 					ss.folded = true;

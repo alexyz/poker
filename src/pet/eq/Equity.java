@@ -7,8 +7,23 @@ import java.util.*;
  */
 public class Equity {
 	
+	/** equity types (note: hi/lo is not a type, it is actually three types) */
+	public static final int DSLO_ONLY = 1, AFLO_ONLY = 2, HI_ONLY = 3, HILO_HI_HALF = 4, HILO_LO_HALF = 5;
+	
+	/** get name of equity type */
+	public static String getEqTypeName(int eqtype) {
+		switch (eqtype) {
+			case DSLO_ONLY: return "2-7 Low Only";
+			case AFLO_ONLY: return "A-5 Low Only";
+			case HI_ONLY: return "Hi Only";
+			case HILO_HI_HALF: return "Hi Half";
+			case HILO_LO_HALF: return "Lo Half";
+			default: throw new RuntimeException();
+		}
+	}
+	
 	/** equity type description */
-	public final String type;
+	public final int eqtype;
 	/** current value */
 	public int current;
 	/** Currently winning and not tying */
@@ -40,8 +55,8 @@ public class Equity {
 	/** count that each card (as part of group of k cards) will make the best hand */
 	final Map<String,int[]> outcount = new TreeMap<String,int[]>();
 	
-	public Equity(String type) {
-		this.type = type;
+	public Equity(int eqtype) {
+		this.eqtype = eqtype;
 	}
 
 	/**
