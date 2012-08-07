@@ -161,14 +161,14 @@ public class HandUtil {
 	 * Get all hole cards for hand
 	 */
 	public static String[][] getHoleCards(Hand hand) {
-		List<String[]> holes = new ArrayList<String[]>();
+		List<String[]> holeCards = new ArrayList<String[]>();
 		for (Seat seat : hand.seats) {
 			if (seat.finalHoleCards != null && seat.finalHoleCards.length > 0) {
-				holes.add(seat.finalHoleCards);
+				holeCards.add(seat.finalHoleCards);
 			}
 		}
-		String[][] holesArr = holes.toArray(new String[holes.size()][]);
-		return holesArr;
+		String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
+		return holeCardsArr;
 	}
 	
 	private HandUtil() {

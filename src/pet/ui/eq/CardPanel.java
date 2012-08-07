@@ -2,17 +2,17 @@ package pet.ui.eq;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 
 /**
  * A panel that shoes the given list of card labels in the west of a border layout
  */
 class CardPanel extends JPanel {
 
-	private final CardLabel[] cardLabs;
+	private final CardLabel[] cardLabels;
 	private final int mincards;
 	
 	/**
@@ -22,12 +22,12 @@ class CardPanel extends JPanel {
 		super(new GridBagLayout());
 		this.mincards = mincards;
 		setBorder(BorderFactory.createTitledBorder(name));
-		cardLabs = new CardLabel[maxcards];
+		cardLabels = new CardLabel[maxcards];
 		
 		JPanel p = new JPanel(new GridLayout(1, maxcards, 5, 5));
-		for (int n = 0; n < cardLabs.length; n++) {
+		for (int n = 0; n < cardLabels.length; n++) {
 			CardLabel cl = new CardLabel();
-			cardLabs[n] = cl;
+			cardLabels[n] = cl;
 			p.add(cl);
 		}
 		
@@ -47,40 +47,44 @@ class CardPanel extends JPanel {
 	}
 	
 	/**
-	 * Add the card labels to the list
+	 * Get the card labels.
 	 */
-	public void collectCardLabels(List<CardLabel> l) {
-		for (CardLabel cl : cardLabs) {
-			l.add(cl);
-		}
+	public List<CardLabel> getCardLabels() {
+		return Collections.unmodifiableList(Arrays.asList(cardLabels));
 	}
 	
+	/**
+	 * set all cards to blank
+	 */
 	public void clearCards() {
-		for (CardLabel cl : cardLabs) {
+		for (CardLabel cl : cardLabels) {
 			cl.setCard(null);
 		}
 	}
 	
+	/**
+	 * set the given cards to blank (indexed from 0)
+	 */
 	public void clearCards(int from, int to) {
 		for (int n = from; n < to; n++) {
-			cardLabs[n].setCard(null);
+			cardLabels[n].setCard(null);
 		}
 	}
 	
 	public void setCard(String c, int n) {
-		cardLabs[n].setCard(c);
+		cardLabels[n].setCard(c);
 	}
 	
 	public void setCards(List<String> cards) {
 		clearCards();
-		for (int n = 0; n < cardLabs.length; n++) {
-			cardLabs[n].setCard(n < cards.size() ? cards.get(n) : null);
+		for (int n = 0; n < cardLabels.length; n++) {
+			cardLabels[n].setCard(n < cards.size() ? cards.get(n) : null);
 		}
 	}
 	
 	public int getCardCount() {
 		int c = 0;
-		for (CardLabel cl : cardLabs) { 
+		for (CardLabel cl : cardLabels) { 
 			if (cl.getCard() != null) {
 				c++;
 			}
@@ -96,11 +100,11 @@ class CardPanel extends JPanel {
 	 * Get the cards displayed
 	 */
 	public String[] getCards() {
-		return CardLabel.getCards(Arrays.asList(cardLabs));
+		return CardLabel.getCards(Arrays.asList(cardLabels));
 	}
 	
 	public void setCardsHidden(boolean hide) {
-		for (CardLabel cl : cardLabs) {
+		for (CardLabel cl : cardLabels) {
 			cl.setCardHidden(hide);
 		}
 	}

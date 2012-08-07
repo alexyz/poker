@@ -59,8 +59,8 @@ public class HandStateUtil {
 		
 		// equity stuff
 		Poker poker = GameUtil.getPoker(hand.game);
-		List<String[]> holes = new ArrayList<String[]>();
-		List<SeatState> holeSeats = new ArrayList<SeatState>();
+		List<String[]> holeCards = new ArrayList<String[]>();
+		List<SeatState> holeCardSeats = new ArrayList<SeatState>();
 		Set<String> blockers = new TreeSet<String>();
 
 		// for each street
@@ -75,8 +75,8 @@ public class HandStateUtil {
 			hs.action = null;
 			hs.streetIndex = s;
 			hs.actionSeat = HandState.NO_SEAT;
-			holes.clear();
-			holeSeats.clear();
+			holeCards.clear();
+			holeCardSeats.clear();
 			blockers.clear();
 			
 			for (SeatState ss : hs.seats) {
@@ -91,8 +91,8 @@ public class HandStateUtil {
 						ss.hole = ss.holeObj.hole;
 						// make sure hand has minimum number of cards, pass others as blockers
 						if (ss.hole.length >= GameUtil.getMinHoleCards(hand.game.type)) {
-							holes.add(ss.hole);
-							holeSeats.add(ss);
+							holeCards.add(ss.hole);
+							holeCardSeats.add(ss);
 						} else {
 							blockers.addAll(Arrays.asList(ss.hole));
 						}
@@ -106,11 +106,11 @@ public class HandStateUtil {
 				}
 			}
 			
-			String[][] holesArr = holes.toArray(new String[holes.size()][]);
+			String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
 			String[] blockersArr = blockers.toArray(new String[blockers.size()]);
-			MEquity[] eqs = poker.equity(hs.board, holesArr, blockersArr);
-			for (int n = 0; n < holeSeats.size(); n++) {
-				SeatState ss = holeSeats.get(n);
+			MEquity[] eqs = poker.equity(hs.board, holeCardsArr, blockersArr);
+			for (int n = 0; n < holeCardSeats.size(); n++) {
+				SeatState ss = holeCardSeats.get(n);
 				ss.meq = eqs[n];
 			}
 			

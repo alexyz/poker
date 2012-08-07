@@ -5,11 +5,14 @@ import javax.swing.*;
 
 import pet.eq.*;
 
+/**
+ * displays equity calculation panel specific to holdem/omaha
+ */
 public class HoldemCalcPanel extends CalcPanel {
 	
 	private final CardPanel boardPanel;
 	private final HandCardPanel[] handPanels = new HandCardPanel[10];
-	private final JCheckBox randHandsBox = new JCheckBox("Hands");
+	private final JCheckBox randHandsBox = new JCheckBox("Hole Cards");
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
 	private final JCheckBox randRiverBox = new JCheckBox("River");
@@ -23,15 +26,12 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// create board and hands and collect card labels
 		boardPanel = new CardPanel("Community Cards", 0, 5);
-		boardPanel.collectCardLabels(cardLabels);
 		
 		String name = omaha ? "Omaha" : "Hold'em";
 		int min = omaha ? 2 : 1;
 		int max = omaha ? 4 : 2;
 		for (int n = 0; n < handPanels.length; n++) {
-			HandCardPanel cp = new HandCardPanel(name + " hand " + (n+1), min, max);
-			cp.collectCardLabels(cardLabels);
-			handPanels[n] = cp;
+			handPanels[n] = new HandCardPanel(name + " hand " + (n+1), min, max);
 		}
 		
 		// add to layout
@@ -58,19 +58,13 @@ public class HoldemCalcPanel extends CalcPanel {
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(String[] board, String[][] holes, boolean hilo) {
-		clear();
-		boardPanel.setCards(Arrays.asList(board));
-		for (int n = 0; n < holes.length; n++) {
-			handPanels[n].setCards(Arrays.asList(holes[n]));
-		}
+	public void displayHand(String[] board, String[][] holeCards, boolean hilo) {
+		displayHand(board, holeCards, null);
 		hiloBox.setSelected(hilo);
-		updateDeck();
 	}
 
 	@Override
 	public void hideOpp(boolean hide) {
-		super.hideOpp(hide);
 		for (int n = 1; n < handPanels.length; n++) {
 			handPanels[n].setCardsHidden(hide);
 		}
@@ -124,7 +118,6 @@ public class HoldemCalcPanel extends CalcPanel {
 
 	@Override
 	public void calc() {
-		List<String[]> hs = new ArrayList<String[]>();
 		for (HandCardPanel hp : handPanels) {
 			hp.setHandEquity(null);
 		}
@@ -134,11 +127,14 @@ public class HoldemCalcPanel extends CalcPanel {
 			System.out.println("incomplete board");
 			return;
 		}
+		
 		if (board.length == 0) {
 			board = null;
 		}
 		
-		List<HandCardPanel> hps = new ArrayList<HandCardPanel>();
+		final List<String[]> holeCards = new ArrayList<String[]>();
+		final List<HandCardPanel> holeCardsHandPanels = new ArrayList<HandCardPanel>();
+		
 		for (HandCardPanel hp : handPanels) {
 			String[] hand = hp.getCards();
 			if (hand.length > 0) {
@@ -147,38 +143,27 @@ public class HoldemCalcPanel extends CalcPanel {
 					return;
 					
 				} else {
-					hps.add(hp);
-					hs.add(hand);
+					holeCardsHandPanels.add(hp);
+					holeCards.add(hand);
 				}
 			}
 		}
 
-		if (hs.size() == 0) {
+		if (holeCards.size() == 0) {
 			System.out.println("no hands");
 			return;
 		}
-
-		String[][] hands = hs.toArray(new String[hs.size()][]);
-		MEquity[] eqs = new HEPoker(omaha, hiloBox.isSelected()).equity(board, hands, null);
+		
+		final String[] blockers = getBlockers();
+		final String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
+		
+		final HEPoker poker = new HEPoker(omaha, hiloBox.isSelected());
+		final MEquity[] eqs = poker.equity(board, holeCardsArr, blockers);
+		
 		for (int n = 0; n < eqs.length; n++) {
-			//HandEq e = eqs[n];
-			//pl.get(n).setHandEquity(e);
-			hps.get(n).setHandEquity(eqs[n]);
+			holeCardsHandPanels.get(n).setHandEquity(eqs[n]);
 		}
 
-	}
-
-	/**
-	 * clear the deck, the board and the hand panels and select first hole card
-	 */
-	@Override
-	public void clear() {
-		super.clear();
-		boardPanel.clearCards();
-		for (HandCardPanel hp : handPanels) {
-			hp.clearCards();
-		}
-		selectCard(5);
 	}
 
 }

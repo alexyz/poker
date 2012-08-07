@@ -10,9 +10,7 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import pet.eq.DrawPoker;
-import pet.eq.DrawPoker2;
-import pet.eq.PokerUtil;
+import pet.eq.*;
 import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.info.*;
@@ -82,6 +80,7 @@ public class PokerFrame extends JFrame {
 	private final GamesPanel gamesPanel = new GamesPanel();
 	private final PlayerPanel playerPanel = new PlayerPanel();
 	private final HUDManager hudManager = new HUDManager();
+	private final AboutPanel aboutPanel = new AboutPanel();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -96,8 +95,9 @@ public class PokerFrame extends JFrame {
 			e.printStackTrace();
 		}
 		
-		tabs.addTab("Equity", eqTabs);
-		tabs.addTab("History", hisTabs);
+		tabs.addTab("Equity Calculator", eqTabs);
+		tabs.addTab("History Parser", hisTabs);
+		tabs.addTab("About", aboutPanel);
 		
 		eqTabs.addTab("Hold'em", holdemPanel);
 		eqTabs.addTab("Omaha", omahaPanel);
@@ -173,15 +173,15 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(hisTabs);
 	}
 	
-	public void displayHoldemEquity(String[] board, String[][] holes, boolean omaha, boolean hilo) {
+	public void displayHoldemEquity(String[] board, String[][] holeCards, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
-		panel.displayHand(board, holes, hilo);
+		panel.displayHand(board, holeCards, hilo);
 		eqTabs.setSelectedComponent(panel);
 		tabs.setSelectedComponent(eqTabs);
 	}
 	
-	public void displayDrawEquity(String[][] holes, String type) {
-		drawPanel.displayHand(holes, type);
+	public void displayDrawEquity(String[][] holeCards, String type) {
+		drawPanel.displayHand(holeCards, type);
 		eqTabs.setSelectedComponent(drawPanel);
 		tabs.setSelectedComponent(eqTabs);
 	}

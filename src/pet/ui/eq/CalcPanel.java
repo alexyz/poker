@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.*;
@@ -14,8 +15,8 @@ import javax.swing.*;
  *   [board] setboard() gridy=1
  *   [hands scroll] sethands() gridy=2
  * [blockers] gridy=3
- * [[rand opts] hide rand] addrandopt() gridy=4
- * [num blockers clear [calc opts] calc] addcalcopt() gridy=5
+ * [[rand opts] hide num rand] addrandopt() gridy=4
+ * [[calc opts] clear calc] addcalcopt() gridy=5
  */
 abstract class CalcPanel extends JPanel {
 	
@@ -25,19 +26,20 @@ abstract class CalcPanel extends JPanel {
 	private final JPanel calcPanel = new JPanel();
 	private final JPanel calcOptsPanel = new JPanel();
 	private final CardPanel blockersCardPanel = new CardPanel("Blockers", 0, 10);
-	private final JSpinner numOppSpinner = new JSpinner();
+	private final JSpinner randNumOppSpinner = new JSpinner();
 	private final JCheckBox hideBox = new JCheckBox("Hide Opp.");
 	private final JButton clearButton = new JButton("Clear");
 	private final JButton randButton = new JButton("Random");
 	private final JButton calcButton = new JButton("Calculate");
-
 	/**
-	 * the list of card labels used by the board and player hole cards. subclass
-	 * should add its card labels to this
+	 * the list of card labels used by the board and player hole cards.
 	 */
-	protected final List<CardLabel> cardLabels = new ArrayList<CardLabel>();
+	private final List<CardLabel> cardLabels = new ArrayList<CardLabel>();
+	
 	/** currently selected card */
 	private int selcard;
+	private CardPanel[] cardPanels;
+	private CardPanel boardPanel;
 
 	public CalcPanel() {
 		setLayout(new GridBagLayout());
@@ -45,10 +47,12 @@ abstract class CalcPanel extends JPanel {
 		deckPanel.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
+				// set the selected card to the deck card and move to next card
 				cardLabels.get(selcard).setCard((String) e.getNewValue());
 				selectCard(selcard + 1);
 			}
 		});
+		
 		deckPanel.addPropertyChangeListener(CardLabel.CARD_DESEL_PROP_CHANGE, new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
@@ -56,6 +60,7 @@ abstract class CalcPanel extends JPanel {
 					CardLabel cl = cardLabels.get(n);
 					String c = cl.getCard();
 					if (c != null && c.equals(e.getNewValue())) {
+						// remove the card
 						cl.setCard(null);
 						selectCard(n);
 						break;
@@ -76,25 +81,26 @@ abstract class CalcPanel extends JPanel {
 		hideBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				hideOpp(e.getStateChange() == ItemEvent.SELECTED);
+				boolean hide = e.getStateChange() == ItemEvent.SELECTED;
+				deckPanel.setCardsHidden(hide);
+				hideOpp(hide);
 			}
 		});
 		
 		randButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int num = ((SpinnerNumberModel)numOppSpinner.getModel()).getNumber().intValue();
+				int num = ((SpinnerNumberModel)randNumOppSpinner.getModel()).getNumber().intValue();
 				random(num);
 			}
 		});
 		
 		randPanel.add(randOptsPanel);
 		randPanel.add(hideBox);
+		randPanel.add(randNumOppSpinner);
 		randPanel.add(randButton);
 		c.gridy = 4;
 		add(randPanel, c);
-		
-		// TODO num opps spinner listener
 		
 		clearButton.addActionListener(new ActionListener() {
 			@Override
@@ -110,7 +116,6 @@ abstract class CalcPanel extends JPanel {
 			}
 		});
 		
-		calcPanel.add(numOppSpinner);
 		calcPanel.add(calcOptsPanel);
 		calcPanel.add(clearButton);
 		calcPanel.add(calcButton);
@@ -118,17 +123,21 @@ abstract class CalcPanel extends JPanel {
 		add(calcPanel, c);
 	}
 	
-	protected void setBoard(CardPanel board) {
+	/** set the community card panel */
+	protected void setBoard(CardPanel boardPanel) {
+		this.boardPanel = boardPanel;
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridy = 1;
-		add(board, c);
+		add(boardPanel, c);
 	}
 	
 	/**
 	 * Set the card panels created by the subclass (not the actual hands)
 	 */
 	protected void setCardPanels(CardPanel[] cardPanels) {
-		numOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
+		this.cardPanels = cardPanels;
+		
+		randNumOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
 		
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -160,8 +169,29 @@ abstract class CalcPanel extends JPanel {
 		calcOptsPanel.add(c);
 	}
 
-	/** add selection listener to all the card labels */
+	/**
+	 * Add selection listener to all the card labels. Need to call setBoard,
+	 * setCardPanels first.
+	 */
 	protected void initCardLabels() {
+		// collect the card labels in selection order
+		if (boardPanel != null) {
+			for (CardLabel cl : boardPanel.getCardLabels()) {
+				cardLabels.add(cl);
+			}
+		}
+		
+		for (CardPanel cp : cardPanels) {
+			for (CardLabel cl : cp.getCardLabels()) {
+				cardLabels.add(cl);
+			}
+		}
+		
+		for (CardLabel cl : blockersCardPanel.getCardLabels()) {
+			cardLabels.add(cl);
+		}
+		
+		// add the listeners
 		for (final CardLabel cl : cardLabels) {
 			cl.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, new PropertyChangeListener() {
 				@Override
@@ -175,21 +205,31 @@ abstract class CalcPanel extends JPanel {
 		}
 	}
 
-	/** select the given board/hole card number */
+	/** select the given board/hole card number. need to call initCardLabels first */
 	protected void selectCard(int n) {
 		System.out.println("calc panel select card " + n);
 		cardLabels.get(selcard).setCardSelected(false);
 		selcard = n % cardLabels.size();
 		cardLabels.get(selcard).setCardSelected(true);
 	}
-
+	
 	/**
-	 * clear the deck
+	 * clear deck, board, hands, blockers and select first hand card
 	 */
 	protected void clear() {
 		deckPanel.deselectCards();
+		int n = 0;
+		if (boardPanel != null) {
+			boardPanel.clearCards();
+			n += boardPanel.getCardLabels().size();
+		}
+		for (CardPanel cp : cardPanels) {
+			cp.clearCards();
+		}
+		blockersCardPanel.clearCards();
+		selectCard(n);
 	}
-	
+
 	/**
 	 * Select the deck cards according to cards displayed in the card labels
 	 */
@@ -204,14 +244,41 @@ abstract class CalcPanel extends JPanel {
 	protected List<String> getDeck() {
 		return deckPanel.getCards();
 	}
-
+	
+	/**
+	 * get blockers
+	 */
+	protected String[] getBlockers() {
+		return blockersCardPanel.getCards();
+	}
+	
+	/** set the board, hands and blockers */
+	protected void displayHand(String[] board, String[][] holeCards, String[] blockers) {
+		clear();
+		if (board != null) {
+			boardPanel.setCards(Arrays.asList(board));
+		}
+		for (int n = 0; n < holeCards.length; n++) {
+			cardPanels[n].setCards(Arrays.asList(holeCards[n]));
+		}
+		randNumOppSpinner.setValue(holeCards.length);
+		if (blockers != null) {
+			blockersCardPanel.setCards(Arrays.asList(blockers));
+		}
+		updateDeck();
+	}
+	
+	//
+	// methods for subclass
+	//
+	
+	/** random button pressed */
 	protected abstract void random(int num);
 
+	/** calc button pressed */
 	protected abstract void calc();
 
 	/** hide the cards in the deck. subclass should also hide opponents hole card */
-	protected void hideOpp(boolean hide) {
-		deckPanel.setCardsHidden(hide);
-	}
+	protected abstract void hideOpp(boolean hide);
 
 }

@@ -458,7 +458,7 @@ public abstract class Poker {
 	/**
 	 * Calculate equity for given board and hands.
 	 */
-	public abstract MEquity[] equity(String[] board, String[][] holes, String[] blockers);
+	public abstract MEquity[] equity(String[] board, String[][] holeCards, String[] blockers);
 	
 	/**
 	 * Calculate value of exact hi hand.

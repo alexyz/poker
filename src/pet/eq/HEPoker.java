@@ -44,22 +44,22 @@ public class HEPoker extends Poker {
 	
 	// sync to protect changes to temp
 	@Override
-	public synchronized MEquity[] equity(String[] board, String[][] holes, String[] blockers) {
+	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers) {
 		Arrays.fill(valueTemp, null);
 		validateBoard(board);
-		for (String[] hole : holes) {
+		for (String[] hole : holeCards) {
 			validateHole(hole, omaha);
 		}
 		
 		// cards not used by hands or board
-		final String[] deck = Poker.remdeck(holes, board, blockers);
+		final String[] deck = Poker.remdeck(holeCards, board, blockers);
 		
 		if (board == null) {
 			// monte carlo (random sample boards)
-			return equityImpl(new HEBoardSample(deck, 10000), holes);
+			return equityImpl(new HEBoardSample(deck, 10000), holeCards);
 		} else {
 			// all possible boards
-			return equityImpl(new HEBoardEnum(deck, board), holes);
+			return equityImpl(new HEBoardEnum(deck, board), holeCards);
 		}
 	}
 
@@ -82,12 +82,12 @@ public class HEPoker extends Poker {
 	/**
 	 * Calc exact tex/omaha hand equity for each hand for given board
 	 */
-	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holes) {
+	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holeCards) {
 		// equity type is ignored if hilo is true
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holes.length, hilo, Equity.HI_ONLY, heboard.deck.length, true);
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, true);
 		
-		final int[] hivals = new int[holes.length];
-		final int[] lovals = new int[holes.length];
+		final int[] hivals = new int[holeCards.length];
+		final int[] lovals = new int[holeCards.length];
 		
 		boolean lowPossible = hilo;
 		if (hilo) {
@@ -99,17 +99,17 @@ public class HEPoker extends Poker {
 		
 		// get current high hand values (not equity)
 		if (heboard.current != null) {
-			for (int n = 0; n < holes.length; n++) {
+			for (int n = 0; n < holeCards.length; n++) {
 				if (heboard.current.length >= 3) {
-					hivals[n] = value(Poker.hiValue, heboard.current, holes[n]);
+					hivals[n] = value(Poker.hiValue, heboard.current, holeCards[n]);
 				}
 			}
 			MEquityUtil.updateCurrent(meqs, Equity.HI_ONLY, hivals);
 			
 			// get current low values
 			if (lowPossible) {
-				for (int n = 0; n < holes.length; n++) {
-					lovals[n] = value(Poker.afLowValue, heboard.current, holes[n]);
+				for (int n = 0; n < holeCards.length; n++) {
+					lovals[n] = value(Poker.afLowValue, heboard.current, holeCards[n]);
 				}
 				MEquityUtil.updateCurrent(meqs, Equity.HILO_LO_HALF, lovals);
 			}
@@ -125,15 +125,15 @@ public class HEPoker extends Poker {
 			//System.out.println("board p: " + p + " current: " + Arrays.toString(heboard.current) + " next: " + Arrays.toString(heboard.board));
 			
 			// hi equity
-			for (int i = 0; i < holes.length; i++) {
-				hivals[i] = value(Poker.hiValue, heboard.board, holes[i]);
+			for (int i = 0; i < holeCards.length; i++) {
+				hivals[i] = value(Poker.hiValue, heboard.board, holeCards[i]);
 			}
 			
 			// low equity - only counts if at least one hand makes low
 			boolean hasLow = false;
 			if (lowPossible) {
-				for (int i = 0; i < holes.length; i++) {
-					int v = value(Poker.afLowValue, heboard.board, holes[i]);
+				for (int i = 0; i < holeCards.length; i++) {
+					int v = value(Poker.afLowValue, heboard.board, holeCards[i]);
 					if (v > 0) {
 						hasLow = true;
 					}

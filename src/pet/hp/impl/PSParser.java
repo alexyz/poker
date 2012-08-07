@@ -721,10 +721,10 @@ public class PSParser extends Parser {
 				if (name.equals("DEALING HANDS")) {
 					ignoreStreet = true;
 				}
+				// have to manually make new street in first draw/stand pat action
 				break;
 			case Game.DSTD_TYPE:
 				//*** DEALING HANDS ***
-				// in 5 card draw you don't get these so have to hack the new street in parse action
 				//*** FIRST DRAW ***
 				//*** SECOND DRAW ***
 				//*** THIRD DRAW ***
