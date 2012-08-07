@@ -5,12 +5,13 @@ import java.awt.*;
 import javax.swing.*;
 
 import pet.eq.*;
+import pet.ui.PokerFrame;
 
+/** show high hand ranks */
 public class RanksPanel extends JPanel {
 
-	// TODO move to pf
-	private static final Font font = UIManager.getFont("Label.font");
-	private static final Font boldfont = font.deriveFont(Font.BOLD);
+	private final Font font = UIManager.getFont("Label.font");
+	private final Font fontbold = font.deriveFont(Font.BOLD);
 
 	private final JLabel[] rankLabs;
 
@@ -22,8 +23,8 @@ public class RanksPanel extends JPanel {
 		for (int n = 0; n < rankLabs.length; n++) {
 			JLabel l = new JLabel();
 			l.setVerticalAlignment(SwingConstants.CENTER);
-			l.setPreferredSize(new Dimension(boldfont.getSize() * 4, boldfont.getSize() + 4));
-			l.setMinimumSize(l.getPreferredSize());
+			//l.setPreferredSize(new Dimension(boldfont.getSize() * 4, boldfont.getSize() + 4));
+			//l.setMinimumSize(l.getPreferredSize());
 			rankLabs[n] = l;
 			add(rankLabs[n]);
 		}
@@ -42,7 +43,7 @@ public class RanksPanel extends JPanel {
 			for (int n = 0; n < rankLabs.length; n++) {
 				JLabel rl = rankLabs[n];
 				rl.setForeground(e.wonrank[n] > 0 ? Color.black : Color.darkGray);
-				rl.setFont(e.wonrank[n] > 0 ? boldfont : font);
+				rl.setFont(e.wonrank[n] > 0 ? fontbold : font);
 				rl.setText(String.format("%s: %.0f", Poker.ranknames[n], e.wonrank[n]));
 			}
 		} else {

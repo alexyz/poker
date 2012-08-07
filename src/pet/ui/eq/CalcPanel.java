@@ -14,7 +14,6 @@ import javax.swing.*;
  * [deck] gridy=0
  *   [board] setboard() gridy=1
  *   [hands scroll] sethands() gridy=2
- * [blockers] gridy=3
  * [[rand opts] hide num rand] addrandopt() gridy=4
  * [[calc opts] clear calc] addcalcopt() gridy=5
  */
@@ -23,7 +22,7 @@ abstract class CalcPanel extends JPanel {
 	private final DeckPanel deckPanel = new DeckPanel();
 	private final JPanel randPanel = new JPanel();
 	private final JPanel randOptsPanel = new JPanel();
-	private final JPanel calcPanel = new JPanel();
+	private final JPanel calcButtonsPanel = new JPanel();
 	private final JPanel calcOptsPanel = new JPanel();
 	private final CardPanel blockersCardPanel = new CardPanel("Blockers", 0, 10);
 	private final JSpinner randNumOppSpinner = new JSpinner();
@@ -31,13 +30,14 @@ abstract class CalcPanel extends JPanel {
 	private final JButton clearButton = new JButton("Clear");
 	private final JButton randButton = new JButton("Random");
 	private final JButton calcButton = new JButton("Calculate");
+	private final JScrollPane scroller = new JScrollPane();
 	/**
-	 * the list of card labels used by the board and player hole cards.
+	 * the list of card labels used by the board, player hole cards and blockers
 	 */
 	private final List<CardLabel> cardLabels = new ArrayList<CardLabel>();
 	
-	/** currently selected card */
-	private int selcard;
+	/** currently selected card (cardLabels index) */
+	private int selectedCard;
 	private CardPanel[] cardPanels;
 	private CardPanel boardPanel;
 
@@ -48,8 +48,8 @@ abstract class CalcPanel extends JPanel {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
 				// set the selected card to the deck card and move to next card
-				cardLabels.get(selcard).setCard((String) e.getNewValue());
-				selectCard(selcard + 1);
+				cardLabels.get(selectedCard).setCard((String) e.getNewValue());
+				selectCard(selectedCard + 1);
 			}
 		});
 		
@@ -71,12 +71,7 @@ abstract class CalcPanel extends JPanel {
 		
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
-		//c.weightx = 1;
-		//c.weighty = 1;
 		add(deckPanel, c);
-		
-		c.gridy = 3;
-		add(blockersCardPanel, c);
 		
 		hideBox.addItemListener(new ItemListener() {
 			@Override
@@ -116,11 +111,11 @@ abstract class CalcPanel extends JPanel {
 			}
 		});
 		
-		calcPanel.add(calcOptsPanel);
-		calcPanel.add(clearButton);
-		calcPanel.add(calcButton);
+		calcButtonsPanel.add(calcOptsPanel);
+		calcButtonsPanel.add(clearButton);
+		calcButtonsPanel.add(calcButton);
 		c.gridy = 5;
-		add(calcPanel, c);
+		add(calcButtonsPanel, c);
 	}
 	
 	/** set the community card panel */
@@ -150,15 +145,20 @@ abstract class CalcPanel extends JPanel {
 			p.add(cp, c);
 			c.gridy++;
 		}
+		p.add(blockersCardPanel, c);
 		
-		JScrollPane sp = new JScrollPane(p, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scroller.setViewportView(p);
+		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroller.setPreferredSize(new Dimension(640,320));
+		
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.fill = GridBagConstraints.BOTH;
-		add(sp, c);
+		add(scroller, c);
 	}
 	
 	protected void addRandOpt(JComponent c) {
@@ -198,8 +198,8 @@ abstract class CalcPanel extends JPanel {
 				public void propertyChange(PropertyChangeEvent evt) {
 					deckPanel.deselectCard(cl.getCard());
 					cl.setCard(null);
-					cardLabels.get(selcard).setCardSelected(false);
-					selcard = cardLabels.indexOf(cl);
+					cardLabels.get(selectedCard).setCardSelected(false);
+					selectedCard = cardLabels.indexOf(cl);
 				}
 			});
 		}
@@ -208,9 +208,9 @@ abstract class CalcPanel extends JPanel {
 	/** select the given board/hole card number. need to call initCardLabels first */
 	protected void selectCard(int n) {
 		System.out.println("calc panel select card " + n);
-		cardLabels.get(selcard).setCardSelected(false);
-		selcard = n % cardLabels.size();
-		cardLabels.get(selcard).setCardSelected(true);
+		cardLabels.get(selectedCard).setCardSelected(false);
+		selectedCard = n % cardLabels.size();
+		cardLabels.get(selectedCard).setCardSelected(true);
 	}
 	
 	/**
@@ -228,6 +228,7 @@ abstract class CalcPanel extends JPanel {
 		}
 		blockersCardPanel.clearCards();
 		selectCard(n);
+		scroller.getVerticalScrollBar().getModel().setValue(0);
 	}
 
 	/**
