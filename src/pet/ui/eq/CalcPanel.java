@@ -26,7 +26,7 @@ abstract class CalcPanel extends JPanel {
 	private final JPanel calcOptsPanel = new JPanel();
 	private final CardPanel blockersCardPanel = new CardPanel("Blockers", 0, 10);
 	private final JSpinner randNumOppSpinner = new JSpinner();
-	private final JCheckBox hideBox = new JCheckBox("Hide Opp.");
+	private final JToggleButton hideButton = new JToggleButton("Hide");
 	private final JButton clearButton = new JButton("Clear");
 	private final JButton randButton = new JButton("Random");
 	private final JButton calcButton = new JButton("Calculate");
@@ -73,7 +73,7 @@ abstract class CalcPanel extends JPanel {
 		c.gridx = 0;
 		add(deckPanel, c);
 		
-		hideBox.addItemListener(new ItemListener() {
+		hideButton.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean hide = e.getStateChange() == ItemEvent.SELECTED;
@@ -91,7 +91,7 @@ abstract class CalcPanel extends JPanel {
 		});
 		
 		randPanel.add(randOptsPanel);
-		randPanel.add(hideBox);
+		randPanel.add(hideButton);
 		randPanel.add(randNumOppSpinner);
 		randPanel.add(randButton);
 		c.gridy = 4;

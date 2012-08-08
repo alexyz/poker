@@ -44,7 +44,7 @@ class HandCardPanel extends CardPanel {
 	private final RanksPanel hiHalfRanks = new RanksPanel();
 	private final EquityPanel loHalfEquityPanel = new EquityPanel();
 
-	public HandCardPanel(String name, int mincards, int maxcards) {
+	public HandCardPanel(String name, int mincards, int maxcards, boolean below) {
 		super(name, mincards, maxcards);
 		hiHalfEquityPanel.setVisible(false);
 		loHalfEquityPanel.setVisible(false);
@@ -74,7 +74,7 @@ class HandCardPanel extends CardPanel {
 		p.add(loHalfEquityPanel, g);
 		
 		// add to superclass layout
-		addDetails(p);
+		addDetails(p, below);
 	}
 	
 	private void clearHandEquity() {

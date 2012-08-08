@@ -52,7 +52,7 @@ public abstract class DrawPoker2 extends Poker {
 		List<Draw> l = new ArrayList<Draw>();
 		
 		for (int n = 0; n <= 5; n++) {
-			String[] y = getDrawingHand(l, x, n, dsLowValue, 2f);
+			String[] y = getDrawingHand(l, x, n, Value.dsLowValue, 2f);
 			String[] z = DrawPoker.getDraw(x, n);
 			System.out.println("draw " + n + " old: " + Arrays.toString(z));
 			System.out.println("       new: " + Arrays.toString(y));
@@ -123,7 +123,7 @@ public abstract class DrawPoker2 extends Poker {
 	}
 	
 	public static String[] getDrawingHand(final String[] hand, final int drawn, boolean hi) {
-		return getDrawingHand(null, hand, drawn, hi ? Poker.hiValue : Poker.dsLowValue, 2f);
+		return getDrawingHand(null, hand, drawn, hi ? Value.hiValue : Value.dsLowValue, 2f);
 	}
 
 	/**

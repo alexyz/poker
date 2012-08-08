@@ -37,10 +37,10 @@ class CardPanel extends JPanel {
 		add(p, g);
 	}
 	
-	protected void addDetails(JComponent c) {
+	protected void addDetails(JComponent c, boolean below) {
 		GridBagConstraints g = new GridBagConstraints();
-		g.gridx = 1;
-		g.gridy = 0;
+		g.gridx = below ? 0 : 1;
+		g.gridy = below ? 1 : 0;
 		g.weightx = 1;
 		g.fill = GridBagConstraints.BOTH;
 		add(c, g);
@@ -75,6 +75,9 @@ class CardPanel extends JPanel {
 		cardLabels[n].setCard(c);
 	}
 	
+	/**
+	 * clears all cards and calls setCard for each card label
+	 */
 	public void setCards(List<String> cards) {
 		clearCards();
 		for (int n = 0; n < cardLabels.length; n++) {

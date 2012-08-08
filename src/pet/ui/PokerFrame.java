@@ -49,6 +49,12 @@ public class PokerFrame extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+					@Override
+					public void uncaughtException(Thread t, Throwable e) {
+						handleException("Error", e);
+					}
+				});
 				// need to create and pack in awt thread otherwise it can deadlock
 				// due to the java console panel
 				instance = new PokerFrame();
@@ -58,6 +64,17 @@ public class PokerFrame extends JFrame {
 			}
 		});
 		
+	}
+	
+	/**
+	 * display dialog
+	 */
+	private static void handleException(String title, Throwable e) {
+		e.printStackTrace(System.out);
+		JOptionPane.showMessageDialog(getInstance(), 
+				e.toString(), // + ": " + e.getMessage(), 
+				title, 
+				JOptionPane.ERROR_MESSAGE);
 	}
 	
 	/** all the parsed data */
@@ -81,6 +98,7 @@ public class PokerFrame extends JFrame {
 	private final PlayerPanel playerPanel = new PlayerPanel();
 	private final HUDManager hudManager = new HUDManager();
 	private final AboutPanel aboutPanel = new AboutPanel();
+	private final StudCalcPanel studPanel = new StudCalcPanel();
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
@@ -102,6 +120,7 @@ public class PokerFrame extends JFrame {
 		eqTabs.addTab("Hold'em", holdemPanel);
 		eqTabs.addTab("Omaha", omahaPanel);
 		eqTabs.addTab("Draw", drawPanel);
+		eqTabs.addTab("Stud", studPanel);
 		
 		hisTabs.addTab("History", historyPanel);
 		hisTabs.addTab("Players", playerPanel);

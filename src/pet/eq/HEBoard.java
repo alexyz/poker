@@ -1,5 +1,7 @@
 package pet.eq;
 
+import java.util.Random;
+
 /**
  * methods for getting complete hold'em/omaha boards, either
  * randomly or with combinatorial enumeration
@@ -24,6 +26,7 @@ abstract class HEBoard {
 class HEBoardSample extends HEBoard {
 	private final long[] picked = new long[1];
 	private final int count;
+	private final Random r = new Random();
 	
 	public HEBoardSample(String[] deck, int count) {
 		super(deck, null);
@@ -41,7 +44,7 @@ class HEBoardSample extends HEBoard {
 		for (int n = 0; n < 5; n++) {
 			// TODO should really pick straight into board
 			// should also use thread local random
-			board[n] = RandomUtil.pick(deck, picked);
+			board[n] = PokerUtil.pick(r, deck, picked);
 		}
 	}
 	

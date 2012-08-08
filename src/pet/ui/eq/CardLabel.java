@@ -22,7 +22,8 @@ class CardLabel extends JLabel {
 	public static String CARD_SEL_PROP_CHANGE = "cardsel", CARD_DESEL_PROP_CHANGE = "carddesel";
 	
 	/**
-	 * get the cards for the card labels that have cards
+	 * get the cards for the card labels that have cards (array could have 0 to
+	 * cardLabels.size elements)
 	 */
 	public static String[] getCards(List<CardLabel> cardLabels) {
 		List<String> cards = new ArrayList<String>();

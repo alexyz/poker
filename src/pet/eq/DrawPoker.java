@@ -1,6 +1,7 @@
 package pet.eq;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Draw poker equity methods
@@ -11,45 +12,47 @@ public class DrawPoker extends Poker {
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
-	private static MEquity[] equityImpl(Value value, String[][] hands, String[] blockers) {
-		System.out.println("draw sample equity: " + Arrays.deepToString(hands));
+	private static MEquity[] equityImpl(Value value, String[][] holeCards, String[] blockers) {
+		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards));
 
 		// remaining cards in deck
-		final String[] deck = Poker.remdeck(hands, blockers);
+		final String[] deck = Poker.remdeck(holeCards, blockers);
 
 		// return value
-		final MEquity[] meqs = MEquityUtil.makeMEquity(hands.length, false, value.eqtype, deck.length, false);
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, false, value.eqtype(), deck.length, false);
 
 		// get current hand values (not equity)
-		final int[] vals = new int[hands.length];
-		for (int n = 0; n < hands.length; n++) {
-			if (hands[n].length == 5) {
-				vals[n] = value.value(hands[n]);
+		final int[] vals = new int[holeCards.length];
+		for (int n = 0; n < holeCards.length; n++) {
+			if (holeCards[n].length == 5) {
+				vals[n] = value.value(holeCards[n]);
 			}
 		}
-		MEquityUtil.updateCurrent(meqs, value.eqtype, vals);
+		MEquityUtil.updateCurrent(meqs, value.eqtype(), vals);
 
 		final String[] h = new String[5];
 
 		// get hand values for picks
 		final int c = 100000;
 		final long[] pick = new long[1];
+		final Random r = new Random();
+		
 		for (int p = 0; p < c; p++) {
 			pick[0] = 0;
-			for (int hn = 0; hn < hands.length; hn++) {
+			for (int hn = 0; hn < holeCards.length; hn++) {
 				// could be any length
-				String[] hand = hands[hn];
+				String[] hand = holeCards[hn];
 				for (int n = 0; n < 5; n++) {
 					if (hand.length > n) {
 						h[n] = hand[n];
 					} else {
-						h[n] = RandomUtil.pick(deck, pick);
+						h[n] = PokerUtil.pick(r, deck, pick);
 					}
 				}
 				int v = value.value(h);
 				vals[hn] = v;
 			}
-			MEquityUtil.updateEquity(meqs, value.eqtype, vals, null, 0);
+			MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null, 0);
 		}
 
 		MEquityUtil.summariseEquity(meqs, c, 0);
@@ -172,7 +175,7 @@ public class DrawPoker extends Poker {
 
 	@Override
 	public MEquity[] equity(String[] board, String[][] hands, String[] blockers) {
-		return equityImpl(high ? hiValue : dsLowValue, hands, blockers);
+		return equityImpl(high ? Value.hiValue : Value.dsLowValue, hands, blockers);
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package pet.eq;
 
 import java.awt.Color;
+import java.util.Random;
 
 /**
  * General utility methods
@@ -90,5 +91,38 @@ public class PokerUtil {
 		}
 	}
 
+	/**
+	 * pick a value from a (max length 63) that hasn't been picked before
+	 * according to picked[0] and update picked[0]
+	 */
+	static String pick(Random r, String[] a, long[] picked) {
+		if (a.length > 63) {
+			throw new RuntimeException();
+		}
+		if (picked[0] >= ((1L << a.length) - 1)) {
+			throw new RuntimeException("none left to pick");
+		}
+		while (true) {
+			int i = r.nextInt(a.length);
+			long m = 1L << i;
+			if ((picked[0] & m) == 0) {
+				picked[0] |= m;
+				return a[i];
+			}
+		}
+	}
+	
+	/**
+	 * shuffle array
+	 */
+	public static void shuffle(Object[] a, Random r) {
+		for (int n = 0; n < a.length; n++) {
+			// don't just pick random position!
+			int x = r.nextInt(a.length - n) + n;
+			Object o = a[n];
+			a[n] = a[x];
+			a[x] = o;
+		}
+	}
 	
 }

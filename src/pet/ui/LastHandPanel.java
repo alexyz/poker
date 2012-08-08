@@ -10,6 +10,7 @@ import javax.swing.*;
 import pet.hp.*;
 import pet.hp.state.*;
 import pet.ui.eq.DrawCalcPanel;
+import pet.ui.eq.PokerItem;
 import pet.ui.ta.*;
 
 /**
@@ -87,10 +88,10 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 						pf.displayHoldemEquity(hs.hand.board, holeCards, true, true);
 						break;
 					case Game.FCD_TYPE:
-						pf.displayDrawEquity(holeCards, DrawCalcPanel.HIGH);
+						pf.displayDrawEquity(holeCards, PokerItem.HIGH);
 						break;
 					case Game.DSTD_TYPE:
-						pf.displayDrawEquity(holeCards, DrawCalcPanel.DSLOW);
+						pf.displayDrawEquity(holeCards, PokerItem.DSLOW);
 						break;
 					default:
 						throw new RuntimeException("unknown game type " + hs.hand);

@@ -79,48 +79,6 @@ public abstract class Poker {
 	private static int[] uniqueValues;
 	
 	/**
-	 * calculates high value of hand
-	 */
-	public static final Value hiValue = new Value(Equity.HI_ONLY) {
-		@Override
-		public final int value(String[] hand) {
-			return Poker.value(hand);
-		}
-		@Override
-		public float score(String[] hand, float bias) {
-			return DrawPoker2.score(value(hand), bias, true);
-		}
-	};
-	
-	/**
-	 * Calculates ace to five low value of hand
-	 */
-	public static final Value afLowValue = new Value(Equity.AFLO_ONLY) {
-		@Override
-		public final int value(String[] hand) {
-			return Poker.lowValue(hand);
-		}
-		@Override
-		public float score(String[] hand, float bias) {
-			throw new RuntimeException("not yet implemented");
-		}
-	};
-	
-	/**
-	 * deuce to seven low value function
-	 */
-	protected static final Value dsLowValue = new Value(Equity.DSLO_ONLY) {
-		@Override
-		public int value(String[] hand) {
-			return dsValue(hand);
-		}
-		@Override
-		public float score(String[] hand, float bias) {
-			return DrawPoker2.score(Poker.value(hand), bias, false);
-		}
-	};
-	
-	/**
 	 * count low cards
 	 */
 	static int lowCount(String[] hand, boolean acehigh) {
@@ -134,11 +92,10 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * get ace to five low value of hand.
+	 * get 8 or better qualified ace to five low value of hand.
 	 * returns 0 if no low.
-	 * FIXME this isn't proper low, as low can have pairs (though not str/fl)
 	 */
-	static int lowValue(String[] hand) {
+	static int aflow8Value(String[] hand) {
 		validate(hand);
 		if (lowCount(hand, false) ==  5) {
 			int p = isPair(hand, false);
@@ -150,6 +107,18 @@ public abstract class Poker {
 			}
 		}
 		return 0;
+	}
+	
+	/**
+	 * get unqualified ace to five low value of hand
+	 */
+	static int afLowValue(String[] hand) {
+		validate(hand);
+		// allow pairs but not straights or flushes, ace low
+		int p = isPair(hand, false);
+		// invert value
+		int v = AF_LOW_TYPE | (INV_MASK - p);
+		return v;
 	}
 	
 	/** check hand is 5 cards and non of the cards are duplicated */

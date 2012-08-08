@@ -3,21 +3,36 @@ package pet.eq;
 import java.util.*;
 
 /**
- * Represents the equity of a hand
+ * Represents the equity of a hand according to a specific valuation type
  */
 public class Equity {
 	
-	/** equity types (note: hi/lo is not a type, it is actually three types) */
-	public static final int DSLO_ONLY = 1, AFLO_ONLY = 2, HI_ONLY = 3, HILO_HI_HALF = 4, HILO_LO_HALF = 5;
+	/*
+	 * equity types (note: hi/lo (8 or better) is not a type, it is actually
+	 * three types, hence the MEquity class)
+	 */
+	/** deuce to seven low only equity type (single draw/triple draw) */
+	public static final int DSLO_ONLY = 1;
+	/** ace to five low only equity type  (razz) */ 
+	public static final int AFLO_ONLY = 2;
+	/** high only equity type (holdem, omaha hi, 5 card draw, etc) */
+	public static final int HI_ONLY = 3;
+	/** high half of hi/lo equity type (omaha 8, stud 8, etc) */
+	public static final int HILO_HI_HALF = 4;
+	/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
+	public static final int HILO_AFLO8_HALF = 5;
+	/** ace to five low 8 or better only equity type (not used by any game, as it's qualified) */
+	public static final int AFLO8_ONLY = 6;
 	
 	/** get name of equity type */
 	public static String getEqTypeName(int eqtype) {
 		switch (eqtype) {
 			case DSLO_ONLY: return "2-7 Low Only";
 			case AFLO_ONLY: return "A-5 Low Only";
-			case HI_ONLY: return "Hi Only";
-			case HILO_HI_HALF: return "Hi Half";
-			case HILO_LO_HALF: return "Lo Half";
+			case AFLO8_ONLY: return "A-5 Low (8) Only";
+			case HI_ONLY: return "High Only";
+			case HILO_HI_HALF: return "High Half";
+			case HILO_AFLO8_HALF: return "A-5 Low (8) Half";
 			default: throw new RuntimeException();
 		}
 	}

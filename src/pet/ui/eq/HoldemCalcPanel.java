@@ -31,7 +31,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		int min = omaha ? 2 : 1;
 		int max = omaha ? 4 : 2;
 		for (int n = 0; n < handPanels.length; n++) {
-			handPanels[n] = new HandCardPanel(name + " hand " + (n+1), min, max);
+			handPanels[n] = new HandCardPanel(name + " hand " + (n+1), min, max, false);
 		}
 		
 		// add to layout
