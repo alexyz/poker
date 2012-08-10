@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.hp;
 
 import java.awt.FlowLayout;
 import java.awt.event.*;

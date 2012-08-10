@@ -22,7 +22,7 @@ public class Game implements Serializable {
 	/** limit type constants */
 	public static final int NO_LIMIT = 100, POT_LIMIT = 101, FIXED_LIMIT = 102;
 	/** mix type constants */
-	public static final int HE_OM_MIX = 1001, TRIPSTUD_MIX = 1002, EIGHT_MIX = 1003;
+	public static final int HE_OM_MIX = 1001, TRIPSTUD_MIX = 1002, EIGHT_MIX = 1003, HORSE_MIX = 1004;
 	/** currency type constants (excluding $ and €) */
 	public static final char PLAY_CURRENCY = 'p', TOURN_CURRENCY = 't';
 	/** subtype constants */

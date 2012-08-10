@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.hp;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,6 +12,7 @@ import javax.swing.event.*;
 import pet.hp.Hand;
 import pet.hp.History;
 import pet.hp.info.*;
+import pet.ui.PokerFrame;
 import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
 

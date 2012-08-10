@@ -96,6 +96,8 @@ public class GameUtil {
 				return "Triple Stud";
 			case Game.EIGHT_MIX:
 				return "8-Game";
+			case Game.HORSE_MIX:
+				return "HORSE";
 			default: 
 				throw new RuntimeException("unknown mix type " + mixtype);
 		}

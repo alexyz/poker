@@ -34,9 +34,11 @@ public class HandStateUtil {
 	 */
 	// synchronize for cache, but sampled equity calc can be slow...
 	public static synchronized List<HandState> getStates(final Hand hand) {
+		System.out.println("get hands states for " + hand);
 		// see if we've already done this hand
 		for (List<HandState> l : cache) {
 			if (l.get(0).hand.id.equals(hand.id)) {
+				System.out.println("cache hit");
 				return l;
 			}
 		}
@@ -151,8 +153,8 @@ public class HandStateUtil {
 			int trail = 0;
 			int lastbet = 0;
 			for (Action act : hand.streets[s]) {
-				System.out.println();
-				System.out.println("act " + act);
+				//System.out.println();
+				//System.out.println("act " + act);
 				hs = hs.clone();
 				hs.action = act;
 				
@@ -169,7 +171,7 @@ public class HandStateUtil {
 				} else if (act.amount != 0) {
 					// pot raise amount
 					int potraise = hs.pot + trail + 2 * (lastbet - ss.amount);
-					System.out.println("MAX: pot=" + hs.pot + " trail=" + trail + " lastbet=" + lastbet + " committed=" + ss.amount + " => potraise " + potraise);
+					//System.out.println("MAX: pot=" + hs.pot + " trail=" + trail + " lastbet=" + lastbet + " committed=" + ss.amount + " => potraise " + potraise);
 					
 					ss.amount += act.amount;
 					int tocall = 0;
@@ -189,8 +191,8 @@ public class HandStateUtil {
 							ss.ev = totalpot * eq - act.amount;
 							ss.tev += ss.ev;
 							
-							System.out.println("EV: pot=" + hs.pot + " actam=" + act.amount + " trail=" + trail + " tocall=" + tocall + " => total " + totalpot);
-							System.out.println("EV:   eq=" + eq + " p*eq=" + (totalpot*eq) + " cost=" + act.amount + " => ev " + ss.ev);
+							//System.out.println("EV: pot=" + hs.pot + " actam=" + act.amount + " trail=" + trail + " tocall=" + tocall + " => total " + totalpot);
+							//System.out.println("EV:   eq=" + eq + " p*eq=" + (totalpot*eq) + " cost=" + act.amount + " => ev " + ss.ev);
 							break;
 							
 						case Action.COLLECT_TYPE:

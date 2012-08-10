@@ -142,7 +142,8 @@ public abstract class DrawPoker2 extends Poker {
 		} else if (drawn == 0) {
 			// special case, nothing to test other than given hand
 			if (draws != null) {
-				draws.add(new Draw(hand, value.score(hand, bias)));
+				int v = value.value(hand);
+				draws.add(new Draw(hand, value.score(v, bias)));
 			}
 			return hand.clone();
 		}
@@ -167,7 +168,8 @@ public abstract class DrawPoker2 extends Poker {
 			for (int j = 0; j < jmax; j++) {
 				// pick drawn from deck
 				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
-				score += value.score(drawnHand, bias);
+				int v = value.value(drawnHand);
+				score += value.score(v, bias);
 			}
 			
 			float averageScore = score / (1.0f * jmax);

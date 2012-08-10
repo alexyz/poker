@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.hp;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
@@ -9,6 +9,7 @@ import javax.swing.event.*;
 
 import pet.hp.*;
 import pet.hp.info.*;
+import pet.ui.PokerFrame;
 import pet.ui.ta.*;
 
 public class GamesPanel extends JPanel implements HistoryListener {

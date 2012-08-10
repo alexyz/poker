@@ -14,8 +14,8 @@ public abstract class Value {
 			return Poker.value(hand);
 		}
 		@Override
-		public float score(String[] hand, float bias) {
-			return DrawPoker2.score(value(hand), bias, true);
+		public float score(int value, float bias) {
+			return DrawPoker2.score(value, bias, true);
 		}
 	};
 	
@@ -28,7 +28,7 @@ public abstract class Value {
 			return Poker.afLowValue(hand);
 		}
 		@Override
-		public float score(String[] hand, float bias) {
+		public float score(int value, float bias) {
 			throw new RuntimeException();
 		}
 	};
@@ -42,7 +42,7 @@ public abstract class Value {
 			return Poker.aflow8Value(hand);
 		}
 		@Override
-		public float score(String[] hand, float bias) {
+		public float score(int value, float bias) {
 			throw new RuntimeException("not yet implemented");
 		}
 	};
@@ -56,8 +56,8 @@ public abstract class Value {
 			return Poker.dsValue(hand);
 		}
 		@Override
-		public float score(String[] hand, float bias) {
-			return DrawPoker2.score(Poker.value(hand), bias, false);
+		public float score(int value, float bias) {
+			return DrawPoker2.score(value, bias, false);
 		}
 	};
 	
@@ -81,5 +81,5 @@ public abstract class Value {
 	/**
 	 * get normalised score (experimental)
 	 */
-	public abstract float score(String[] hand, float bias);
+	public abstract float score(int value, float bias);
 }

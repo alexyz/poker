@@ -128,12 +128,15 @@ public class HandUtil {
 				} else if (hand.myseat == seat) {
 					// get current player cards but also see which ones were kept
 					String[] x = hand.myDrawCards(streetIndex);
+					if (x == null) {
+						return null;
+					}
+					System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(x));
 					String[] y = hand.myDrawCards(streetIndex + 1);
-					System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(x) + " and " + Arrays.toString(y));
 					if (y == null) {
 						y = hand.myseat.finalHoleCards;
-						System.out.println("using final hole cards " + Arrays.toString(y));
 					}
+					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
 					hc = kept(x, y, seat.drawn(streetIndex));
 					
 				} else {

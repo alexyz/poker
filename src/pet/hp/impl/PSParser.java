@@ -24,7 +24,7 @@ public class PSParser extends Parser {
 		// PokerStars Hand #83338296941:  8-Game (Razz Limit, 100/200) - 2012/07/15 1:45:25 ET
 		static final Pattern pat = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
 				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
-				+ "(?:(Mixed \\S+|Triple Stud|8Game) )?"
+				+ "(?:(Mixed \\S+|Triple Stud|8Game|HORSE) )?"
 				+ "(.+?) "
 				+ "(No Limit|Pot Limit|Limit) "
 				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
@@ -577,6 +577,8 @@ public class PSParser extends Parser {
 				game.mix = Game.TRIPSTUD_MIX;
 			} else if (mixs.equals("8Game")) {
 				game.mix = Game.EIGHT_MIX;
+			} else if (mixs.equals("HORSE")) {
+				game.mix = Game.HORSE_MIX;
 			} else {
 				throw new RuntimeException("unknown mix type " + mixs);
 			}

@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.hp;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import pet.hp.*;
 import pet.hp.state.*;
+import pet.ui.PokerFrame;
 import pet.ui.eq.DrawCalcPanel;
 import pet.ui.eq.PokerItem;
 import pet.ui.ta.*;

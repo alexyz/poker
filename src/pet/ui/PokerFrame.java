@@ -17,6 +17,7 @@ import pet.hp.impl.PSParser;
 import pet.hp.info.*;
 import pet.ui.eq.*;
 import pet.ui.gr.GraphData;
+import pet.ui.hp.*;
 import pet.ui.hud.HUDManager;
 import pet.ui.rep.ReplayPanel;
 
