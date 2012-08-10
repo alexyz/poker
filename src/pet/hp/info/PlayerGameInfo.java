@@ -90,7 +90,7 @@ public class PlayerGameInfo {
 		// count winning rank.. if you dare!
 		if (seat.showdown) {
 			Poker p = GameUtil.getPoker(hand.game);
-			int v = p.value(hand.board, seat.finalHoleCards);
+			int v = p.value(hand.board, seat.cards());
 			int r = Poker.rank(v);
 			(seat.won > 0 ? rankwon : ranklost)[r]++;
 			rankam[r]+=seat.won-seat.pip;

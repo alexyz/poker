@@ -9,25 +9,25 @@ import pet.hp.Hand;
  * cloned - do not duplicate references
  */
 public class HandState implements Cloneable {
-	public static final int NO_SEAT = -1;
 	/** the hand the states were derived from */
 	public final Hand hand;
 	/** seats in hand (where seat 1 is index 0), elements can be null */
 	public SeatState[] seats;
+	
 	/** community cards */
 	public String[] board;
 	/** current pot */
 	public int pot;
-	/** seat index of button */
-	public int button;
-	/** index of seat state of current action, NO_SEAT if no action */
-	public int actionSeat;
+	/** seat index of button (starting at 0) */
+	public int buttonIndex = -1;
+	/** index of seat state of current action (starting at 0) */
+	public int actionSeatIndex = -1;
 	/** current action */
 	public Action action;
 	/** information */
 	public String note;
 	/** current street, starting at 0 */
-	public int streetIndex;
+	public int streetIndex = -1;
 	
 	public HandState(Hand hand) {
 		this.hand = hand;
@@ -35,7 +35,7 @@ public class HandState implements Cloneable {
 	}
 	
 	public SeatState actionSeat() {
-		return actionSeat >= 0 ? seats[actionSeat] : null;
+		return actionSeatIndex >= 0 ? seats[actionSeatIndex] : null;
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class HandState implements Cloneable {
 	
 	@Override
 	public String toString() {
-		if (actionSeat >= 0) {
+		if (actionSeatIndex >= 0) {
 			return String.valueOf(action);
 		}
 		return note;

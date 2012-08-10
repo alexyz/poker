@@ -46,7 +46,7 @@ public class DrawPoker extends Poker {
 					if (hand.length > n) {
 						h[n] = hand[n];
 					} else {
-						h[n] = PokerUtil.pick(r, deck, pick);
+						h[n] = ArrayUtil.pick(r, deck, pick);
 					}
 				}
 				int v = value.value(h);

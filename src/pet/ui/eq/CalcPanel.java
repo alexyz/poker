@@ -254,18 +254,15 @@ abstract class CalcPanel extends JPanel {
 	}
 	
 	/** set the board, hands and blockers */
-	protected void displayHand(String[] board, String[][] holeCards, String[] blockers) {
+	protected void displayHand(String[] board, List<String[]> holeCards) {
 		clear();
 		if (board != null) {
-			boardPanel.setCards(Arrays.asList(board));
+			boardPanel.setCards(board);
 		}
-		for (int n = 0; n < holeCards.length; n++) {
-			cardPanels[n].setCards(Arrays.asList(holeCards[n]));
+		for (int n = 0; n < holeCards.size(); n++) {
+			cardPanels[n].setCards(holeCards.get(n));
 		}
-		randNumOppSpinner.setValue(holeCards.length);
-		if (blockers != null) {
-			blockersCardPanel.setCards(Arrays.asList(blockers));
-		}
+		randNumOppSpinner.setValue(holeCards.size());
 		updateDeck();
 	}
 	

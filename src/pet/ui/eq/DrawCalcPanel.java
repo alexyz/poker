@@ -1,7 +1,10 @@
 package pet.ui.eq;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.*;
 
@@ -38,16 +41,9 @@ public class DrawCalcPanel extends CalcPanel {
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(String[][] holeCards, String type) {
-		displayHand(null, holeCards, null);
-		
-		for (int n = 0; n < pokerCombo.getItemCount(); n++) {
-			PokerItem p = (PokerItem) pokerCombo.getItemAt(n);
-			if (p.name.equals(type)) {
-				pokerCombo.setSelectedIndex(n);
-				break;
-			}
-		}
+	public void displayHand(List<String[]> holeCards, String type) {
+		displayHand(null, holeCards);
+		PokerItem.select(pokerCombo, type);
 	}
 	
 	@Override
@@ -75,10 +71,10 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void random(int num) {
-		ArrayList<String> deck = new ArrayList<String>(Poker.deck);
-		Collections.shuffle(deck);
+		String[] deck = Poker.deck();
+		ArrayUtil.shuffle(deck, new Random());
 		for (int n = 0; n < num; n++) {
-			handPanels[n].setCards(deck.subList(n * 5, n * 5 + 5));
+			handPanels[n].setCards(Arrays.copyOfRange(deck, n * 5, n * 5 + 5));
 		}
 		updateDeck();
 	}

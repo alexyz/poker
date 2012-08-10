@@ -3,6 +3,8 @@ package pet.hp;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import pet.eq.ArrayUtil;
+
 /**
  * A player sitting at a table (never sitting out).
  * This object should be considered immutable.
@@ -16,6 +18,8 @@ public class Seat implements Serializable {
 	public int chips;
 	/** seats final hole cards */
 	public String[] finalHoleCards;
+	/** seats final public cards */
+	public String[] finalUpCards;
 	/** amount won */
 	public int won;
 	/**
@@ -34,6 +38,18 @@ public class Seat implements Serializable {
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;
+	
+	public String[] cards() {
+		if (finalHoleCards != null) {
+			if (finalUpCards != null) {
+				return ArrayUtil.join(finalHoleCards, finalUpCards);
+			} else {
+				return finalHoleCards;
+			}
+		} else {
+			return null;
+		}
+	}
 	
 	/** return number drawn indexed from 0 */
 	public int drawn(int draw) {
@@ -59,6 +75,9 @@ public class Seat implements Serializable {
 		String s = num + ":" + name + "(" + chips + ")";
 		if (finalHoleCards != null) {
 			s += " " + Arrays.asList(finalHoleCards);
+		}
+		if (finalUpCards != null) {
+			s += " " + Arrays.asList(finalUpCards);
 		}
 		if (drawn0 > 0) {
 			s += " discards " + drawn0;

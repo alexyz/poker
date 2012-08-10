@@ -42,46 +42,48 @@ public class Hand implements Serializable {
 	/** pokerstars wealth delta */
 	public int rake;
 	/**
-	 * original (all games) and subsequent (draw games) hole cards dealt to
+	 * Draw games only - original and subsequent hole cards dealt to
 	 * player. since we only ever know the original cards for current player,
-	 * this is on hand and not seat.
+	 * these are here and not on seat instance.
 	 */
-	public String[] myHoleCards0, myHoleCards1, myHoleCards2, myHoleCards3;
+	public String[] myDrawCards0, myDrawCards1, myDrawCards2, myDrawCards3;
 	/** name of table */
 	public String tablename;
 	/** button seat number */
-	public int button;
+	public byte button;
+	/** the street index the deck was reshuffled on (default 99, i.e. never reshuffled) */
+	public byte reshuffleStreetIndex = 99;
 	
 	public Hand(long id) {
 		this.id = id;
 	}
 	
-	public String[] myHoleCards(int n) {
+	public String[] myDrawCards(int n) {
 		switch (n) {
-			case 0: return myHoleCards0;
-			case 1: return myHoleCards1;
-			case 2: return myHoleCards2;
-			case 3: return myHoleCards3;
+			case 0: return myDrawCards0;
+			case 1: return myDrawCards1;
+			case 2: return myDrawCards2;
+			case 3: return myDrawCards3;
 			default: throw new RuntimeException();
 		}
 	}
 	
-	public void addMyHoleCards(String[] h) {
-		if (myHoleCards0 == null) {
+	public void addMyDrawCards(String[] h) {
+		if (myDrawCards0 == null) {
 			// first hand for all games
-			myHoleCards0 = h;
+			myDrawCards0 = h;
 			
-		} else if (myHoleCards1 == null) {
+		} else if (myDrawCards1 == null) {
 			// second hand for draw and triple draw
-			myHoleCards1 = h;
+			myDrawCards1 = h;
 			
-		} else if (myHoleCards2 == null) {
+		} else if (myDrawCards2 == null) {
 			// third hand for triple draw
-			myHoleCards2 = h;
+			myDrawCards2 = h;
 			
-		} else if (myHoleCards3 == null) {
+		} else if (myDrawCards3 == null) {
 			// fourth and final hand for triple draw
-			myHoleCards3 = h;
+			myDrawCards3 = h;
 			
 		} else {
 			throw new RuntimeException("too many hole cards");

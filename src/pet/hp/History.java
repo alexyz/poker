@@ -99,38 +99,29 @@ public class History {
 	/**
 	 * get the game for the hand line and table details
 	 */
-	public synchronized Game getGame(char currency, char mix, char type, int subtype, char limit, int max, int sb, int bb) { 
-		if (type == 0 || limit == 0 || max == 0 || currency == 0) {
+	public synchronized Game getGame(final Game game) { 
+		if (game.type == 0 || game.limit == 0 || game.max == 0 || game.currency == 0 || game.id != null) {
 			throw new RuntimeException("invalid game");
 		}
 		
-		if (currency == Game.TOURN_CURRENCY) {
+		if (game.currency == Game.TOURN_CURRENCY) {
 			// don't store blinds for tournament hands as they are variable
-			sb = 0;
-			bb = 0;
+			game.sb = 0;
+			game.bb = 0;
 		}
 		
 		// find game, otherwise create it
-		for (Game game : games) {
-			if (game.currency == currency && game.type == type && game.limit == limit
-					&& game.subtype == subtype && game.sb == sb && game.bb == bb && game.mix == mix
-					&& game.max == max) {
-				return game;
+		for (Game g : games) {
+			if (g.currency == game.currency && g.type == game.type && g.limit == game.limit
+					&& g.subtype == game.subtype && g.sb == game.sb && g.bb == game.bb && g.mix == game.mix
+					&& g.max == game.max) {
+				return g;
 			}
 		}
 
-		Game game = new Game();
-		game.currency = currency;
-		game.type = type;
-		game.limit = limit;
-		game.subtype = subtype;
-		game.sb = sb;
-		game.bb = bb;
-		game.max = max;
-		game.mix = mix;
 		game.id = GameUtil.getGameId(game);
 		games.add(game);
-		System.out.println("created game " + game);
+		System.out.println("new game " + game);
 		
 		for (HistoryListener l : listeners) {
 			l.gameAdded(game);

@@ -9,12 +9,20 @@ import java.io.Serializable;
  */
 public class Game implements Serializable {
 	
-	/** game type constants */
-	public static final char FCD_TYPE = 'F', HE_TYPE = 'H', OM_TYPE = 'O', OMHL_TYPE = '8', DSTD_TYPE = 'T';
+	/* game type constants */
+	public static final int FCD_TYPE = 1;
+	public static final int HE_TYPE = 2;
+	public static final int OM_TYPE = 3;
+	public static final int OMHL_TYPE = 4;
+	public static final int DSTD_TYPE = 5;
+	public static final int DSSD_TYPE = 6;
+	public static final int RAZZ_TYPE = 7;
+	public static final int STUD_TYPE = 8;
+	public static final int STUDHL_TYPE = 9;
 	/** limit type constants */
-	public static final char NO_LIMIT = 'N', POT_LIMIT = 'P', FIXED_LIMIT = 'F';
+	public static final int NO_LIMIT = 100, POT_LIMIT = 101, FIXED_LIMIT = 102;
 	/** mix type constants */
-	public static final char HE_OM_MIX = 'M';
+	public static final int HE_OM_MIX = 1001, TRIPSTUD_MIX = 1002, EIGHT_MIX = 1003;
 	/** currency type constants (excluding $ and €) */
 	public static final char PLAY_CURRENCY = 'p', TOURN_CURRENCY = 't';
 	/** subtype constants */
@@ -24,13 +32,13 @@ public class Game implements Serializable {
 	public String id;
 	
 	/** mixed game type */
-	public char mix;
+	public int mix;
 	/** type of game for street and hand analysis purposes */
-	public char type;
+	public int type;
 	/** max players */
 	public int max;
 	/** limit type */
-	public char limit;
+	public int limit;
 	/** hand currency */
 	public char currency;
 	/** sub type, e.g. zoom */

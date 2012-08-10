@@ -10,7 +10,7 @@ public class Action implements Serializable {
 	
 	public static final String[] TYPENAME = new String[] { 
 		null, "check", "fold", "raise", "call", "bet", "post",
-		"muck", "doesn't show", "show", "draw", "stand pat", "uncall", "collect"
+		"muck", "doesn't show", "show", "draw", "stand pat", "uncall", "collect", "brings in"
 	};
 	public static final byte CHECK_TYPE = 1;
 	public static final byte FOLD_TYPE = 2;
@@ -27,8 +27,10 @@ public class Action implements Serializable {
 	public static final byte UNCALL_TYPE = 12;
 	/** win */
 	public static final byte COLLECT_TYPE = 13;
+	public static final byte BRINGSIN_TYPE = 14;
+	
 	/** total number of types */
-	public static final int TYPES = 14;
+	public static final int TYPES = 15;
 	
 	public Action(Seat seat) {
 		this.seat = seat;

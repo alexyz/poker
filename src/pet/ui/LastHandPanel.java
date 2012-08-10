@@ -75,23 +75,22 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				HandStates hs = (HandStates) stateCombo.getSelectedItem();
-				String[][] holeCards = HandUtil.getHoleCards(hs.hand);
 				PokerFrame pf = PokerFrame.getInstance();
 				switch (hs.hand.game.type) {
 					case Game.HE_TYPE:
-						pf.displayHoldemEquity(hs.hand.board, holeCards, false, false);
+						pf.displayHoldemEquity(hs.hand, false, false);
 						break;
 					case Game.OM_TYPE:
-						pf.displayHoldemEquity(hs.hand.board, holeCards, true, false);
+						pf.displayHoldemEquity(hs.hand, true, false);
 						break;
 					case Game.OMHL_TYPE:
-						pf.displayHoldemEquity(hs.hand.board, holeCards, true, true);
+						pf.displayHoldemEquity(hs.hand, true, true);
 						break;
 					case Game.FCD_TYPE:
-						pf.displayDrawEquity(holeCards, PokerItem.HIGH);
+						pf.displayDrawEquity(hs.hand, PokerItem.HIGH);
 						break;
 					case Game.DSTD_TYPE:
-						pf.displayDrawEquity(holeCards, PokerItem.DSLOW);
+						pf.displayDrawEquity(hs.hand, PokerItem.DSLOW);
 						break;
 					default:
 						throw new RuntimeException("unknown game type " + hs.hand);

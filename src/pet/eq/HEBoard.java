@@ -42,9 +42,7 @@ class HEBoardSample extends HEBoard {
 	void next() {
 		picked[0] = 0;
 		for (int n = 0; n < 5; n++) {
-			// TODO should really pick straight into board
-			// should also use thread local random
-			board[n] = PokerUtil.pick(r, deck, picked);
+			board[n] = ArrayUtil.pick(r, deck, picked);
 		}
 	}
 	

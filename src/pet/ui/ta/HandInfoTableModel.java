@@ -18,9 +18,9 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.hand.date;
 			}
 		});
-		cols.add(new MyColumn<HandInfo>(Hole.class, "MyHole", "Final hole cards") {
+		cols.add(new MyColumn<HandInfo>(HoleCards.class, "MyHole", "Final hole cards") {
 			@Override
-			public Hole getValue(HandInfo o) {
+			public HoleCards getValue(HandInfo o) {
 				return o.hole();
 			}
 		});
@@ -74,9 +74,9 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return o.myvalue();
 			}
 		});
-		cols.add(new MyColumn<HandInfo>(Rank.class, "Hand", "Players final hand") {
+		cols.add(new MyColumn<HandInfo>(HandValue.class, "Hand", "Players final hand") {
 			@Override
-			public Rank getValue(HandInfo o) {
+			public HandValue getValue(HandInfo o) {
 				return o.rank();
 			}
 		});

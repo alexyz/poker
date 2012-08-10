@@ -2,9 +2,10 @@ package pet.hp.info;
 
 import pet.eq.Poker;
 
-public class Rank implements Comparable<Rank> {
+/** represents a hand value */
+public class HandValue implements Comparable<HandValue> {
 	private final int v; 
-	public Rank(int v) {
+	public HandValue(int v) {
 		this.v = v;
 	}
 	@Override
@@ -12,12 +13,12 @@ public class Rank implements Comparable<Rank> {
 		return v != 0 ? Poker.valueString(v) : null;
 	}
 	@Override
-	public int compareTo(Rank r) {
+	public int compareTo(HandValue r) {
 		return r.v - v;
 	}
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof Rank && ((Rank)o).v == v;
+		return o instanceof HandValue && ((HandValue)o).v == v;
 	}
 	@Override
 	public int hashCode() {

@@ -22,7 +22,6 @@ public class SeatState implements Cloneable {
 	/** bet to pot ratio as percent (100 is pot bet) */
 	public float bpr;
 	/** current hole cards (changes in games like draw) */
-	public String[] hole;
 	public HandUtil.HoleCards holeObj;
 	/** has folded yet */
 	public boolean folded;
@@ -30,7 +29,7 @@ public class SeatState implements Cloneable {
 	public boolean won;
 	/** current hand equity, if any */
 	public MEquity meq;
-	/** number of non-draw actions on this street starting at 1 (draw/standpat is 0) */
+	/** number of actions on this street starting at 1 */
 	public int actionNum;
 	/** expected value! */
 	public float ev;

@@ -124,7 +124,7 @@ class TableComponent extends JComponent {
 				seatCol = Color.darkGray;
 			} else if (ss.folded) {
 				seatCol = Color.gray;
-			} else if (hs.actionSeat == s) {
+			} else if (hs.actionSeatIndex == s) {
 				seatCol = Color.yellow;
 			} else if (ss.won) {
 				seatCol = Color.orange;
@@ -155,8 +155,8 @@ class TableComponent extends JComponent {
 				List<String> lines = new ArrayList<String>();
 				lines.add(ss.seat.name);
 				lines.add(GameUtil.formatMoney(hand.game.currency, ss.stack));
-				if (!ss.folded || ss.hole != null) {
-					lines.add(ss.hole != null ? PokerUtil.cardsString(ss.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
+				if (!ss.folded || ss.holeObj != null) {
+					lines.add(ss.holeObj != null ? PokerUtil.cardsString(ss.holeObj.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
 				}
 				if (ss.meq != null) {
 					lines.add(MEquityUtil.currentString(ss.meq));
@@ -165,7 +165,7 @@ class TableComponent extends JComponent {
 				if (ss.spr > 0) {
 					lines.add(String.format("SPR: %2.1f", ss.spr));
 				}
-				if (hs.actionSeat == s || ss.won) {
+				if (hs.actionSeatIndex == s || ss.won) {
 					lines.add(ss.won ? "wins" : hs.actionString());
 				}
 				
@@ -193,7 +193,7 @@ class TableComponent extends JComponent {
 			}
 
 			// seat button
-			if (hs.button == s) {
+			if (hs.buttonIndex == s) {
 				g2.setColor(Color.gray);
 				double butdis = 0.25;
 				double ao = Math.PI / 9;

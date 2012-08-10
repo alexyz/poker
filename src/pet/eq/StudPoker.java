@@ -19,7 +19,7 @@ public class StudPoker extends Poker {
 	}
 
 	/** 
-	 * pass 4-7 card hands and convert 6+1 card hands into 7 card hands
+	 * passes 3-7 card hands and convert 6+1 card hands into 7 card hands
 	 */
 	private String[] normalise(final String[] board, final String[] holeCards, final boolean create) {
 		// validate
@@ -65,17 +65,18 @@ public class StudPoker extends Poker {
 	}
 	
 	@Override
-	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsParam, final String[] blockers) {
-		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsParam) + " board " + Arrays.toString(board));
+	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsOrig, final String[] blockers) {
+		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsOrig) + " board " + Arrays.toString(board) + " blockers " + Arrays.toString(blockers));
 
-		// normalise hands
-		final String[][] holeCards = new String[holeCardsParam.length][];
-		for (int n = 0; n < holeCardsParam.length; n++) {
-			holeCards[n] = normalise(board, holeCardsParam[n], true);
-		}
-		
 		// remaining cards in deck
-		final String[] deck = Poker.remdeck(holeCards, blockers, board);
+		// use original cards so none are duplicated
+		final String[] deck = Poker.remdeck(holeCardsOrig, blockers, board);
+		
+		// normalise hands
+		final String[][] holeCards = new String[holeCardsOrig.length][];
+		for (int n = 0; n < holeCardsOrig.length; n++) {
+			holeCards[n] = normalise(board, holeCardsOrig[n], true);
+		}
 
 		// return value
 		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
@@ -107,7 +108,7 @@ public class StudPoker extends Poker {
 		int hiloCount = 0;
 		
 		for (int n = 0; n < maxn; n++) {
-			PokerUtil.shuffle(deck, r);
+			ArrayUtil.shuffle(deck, r);
 			int di = 0;
 			String commCard = null;
 			if (holeCards.length >= 8) {
@@ -160,9 +161,13 @@ public class StudPoker extends Poker {
 	}
 	
 	@Override
-	public int value(String[] board, String[] holeCards) {
+	public int value(String[] board, String[] cards) {
 		// only does one value type...
-		return studValue(value, normalise(board, holeCards,false));
+		if (cards.length >= 5) {
+			return studValue(value, normalise(board, cards, false));
+		} else {
+			return 0;
+		}
 	}
 	
 }

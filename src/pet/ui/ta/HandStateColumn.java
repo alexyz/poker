@@ -18,7 +18,7 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 	
 	@Override
 	public Color getColour(HandState hs) {
-		if (hs.actionSeat == -1) {
+		if (hs.actionSeatIndex == -1) {
 			return Color.lightGray;
 			
 		} else if (hs.action.type == Action.COLLECT_TYPE) {
@@ -33,7 +33,7 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 	
 	@Override
 	public Font getFont(HandState hs) {
-		if (hs.actionSeat == HandState.NO_SEAT) {
+		if (hs.actionSeatIndex < 0) {
 			return boldfont;
 		} 
 		return null;

@@ -62,21 +62,23 @@ public abstract class Poker {
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
 	/** complete deck in face then suit order, lowest first */
-	// TODO other arrays should be immutable
-	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(
-			"2h", "2s", "2c", "2d",
-			"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
-			"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
-			"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
-			"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
-			"Ah", "As", "Ac", "Ad" 
-			));
+	private static final String[] deckArr = { "2h", "2s", "2c", "2d",
+		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
+		"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
+		"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
+		"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
+		"Ah", "As", "Ac", "Ad" };
+	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(deckArr));
 	
 	/** complete suits */
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
 	
 	/** array of all possible unique hi hand values (there are only approx 7500) */
 	private static int[] uniqueValues;
+	
+	public static String[] deck() {
+		return deckArr.clone();
+	}
 	
 	/**
 	 * count low cards
@@ -296,20 +298,13 @@ public abstract class Poker {
 		}
 		
 		boolean hi;
-		String type;
 		switch (value & TYPE) {
 			case HI_TYPE:
 				hi = true;
-				type = null;
 				break;
 			case DS_LOW_TYPE:
-				hi = false;
-				type = "27Lo";
-				value = INV_MASK - (value & HAND);
-				break;
 			case AF_LOW_TYPE:
 				hi = false;
-				type = "A5Lo";
 				value = INV_MASK - (value & HAND);
 				break;
 			default:
@@ -336,7 +331,7 @@ public abstract class Poker {
 			default: s = "Unknown";
 		}
 		
-		return hi ? s : type + ": " + s;
+		return hi ? s : "(" + s + ")";
 	}
 	
 	public static char face(String card) {
@@ -345,7 +340,14 @@ public abstract class Poker {
 	
 	/** return rank of hand, from 0 to 9 (NOT the rank bitmask constants) */
 	public static int rank(int value) {
-		return value >> 20;
+		switch (value & TYPE) {
+			case HI_TYPE:
+				return (value & RANK) >> 20;
+				
+			default:
+				// FIXME add some low ranks
+				return 0;
+		}
 	}
 	
 	/**
@@ -370,8 +372,8 @@ public abstract class Poker {
 	private static void rem1(List<String> list, String[] a) {
 		if (a != null) {
 			for (String s : a) {
-				if (!list.remove(s)) {
-					throw new RuntimeException();
+				if (s != null && !list.remove(s)) {
+					throw new RuntimeException("card " + s + " already removed");
 				}
 			}
 		}

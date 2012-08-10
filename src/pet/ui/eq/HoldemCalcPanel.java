@@ -58,8 +58,8 @@ public class HoldemCalcPanel extends CalcPanel {
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(String[] board, String[][] holeCards, boolean hilo) {
-		displayHand(board, holeCards, null);
+	public void displayHand(String[] board, List<String[]> holeCards, boolean hilo) {
+		displayHand(board, holeCards);
 		hiloBox.setSelected(hilo);
 	}
 
@@ -96,7 +96,8 @@ public class HoldemCalcPanel extends CalcPanel {
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
-				handPanels[n].setCards(deck.subList(i, i + numHoleCards));
+				// XXX hack
+				handPanels[n].setCards(deck.subList(i, i + numHoleCards).toArray(new String[0]));
 				i += numHoleCards;
 			}
 		}

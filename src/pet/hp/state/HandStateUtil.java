@@ -4,6 +4,7 @@ import java.util.*;
 
 import pet.eq.*;
 import pet.hp.*;
+import pet.hp.HandUtil.HoleCards;
 
 public class HandStateUtil {
 	
@@ -32,52 +33,52 @@ public class HandStateUtil {
 	 * convert hand into list of hand states
 	 */
 	// synchronize for cache, but sampled equity calc can be slow...
-	public static synchronized List<HandState> getStates(Hand hand) {
+	public static synchronized List<HandState> getStates(final Hand hand) {
+		// see if we've already done this hand
 		for (List<HandState> l : cache) {
 			if (l.get(0).hand.id.equals(hand.id)) {
 				return l;
 			}
 		}
 		
-		List<HandState> states = new Vector<HandState>();
-
+		final List<HandState> states = new ArrayList<HandState>();
+		
 		// initial state (not displayed)
+		// will be reassigned after each action
 		HandState hs = new HandState(hand);
 		hs.pot = hand.antes;
-		hs.button = hand.button - 1;
-		hs.actionSeat = HandState.NO_SEAT;
+		hs.buttonIndex = hand.button - 1;
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState(seat);
-			if (seat.finalHoleCards != null) {
-				String[] hole = seat.finalHoleCards.clone();
-				Arrays.sort(hole, Cmp.revCardCmp);
-				ss.hole = hole;
-			}
+			//ss.hole = HandUtil.getFinalCards(hand.game.type, seat);
 			ss.stack = seat.chips;
 			hs.seats[seat.num - 1] = ss;
 		}
 		
 		// equity stuff
-		Poker poker = GameUtil.getPoker(hand.game);
-		List<String[]> holeCards = new ArrayList<String[]>();
-		List<SeatState> holeCardSeats = new ArrayList<SeatState>();
-		Set<String> blockers = new TreeSet<String>();
-
+		final Poker poker = GameUtil.getPoker(hand.game);
+		final int minHoleCards = GameUtil.getMinHoleCards(hand.game.type);
+		final List<String[]> holeCards = new ArrayList<String[]>();
+		final List<SeatState> holeCardSeats = new ArrayList<SeatState>();
+		final Set<String> blockers = new TreeSet<String>();
+		
 		// for each street
 		for (int s = 0; s < hand.streets.length; s++) {
 			
 			//
 			// state for clear bets, place card
 			//
-			String[] board = HandUtil.getStreetBoard(hand, s);
+			final String[] board = HandUtil.getStreetBoard(hand, s);
 			hs.board = board;
 			hs.note = GameUtil.getStreetName(hand.game.type, s);
 			hs.action = null;
 			hs.streetIndex = s;
-			hs.actionSeat = HandState.NO_SEAT;
+			hs.actionSeatIndex = -1;
 			holeCards.clear();
 			holeCardSeats.clear();
-			blockers.clear();
+			if (hand.reshuffleStreetIndex == s) {
+				blockers.clear();
+			}
 			
 			for (SeatState ss : hs.seats) {
 				if (ss != null) {
@@ -85,20 +86,47 @@ public class HandStateUtil {
 					ss.amount = 0;
 					ss.meq = null;
 					ss.actionNum = 0;
-					// get hole cards of live hands
-					if (ss.hole != null && !ss.folded) {
-						ss.holeObj = HandUtil.getStreetHole(hand, ss.seat, s);
-						ss.hole = ss.holeObj.hole;
-						// make sure hand has minimum number of cards, pass others as blockers
-						if (ss.hole.length >= GameUtil.getMinHoleCards(hand.game.type)) {
-							holeCards.add(ss.hole);
-							holeCardSeats.add(ss);
+					
+					// get cards of seat
+					HoleCards hc = HandUtil.getCards(hand, ss.seat, s);
+					ss.holeObj = hc;
+					
+					if (hc != null) {
+						// do we have enough cards for stud?
+						// unknown down cards will be null (holdem/draw never have null cards)
+						boolean partial = false;
+						for (int n = 0; n < hc.hole.length; n++) {
+							if (hc.hole[n] == null) {
+								partial = true;
+								break;
+							}
+						}
+						
+						// do we have 2 hole cards for omaha? other games just require 1
+						if (partial || hc.hole.length < minHoleCards || ss.folded) {
+							for (int n = 0; n < hc.hole.length; n++) {
+								if (hc.hole[n] != null) {
+									blockers.add(hc.hole[n]);
+								}
+							}
+							
 						} else {
-							blockers.addAll(Arrays.asList(ss.hole));
+							// do it
+							holeCards.add(hc.hole);
+							holeCardSeats.add(ss);
+						}
+						
+						if (hc.discarded != null && hand.reshuffleStreetIndex > s) {
+							// count all discards on all streets as blockers
+							// though in triple draw the deck can be reshuffled mid-street
+							for (int n = 0; n < hc.discarded.length; n++) {
+								blockers.add(hc.discarded[n]);
+							}
 						}
 					}
 				}
 			}
+			
 			for (SeatState ss : hs.seats) {
 				if (ss != null) {
 					// need to know pot to calc spr
@@ -128,7 +156,7 @@ public class HandStateUtil {
 				hs = hs.clone();
 				hs.action = act;
 				
-				hs.actionSeat = act.seat.num - 1;
+				hs.actionSeatIndex = act.seat.num - 1;
 				SeatState ss = hs.actionSeat();
 				ss.bpr = 0;
 				ss.ev = 0;
@@ -147,6 +175,7 @@ public class HandStateUtil {
 					int tocall = 0;
 					
 					switch (act.type) {
+						case Action.BRINGSIN_TYPE:
 						case Action.BET_TYPE:
 						case Action.RAISE_TYPE:
 							ss.bpr = (act.amount * 100f) / potraise;
@@ -169,6 +198,8 @@ public class HandStateUtil {
 							ss.won = true;
 							ss.amount = -act.amount;
 							break;
+							
+						default:
 					}
 					
 					lastbet = Math.max(lastbet, ss.amount);
@@ -187,5 +218,5 @@ public class HandStateUtil {
 		
 		return states;
 	}
-
+	
 }

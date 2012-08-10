@@ -78,10 +78,10 @@ class CardPanel extends JPanel {
 	/**
 	 * clears all cards and calls setCard for each card label
 	 */
-	public void setCards(List<String> cards) {
+	public void setCards(String[] cards) {
 		clearCards();
-		for (int n = 0; n < cardLabels.length; n++) {
-			cardLabels[n].setCard(n < cards.size() ? cards.get(n) : null);
+		for (int n = 0; n < Math.min(cardLabels.length, cards.length); n++) {
+			cardLabels[n].setCard(cards[n]);
 		}
 	}
 	

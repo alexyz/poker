@@ -11,14 +11,18 @@ import pet.eq.*;
 public class GameUtil {
 	
 	/** poker equity functions */
-	private static final Poker drawPoker = new DrawPoker(true);
-	private static final Poker tripleDrawPoker = new DrawPoker(false);
-	private static final Poker holdemPoker = new HEPoker(false, false);
-	private static final Poker omahaPoker = new HEPoker(true, false);
-	private static final Poker omahaHLPoker = new HEPoker(true, true);
+	private static final DrawPoker drawPoker = new DrawPoker(true);
+	private static final DrawPoker lowDrawPoker = new DrawPoker(false);
+	private static final HEPoker holdemPoker = new HEPoker(false, false);
+	private static final HEPoker omahaPoker = new HEPoker(true, false);
+	private static final HEPoker omahaHLPoker = new HEPoker(true, true);
+	private static final StudPoker studPoker = new StudPoker(Value.hiValue, false);
+	private static final StudPoker studHLPoker = new StudPoker(Value.hiValue, true);
+	private static final StudPoker razzPoker = new StudPoker(Value.afLowValue, false);
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre-draw", "Post-draw" };
 	private static final String[] tripdrawstreetnames = { "Pre-draw", "Post-draw 1", "Post-draw 2", "Post-draw 3" };
+	private static final String[] studstreetnames = { "3rd Street", "4th Street", "5th Street", "6th Street", "River" };
 	
 	public static Comparator<Game> idCmp = new Comparator<Game>() {
 		@Override
@@ -44,7 +48,7 @@ public class GameUtil {
 	}
 	
 	/** get full name of limit type */
-	public static String getLimitName(char limittype) {
+	public static String getLimitName(int limittype) {
 		switch (limittype) {
 			case Game.POT_LIMIT: 
 				return "PL"; //"Pot Limit";
@@ -58,28 +62,40 @@ public class GameUtil {
 	}
 	
 	/** get full name of game */
-	public static String getGameTypeName(char gametype) {
+	public static String getGameTypeName(int gametype) {
 		switch (gametype) {
 			case Game.OM_TYPE: 
 				return "Omaha";
 			case Game.OMHL_TYPE:
-				return "Omaha H-L";
+				return "Omaha H/L";
 			case Game.HE_TYPE: 
 				return "Hold'em";
 			case Game.FCD_TYPE: 
 				return "5 Card Draw";
 			case Game.DSTD_TYPE:
 				return "2-7 Triple Draw";
+			case Game.DSSD_TYPE:
+				return "2-7 Single Draw";
+			case Game.RAZZ_TYPE:
+				return "Razz";
+			case Game.STUD_TYPE:
+				return "7 Card Stud";
+			case Game.STUDHL_TYPE:
+				return "7 Card Stud H/L";
 			default: 
 				throw new RuntimeException("no such game type " + gametype);
 		}
 	}
 	
 	/** get full name of mixed game type */
-	public static String getMixTypeName(char mixtype) {
+	public static String getMixTypeName(int mixtype) {
 		switch (mixtype) {
 			case Game.HE_OM_MIX: 
 				return "Mixed HE/OM";
+			case Game.TRIPSTUD_MIX:
+				return "Triple Stud";
+			case Game.EIGHT_MIX:
+				return "8-Game";
 			default: 
 				throw new RuntimeException("unknown mix type " + mixtype);
 		}
@@ -117,29 +133,37 @@ public class GameUtil {
 	}
 	
 	/** return the number of hole cards for this game */
-	public static int getHoleCards(char gametype) {
+	public static int getHoleCards(int gametype) {
 		switch (gametype) {
-			case Game.FCD_TYPE:
-			case Game.DSTD_TYPE:
-				return 5;
 			case Game.HE_TYPE:
 				return 2;
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
 				return 4;
+			case Game.FCD_TYPE:
+			case Game.DSTD_TYPE:
+			case Game.DSSD_TYPE:
+				return 5;
+			case Game.STUD_TYPE:
+			case Game.RAZZ_TYPE:
+			case Game.STUDHL_TYPE:
+				return 7;
 			default: 
 				throw new RuntimeException("unknown game type " + gametype);
 		}
 	}
 	
 	/** return the minimum number of hole cards required for an equity calculation for this game */
-	public static int getMinHoleCards(char gametype) {
+	public static int getMinHoleCards(int gametype) {
 		// should probably get this from poker instance
 		switch (gametype) {
+			case Game.HE_TYPE:
 			case Game.FCD_TYPE:
 			case Game.DSTD_TYPE:
-				return 1;
-			case Game.HE_TYPE:
+			case Game.DSSD_TYPE:
+			case Game.STUD_TYPE:
+			case Game.STUDHL_TYPE:
+			case Game.RAZZ_TYPE:
 				return 1;
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
@@ -150,26 +174,32 @@ public class GameUtil {
 	}
 	
 	/** return a string representing unknown hole cards for this game */
-	public static String unknownCardsString(char gametype) {
+	public static String unknownCardsString(int gametype) {
 		// return string constant instead of making string
 		switch (gametype) {
-			case Game.FCD_TYPE:
-			case Game.DSTD_TYPE:
-				return "[ ][ ][ ][ ][ ]";
 			case Game.HE_TYPE:
 				return "[ ][ ]";
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
 				return "[ ][ ][ ][ ]";
+			case Game.FCD_TYPE:
+			case Game.DSTD_TYPE:
+			case Game.DSSD_TYPE:
+				return "[ ][ ][ ][ ][ ]";
+			case Game.STUD_TYPE:
+			case Game.RAZZ_TYPE:
+			case Game.STUDHL_TYPE:
+				return "[ ][ ][ ][ ][ ][ ][ ]";
 			default:
 				throw new RuntimeException("unknown game type " + gametype);
 		}
 	}
 	
 	/** get street names for game type */
-	private static String[] getStreetNames (char gametype) {
+	private static String[] getStreetNames (int gametype) {
 		switch (gametype) {
 			case Game.FCD_TYPE:
+			case Game.DSSD_TYPE:
 				return drawstreetnames;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
@@ -177,24 +207,28 @@ public class GameUtil {
 				return hestreetnames;
 			case Game.DSTD_TYPE:
 				return tripdrawstreetnames;
+			case Game.STUD_TYPE:
+			case Game.STUDHL_TYPE:
+			case Game.RAZZ_TYPE:
+				return studstreetnames;
 			default:
 				throw new RuntimeException("no such game type " + gametype);
 		}
 	}
 	
 	/** return true if this street is the showdown street for the given game type */
-	public static boolean isShowdown (char gametype, int street) {
-		return street == getStreetNames(gametype).length - 1;
+	public static boolean isShowdown (int gametype, int streetIndex) {
+		return streetIndex == getStreetNames(gametype).length - 1;
 	}
 	
 	/** return the maximum number of streets in this game type */
-	public static int getMaxStreets (char gametype) {
+	public static int getMaxStreets (int gametype) {
 		return getStreetNames(gametype).length;
 	}
 	
 	/** get the name of the street for this game type (starting at 0) */
-	public static String getStreetName (char gametype, int street) {
-		return getStreetNames(gametype)[street];
+	public static String getStreetName (int gametype, int streetIndex) {
+		return getStreetNames(gametype)[streetIndex];
 	}
 	
 	public static String formatMoney(char currency, int amount) {
@@ -225,7 +259,14 @@ public class GameUtil {
 			case Game.OMHL_TYPE:
 				return omahaHLPoker;
 			case Game.DSTD_TYPE:
-				return tripleDrawPoker;
+			case Game.DSSD_TYPE:
+				return lowDrawPoker;
+			case Game.STUD_TYPE:
+				return studPoker;
+			case Game.RAZZ_TYPE:
+				return razzPoker;
+			case Game.STUDHL_TYPE:
+				return studHLPoker;
 			default:
 				throw new RuntimeException("no poker for game " + game);
 		}

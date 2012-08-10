@@ -123,7 +123,7 @@ public abstract class DrawPoker2 extends Poker {
 	}
 	
 	public static String[] getDrawingHand(final String[] hand, final int drawn, boolean hi) {
-		return getDrawingHand(null, hand, drawn, hi ? Value.hiValue : Value.dsLowValue, 2f);
+		return getDrawingHand(null, hand, drawn, hi ? Value.hiValue : Value.dsLowValue, 3f);
 	}
 
 	/**

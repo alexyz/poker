@@ -3,6 +3,7 @@ package pet.ui;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -140,6 +141,7 @@ public class PokerFrame extends JFrame {
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
+		// XXX causes infinite loop in jeditorpane layout
 		pack();
 	}
 	
@@ -192,14 +194,16 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(hisTabs);
 	}
 	
-	public void displayHoldemEquity(String[] board, String[][] holeCards, boolean omaha, boolean hilo) {
+	public void displayHoldemEquity(Hand hand, boolean omaha, boolean hilo) {
 		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
-		panel.displayHand(board, holeCards, hilo);
+		List<String[]> holeCards = HandUtil.getFinalCards(hand);
+		panel.displayHand(hand.board, holeCards, hilo);
 		eqTabs.setSelectedComponent(panel);
 		tabs.setSelectedComponent(eqTabs);
 	}
 	
-	public void displayDrawEquity(String[][] holeCards, String type) {
+	public void displayDrawEquity(Hand hand, String type) {
+		List<String[]> holeCards = HandUtil.getFinalCards(hand);
 		drawPanel.displayHand(holeCards, type);
 		eqTabs.setSelectedComponent(drawPanel);
 		tabs.setSelectedComponent(eqTabs);
@@ -224,7 +228,7 @@ public class PokerFrame extends JFrame {
 				List<Hand> hands = history.getHands("tawvx", gid);
 				for (Hand hand : hands) {
 					// get pre-draw and post draw hands
-					String[] h1 = hand.myHoleCards0;
+					String[] h1 = hand.myDrawCards0;
 					String[] h2 = hand.myseat.finalHoleCards;
 					int d = hand.myseat.drawn0;
 					if (h1 != null && h2 != null) {

@@ -23,27 +23,33 @@ public class HandInfo {
 
 	public final Hand hand;
 	/** the current players hole cards */
-	private Hole hole;
+	private HoleCards hole;
 	/** the current players hand rank */
-	private Rank rank;
+	private HandValue rank;
 
 	/** create hand info for the given hand */
 	public HandInfo(Hand hand) {
 		this.hand = hand;
 	}
 	
-	public Hole hole() {
+	public HoleCards hole() {
 		if (hole == null) {
-			hole = new Hole(hand.myseat.finalHoleCards);
+			// hole cards for my seat should never be null
+			String[] cards = hand.myseat.finalHoleCards;
+			if (cards.length == 3) {
+				// just show first two for stud
+				cards = Arrays.copyOf(cards, 2);
+			}
+			hole = new HoleCards(cards);
 		}
 		return hole;
 	}
 	
-	public Rank rank() {
+	public HandValue rank() {
 		if (rank == null) {
 			Poker p = GameUtil.getPoker(hand.game);
-			int v = p.value(hand.board, hand.myseat.finalHoleCards);
-			rank = new Rank(v);
+			int v = p.value(hand.board, hand.myseat.cards());
+			rank = new HandValue(v);
 		}
 		return rank;
 	}
@@ -161,7 +167,7 @@ public class HandInfo {
 		sb.append("button " + hand.button + "\n");
 		sb.append("game " + hand.game + "\n");
 		sb.append("date " + hand.date + "\n");
-		sb.append("original hole " + Arrays.toString(hand.myHoleCards0) + "\n");
+		sb.append("original draw cards " + Arrays.toString(hand.myDrawCards0) + "\n");
 		sb.append("id " + hand.id + "\n");
 		sb.append("pot " + hand.pot + "\n");
 		sb.append("rake " + hand.rake + "\n");
