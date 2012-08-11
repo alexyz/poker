@@ -6,11 +6,11 @@ import java.text.DateFormat;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 import pet.hp.*;
 import pet.hp.state.*;
 import pet.ui.PokerFrame;
-import pet.ui.eq.DrawCalcPanel;
 import pet.ui.eq.PokerItem;
 import pet.ui.ta.*;
 
@@ -27,6 +27,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	private final JButton playerButton = new JButton("Player");
 	private final JButton replayButton = new JButton("Replay");
 	private final JToggleButton updateButton = new JToggleButton("Auto Select");
+	private final JScrollPane tableScroller = new JScrollPane(handTable);
 
 	public LastHandPanel() {
 		super(new BorderLayout());
@@ -35,6 +36,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				HandStates states = (HandStates) e.getItem();
+				tableScroller.setBorder(new TitledBorder(states.hand.game.id));
 				((HandStateTableModel)handTable.getModel()).setRows(states.states);
 			}
 		});
@@ -124,8 +126,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		bottomPanel.add(equityButton);
 		bottomPanel.add(playerButton);
 		bottomPanel.add(replayButton);
-
-		JScrollPane tableScroller = new JScrollPane(handTable);
+		
 		add(topPanel, BorderLayout.NORTH);
 		add(tableScroller, BorderLayout.CENTER);
 		add(bottomPanel, BorderLayout.SOUTH);

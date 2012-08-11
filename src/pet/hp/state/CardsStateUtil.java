@@ -43,6 +43,7 @@ public class CardsStateUtil {
 			case Game.STUD_TYPE:
 			case Game.STUDHL_TYPE:
 			case Game.RAZZ_TYPE:
+				// XXX should maybe emphasise difference between down and up cards
 				String[] cards = HandUtil.getFinalCards(hand.game.type, seat);
 				if (streetIndex < 4) {
 					cards = Arrays.copyOf(cards, streetIndex + 3);

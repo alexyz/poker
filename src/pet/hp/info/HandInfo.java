@@ -186,4 +186,9 @@ public class HandInfo {
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public String toString() {
+		return "HandInfo[" + hand.id + "]";
+	}
 }

@@ -43,7 +43,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		}
 	};
 	
-	private static final MyColumn<HandState> holeBoardCol = new HandStateColumn(String.class, "Board/Hole", "Players hole cards or board") {
+	private static final MyColumn<HandState> holeBoardCol = new HandStateColumn(String.class, "Board/Cards", "Board, player hole cards or up cards") {
 		@Override
 		public String getValue(HandState hs) {
 			SeatState ss = hs.actionSeat();

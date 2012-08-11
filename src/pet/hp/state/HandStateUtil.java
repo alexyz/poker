@@ -90,7 +90,7 @@ public class HandStateUtil {
 					
 					// get cards of seat
 					CardsState hc = CardsStateUtil.getCards(hand, ss.seat, s);
-					System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
+					//System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
 					ss.cards = hc;
 					
 					if (hc != null) {

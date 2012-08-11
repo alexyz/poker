@@ -1,5 +1,7 @@
 package pet.hp.state;
 
+import java.util.Arrays;
+
 /**
  * player hole cards as string array, plus meta data to indicate discarded cards
  * and if cards were guessed
@@ -25,5 +27,10 @@ public class CardsState {
 	
 	public CardsState(String[] hole) {
 		this(hole, null, false);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Cards[%s %s %s]", Arrays.toString(hole), Arrays.toString(discarded), guess);
 	}
 }

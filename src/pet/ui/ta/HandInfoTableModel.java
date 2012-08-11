@@ -59,7 +59,14 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 		cols.add(new MyColumn<HandInfo>(String.class, "Show", "Show down") {
 			@Override
 			public String getValue(HandInfo o) {
-				return o.hand.showdown ? "Y" : "";
+				if (o.hand.showdown) {
+					if (o.hand.game.hilo && !o.hand.showdownNoLow) {
+						return "Y+L";
+					} else {
+						return "Y";
+					}
+				}
+				return "";
 			}
 		});
 		cols.add(new MyColumn<HandInfo>(Integer.class, "Pot", "Pot") {

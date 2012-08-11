@@ -86,10 +86,10 @@ public class Equity {
 		}
 		
 		total = (woncount * 100f) / hands;
-		System.out.println("    hands=" + hands + " woncount=" + woncount + " totalpc=" + total);
+		//System.out.println("    hands=" + hands + " woncount=" + woncount + " totalpc=" + total);
 		if (tiedcount > 0) {
 			total += (tied * ((tiedcount * 1f) / tiedwithcount));
-			System.out.println("    hands=" + hands + " woncount=" + woncount + " tiedcount=" + tiedcount + " tiedwithcount=" + tiedwithcount + " totalpc=" + total);
+			//System.out.println("    hands=" + hands + " woncount=" + woncount + " tiedcount=" + tiedcount + " tiedwithcount=" + tiedwithcount + " totalpc=" + total);
 		}
 	}
 

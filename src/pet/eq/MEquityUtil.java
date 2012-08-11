@@ -105,13 +105,13 @@ public class MEquityUtil {
 	 * summarise equities (convert counts to percentages)
 	 */
 	static void summariseEquity(MEquity[] meqs, int count, int hiloCount) {
-		System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
+		//System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
 		for (MEquity meq : meqs) {
-			System.out.println("meq " + meq);
+			//System.out.println("  meq " + meq);
 			
 			Equity hionly = meq.eqs[0];
 			hionly.summariseEquity(count);
-			System.out.println("  hionly won: " + hionly.won + " tied: " + hionly.tied + " total: " + hionly.total);
+			//System.out.println("  hionly won: " + hionly.won + " tied: " + hionly.tied + " total: " + hionly.total);
 			
 			if (hiloCount == 0) {
 				meq.totaleq = hionly.total;
@@ -120,22 +120,22 @@ public class MEquityUtil {
 				Equity hihalf = meq.eqs[1];
 				// high count as it applies to every hand not just hi/lo hands
 				hihalf.summariseEquity(count);
-				System.out.println("  hihalf won: " + hihalf.won + " tied: " + hihalf.tied + " total: " + hihalf.total);
-				System.out.println("  hionly+hihalf won: " + (hionly.won + hihalf.won) + " tied: " + (hionly.tied+hihalf.tied) + " total: " + (hionly.total+hihalf.total));
+				//System.out.println("  hihalf won: " + hihalf.won + " tied: " + hihalf.tied + " total: " + hihalf.total);
+				//System.out.println("  hionly+hihalf won: " + (hionly.won + hihalf.won) + " tied: " + (hionly.tied+hihalf.tied) + " total: " + (hionly.total+hihalf.total));
 				
 				Equity lohalf = meq.eqs[2];
 				lohalf.summariseEquity(count);
-				System.out.println("  lohalf won: " + lohalf.won + " tied: " + lohalf.tied + " total: " + lohalf.total);
+				//System.out.println("  lohalf won: " + lohalf.won + " tied: " + lohalf.tied + " total: " + lohalf.total);
 				
 				meq.lowPossible = (hiloCount * 100f) / count;
-				System.out.println("  low possible: " + meq.lowPossible);
+				//System.out.println("  low possible: " + meq.lowPossible);
 				
 				meq.totaleq = hionly.total + (hihalf.total + lohalf.total) / 2;
 			}
-			System.out.println("  total eq: " + meq.totaleq);
+			//System.out.println("  total eq: " + meq.totaleq);
 			
 			meq.scoop = (meq.scoopcount * 100f) / count;
-			System.out.println("  scoop count: " + meq.scoopcount + " scoop: " + meq.scoop);
+			//System.out.println("  scoop count: " + meq.scoopcount + " scoop: " + meq.scoop);
 		}
 	}
 
@@ -153,7 +153,7 @@ public class MEquityUtil {
 	public static String currentString(MEquity me) {
 		String s = Poker.valueString(me.eqs[0].current);
 		if (me.hilo) {
-			s += " / " + Poker.valueString(me.eqs[1].current);
+			//s += " Hi: " + Poker.valueString(me.eqs[1].current);
 			s += " / " + Poker.valueString(me.eqs[2].current);
 		}
 		return s;

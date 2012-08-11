@@ -45,9 +45,16 @@ public class Game implements Serializable {
 	public int subtype;
 	/** blinds XXX cash game only */
 	public int sb, bb;
+	/** is a hi/lo game */
+	public boolean hilo;
+	
+	public Game() {
+		//
+	}
 	
 	@Override
 	public String toString() {
 		return "Game[" + id + "]";
 	}
+	
 }

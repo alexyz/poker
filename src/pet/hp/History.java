@@ -120,6 +120,13 @@ public class History {
 		}
 
 		game.id = GameUtil.getGameId(game);
+		switch (game.type) {
+			case Game.STUDHL_TYPE:
+			case Game.OMHL_TYPE:
+				game.hilo = true;
+				break;
+			default:
+		}
 		games.add(game);
 		System.out.println("new game " + game);
 		

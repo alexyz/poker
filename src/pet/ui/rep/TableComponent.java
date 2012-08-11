@@ -88,7 +88,7 @@ class TableComponent extends JComponent {
 		if (hand != null) {
 			g2.setColor(Color.black);
 			g2.setFont(PokerFrame.boldfont);
-			g2.drawString(String.format("%s %d-max", hand.game.id, hand.game.max), 18, 18);
+			g2.drawString(hand.game.id, 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
 			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
 		}
@@ -159,7 +159,9 @@ class TableComponent extends JComponent {
 					lines.add(ss.cards != null ? PokerUtil.cardsString(ss.cards.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
 				}
 				if (ss.meq != null) {
-					lines.add(MEquityUtil.currentString(ss.meq));
+					if (ss.meq.eqs[0].current != 0) {
+						lines.add(MEquityUtil.currentString(ss.meq));
+					}
 					lines.add(MEquityUtil.equityString(ss.meq));
 				}
 				if (ss.spr > 0) {

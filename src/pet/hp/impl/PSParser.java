@@ -196,10 +196,12 @@ public class PSParser extends Parser {
 
 		} else if (line.equals("No low hand qualified")) {
 			println("no low");
+			// need to check game.hilo to see if this can be used
+			hand.showdownNoLow = true;
 			
 		} else if (line.equals("The deck is reshuffled")) {
-			// XXX HandStateUtil better not think discarded cards are blockers anymore...
 			println("deck reshuffled");
+			// don't think of discarded cards as blockers...
 			hand.reshuffleStreetIndex = (byte) (streets.size() - 1);
 			
 		} else if (line.equals("Pair on board - a double bet is allowed")) {

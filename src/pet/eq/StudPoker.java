@@ -91,7 +91,7 @@ public class StudPoker extends Poker {
 			if (holeCards[n].length >= 5) {
 				hivals[n] = studValue(value, holeCards[n]);
 				if (hilo) {
-					hivals[n] = studValue(Value.afLow8Value, holeCards[n]);
+					lovals[n] = studValue(Value.afLow8Value, holeCards[n]);
 				}
 			}
 		}

@@ -97,7 +97,7 @@ public class HandUtil {
 		}
 		return cardsList;
 	}
-		
+	
 	private HandUtil() {
 		//
 	}
