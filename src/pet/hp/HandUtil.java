@@ -2,35 +2,10 @@ package pet.hp;
 
 import java.util.*;
 
-import pet.eq.Cmp;
-import pet.eq.DrawPoker;
-import pet.eq.DrawPoker2;
-
 /**
  * Utilities for hands (no analysis - see HandInfo)
  */
 public class HandUtil {
-	
-	/** player hole cards as string array, plus metadata to indicate discarded cards and if cards were guessed */
-	public static class HoleCards {
-		/** hole cards for display/equity purposes */
-		public final String[] hole;
-		/** discarded cards if any */
-		public final String[] discarded;
-		/** are hole cards guessed */
-		public final boolean guess;
-		public HoleCards(String[] hole, String[] discarded, boolean guess) {
-			this.hole = hole;
-			this.discarded = discarded;
-			this.guess = guess;
-		}
-		public HoleCards(int numHole, int numDiscarded) {
-			this(new String[numHole], numDiscarded > 0 ? new String[numDiscarded] : null, false);
-		}
-		public HoleCards(String[] hole) {
-			this(hole, null, false);
-		}
-	}
 	
 	/**
 	 * Compare hands by id
@@ -75,113 +50,7 @@ public class HandUtil {
 				throw new RuntimeException("unknown game type " + hand.game.type);
 		}
 	}
-	
-	/**
-	 * get the hole cards the current player kept and discarded
-	 */
-	private static HoleCards kept(String[] hole1, String[] hole2, int discards) {
-		HoleCards h = new HoleCards(5 - discards, discards);
-		int i = 0, j = 0;
-		for (int n1 = 0; n1 < 5; n1++) {
-			find: {
-				for (int n2 = 0; n2 < 5; n2++) {
-					if (hole1[n1].equals(hole2[n2])) {
-						h.hole[i++] = hole1[n1];
-						break find;
-					}
-				}
-				h.discarded[j++] = hole1[n1];
-			}
-		}
-		return h;
-	}
-	
-	/**
-	 * Get cards player had on this street
-	 */
-	public static HandUtil.HoleCards getCards(final Hand hand, final Seat seat, final int streetIndex) {
-		if (seat.finalHoleCards == null && seat.finalUpCards == null) {
-			// nothing to base return value on
-			// note that only stud has up cards and the hole cards could be null
-			return null;
-		}
-		
-		HoleCards hc = null;
-		
-		switch (hand.game.type) {
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
-				String[] cards = getFinalCards(hand.game.type, seat);
-				if (streetIndex < 4) {
-					cards = Arrays.copyOf(cards, streetIndex + 3);
-				}
-				// don't sort (though could sort first two)
-				return new HoleCards(cards);
-			
-			case Game.DSTD_TYPE:
-			case Game.DSSD_TYPE:
-				if (streetIndex == GameUtil.getMaxStreets(hand.game.type) - 1) {
-					// on final street just return final hand from seat
-					hc = new HoleCards(seat.finalHoleCards.clone());
-					
-				} else if (hand.myseat == seat) {
-					// get current player cards but also see which ones were kept
-					String[] x = hand.myDrawCards(streetIndex);
-					if (x == null) {
-						return null;
-					}
-					System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(x));
-					String[] y = hand.myDrawCards(streetIndex + 1);
-					if (y == null) {
-						y = hand.myseat.finalHoleCards;
-					}
-					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
-					hc = kept(x, y, seat.drawn(streetIndex));
-					
-				} else {
-					// guess opponents hole cards based on final hand
-					String[] h = DrawPoker2.getDrawingHand(seat.finalHoleCards, seat.drawn(streetIndex), false);
-					hc = new HoleCards(h, null, true);
-				}
-				break;
-				
-			case Game.FCD_TYPE:
-				if (streetIndex == 1) {
-					// return final hand
-					hc = new HoleCards(seat.finalHoleCards.clone());
-					
-				} else if (hand.myseat == seat) {
-					// return starting hand
-					// XXX should also return discarded
-					hc = kept(hand.myDrawCards0, seat.finalHoleCards, seat.drawn0);
-					
-				} else {
-					// guess what cards the opponent kept
-					hc = new HoleCards(DrawPoker.getDrawingHand(seat.finalHoleCards, seat.drawn0), null, true);
-				}
-				break;
-				
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-				hc = new HoleCards(seat.finalHoleCards);
-				break;
-				
-			default:
-				throw new RuntimeException("unknown game type " + hand.game);
-		}
-		
-		if (hc != null) {
-			Arrays.sort(hc.hole, Cmp.revCardCmp);
-			if (hc.discarded != null) {
-				Arrays.sort(hc.discarded, Cmp.revCardCmp);
-			}
-		}
-		
-		return hc;
-	}
-	
+
 	/**
 	 * get the final cards this seat had for display purposes returns null if no
 	 * known cards, array may contain null if some are unknown
@@ -228,7 +97,7 @@ public class HandUtil {
 		}
 		return cardsList;
 	}
-	
+		
 	private HandUtil() {
 		//
 	}

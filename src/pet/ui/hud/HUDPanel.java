@@ -145,7 +145,7 @@ class HUDPanel extends JPanel {
 				text.append(text.length() > 0 ? ", " : "").append(eqStrSh);
 				// tip
 				// TODO street no...
-				tip.append(PokerUtil.cardsString(ss.holeObj.hole)).append(":  ");
+				tip.append(PokerUtil.cardsString(ss.cards.hole)).append(":  ");
 				tip.append(eqStr).append(":  ").append("<br>");
 				tip.append(curStr).append("<br>");
 			}

@@ -1,7 +1,6 @@
 package pet.hp.state;
 
 import pet.eq.*;
-import pet.hp.HandUtil;
 import pet.hp.Seat;
 
 /**
@@ -22,7 +21,7 @@ public class SeatState implements Cloneable {
 	/** bet to pot ratio as percent (100 is pot bet) */
 	public float bpr;
 	/** current hole cards (changes in games like draw) */
-	public HandUtil.HoleCards holeObj;
+	public CardsState cards;
 	/** has folded yet */
 	public boolean folded;
 	/** has won - only true at end, unlike seat.won > 0 */

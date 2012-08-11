@@ -4,7 +4,6 @@ import java.util.*;
 
 import pet.eq.*;
 import pet.hp.*;
-import pet.hp.HandUtil.HoleCards;
 
 public class HandStateUtil {
 	
@@ -90,8 +89,9 @@ public class HandStateUtil {
 					ss.actionNum = 0;
 					
 					// get cards of seat
-					HoleCards hc = HandUtil.getCards(hand, ss.seat, s);
-					ss.holeObj = hc;
+					CardsState hc = CardsStateUtil.getCards(hand, ss.seat, s);
+					System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
+					ss.cards = hc;
 					
 					if (hc != null) {
 						// do we have enough cards for stud?

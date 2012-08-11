@@ -155,8 +155,8 @@ class TableComponent extends JComponent {
 				List<String> lines = new ArrayList<String>();
 				lines.add(ss.seat.name);
 				lines.add(GameUtil.formatMoney(hand.game.currency, ss.stack));
-				if (!ss.folded || ss.holeObj != null) {
-					lines.add(ss.holeObj != null ? PokerUtil.cardsString(ss.holeObj.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
+				if (!ss.folded || ss.cards != null) {
+					lines.add(ss.cards != null ? PokerUtil.cardsString(ss.cards.hole) : GameUtil.unknownCardsString(hs.hand.game.type));
 				}
 				if (ss.meq != null) {
 					lines.add(MEquityUtil.currentString(ss.meq));
