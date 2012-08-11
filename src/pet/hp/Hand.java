@@ -64,7 +64,7 @@ public class Hand implements Serializable {
 			case 1: return myDrawCards1;
 			case 2: return myDrawCards2;
 			case 3: return myDrawCards3;
-			default: throw new RuntimeException();
+			default: throw new RuntimeException("no such draw " + n);
 		}
 	}
 	

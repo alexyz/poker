@@ -33,7 +33,7 @@ public class Equity {
 			case HI_ONLY: return "High Only";
 			case HILO_HI_HALF: return "High Half";
 			case HILO_AFLO8_HALF: return "A-5 Low (8) Half";
-			default: throw new RuntimeException();
+			default: throw new RuntimeException("no such equity type: " + eqtype);
 		}
 	}
 	

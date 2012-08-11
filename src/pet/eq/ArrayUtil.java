@@ -24,7 +24,7 @@ public class ArrayUtil {
 	 */
 	static String pick(Random r, String[] a, long[] picked) {
 		if (a.length > 63) {
-			throw new RuntimeException();
+			throw new RuntimeException("array is longer than 63");
 		}
 		if (picked[0] >= ((1L << a.length) - 1)) {
 			throw new RuntimeException("none left to pick");

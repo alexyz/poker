@@ -142,7 +142,7 @@ public class History {
 			t.cost = cost;
 		} else {
 			if (t.currency != cur || t.buyin != buyin || t.cost != cost) {
-				throw new RuntimeException();
+				throw new RuntimeException("tournament changed: " + t);
 			}
 		}
 		return t;

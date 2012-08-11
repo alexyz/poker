@@ -7,7 +7,7 @@ import java.util.*;
  * experimental draw poker functions
  */
 public abstract class DrawPoker2 extends Poker {
-
+	
 	/** represents a possible draw and its average score */
 	public static class Draw implements Comparable<Draw> {
 		public final String[] hole;
@@ -104,36 +104,56 @@ public abstract class DrawPoker2 extends Poker {
 		}
 		
 	}
-	*/
+	 */
 	
 	/**
-	 * get normalised score of high hand (i.e. hand value is 0-1), optionally inverted
+	 * get normalised score of hand (i.e. hand value is 0-1), optionally inverted
 	 */
-	protected static float score(int value, float bias, boolean high) {
-		int[] uniqueValues = uniqueValues();
-		int p = Arrays.binarySearch(uniqueValues, value);
-		if (p < 0) {
-			throw new RuntimeException();
+	protected static float score(final int value, final float bias) {
+		// get high value
+		final boolean high;
+		final int highValue;
+		switch (value & TYPE) {
+			case HI_TYPE:
+				high = true;
+				highValue = value;
+				break;
+			case DS_LOW_TYPE:
+				high = false;
+				highValue = INV_MASK - (value & HAND);
+				break;
+			default:
+				// ace to five doesn't include str/fl
+				// but then, no drawing games use ace to five values so doesn't matter
+				throw new RuntimeException("can't get score of " + Poker.valueString(value));
 		}
+		
+		int[] highValues = highValues();
+		int p = Arrays.binarySearch(highValues, highValue);
+		if (p < 0) {
+			throw new RuntimeException("not a high value: " + Poker.valueString(highValue));
+		}
+		
 		if (!high) {
 			// invert score for deuce to seven low
-			p = uniqueValues.length - 1 - p;
+			p = highValues.length - 1 - p;
 		}
-		return (float) Math.pow((1f * p) / (uniqueValues.length - 1f), bias);
+		
+		return (float) Math.pow((1f * p) / (highValues.length - 1f), bias);
 	}
 	
 	public static String[] getDrawingHand(final String[] hand, final int drawn, boolean hi) {
 		return getDrawingHand(null, hand, drawn, hi ? Value.hiValue : Value.dsLowValue, 3f);
 	}
-
+	
 	/**
 	 * get the best drawing hand for the given hand, number drawn, hand valuation and big hand bias.
 	 * optionally returns score of all possible drawing hands.
 	 */
 	private static String[] getDrawingHand(List<Draw> draws, final String[] hand, final int drawn, Value value, float bias) {
-
+		
 		if (drawn < 0 || drawn > 5) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid drawn: " + drawn);
 			
 		} else if (drawn == 5) {
 			// special case, no draw and no meaningful score
@@ -143,7 +163,7 @@ public abstract class DrawPoker2 extends Poker {
 			// special case, nothing to test other than given hand
 			if (draws != null) {
 				int v = value.value(hand);
-				draws.add(new Draw(hand, value.score(v, bias)));
+				draws.add(new Draw(hand, score(v, bias)));
 			}
 			return hand.clone();
 		}
@@ -169,7 +189,7 @@ public abstract class DrawPoker2 extends Poker {
 				// pick drawn from deck
 				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
 				int v = value.value(drawnHand);
-				score += value.score(v, bias);
+				score += score(v, bias);
 			}
 			
 			float averageScore = score / (1.0f * jmax);
@@ -177,7 +197,7 @@ public abstract class DrawPoker2 extends Poker {
 			if (draws != null) {
 				draws.add(new Draw(drawingHand, averageScore));
 			}
-					
+			
 			if (score > maxScore) {
 				// copy new max hole cards
 				maxDrawingHand = drawingHand;

@@ -74,7 +74,7 @@ public abstract class Poker {
 	public static final char[] suits = { S_SUIT, H_SUIT, C_SUIT, D_SUIT };
 	
 	/** array of all possible unique hi hand values (there are only approx 7500) */
-	private static int[] uniqueValues;
+	private static int[] uniqueHighValues;
 	
 	public static String[] deck() {
 		return deckArr.clone();
@@ -294,31 +294,33 @@ public abstract class Poker {
 	 */
 	public static String valueString(int value) {
 		if (value <= 0) {
-			return "nil";
+			return "No value";
 		}
 		
-		boolean hi;
+		final boolean high;
+		final int highValue;
 		switch (value & TYPE) {
 			case HI_TYPE:
-				hi = true;
+				high = true;
+				highValue = value;
 				break;
 			case DS_LOW_TYPE:
 			case AF_LOW_TYPE:
-				hi = false;
-				value = INV_MASK - (value & HAND);
+				high = false;
+				highValue = INV_MASK - (value & HAND);
 				break;
 			default:
-				throw new RuntimeException();
+				return "##" + Integer.toHexString(value) + "##";
 		}
 		
-		final char c1 = valueFace(value);
-		final char c2 = valueFace(value >> 4);
-		final char c3 = valueFace(value >> 8);
-		final char c4 = valueFace(value >> 12);
-		final char c5 = valueFace(value >> 16);
+		final char c1 = valueFace(highValue);
+		final char c2 = valueFace(highValue >> 4);
+		final char c3 = valueFace(highValue >> 8);
+		final char c4 = valueFace(highValue >> 12);
+		final char c5 = valueFace(highValue >> 16);
 		
 		String s;
-		switch (value & 0xf00000) {
+		switch (highValue & 0xf00000) {
 			case SF_MASK: s = "Straight Flush - " + c1 + " high"; break;
 			case FK_MASK: s = "Four of a Kind " + c2 + " - " + c1; break;
 			case FH_MASK: s = "Full House " + c2 + " full of " + c1; break;
@@ -327,11 +329,11 @@ public abstract class Poker {
 			case TK_MASK: s = "Three of a Kind " + c3 + " - " + c2 + " " + c1; break;
 			case TP_MASK: s = "Two Pair " + c3 + " and " + c2 + " - " + c1; break;
 			case P_MASK: s = "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1; break;
-			case H_MASK: s = c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + (hi ? " high" : " low"); break;
-			default: s = "Unknown";
+			case H_MASK: s = c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + (high ? " high" : " low"); break;
+			default: s = "**" + Integer.toHexString(highValue) + "**";
 		}
 		
-		return hi ? s : "(" + s + ")";
+		return high ? s : "(" + s + ")";
 	}
 	
 	public static char face(String card) {
@@ -382,9 +384,9 @@ public abstract class Poker {
 	/**
 	 * Go through every possible 5 card hand and collect the unique hand values in order
 	 */
-	static int[] uniqueValues() {
-		if (uniqueValues != null) {
-			return uniqueValues;
+	static int[] highValues() {
+		if (uniqueHighValues != null) {
+			return uniqueHighValues;
 		}
 		
 		// TODO this is not very efficient, could just serialise/deserialise array
@@ -418,7 +420,7 @@ public abstract class Poker {
 			a[i++] = v;
 		}
 		Arrays.sort(a);
-		uniqueValues = a;
+		uniqueHighValues = a;
 		return a;
 	}
 	

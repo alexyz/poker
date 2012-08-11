@@ -59,7 +59,7 @@ public class MEquity {
 				i = 2;
 				break;
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("no such equity type " + eqtype);
 		}
 		Equity e = eqs[i];
 		if (e.eqtype != eqtype) {

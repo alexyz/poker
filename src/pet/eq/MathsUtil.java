@@ -49,7 +49,7 @@ public class MathsUtil {
 	public static int bincoff(int n, int k) {
 		int c = C[n][k];
 		if (c == -1) {
-			throw new RuntimeException();
+			throw new RuntimeException("no binary coefficient for " + n + ", " + k);
 		}
 		return c;
 	}

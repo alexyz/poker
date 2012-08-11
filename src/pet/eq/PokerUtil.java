@@ -26,7 +26,7 @@ public class PokerUtil {
 			return "";
 		}
 	}
-
+	
 	/**
 	 * return integer value of cards (must be sorted, and no longer than 5)
 	 */
@@ -45,7 +45,7 @@ public class PokerUtil {
 		}
 		return v;
 	}
-
+	
 	/**
 	 * Return colour of suit
 	 */
@@ -53,14 +53,15 @@ public class PokerUtil {
 		// switch instead of map due to primitive type
 		// TODO could just use "schd".indexOf(suit)
 		switch (s) {
-		case Poker.S_SUIT: return Color.black;
-		case Poker.C_SUIT: return Color.green;
-		case Poker.H_SUIT: return Color.red;
-		case Poker.D_SUIT: return Color.blue;
+			case Poker.S_SUIT: return Color.black;
+			case Poker.C_SUIT: return Color.green;
+			case Poker.H_SUIT: return Color.red;
+			case Poker.D_SUIT: return Color.blue;
+			default:
+				throw new RuntimeException("unknown suit: " + s);
 		}
-		throw new RuntimeException();
 	}
-
+	
 	/**
 	 * Get the unicode suit symbol
 	 */
@@ -77,18 +78,18 @@ public class PokerUtil {
 			default: return 0;
 		}
 	}
-
+	
 	/**
 	 * Return suit value from 0-3 (for sorting purposes)
 	 */
 	public static int suitValue(String card) {
 		switch (Poker.suit(card)) {
-		case Poker.C_SUIT: return 3;
-		case Poker.D_SUIT: return 2;
-		case Poker.H_SUIT: return 1;
-		case Poker.S_SUIT: return 0;
-		default: return -1;
+			case Poker.C_SUIT: return 3;
+			case Poker.D_SUIT: return 2;
+			case Poker.H_SUIT: return 1;
+			case Poker.S_SUIT: return 0;
+			default: return -1;
 		}
 	}
-
+	
 }
