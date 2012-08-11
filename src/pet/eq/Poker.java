@@ -23,7 +23,10 @@ public abstract class Poker {
 	protected static final int HI_TYPE = 0;
 	/** deuce to seven low hand value type */
 	protected static final int DS_LOW_TYPE = 0x1000000;
-	/** ace to five low hand value type */
+	/**
+	 * ace to five low hand value type - do MAX_MASK - (value & HAND) to get
+	 * apparent high value
+	 */
 	protected static final int AF_LOW_TYPE = 0x2000000;
 	
 	/** rank mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
@@ -50,7 +53,7 @@ public abstract class Poker {
 	/** straight flush rank mask */
 	protected static final int SF_MASK = 0x800000;
 	/** impossible rank higher than straight flush */
-	protected static final int INV_MASK = 0x900000;
+	protected static final int MAX_MASK = 0x900000;
 	
 	/** number of high ranks */
 	public static final int RANKS = 9;
@@ -59,6 +62,8 @@ public abstract class Poker {
 	 * short rank names (value >> 20)
 	 */
 	public static final String[] ranknames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
+	public static final String[] afLowRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
+	
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
 	/** complete deck in face then suit order, lowest first */
@@ -104,7 +109,7 @@ public abstract class Poker {
 			if (p < P_MASK) {
 				// no pairs
 				// invert value
-				int v = AF_LOW_TYPE | (INV_MASK - p);
+				int v = AF_LOW_TYPE | (MAX_MASK - p);
 				return v;
 			}
 		}
@@ -119,7 +124,7 @@ public abstract class Poker {
 		// allow pairs but not straights or flushes, ace low
 		int p = isPair(hand, false);
 		// invert value
-		int v = AF_LOW_TYPE | (INV_MASK - p);
+		int v = AF_LOW_TYPE | (MAX_MASK - p);
 		return v;
 	}
 	
@@ -252,7 +257,7 @@ public abstract class Poker {
 	 * deuce to seven value - exact opposite of high value
 	 */
 	static int dsValue(String[] hand) {
-		return Poker.DS_LOW_TYPE | (Poker.INV_MASK - Poker.value(hand));
+		return Poker.DS_LOW_TYPE | (Poker.MAX_MASK - Poker.value(hand));
 	}
 	
 	/**
@@ -307,7 +312,7 @@ public abstract class Poker {
 			case DS_LOW_TYPE:
 			case AF_LOW_TYPE:
 				high = false;
-				highValue = INV_MASK - (value & HAND);
+				highValue = MAX_MASK - (value & HAND);
 				break;
 			default:
 				return "##" + Integer.toHexString(value) + "##";
@@ -340,14 +345,37 @@ public abstract class Poker {
 		return card.charAt(0);
 	}
 	
-	/** return rank of hand, from 0 to 9 (NOT the rank bitmask constants) */
+	/**
+	 * return rank of hand, from 0 to 9 (RANKS) (NOT the rank bitmask
+	 * constants), this is an index into the rank names arrays for the value
+	 * type
+	 */
 	public static int rank(int value) {
 		switch (value & TYPE) {
 			case HI_TYPE:
 				return (value & RANK) >> 20;
 				
+			case AF_LOW_TYPE:
+				// ranks are: 5, 6, 7, 8, Hc, P+
+				final int v = MAX_MASK - (value & HAND);
+				final int r = v & RANK;
+				if (r == H_MASK) {
+					// most significant card
+					switch ((v >> 16) & 0xf) {
+						case 5: return 0;
+						case 6: return 1;
+						case 7: return 2;
+						case 8: return 3;
+						default: return 4;
+					}
+				} else {
+					// pair or greater
+					return 5;
+				}
+				
+				// TODO 2-7 ranks
+				
 			default:
-				// FIXME add some low ranks
 				return 0;
 		}
 	}

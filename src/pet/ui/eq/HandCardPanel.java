@@ -38,16 +38,17 @@ class HandCardPanel extends CardPanel {
 	}
 
 	private final JLabel totalLabel = new JLabel();
-	private final EquityPanel hiOnlyEquityPanel = new EquityPanel();
-	private final RanksPanel hiOnlyRanks = new RanksPanel();
-	private final EquityPanel hiHalfEquityPanel = new EquityPanel();
-	private final RanksPanel hiHalfRanks = new RanksPanel();
-	private final EquityPanel loHalfEquityPanel = new EquityPanel();
-
+	private final EquityPanel firstEquityPanel = new EquityPanel();
+	private final RanksPanel firstRankPanel = new RanksPanel();
+	private final EquityPanel secondEquityPanel = new EquityPanel();
+	private final RanksPanel secondRanksPanel = new RanksPanel();
+	private final EquityPanel thirdEquityPanel = new EquityPanel();
+	private final RanksPanel thirdRanksPanel = new RanksPanel();
+	
 	public HandCardPanel(String name, int mincards, int maxcards, boolean below) {
 		super(name, mincards, maxcards);
-		hiHalfEquityPanel.setVisible(false);
-		loHalfEquityPanel.setVisible(false);
+		secondEquityPanel.setVisible(false);
+		thirdEquityPanel.setVisible(false);
 		
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints g = new GridBagConstraints();
@@ -59,53 +60,60 @@ class HandCardPanel extends CardPanel {
 		p.add(totalLabel, g);
 		
 		g.gridy++;
-		p.add(hiOnlyEquityPanel, g);
+		p.add(firstEquityPanel, g);
 		
 		g.gridy++;
-		p.add(hiOnlyRanks, g);
+		p.add(firstRankPanel, g);
 		
 		g.gridy++;
-		p.add(hiHalfEquityPanel, g);
+		p.add(secondEquityPanel, g);
 		
 		g.gridy++;
-		p.add(hiHalfRanks, g);
+		p.add(secondRanksPanel, g);
 		
 		g.gridy++;
-		p.add(loHalfEquityPanel, g);
+		p.add(thirdEquityPanel, g);
+		
+		g.gridy++;
+		p.add(thirdRanksPanel, g);
 		
 		// add to superclass layout
 		addDetails(p, below);
 	}
 	
 	private void clearHandEquity() {
-		hiOnlyEquityPanel.clearHandEquity();
-		hiOnlyRanks.clearHandEquity();
-		hiHalfEquityPanel.clearHandEquity();
-		hiHalfEquityPanel.setVisible(false);
-		hiHalfRanks.clearHandEquity();
-		hiHalfRanks.setVisible(false);
-		loHalfEquityPanel.clearHandEquity();
-		loHalfEquityPanel.setVisible(false);
 		totalLabel.setText("");
+		firstEquityPanel.clearHandEquity();
+		firstRankPanel.clearHandEquity();
+		secondEquityPanel.clearHandEquity();
+		secondEquityPanel.setVisible(false);
+		secondRanksPanel.clearHandEquity();
+		secondRanksPanel.setVisible(false);
+		thirdEquityPanel.clearHandEquity();
+		thirdEquityPanel.setVisible(false);
+		thirdRanksPanel.clearHandEquity();
+		thirdRanksPanel.setVisible(false);
 	}
 
 	public void setHandEquity(MEquity me) {
 		clearHandEquity();
 		
 		if (me != null) {
-			hiOnlyEquityPanel.setHandEquity(me, me.eqs[0]);
-			hiOnlyRanks.setHandEquity(me.eqs[0]);
+			firstEquityPanel.setHandEquity(me, me.eqs[0]);
+			firstRankPanel.setHandEquity(me.eqs[0]);
 			
 			if (me.eqs.length >= 2) {
-				hiHalfEquityPanel.setHandEquity(me, me.eqs[1]);
-				hiHalfEquityPanel.setVisible(true);
-				hiHalfRanks.setHandEquity(me.eqs[1]);
-				hiHalfRanks.setVisible(true);
+				secondEquityPanel.setHandEquity(me, me.eqs[1]);
+				secondEquityPanel.setVisible(true);
+				secondRanksPanel.setHandEquity(me.eqs[1]);
+				secondRanksPanel.setVisible(true);
 			}
 			
 			if (me.eqs.length >= 3) {
-				loHalfEquityPanel.setHandEquity(me, me.eqs[2]);
-				loHalfEquityPanel.setVisible(true);
+				thirdEquityPanel.setHandEquity(me, me.eqs[2]);
+				thirdEquityPanel.setVisible(true);
+				thirdRanksPanel.setHandEquity(me.eqs[2]);
+				thirdRanksPanel.setVisible(true);
 			}
 			
 			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);

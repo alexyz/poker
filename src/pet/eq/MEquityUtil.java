@@ -75,10 +75,7 @@ public class MEquityUtil {
 					e.tiedcount++;
 					e.tiedwithcount += maxcount;
 				}
-				if (eqtype == Equity.HI_ONLY || eqtype == Equity.HILO_HI_HALF) {
-					// FIXME hi only
-					e.wonrankcount[Poker.rank(max)]++;
-				}
+				e.wonrankcount[Poker.rank(max)]++;
 				
 				// FIXME need to do this for mequity, not equity
 				// count the cards as outs if this turns losing hand into

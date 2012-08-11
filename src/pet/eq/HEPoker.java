@@ -83,6 +83,7 @@ public class HEPoker extends Poker {
 	 * Calc exact tex/omaha hand equity for each hand for given board
 	 */
 	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holeCards) {
+		
 		boolean lowPossible = hilo;
 		if (hilo) {
 			if (heboard.current != null) {
@@ -108,7 +109,7 @@ public class HEPoker extends Poker {
 			// get current low values
 			if (lowPossible) {
 				for (int n = 0; n < holeCards.length; n++) {
-					lovals[n] = heValue(Value.afLowValue, heboard.current, holeCards[n]);
+					lovals[n] = heValue(Value.afLow8Value, heboard.current, holeCards[n]);
 				}
 				MEquityUtil.updateCurrent(meqs, Equity.HILO_AFLO8_HALF, lovals);
 			}
@@ -132,7 +133,7 @@ public class HEPoker extends Poker {
 			boolean hasLow = false;
 			if (lowPossible) {
 				for (int i = 0; i < holeCards.length; i++) {
-					int v = heValue(Value.afLowValue, heboard.board, holeCards[i]);
+					int v = heValue(Value.afLow8Value, heboard.board, holeCards[i]);
 					if (v > 0) {
 						hasLow = true;
 					}

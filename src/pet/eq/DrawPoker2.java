@@ -120,7 +120,7 @@ public abstract class DrawPoker2 extends Poker {
 				break;
 			case DS_LOW_TYPE:
 				high = false;
-				highValue = INV_MASK - (value & HAND);
+				highValue = MAX_MASK - (value & HAND);
 				break;
 			default:
 				// ace to five doesn't include str/fl

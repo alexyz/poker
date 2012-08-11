@@ -37,6 +37,26 @@ public class Equity {
 		}
 	}
 	
+	/**
+	 * get the array of rank names for the equity type. can't use current value
+	 * to get type because it might not be set
+	 */
+	public static String[] getRankNames(int eqtype) {
+		switch (eqtype) {
+			case DSLO_ONLY: 
+				return null;
+			case AFLO_ONLY:
+			case HILO_AFLO8_HALF:
+			case AFLO8_ONLY: 
+				return Poker.afLowRankNames;
+			case HI_ONLY:
+			case HILO_HI_HALF:
+				return Poker.ranknames;
+			default: 
+				throw new RuntimeException("no such equity type: " + eqtype);
+		}
+	}
+	
 	/** equity type description */
 	public final int eqtype;
 	/** current value */
