@@ -7,6 +7,27 @@ import java.util.*;
  */
 public class Equity {
 	
+	public static class Out implements Comparable<Out> {
+		public final float pc;
+		public final String card;
+		public Out(String card, float pc) {
+			this.card = card;
+			this.pc = pc;
+		}
+		@Override
+		public int compareTo(Out o) {
+			float c = pc - o.pc;
+			if (c != 0) {
+				return (int) Math.signum(c);
+			}
+			return Cmp.cardCmp.compare(card, o.card);
+		}
+		@Override
+		public String toString() {
+			return String.format("%s[%.1f]", card, pc);
+		}
+	}
+	
 	/*
 	 * equity types (note: hi/lo (8 or better) is not a type, it is actually
 	 * three types, hence the MEquity class)
@@ -73,8 +94,8 @@ public class Equity {
 	public float total;
 	/** percentage of hands won or tied by rank (value >> 20) */
 	public final float[] wonrank = new float[Poker.RANKS];
-	/** percentage that each card will make best hand */
-	public final Map<String,Float> outs = new TreeMap<String,Float>();
+	/** map of cards to percentage times that card will make best hand */
+	public final List<Out> outs = new ArrayList<Out>();
 	
 	// transient stuff
 	
@@ -84,11 +105,10 @@ public class Equity {
 	int tiedcount;
 	/** number of people tied with including self */
 	int tiedwithcount;
-	// XXX hi only
 	/** winning ranks */
 	final int[] wonrankcount = new int[Poker.RANKS];
-	/** count that each card (as part of group of k cards) will make the best hand */
-	final Map<String,int[]> outcount = new TreeMap<String,int[]>();
+	/** count that each card (as part of group of cards) will make the best hand */
+	final int[] outcount = new int[52];
 	
 	public Equity(int eqtype) {
 		this.eqtype = eqtype;
@@ -114,28 +134,26 @@ public class Equity {
 	}
 
 	/**
-	 * Summarise out probabilities for given number of picks
+	 * Summarise out probabilities for given number of picks from remaining cards
 	 */
-	void summariseOuts(int rem, int k) {
-		// maximum number of times an out can appear
-		// XXX probably wrong for k > 2
-		float max = (float) Math.pow(rem - 1, k - 1);
-		for (Map.Entry<String,int[]> me : outcount.entrySet()) {
-			int count = me.getValue()[0];
-			String card = me.getKey();
-			float v = (count * 100f) / max;
-			outs.put(card, v);
-		}
-	}
-	
-	public int outs(float eq) {
-		int c = 0;
-		for (float f : outs.values()) {
-			if (f > eq) {
-				c++;
+	void summariseOuts(float remCards, float picks, float samples) {
+		// maximum number of times an out can appear (average if sampled)
+		// prob of appearing once is picks/remCards, just multiply by samples
+		// (n,k,s) = (k*s)/n
+		// (52,1,52) = 1,  (52,2,1326) = 51,  (52,3,100000) = 5769 
+		float max = (picks * samples) / remCards;
+		System.out.println(String.format("sum outs(%f,%f,%f) max=%f", remCards, picks, samples, max));
+		for (int n = 0; n < outcount.length; n++) {
+			int count = outcount[n];
+			if (count > 0) {
+				String card = Poker.indexToCard(n);
+				float pc = (count * 100f) / max;
+				outs.add(new Out(card, pc));
 			}
 		}
-		return c;
+		Collections.sort(outs);
+		Collections.reverse(outs);
+		System.out.println("outs are " + outs);
 	}
 	
 }

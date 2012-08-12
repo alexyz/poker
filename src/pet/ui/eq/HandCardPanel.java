@@ -16,7 +16,7 @@ import pet.eq.*;
  *        [low ranks]
  */
 class HandCardPanel extends CardPanel {
-
+	
 	/**
 	 * get cards from array of hand card panels.
 	 * return null if no cards set or some hands incomplete
@@ -36,19 +36,14 @@ class HandCardPanel extends CardPanel {
 		System.out.println("hands: " + hands.size());
 		return hands.size() == 0 ? null : hands.toArray(new String[hands.size()][]);
 	}
-
+	
 	private final JLabel totalLabel = new JLabel();
-	private final EquityPanel firstEquityPanel = new EquityPanel();
-	private final RanksPanel firstRankPanel = new RanksPanel();
-	private final EquityPanel secondEquityPanel = new EquityPanel();
-	private final RanksPanel secondRanksPanel = new RanksPanel();
-	private final EquityPanel thirdEquityPanel = new EquityPanel();
-	private final RanksPanel thirdRanksPanel = new RanksPanel();
+	private final EquityPanel[] equityPanels = new EquityPanel[3];
+	private final RanksPanel[] rankPanels = new RanksPanel[3];
+	private final OutsPanel[] outsPanels = new OutsPanel[3];
 	
 	public HandCardPanel(String name, int mincards, int maxcards, boolean below) {
 		super(name, mincards, maxcards);
-		secondEquityPanel.setVisible(false);
-		thirdEquityPanel.setVisible(false);
 		
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints g = new GridBagConstraints();
@@ -59,74 +54,60 @@ class HandCardPanel extends CardPanel {
 		g.gridy = 0;
 		p.add(totalLabel, g);
 		
-		g.gridy++;
-		p.add(firstEquityPanel, g);
-		
-		g.gridy++;
-		p.add(firstRankPanel, g);
-		
-		g.gridy++;
-		p.add(secondEquityPanel, g);
-		
-		g.gridy++;
-		p.add(secondRanksPanel, g);
-		
-		g.gridy++;
-		p.add(thirdEquityPanel, g);
-		
-		g.gridy++;
-		p.add(thirdRanksPanel, g);
+		for (int n = 0; n < 3; n++) {
+			equityPanels[n] = new EquityPanel();
+			rankPanels[n] = new RanksPanel();
+			outsPanels[n] = new OutsPanel();
+			
+			g.gridy++;
+			p.add(equityPanels[n], g);
+			g.gridy++;
+			p.add(rankPanels[n], g);
+			g.gridy++;
+			p.add(outsPanels[n], g);
+		}
 		
 		// add to superclass layout
 		addDetails(p, below);
+		
+		clearEquity();
 	}
 	
-	private void clearHandEquity() {
+	private void clearEquity() {
 		totalLabel.setText("");
-		firstEquityPanel.clearHandEquity();
-		firstRankPanel.clearHandEquity();
-		secondEquityPanel.clearHandEquity();
-		secondEquityPanel.setVisible(false);
-		secondRanksPanel.clearHandEquity();
-		secondRanksPanel.setVisible(false);
-		thirdEquityPanel.clearHandEquity();
-		thirdEquityPanel.setVisible(false);
-		thirdRanksPanel.clearHandEquity();
-		thirdRanksPanel.setVisible(false);
-	}
-
-	public void setHandEquity(MEquity me) {
-		clearHandEquity();
-		
-		if (me != null) {
-			firstEquityPanel.setHandEquity(me, me.eqs[0]);
-			firstRankPanel.setHandEquity(me.eqs[0]);
-			
-			if (me.eqs.length >= 2) {
-				secondEquityPanel.setHandEquity(me, me.eqs[1]);
-				secondEquityPanel.setVisible(true);
-				secondRanksPanel.setHandEquity(me.eqs[1]);
-				secondRanksPanel.setVisible(true);
-			}
-			
-			if (me.eqs.length >= 3) {
-				thirdEquityPanel.setHandEquity(me, me.eqs[2]);
-				thirdEquityPanel.setVisible(true);
-				thirdRanksPanel.setHandEquity(me.eqs[2]);
-				thirdRanksPanel.setVisible(true);
-			}
-			
-			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);
+		for (int n = 0; n < 3; n++) {
+			equityPanels[n].clearEquity();
+			rankPanels[n].clearEquity();
+			outsPanels[n].clearEquity();
+		}
+		for (int n = 1; n < 3; n++) {
+			equityPanels[n].setVisible(false);
+			rankPanels[n].setVisible(false);
+			outsPanels[n].setVisible(false);
 		}
 	}
-
+	
+	public void setEquity(MEquity me) {
+		clearEquity();
+		
+		if (me != null) {
+			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);
+			for (int n = 0; n < me.eqs.length; n++) {
+				equityPanels[n].setHandEquity(me, me.eqs[n]);
+				equityPanels[n].setVisible(true);
+				rankPanels[n].setEquity(me.eqs[n]);
+				rankPanels[n].setVisible(true);
+				outsPanels[n].setEquity(me.eqs[n], me.remCards);
+				//outsPanels[n].setVisible(true);
+			}
+		}
+		
+	}
+	
 	@Override
 	public void clearCards() {
 		super.clearCards();
-		clearHandEquity();
+		clearEquity();
 	}
-
+	
 }
-
-
-

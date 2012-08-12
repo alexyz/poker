@@ -21,7 +21,7 @@ public class StudPoker extends Poker {
 	/** 
 	 * passes 3-7 card hands and convert 6+1 card hands into 7 card hands
 	 */
-	private String[] normalise(final String[] board, final String[] holeCards, final boolean create) {
+	private String[] merge(final String[] board, final String[] holeCards, final boolean create) {
 		// validate
 		if (board != null && (board.length > 1 || (board.length == 1 && holeCards.length != 6))) {
 			throw new RuntimeException("invalid board");
@@ -68,15 +68,28 @@ public class StudPoker extends Poker {
 	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsOrig, final String[] blockers) {
 		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsOrig) + " board " + Arrays.toString(board) + " blockers " + Arrays.toString(blockers));
 
+		// note: hole cards may be mixed length
+		
 		// remaining cards in deck
 		// use original cards so none are duplicated
 		final String[] deck = Poker.remdeck(holeCardsOrig, blockers, board);
 		
-		// normalise hands
+		// merge board with hole cards
 		final String[][] holeCards = new String[holeCardsOrig.length][];
+		int nonblanks = 0;
 		for (int n = 0; n < holeCardsOrig.length; n++) {
-			holeCards[n] = normalise(board, holeCardsOrig[n], true);
+			holeCards[n] = merge(board, holeCardsOrig[n], true);
+			nonblanks += holeCards[n].length;
 		}
+		
+		int blanks;
+		if (holeCards.length == 8) {
+			// last card will be comm card
+			blanks = holeCards.length * 6 + 1 - nonblanks;
+		} else {
+			blanks = holeCards.length * 7 - nonblanks;
+		}
+		System.out.println("deck: " + deck.length + " nonblanks: " + nonblanks + " blanks: " + blanks + " combs: " + MathsUtil.bincoffslow(deck.length, blanks));
 
 		// return value
 		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
@@ -88,11 +101,10 @@ public class StudPoker extends Poker {
 		
 		// get current values
 		for (int n = 0; n < holeCards.length; n++) {
-			if (holeCards[n].length >= 5) {
-				hivals[n] = studValue(value, holeCards[n]);
-				if (hilo) {
-					lovals[n] = studValue(Value.afLow8Value, holeCards[n]);
-				}
+			// returns 0 if less than 5 cards
+			hivals[n] = studValue(value, holeCards[n]);
+			if (hilo) {
+				lovals[n] = studValue(Value.afLow8Value, holeCards[n]);
 			}
 		}
 		
@@ -104,10 +116,11 @@ public class StudPoker extends Poker {
 		}
 		
 		final Random r = new Random();
-		final int maxn = 10000;
+		final int samples = 10000;
 		int hiloCount = 0;
 		
-		for (int n = 0; n < maxn; n++) {
+		// XXX uses sample remaining cards, but exact enumeration might be not be very big
+		for (int s = 0; s < samples; s++) {
 			ArrayUtil.shuffle(deck, r);
 			int di = 0;
 			String commCard = null;
@@ -115,23 +128,28 @@ public class StudPoker extends Poker {
 				commCard = deck[di++];
 			}
 			boolean hasLow = false;
-			for (int h = 0; h < holeCards.length; h++) {
-				// could be any length
-				String[] hc = holeCards[h];
+			
+			for (int n = 0; n < holeCards.length; n++) {
+				// hole cards could be any length, copy to temp
 				for (int c = 0; c < 7; c++) {
-					if (hc.length > c) {
-						tempHoleCards[c] = hc[c];
-					} else if (c < 6 || commCard == null) {
+					if (holeCards[n].length > c) {
+						tempHoleCards[c] = holeCards[n][c];
+						
+					} else if (commCard == null || c < 6) {
+						// pick one from shuffled deck
 						tempHoleCards[c] = deck[di++];
+						
 					} else {
+						// use community card for last card
 						tempHoleCards[c] = commCard;
 					}
 				}
-				hivals[h] = studValue(value, tempHoleCards);
+				
+				hivals[n] = studValue(value, tempHoleCards);
 				if (hilo) {
 					int lv = studValue(Value.afLow8Value, tempHoleCards);
 					if (lv > 0) {
-						lovals[h] = lv;
+						lovals[n] = lv;
 						hasLow = true;
 					}
 				}
@@ -140,31 +158,31 @@ public class StudPoker extends Poker {
 			if (hasLow) {
 				hiloCount++;
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, null);
 				// low winner
-				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, null, 0);
+				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, null);
 				if (hw >= 0 && hw == lw) {
 					meqs[hw].scoopcount++;
 				}
 				
 			} else {
 				// high winner only
-				int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), hivals, null);
 				if (hw >= 0) {
 					meqs[hw].scoopcount++;
 				}
 			}
 		}
 
-		MEquityUtil.summariseEquity(meqs, maxn, hiloCount);
+		MEquityUtil.summariseEquity(meqs, samples, hiloCount);
 		return meqs;
 	}
 	
 	@Override
-	public int value(String[] board, String[] cards) {
+	public synchronized int value(String[] board, String[] cards) {
 		// only does one value type...
 		if (cards.length >= 5) {
-			return studValue(value, normalise(board, cards, false));
+			return studValue(value, merge(board, cards, false));
 		} else {
 			return 0;
 		}

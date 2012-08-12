@@ -30,7 +30,7 @@ public class RanksPanel extends JPanel {
 		
 	}
 	
-	public void clearHandEquity() {
+	public void clearEquity() {
 		for (JLabel rl : rankLabs) {
 			rl.setFont(font);
 			rl.setText("");
@@ -38,7 +38,7 @@ public class RanksPanel extends JPanel {
 	}
 	
 	/** populate the rank names and win percentages */
-	public void setHandEquity(Equity e) {
+	public void setEquity(Equity e) {
 		String[] names = Equity.getRankNames(e.eqtype);
 		for (int n = 0; n < rankLabs.length; n++) {
 			JLabel rl = rankLabs[n];

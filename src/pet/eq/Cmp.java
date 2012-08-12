@@ -27,7 +27,7 @@ class CardCmp implements Comparator<String>, Serializable {
 	
 	@Override
 	public int compare(String c1, String c2) {
-		int v = Poker.faceValue(c1, true) - Poker.faceValue(c2, true);
+		int v = Poker.faceToValue(c1, true) - Poker.faceToValue(c2, true);
 		if (v == 0) {
 			v = Poker.suit(c1) - Poker.suit(c2);
 		}
@@ -40,7 +40,7 @@ class FaceCmp implements Comparator<String>, Serializable {
 	@Override
 	public int compare(String c1, String c2) {
 		// highest first
-		return Poker.faceValue(c2, true) - Poker.faceValue(c1, true);
+		return Poker.faceToValue(c2, true) - Poker.faceToValue(c1, true);
 	}
 	
 }

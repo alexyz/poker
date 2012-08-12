@@ -17,8 +17,10 @@ public class PlayerInfo {
 	public final String name;
 	/** player hands */
 	public int hands;
-	/** date last played */
-	public Date date;
+	/** date first seen */
+	public Date firstDate;
+	/** date last seen */
+	public Date lastDate;
 	
 	/** players games */
 	private final TreeMap<String,PlayerGameInfo> games = new TreeMap<String,PlayerGameInfo>();
@@ -54,8 +56,11 @@ public class PlayerInfo {
 	 */
 	public synchronized void add(Hand h, Seat s) {
 		hands++;
-		if (date == null || date.before(h.date)) {
-			date = h.date;
+		if (lastDate == null || lastDate.before(h.date)) {
+			lastDate = h.date;
+		}
+		if (firstDate == null || firstDate.after(h.date)) {
+			firstDate = h.date;
 		}
 		
 		Game game = h.game;

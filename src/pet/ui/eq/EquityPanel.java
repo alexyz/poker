@@ -1,10 +1,7 @@
 package pet.ui.eq;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.util.*;
 
 import javax.swing.*;
 
@@ -15,10 +12,8 @@ import pet.eq.*;
  */
 class EquityPanel extends JPanel {
 
-	// TODO move to pf
-	private static final Font font = UIManager.getFont("Label.font");
-	private static final Font boldfont = font.deriveFont(Font.BOLD);
-
+	private final Font font = UIManager.getFont("Label.font");
+	private final Font boldfont = font.deriveFont(Font.BOLD);
 	private final JLabel typeLab = new JLabel();
 	private final JLabel equityLab = new JLabel();
 	private final JLabel valueLab = new JLabel();
@@ -37,7 +32,7 @@ class EquityPanel extends JPanel {
 
 	}
 
-	public void clearHandEquity() {
+	public void clearEquity() {
 		typeLab.setText("");
 		equityLab.setText("");
 		valueLab.setText("");
@@ -60,33 +55,6 @@ class EquityPanel extends JPanel {
 			valueLab.setFont(e.curwin ? boldfont : font);
 			valueLab.setText(Poker.valueString(e.current));
 		}
-		/*
-		if (e.current == 0 || e.curwin) {
-			outsLab.setText("");
-			setToolTipText(null);
-
-		} else {
-			List<String> minl = new ArrayList<String>(), majl = new ArrayList<String>();
-			for (Map.Entry<String,Float> o : e.outs.entrySet()) {
-				float v = o.getValue();
-				if (v > 0) {
-					if (v > 50) {
-						majl.add(o.getKey());
-					} else {
-						minl.add(o.getKey());
-					}
-				}
-			}
-			Collections.sort(majl, Cmp.cardCmp);
-			Collections.sort(minl, Cmp.cardCmp);
-			outsLab.setText("Outs: " + majl.size() + " out of " + me.remCards);
-			if (majl.size() > 0) {
-				setToolTipText("<html><b>Major outs</b><br/>" + majl + "</html>");
-			} else if (minl.size() > 0) {
-				setToolTipText("<html><b>Minor outs</b><br/>" + minl + "</html>");
-			}
-		}
-		*/
 	}
 	
 }

@@ -59,20 +59,28 @@ public abstract class Poker {
 	public static final int RANKS = 9;
 	
 	/**
-	 * short rank names (value >> 20)
+	 * short rank names for high hand (value >> 20)
 	 */
 	public static final String[] ranknames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
+	
+	/** short rank names for ace to five low hands */
 	public static final String[] afLowRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
 	
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
+	
 	/** complete deck in face then suit order, lowest first */
-	private static final String[] deckArr = { "2h", "2s", "2c", "2d",
+	private static final String[] deckArr = { 
+		"2h", "2s", "2c", "2d",
 		"3h", "3s", "3c", "3d", "4h", "4s", "4c", "4d", "5h", "5s", "5c",
 		"5d", "6h", "6s", "6c", "6d", "7h", "7s", "7c", "7d", "8h", "8s",
 		"8c", "8d", "9h", "9s", "9c", "9d", "Th", "Ts", "Tc", "Td", "Jh",
 		"Js", "Jc", "Jd", "Qh", "Qs", "Qc", "Qd", "Kh", "Ks", "Kc", "Kd",
-		"Ah", "As", "Ac", "Ad" };
+		"Ah", "As", "Ac", "Ad" 
+	};
+	
+	private static final String[] deckArrS;
+	
 	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(deckArr));
 	
 	/** complete suits */
@@ -80,6 +88,25 @@ public abstract class Poker {
 	
 	/** array of all possible unique hi hand values (there are only approx 7500) */
 	private static int[] uniqueHighValues;
+	
+	static {
+		deckArrS = deckArr.clone();
+		Arrays.sort(deckArrS);
+	}
+	
+	/** get card representing integer */
+	public static String indexToCard(int i) {
+		return deckArrS[i];
+	}
+	
+	/** get an integer representing the card, 0-51 */
+	public static int cardToIndex(String card) {
+		int i = Arrays.binarySearch(deckArrS, card);
+		if (i < 0) {
+			throw new RuntimeException("no such card: " + card);
+		}
+		return i;
+	}
 	
 	public static String[] deck() {
 		return deckArr.clone();
@@ -91,7 +118,7 @@ public abstract class Poker {
 	static int lowCount(String[] hand, boolean acehigh) {
 		int count = 0;
 		for (int n = 0; n < hand.length; n++) {
-			if (faceValue(hand[n], acehigh) <= 8) {
+			if (faceToValue(hand[n], acehigh) <= 8) {
 				count++;
 			}
 		}
@@ -191,7 +218,7 @@ public abstract class Poker {
 		int str = 5;
 		for (int n = 0; n < hand.length; n++) {
 			// sub 1 so bottom bit equals ace low
-			int v = faceValue(hand[n], true) - 1;
+			int v = faceToValue(hand[n], true) - 1;
 			x |= (1 << v);
 			if (v == 13) {
 				// add ace low as well as ace high
@@ -217,7 +244,7 @@ public abstract class Poker {
 		// count card face frequencies (3 bits each) -- 0, 1, 2, 3, 4
 		long v = 0;
 		for (int n = 0; n < hand.length; n++) {
-			v += (1L << ((14 - faceValue(hand[n], acehigh)) * 3));
+			v += (1L << ((14 - faceToValue(hand[n], acehigh)) * 3));
 		}
 		// get the card faces for each frequency
 		int fk = 0, tk = 0, pa = 0, hc = 0;
@@ -263,7 +290,7 @@ public abstract class Poker {
 	/**
 	 * Return integer value of card face, ace high or low (from A = 14 to 2 = 2 or K = 13 to A = 1)
 	 */
-	static int faceValue(String card, boolean acehigh) {
+	static int faceToValue(String card, boolean acehigh) {
 		if (acehigh) {
 			int i = "23456789TJQKA".indexOf(face(card));
 			if (i >= 0) {
@@ -288,7 +315,7 @@ public abstract class Poker {
 	/**
 	 * Return character symbol of face value
 	 */
-	private static char valueFace(int x) {
+	private static char valueToFace(int x) {
 		int v = x & 0xf;
 		// allow 0 index and ace low
 		return "?A23456789TJQKA".charAt(v);
@@ -318,11 +345,11 @@ public abstract class Poker {
 				return "##" + Integer.toHexString(value) + "##";
 		}
 		
-		final char c1 = valueFace(highValue);
-		final char c2 = valueFace(highValue >> 4);
-		final char c3 = valueFace(highValue >> 8);
-		final char c4 = valueFace(highValue >> 12);
-		final char c5 = valueFace(highValue >> 16);
+		final char c1 = valueToFace(highValue);
+		final char c2 = valueToFace(highValue >> 4);
+		final char c3 = valueToFace(highValue >> 8);
+		final char c4 = valueToFace(highValue >> 12);
+		final char c5 = valueToFace(highValue >> 16);
 		
 		String s;
 		switch (highValue & 0xf00000) {
@@ -419,19 +446,18 @@ public abstract class Poker {
 		
 		// TODO this is not very efficient, could just serialise/deserialise array
 		Set<Integer> uniqueValueSet = new TreeSet<Integer>();
-		String[] deck = Poker.deck.toArray(new String[Poker.deck.size()]);
 		String[] hand = new String[5];
 		int valueCount = 0;
-		for (int n0 = 0; n0 < deck.length; n0++) {
-			hand[0] = deck[n0];
-			for (int n1 = n0 + 1; n1 < deck.length; n1++) {
-				hand[1] = deck[n1];
-				for (int n2 = n1 + 1; n2 < deck.length; n2++) {
-					hand[2] = deck[n2];
-					for (int n3 = n2 + 1; n3 < deck.length; n3++) {
-						hand[3] = deck[n3];
-						for (int n4 = n3 + 1; n4 < deck.length; n4++) {
-							hand[4] = deck[n4];
+		for (int n0 = 0; n0 < deckArr.length; n0++) {
+			hand[0] = deckArr[n0];
+			for (int n1 = n0 + 1; n1 < deckArr.length; n1++) {
+				hand[1] = deckArr[n1];
+				for (int n2 = n1 + 1; n2 < deckArr.length; n2++) {
+					hand[2] = deckArr[n2];
+					for (int n3 = n2 + 1; n3 < deckArr.length; n3++) {
+						hand[3] = deckArr[n3];
+						for (int n4 = n3 + 1; n4 < deckArr.length; n4++) {
+							hand[4] = deckArr[n4];
 							uniqueValueSet.add(Poker.value(hand));
 							valueCount++;
 						}

@@ -19,7 +19,7 @@ public class MathsUtil {
 	/**
 	 * Binomial coefficient (slow)
 	 */
-	private static BigInteger bincoffslow(int n, int k) {
+	public static BigInteger bincoffslow(int n, int k) {
 		return n == 0 ? BigInteger.ZERO : facslow(n).divide(facslow(k).multiply(facslow(n - k)));
 	}
 	

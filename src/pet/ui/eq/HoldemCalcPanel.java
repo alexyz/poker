@@ -76,7 +76,7 @@ public class HoldemCalcPanel extends CalcPanel {
 			if (randHandsBox.isSelected()) {
 				hp.clearCards();
 			}
-			hp.setHandEquity(null);
+			hp.setEquity(null);
 		}
 		if (randFlopBox.isSelected()) {
 			boardPanel.clearCards(0, 3);
@@ -120,7 +120,7 @@ public class HoldemCalcPanel extends CalcPanel {
 	@Override
 	public void calc() {
 		for (HandCardPanel hp : handPanels) {
-			hp.setHandEquity(null);
+			hp.setEquity(null);
 		}
 		
 		String[] board = boardPanel.getCards();
@@ -162,7 +162,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		final MEquity[] eqs = poker.equity(board, holeCardsArr, blockers);
 		
 		for (int n = 0; n < eqs.length; n++) {
-			holeCardsHandPanels.get(n).setHandEquity(eqs[n]);
+			holeCardsHandPanels.get(n).setEquity(eqs[n]);
 		}
 
 	}

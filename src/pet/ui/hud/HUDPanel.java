@@ -137,6 +137,7 @@ class HUDPanel extends JPanel {
 		for (int n = 0; n < sstates.size(); n++) {
 			SeatState ss = sstates.get(n);
 			if (ss.meq != null) {
+				// FIXME need to check hand.showdown before showing equity
 				String eqStrSh = MEquityUtil.equityStringShort(ss.meq);
 				String eqStr = MEquityUtil.equityString(ss.meq);
 				curStr = MEquityUtil.currentString(ss.meq);

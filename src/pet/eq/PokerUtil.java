@@ -1,7 +1,6 @@
 package pet.eq;
 
 import java.awt.Color;
-import java.util.Random;
 
 /**
  * General utility methods
@@ -37,7 +36,7 @@ public class PokerUtil {
 		int v = 0;
 		for (String card : cards) {
 			v *= 16;
-			v += Poker.faceValue(card, true);
+			v += Poker.faceToValue(card, true);
 		}
 		for (String card : cards) {
 			v *= 4;

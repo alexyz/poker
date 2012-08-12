@@ -144,6 +144,17 @@ public class HandStateUtil {
 				ss.meq = eqs[n];
 			}
 			
+			// get default equity if there was no showdown
+			for (SeatState ss : hs.seats) {
+				if (ss != null) {
+					if (hand.showdown) {
+						ss.deq = ss.meq != null ? ss.meq.totaleq : 0f;
+					} else {
+						ss.deq = ss.seat.won > 0 ? 100f : 0f;
+					}
+				}
+			}
+			
 			states.add(hs.clone());
 			
 			//
@@ -185,8 +196,9 @@ public class HandStateUtil {
 							tocall = act.amount - lastbet;
 							
 						case Action.CALL_TYPE:
-							// FIXME need a better way of getting eq, e.g. for hi/lo
-							float eq = ss.meq != null ? ss.meq.totaleq / 100f : 0;
+							// use default equity if no showdown
+							//float eq = ss.meq != null ? ss.meq.totaleq / 100f : 0;
+							float eq = ss.deq / 100f;
 							int totalpot = hs.pot + act.amount + trail + tocall;
 							ss.ev = totalpot * eq - act.amount;
 							ss.tev += ss.ev;

@@ -3,7 +3,6 @@ package pet.ui;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;

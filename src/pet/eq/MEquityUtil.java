@@ -1,5 +1,7 @@
 package pet.eq;
 
+import java.util.Arrays;
+
 public class MEquityUtil {
 	
 	/**
@@ -47,7 +49,7 @@ public class MEquityUtil {
 	 * given cards.
 	 * Return single winner, if any, or -1
 	 */
-	static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards, int off) {
+	static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards) {
 		// find highest hand and number of times it occurs
 		int max = 0, maxcount = 0;
 		for (int i = 0; i < vals.length; i++) {
@@ -65,7 +67,6 @@ public class MEquityUtil {
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i] == max) {
 				// update the win/tied/rank count
-				//Equity e = meqs[i].eq[eqtype];
 				Equity e = meqs[i].getEq(eqtype);
 				if (maxcount == 1) {
 					// update mask
@@ -77,21 +78,16 @@ public class MEquityUtil {
 				}
 				e.wonrankcount[Poker.rank(max)]++;
 				
-				// FIXME need to do this for mequity, not equity
 				// count the cards as outs if this turns losing hand into
 				// win/tie or tying hand into win
-				/*
-				if (cards != null && (!e.curwin || (e.curtie && maxcount == 1))) {
-					for (int c = off; c < cards.length; c++) {
+				if (cards != null && e.current > 0 && (!e.curwin || (e.curtie && maxcount == 1))) {
+					//System.out.println("winning cards: " + Arrays.toString(outs));
+					for (int c = 0; c < cards.length; c++) {
 						String card = cards[c];
-						int[] count = e.outcount.get(card);
-						if (count == null) {
-							e.outcount.put(card, count = new int[1]);
-						}
-						count[0]++;
+						int cardIndex = Poker.cardToIndex(card);
+						e.outcount[cardIndex]++;
 					}
 				}
-				*/
 			}
 		}
 		
@@ -136,10 +132,10 @@ public class MEquityUtil {
 		}
 	}
 
-	static void summariseOuts(MEquity[] meqs, int k) {
+	static void summariseOuts(MEquity[] meqs, int picks, int samples) {
 		for (MEquity meq : meqs) {
 			for (Equity eq : meq.eqs) {
-				eq.summariseOuts(meq.remCards, k);
+				eq.summariseOuts(meq.remCards, picks, samples);
 			}
 		}
 	}
@@ -162,7 +158,6 @@ public class MEquityUtil {
 
 	/**
 	 * Return string representing current equity of hand
-	 * TODO short equity string, just use total
 	 */
 	public static String equityString(MEquity me) {
 		String s;
@@ -171,9 +166,9 @@ public class MEquityUtil {
 		if (me.hilo) {
 			Equity hihalf = me.eqs[1];
 			Equity lohalf = me.eqs[2];
-			s = String.format("%.1f-%.1f-%.1f%%", hionly.won, hihalf.won, lohalf.won);
-			if (hionly.tied + hihalf.tied + lohalf.tied != 0) {
-				s += String.format(" (%.0f-%.0f-%.0f T)", hionly.tied, hihalf.tied, lohalf.tied);
+			s = String.format("%.0f, %.0f, %.0f%%", hionly.won, hihalf.won, lohalf.won);
+			if (hionly.tied + hihalf.tied + lohalf.tied > 1) {
+				s += String.format(" (%.0f, %.0f, %.0f%-T)", hionly.tied, hihalf.tied, lohalf.tied);
 			}
 			
 		} else {

@@ -1,8 +1,6 @@
 package pet.ui.eq;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -87,7 +85,7 @@ public class StudCalcPanel extends CalcPanel {
 		MEquity[] meqs = pokerItem.poker.equity(board, hands, blockers);
 		
 		for (int n = 0; n < meqs.length; n++) {
-			handPanels[n].setHandEquity(meqs[n]);
+			handPanels[n].setEquity(meqs[n]);
 		}
 	}
 	

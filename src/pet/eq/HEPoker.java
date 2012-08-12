@@ -117,6 +117,8 @@ public class HEPoker extends Poker {
 		
 		// get equity
 		final int count = heboard.count();
+		final int pick = heboard.pick();
+		final String[] outs = pick <= 2 ? new String[pick] : null;
 		int hiloCount = 0;
 		
 		for (int p = 0; p < count; p++) {
@@ -141,19 +143,26 @@ public class HEPoker extends Poker {
 				}
 			}
 			
+			// XXX this is ugly, should be in HEBoardEnum class only
+			if (outs != null) {
+				for (int n = 0; n < pick; n++) {
+					outs[n] = heboard.board[5 - pick + n];
+				}
+			}
+			
 			if (hasLow) {
 				hiloCount++;
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, outs);
 				// low winner
-				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, null, 0);
+				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, outs);
 				if (hw >= 0 && hw == lw) {
 					meqs[hw].scoopcount++;
 				}
 				
 			} else {
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HI_ONLY, hivals, null, 0);
+				int hw = MEquityUtil.updateEquity(meqs, Equity.HI_ONLY, hivals, outs);
 				if (hw >= 0) {
 					meqs[hw].scoopcount++;
 				}
@@ -161,8 +170,8 @@ public class HEPoker extends Poker {
 		}
 
 		MEquityUtil.summariseEquity(meqs, count, hiloCount);
-		// TODO
-		//MEquityUtil.summariseOuts(meqs, k);
+		// XXX shouldn't be here, just need to store pick and count on mequity
+		MEquityUtil.summariseOuts(meqs, pick, count);
 		return meqs;
 	}
 

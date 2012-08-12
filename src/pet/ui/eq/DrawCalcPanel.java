@@ -1,8 +1,6 @@
 package pet.ui.eq;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -62,7 +60,7 @@ public class DrawCalcPanel extends CalcPanel {
 			String[] blockers = getBlockers();
 			MEquity[] meqs = item.poker.equity(null, hands, blockers);
 			for (int n = 0; n < meqs.length; n++) {
-				handPanels[n].setHandEquity(meqs[n]);
+				handPanels[n].setEquity(meqs[n]);
 			}
 		} else {
 			System.out.println("no hands");

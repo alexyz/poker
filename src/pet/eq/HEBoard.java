@@ -21,6 +21,8 @@ abstract class HEBoard {
 	abstract int count();
 	/** create the next board */
 	abstract void next();
+	/** how many cards will be picked */
+	abstract int pick();
 }
 
 class HEBoardSample extends HEBoard {
@@ -36,6 +38,11 @@ class HEBoardSample extends HEBoard {
 	@Override
 	int count() {
 		return count;
+	}
+	
+	@Override
+	int pick() {
+		return 5;
 	}
 
 	@Override
@@ -68,6 +75,11 @@ class HEBoardEnum extends HEBoard {
 	@Override
 	int count() {
 		return count;
+	}
+	
+	@Override
+	int pick() {
+		return k;
 	}
 	
 	@Override

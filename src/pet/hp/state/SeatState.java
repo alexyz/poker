@@ -26,8 +26,10 @@ public class SeatState implements Cloneable {
 	public boolean folded;
 	/** has won - only true at end, unlike seat.won > 0 */
 	public boolean won;
-	/** current hand equity, if any */
+	/** current hand equity, if any, can be misleading if no showdown */
 	public MEquity meq;
+	/** actual hand equity as percentage */
+	public float deq;
 	/** number of actions on this street starting at 1 */
 	public int actionNum;
 	/** expected value! */

@@ -52,7 +52,7 @@ public class DrawPoker extends Poker {
 				int v = value.value(h);
 				vals[hn] = v;
 			}
-			MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null, 0);
+			MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
 		}
 
 		MEquityUtil.summariseEquity(meqs, c, 0);
@@ -116,7 +116,7 @@ public class DrawPoker extends Poker {
 		String[] h = hand.clone();
 		Arrays.sort(h, Cmp.revCardCmp);
 		for (int n = 1; n < h.length; n++) {
-			if (faceValue(h[n-1], true) == faceValue(h[n], true)) {
+			if (faceToValue(h[n-1], true) == faceToValue(h[n], true)) {
 				// return highest pair
 				return new String[] { h[n-1], h[n] };
 			}

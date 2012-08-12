@@ -108,10 +108,12 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 	private static final MyColumn<HandState> eqCol = new HandStateColumn(String.class, "Equity", "Hand equity") {
 		@Override
 		public String getValue(HandState hs) {
-			SeatState ss = hs.actionSeat();
-			if (ss != null) {
-				if (ss.meq != null && ss.actionNum == 1) {
-					return MEquityUtil.equityString(ss.meq);
+			if (hs.hand.showdown) {
+				SeatState ss = hs.actionSeat();
+				if (ss != null) {
+					if (ss.meq != null && ss.actionNum == 1) {
+						return MEquityUtil.equityString(ss.meq);
+					}
 				}
 			}
 			return "";
