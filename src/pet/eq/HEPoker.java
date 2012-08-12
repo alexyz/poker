@@ -106,8 +106,9 @@ public class HEPoker extends Poker {
 			}
 			MEquityUtil.updateCurrent(meqs, Equity.HI_ONLY, hivals);
 			
-			// get current low values
 			if (lowPossible) {
+				MEquityUtil.updateCurrent(meqs, Equity.HILO_HI_HALF, hivals);
+				// get current low values
 				for (int n = 0; n < holeCards.length; n++) {
 					lovals[n] = heValue(Value.afLow8Value, heboard.current, holeCards[n]);
 				}

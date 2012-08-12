@@ -89,40 +89,37 @@ public class HandStateUtil {
 					ss.actionNum = 0;
 					
 					// get cards of seat
-					CardsState hc = CardsStateUtil.getCards(hand, ss.seat, s);
+					CardsState cs = CardsStateUtil.getCards(hand, ss.seat, s);
 					//System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
-					ss.cards = hc;
+					ss.cardsState = cs;
 					
-					if (hc != null) {
+					if (cs != null) {
 						// do we have enough cards for stud?
 						// unknown down cards will be null (holdem/draw never have null cards)
-						boolean partial = false;
-						for (int n = 0; n < hc.hole.length; n++) {
-							if (hc.hole[n] == null) {
-								partial = true;
-								break;
+						List<String> setCards = new ArrayList<String>();
+						for (String c : cs.cards) {
+							if (c != null) {
+								setCards.add(c);
 							}
 						}
 						
 						// do we have 2 hole cards for omaha? other games just require 1
-						if (partial || hc.hole.length < minHoleCards || ss.folded) {
-							for (int n = 0; n < hc.hole.length; n++) {
-								if (hc.hole[n] != null) {
-									blockers.add(hc.hole[n]);
-								}
+						if (setCards.size() < minHoleCards || ss.folded) {
+							for (String c : setCards) {
+								blockers.add(c);
 							}
 							
 						} else {
 							// do it
-							holeCards.add(hc.hole);
+							holeCards.add(setCards.toArray(new String[setCards.size()]));
 							holeCardSeats.add(ss);
 						}
 						
-						if (hc.discarded != null && hand.reshuffleStreetIndex > s) {
+						if (cs.discarded != null && hand.reshuffleStreetIndex > s) {
 							// count all discards on all streets as blockers
 							// though in triple draw the deck can be reshuffled mid-street
-							for (int n = 0; n < hc.discarded.length; n++) {
-								blockers.add(hc.discarded[n]);
+							for (String c : cs.discarded) {
+								blockers.add(c);
 							}
 						}
 					}

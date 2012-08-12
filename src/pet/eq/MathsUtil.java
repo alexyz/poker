@@ -12,7 +12,7 @@ public class MathsUtil {
 	/**
 	 * Factorial (slow)
 	 */
-	private static BigInteger facslow(int n) {
+	public static BigInteger facslow(int n) {
 		return n <= 1 ? BigInteger.ONE : BigInteger.valueOf(n).multiply(facslow(n - 1));
 	}
 

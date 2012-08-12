@@ -1,7 +1,8 @@
 package pet.eq;
 
-import java.util.Arrays;
-
+/**
+ * utility methods for MEquity class
+ */
 public class MEquityUtil {
 	
 	/**
@@ -47,7 +48,7 @@ public class MEquityUtil {
 	/**
 	 * Update equities win, tie and win rank with given hand values for the
 	 * given cards.
-	 * Return single winner, if any, or -1
+	 * Return index of single winner (scoop), if any, or -1
 	 */
 	static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards) {
 		// find highest hand and number of times it occurs
@@ -69,7 +70,6 @@ public class MEquityUtil {
 				// update the win/tied/rank count
 				Equity e = meqs[i].getEq(eqtype);
 				if (maxcount == 1) {
-					// update mask
 					winner = i;
 					e.woncount++;
 				} else {
@@ -81,13 +81,23 @@ public class MEquityUtil {
 				// count the cards as outs if this turns losing hand into
 				// win/tie or tying hand into win
 				if (cards != null && e.current > 0 && (!e.curwin || (e.curtie && maxcount == 1))) {
-					//System.out.println("winning cards: " + Arrays.toString(outs));
 					for (int c = 0; c < cards.length; c++) {
 						String card = cards[c];
 						int cardIndex = Poker.cardToIndex(card);
 						e.outcount[cardIndex]++;
 					}
 				}
+				
+				// XXX experimental - String[][] mcards
+				/*
+				if (mcards != null && e.current > 0 && (!e.curwin || (e.curtie && maxcount == 1))) {
+					for (int c = 0; c < mcards[i].length; c++) {
+						String card = mcards[i][c];
+						int cardIndex = Poker.cardToIndex(card);
+						e.outcount[cardIndex]++;
+					}
+				}
+				*/
 			}
 		}
 		

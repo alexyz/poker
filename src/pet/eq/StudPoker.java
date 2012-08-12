@@ -1,5 +1,6 @@
 package pet.eq;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -27,7 +28,7 @@ public class StudPoker extends Poker {
 			throw new RuntimeException("invalid board");
 		}
 		
-		if (holeCards.length < 3 || holeCards.length > 7) {
+		if (holeCards.length > 7) {
 			throw new RuntimeException("invalid hand");
 		}
 		
@@ -89,7 +90,13 @@ public class StudPoker extends Poker {
 		} else {
 			blanks = holeCards.length * 7 - nonblanks;
 		}
-		System.out.println("deck: " + deck.length + " nonblanks: " + nonblanks + " blanks: " + blanks + " combs: " + MathsUtil.bincoffslow(deck.length, blanks));
+		
+		System.out.println("deck: " + deck.length + " nonblanks: " + nonblanks + " blanks: " + blanks);
+		BigInteger combs = MathsUtil.bincoffslow(deck.length, blanks);
+		// if this is less than ~50k, should ideally do exact enumeration of combs and perms 
+		// though with 4 or more blanks it tends to be much higher
+		BigInteger combperms = MathsUtil.facslow(blanks).multiply(combs);
+		System.out.println("combs: " + combs + " combperms: " + combperms);
 
 		// return value
 		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
@@ -119,8 +126,9 @@ public class StudPoker extends Poker {
 		final int samples = 10000;
 		int hiloCount = 0;
 		
-		// XXX uses sample remaining cards, but exact enumeration might be not be very big
+		// sample remaining cards, but exact enumeration might be not be very big
 		for (int s = 0; s < samples; s++) {
+			// shuffle instead of pick, as stud tends to use most of the deck
 			ArrayUtil.shuffle(deck, r);
 			int di = 0;
 			String commCard = null;
@@ -148,12 +156,16 @@ public class StudPoker extends Poker {
 				hivals[n] = studValue(value, tempHoleCards);
 				if (hilo) {
 					int lv = studValue(Value.afLow8Value, tempHoleCards);
+					// always assign this as any of them could be low
+					lovals[n] = lv;
 					if (lv > 0) {
-						lovals[n] = lv;
 						hasLow = true;
 					}
 				}
 			}
+			
+			// TODO count outs, but currently can only handle shared (board) outs
+			// and with sample, won't be very accurate anyway
 
 			if (hasLow) {
 				hiloCount++;

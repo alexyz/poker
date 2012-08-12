@@ -8,15 +8,15 @@ import java.util.Arrays;
  */
 // might be better in state package as its only used there
 public class CardsState {
-	/** hole cards for display/equity purposes */
-	public final String[] hole;
+	/** hole cards for display/equity purposes - may contain nulls for stud */
+	public final String[] cards;
 	/** discarded cards if any */
 	public final String[] discarded;
 	/** are hole cards guessed */
 	public final boolean guess;
 	
 	public CardsState(String[] hole, String[] discarded, boolean guess) {
-		this.hole = hole;
+		this.cards = hole;
 		this.discarded = discarded;
 		this.guess = guess;
 	}
@@ -31,6 +31,6 @@ public class CardsState {
 	
 	@Override
 	public String toString() {
-		return String.format("Cards[%s %s %s]", Arrays.toString(hole), Arrays.toString(discarded), guess);
+		return String.format("Cards[%s %s %s]", Arrays.toString(cards), Arrays.toString(discarded), guess);
 	}
 }

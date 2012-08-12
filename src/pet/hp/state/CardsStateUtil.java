@@ -17,7 +17,7 @@ public class CardsStateUtil {
 			find: {
 				for (int n2 = 0; n2 < 5; n2++) {
 					if (hole1[n1].equals(hole2[n2])) {
-						h.hole[i++] = hole1[n1];
+						h.cards[i++] = hole1[n1];
 						break find;
 					}
 				}
@@ -105,7 +105,7 @@ public class CardsStateUtil {
 		}
 		
 		if (hc != null) {
-			Arrays.sort(hc.hole, Cmp.revCardCmp);
+			Arrays.sort(hc.cards, Cmp.revCardCmp);
 			if (hc.discarded != null) {
 				Arrays.sort(hc.discarded, Cmp.revCardCmp);
 			}

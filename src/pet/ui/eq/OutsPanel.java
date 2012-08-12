@@ -25,7 +25,8 @@ class OutsPanel extends JPanel {
 	}
 	
 	void setEquity(Equity e, int remCards) {
-		if (e.curwin) {
+		if (e.current == 0 || e.curwin) {
+			// either no current value or currently winning
 			setVisible(false);
 			
 		} else {
@@ -42,7 +43,7 @@ class OutsPanel extends JPanel {
 				outsLabel.setText("Outs (" + major.size() + "/" + remCards + "): " + PokerUtil.cardsString(majorArr));
 			} else if (minor.size() > 0) {
 				String[] minorArr = minor.toArray(new String[minor.size()]);
-				outsLabel.setText("Minor outs (" + minor.size() + "/" + remCards + "): " + PokerUtil.cardsString(minorArr));
+				outsLabel.setText("Minor outs: " + PokerUtil.cardsString(minorArr));
 			} else {
 				outsLabel.setText("No outs :(");
 			}

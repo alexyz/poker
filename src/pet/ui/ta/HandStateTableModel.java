@@ -59,14 +59,14 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			// equity against
 			
 			if (ss.actionNum == 1) {
-				if (ss.cards != null) {
-					if (ss.cards.guess) {
-						return "(" + PokerUtil.cardsString(ss.cards.hole) + ")";
+				if (ss.cardsState != null) {
+					if (ss.cardsState.guess) {
+						return "(" + PokerUtil.cardsString(ss.cardsState.cards) + ")";
 						
 					} else {
-						String s = PokerUtil.cardsString(ss.cards.hole);
-						if (ss.cards.discarded != null) {
-							s += " (" + PokerUtil.cardsString(ss.cards.discarded) + ")";
+						String s = PokerUtil.cardsString(ss.cardsState.cards);
+						if (ss.cardsState.discarded != null) {
+							s += " (" + PokerUtil.cardsString(ss.cardsState.discarded) + ")";
 						}
 						return s;
 					}
@@ -105,7 +105,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		}
 	};
 	
-	private static final MyColumn<HandState> eqCol = new HandStateColumn(String.class, "Equity", "Hand equity") {
+	private static final MyColumn<HandState> eqCol = new HandStateColumn(String.class, "Equity", "Hand equity (Single, Hi Half, Lo Half)") {
 		@Override
 		public String getValue(HandState hs) {
 			if (hs.hand.showdown) {
