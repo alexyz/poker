@@ -183,7 +183,7 @@ public class MEquityUtil {
 						hionly.won + hihalf.won, hionly.tied + hihalf.tied, 
 						lohalf.won, lohalf.tied);
 			} else {
-				s = String.format("%.1f%% (%.0f, %.0f)", me.totaleq, hionly.won + hihalf.won, lohalf.won);
+				s = String.format("%.1f (%.0f, %.0f)%%", me.totaleq, hionly.won + hihalf.won, lohalf.won);
 			}
 			
 		} else {

@@ -54,8 +54,9 @@ public class StudCalcPanel extends CalcPanel {
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(List<String[]> holeCards, String type) {
-		displayHand(null, holeCards);
+	@Override
+	public void displayHand(String[] board, List<String[]> holeCards, String type) {
+		displayHand(board, holeCards);
 		PokerItem.select(pokerCombo, type);
 	}
 	

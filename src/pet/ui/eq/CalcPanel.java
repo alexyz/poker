@@ -16,7 +16,7 @@ import javax.swing.*;
  * [[rand opts] hide num rand] addrandopt() gridy=4
  * [[calc opts] clear calc] addcalcopt() gridy=5
  */
-abstract class CalcPanel extends JPanel {
+public abstract class CalcPanel extends JPanel {
 	
 	private final DeckPanel deckPanel = new DeckPanel();
 	private final JPanel randPanel = new JPanel();
@@ -268,6 +268,9 @@ abstract class CalcPanel extends JPanel {
 	//
 	// methods for subclass
 	//
+	
+	/** display the given board, cards and hand value type */
+	public abstract void displayHand(String[] board, List<String[]> cards, String type);
 	
 	/** random button pressed */
 	protected abstract void random(int num);

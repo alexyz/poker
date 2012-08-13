@@ -16,16 +16,19 @@ public class HoldemCalcPanel extends CalcPanel {
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
 	private final JCheckBox randRiverBox = new JCheckBox("River");
-	private final JCheckBox hiloBox = new JCheckBox("Hi/Lo");
-	private final boolean omaha;
+	private final JComboBox pokerCombo = new JComboBox();
 	private final int numHoleCards;
 
 	public HoldemCalcPanel(boolean omaha) {
-		this.omaha = omaha;
 		this.numHoleCards = omaha ? 4 : 2;
 		
 		// create board and hands and collect card labels
 		boardPanel = new CardPanel("Community Cards", 0, 5);
+		
+		pokerCombo.setModel(new DefaultComboBoxModel(new PokerItem[] {
+				new PokerItem(PokerItem.HIGH, new HEPoker(omaha, false)),
+				new PokerItem(PokerItem.HILO, new HEPoker(omaha, true))
+		}));
 		
 		String name = omaha ? "Omaha" : "Hold'em";
 		int min = omaha ? 2 : 1;
@@ -51,16 +54,17 @@ public class HoldemCalcPanel extends CalcPanel {
 		addRandOpt(randTurnBox);
 		addRandOpt(randRiverBox);
 		if (omaha) {
-			addCalcOpt(hiloBox);
+			addCalcOpt(pokerCombo);
 		}
 	}
 	
 	/**
 	 * display the given hand
 	 */
-	public void displayHand(String[] board, List<String[]> holeCards, boolean hilo) {
+	@Override
+	public void displayHand(String[] board, List<String[]> holeCards, String type) {
 		displayHand(board, holeCards);
-		hiloBox.setSelected(hilo);
+		PokerItem.select(pokerCombo, type);
 	}
 
 	@Override
@@ -157,9 +161,8 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		final String[] blockers = getBlockers();
 		final String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
-		
-		final HEPoker poker = new HEPoker(omaha, hiloBox.isSelected());
-		final MEquity[] eqs = poker.equity(board, holeCardsArr, blockers);
+		final PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
+		final MEquity[] eqs = pokerItem.poker.equity(board, holeCardsArr, blockers);
 		
 		for (int n = 0; n < eqs.length; n++) {
 			holeCardsHandPanels.get(n).setEquity(eqs[n]);

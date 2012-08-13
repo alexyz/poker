@@ -105,7 +105,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		}
 	};
 	
-	private static final MyColumn<HandState> eqCol = new HandStateColumn(String.class, "Equity", "Hand equity (Single, Hi Half, Lo Half)") {
+	private static final MyColumn<HandState> eqCol = new HandStateColumn(String.class, "Equity", "Hand equity (total, hi, lo)") {
 		@Override
 		public String getValue(HandState hs) {
 			if (hs.hand.showdown) {

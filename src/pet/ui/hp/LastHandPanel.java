@@ -11,6 +11,7 @@ import javax.swing.border.TitledBorder;
 import pet.hp.*;
 import pet.hp.state.*;
 import pet.ui.PokerFrame;
+import pet.ui.eq.CalcPanel;
 import pet.ui.eq.PokerItem;
 import pet.ui.ta.*;
 
@@ -78,26 +79,31 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				HandStates hs = (HandStates) stateCombo.getSelectedItem();
-				PokerFrame pf = PokerFrame.getInstance();
+				String type;
 				switch (hs.hand.game.type) {
 					case Game.HE_TYPE:
-						pf.displayHoldemEquity(hs.hand, false, false);
-						break;
 					case Game.OM_TYPE:
-						pf.displayHoldemEquity(hs.hand, true, false);
+					case Game.FCD_TYPE:
+					case Game.STUD_TYPE:
+						type = PokerItem.HIGH;
 						break;
 					case Game.OMHL_TYPE:
-						pf.displayHoldemEquity(hs.hand, true, true);
+					case Game.STUDHL_TYPE:
+						type = PokerItem.HILO;
 						break;
-					case Game.FCD_TYPE:
-						pf.displayDrawEquity(hs.hand, PokerItem.HIGH);
-						break;
+					case Game.DSSD_TYPE:
 					case Game.DSTD_TYPE:
-						pf.displayDrawEquity(hs.hand, PokerItem.DSLOW);
+						type = PokerItem.DSLOW;
 						break;
 					default:
 						throw new RuntimeException("unknown game type " + hs.hand);
 				}
+				
+				PokerFrame pf = PokerFrame.getInstance();
+				CalcPanel calcPanel = pf.displayCalcPanel(hs.hand.game.type);
+				// TODO maybe take hands for selected street instead
+				List<String[]> cards = HandUtil.getFinalCards(hs.hand);
+				calcPanel.displayHand(hs.hand.board, cards, type);
 			}
 		});
 

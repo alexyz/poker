@@ -194,19 +194,36 @@ public class PokerFrame extends JFrame {
 		tabs.setSelectedComponent(hisTabs);
 	}
 	
-	public void displayHoldemEquity(Hand hand, boolean omaha, boolean hilo) {
-		HoldemCalcPanel panel = omaha ? omahaPanel : holdemPanel;
-		List<String[]> holeCards = HandUtil.getFinalCards(hand);
-		panel.displayHand(hand.board, holeCards, hilo);
-		eqTabs.setSelectedComponent(panel);
+	/**
+	 * display the calc panel for the game type and return it so you can set the
+	 * hand
+	 */
+	public CalcPanel displayCalcPanel(int gameType) {
+		CalcPanel p;
+		switch (gameType) {
+			case Game.HE_TYPE: 
+				p = holdemPanel;
+				break;
+			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
+				p = omahaPanel;
+				break;
+			case Game.DSTD_TYPE:
+			case Game.FCD_TYPE:
+			case Game.DSSD_TYPE: 
+				p = drawPanel;
+				break;
+			case Game.STUD_TYPE:
+			case Game.STUDHL_TYPE:
+			case Game.RAZZ_TYPE:
+				p = studPanel;
+				break;
+			default:
+				throw new RuntimeException("no panel for game " + gameType);
+		}
+		eqTabs.setSelectedComponent(p);
 		tabs.setSelectedComponent(eqTabs);
-	}
-	
-	public void displayDrawEquity(Hand hand, String type) {
-		List<String[]> holeCards = HandUtil.getFinalCards(hand);
-		drawPanel.displayHand(holeCards, type);
-		eqTabs.setSelectedComponent(drawPanel);
-		tabs.setSelectedComponent(eqTabs);
+		return p;
 	}
 
 	public void displayPlayer(String player) {
