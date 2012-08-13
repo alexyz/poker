@@ -23,6 +23,8 @@ abstract class HEBoard {
 	abstract void next();
 	/** how many cards will be picked */
 	abstract int pick();
+	/** is this an exact enumeration */
+	abstract boolean exact();
 }
 
 class HEBoardSample extends HEBoard {
@@ -51,6 +53,11 @@ class HEBoardSample extends HEBoard {
 		for (int n = 0; n < 5; n++) {
 			board[n] = ArrayUtil.pick(r, deck, picked);
 		}
+	}
+	
+	@Override
+	boolean exact() {
+		return false;
 	}
 	
 }
@@ -86,6 +93,11 @@ class HEBoardEnum extends HEBoard {
 	void next() {
 		// get board combination
 		MathsUtil.kcomb(k, p++, deck, board, current.length);
+	}
+	
+	@Override
+	boolean exact() {
+		return true;
 	}
 }
 	

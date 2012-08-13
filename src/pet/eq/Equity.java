@@ -86,7 +86,11 @@ public class Equity {
 	public boolean curwin;
 	/** currently tying */
 	public boolean curtie;
-	/** percentage of hands won but not tied */
+	/**
+	 * percentage of hands won but not tied. note: for hi/lo, it is possible to
+	 * just add hi only won and hi half won for total high won, as they are
+	 * exclusive. same for tied.
+	 */
 	public float won;
 	/** percentage of hands tied but not won */
 	public float tied;

@@ -93,7 +93,7 @@ public class HEPoker extends Poker {
 		}
 		
 		// equity type is ignored if hilo is true
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, true);
+		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, heboard.exact());
 		final int[] hivals = new int[holeCards.length];
 		final int[] lovals = lowPossible ? new int[holeCards.length] : null;
 		

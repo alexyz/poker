@@ -118,6 +118,52 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			}
 			return "";
 		}
+		@Override
+		public String getToolTip(HandState hs) {
+			StringBuilder sb = new StringBuilder();
+			SeatState ss = hs.actionSeat();
+			if (ss != null) {
+				if (hs.hand.showdown && ss.meq != null) {
+					sb.append("<html>");
+					
+					sb.append("<table><tr><th>Total</th><td>").append(pc(ss.meq.totaleq)).append("</td></tr>");
+					sb.append("<tr><th>Scoop</th><td>").append(pc(ss.meq.scoop)).append("</td></tr>");
+					if (ss.meq.hilo) {
+						sb.append("<tr><th>Low possible</th><td>").append(pc(ss.meq.lowPossible)).append("</td></tr>");
+					}
+					sb.append("<tr><th>Exact</th><td>").append(ss.meq.exact).append("</td></tr>");
+					//sb.append("<tr><th>Remaining cards</th><td>").append(ss.meq.remCards).append("</td></tr>");
+					sb.append("</table>");
+					
+					//sb.append("<hr>");
+					
+					sb.append("<table><tr><th></th>");
+					sb.append("<th>Win</th>");
+					sb.append("<th>Tie</th></tr>");
+					for (Equity e : ss.meq.eqs) {
+						sb.append("<tr><th>").append(Equity.getEqTypeName(e.eqtype)).append("</th>");
+						sb.append("<td>").append(pc(e.won)).append("</td>");
+						sb.append("<td>").append(pc(e.tied)).append("</td></tr>");
+					}
+					sb.append("</table>");
+					
+					sb.append("</html>");
+					
+				} else {
+					// either 100 or 0
+					sb.append("Default equity:  ").append(ss.deq).append("%");
+				}
+			}
+			//System.out.println(sb);
+			return sb.toString();
+		}
+		private String pc(float f) {
+			if (f != 0) {
+				return "<b>" + String.format("%.1f", f) + "%</b>";
+			} else {
+				return "0.0%";
+			}
+		}
 	};
 	
 	private static final MyColumn<HandState> evCol = new HandStateColumn(String.class, "EV", "Expected Value") {

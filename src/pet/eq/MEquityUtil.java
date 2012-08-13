@@ -176,14 +176,19 @@ public class MEquityUtil {
 		if (me.hilo) {
 			Equity hihalf = me.eqs[1];
 			Equity lohalf = me.eqs[2];
-			s = String.format("%.0f, %.0f, %.0f%%", hionly.won, hihalf.won, lohalf.won);
-			if (hionly.tied + hihalf.tied + lohalf.tied > 1) {
-				s += String.format(" (%.0f, %.0f, %.0f%-T)", hionly.tied, hihalf.tied, lohalf.tied);
+			if (hionly.tied + hihalf.tied + lohalf.tied > 10) {
+				// 50.0% (0:100, 0:70)
+				s = String.format("%.1f (%.0f:%.0f, %.0f:%.0f)%%", 
+						me.totaleq, 
+						hionly.won + hihalf.won, hionly.tied + hihalf.tied, 
+						lohalf.won, lohalf.tied);
+			} else {
+				s = String.format("%.1f%% (%.0f, %.0f)", me.totaleq, hionly.won + hihalf.won, lohalf.won);
 			}
 			
 		} else {
 			s = String.format("%.1f%%", hionly.won);
-			if (hionly.tied != 0) {
+			if (hionly.tied > 1) {
 				s += String.format(" (%.1f%% T)", hionly.tied);
 			}
 		}

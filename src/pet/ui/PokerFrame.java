@@ -46,7 +46,7 @@ public class PokerFrame extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		ToolTipManager.sharedInstance().setDismissDelay(5000);
+		ToolTipManager.sharedInstance().setDismissDelay(20000);
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
