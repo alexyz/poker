@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -27,8 +29,10 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	private final JButton equityButton = new JButton("Equity");
 	private final JButton playerButton = new JButton("Player");
 	private final JButton replayButton = new JButton("Replay");
-	private final JToggleButton updateButton = new JToggleButton("Auto Select");
+	private final JToggleButton autoButton = new JToggleButton("Auto");
 	private final JScrollPane tableScroller = new JScrollPane(handTable);
+	// XXX share with other classes?
+	private final ExecutorService es = Executors.newSingleThreadExecutor();
 
 	public LastHandPanel() {
 		super(new BorderLayout());
@@ -36,7 +40,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		stateCombo.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				HandStates states = (HandStates) e.getItem();
+				HandStateItem states = (HandStateItem) e.getItem();
 				tableScroller.setBorder(new TitledBorder(states.hand.game.id));
 				((HandStateTableModel)handTable.getModel()).setRows(states.states);
 			}
@@ -78,7 +82,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		equityButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				HandStates hs = (HandStates) stateCombo.getSelectedItem();
+				HandStateItem hs = (HandStateItem) stateCombo.getSelectedItem();
 				String type;
 				switch (hs.hand.game.type) {
 					case Game.HE_TYPE:
@@ -110,7 +114,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		replayButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				HandStates hs = (HandStates) stateCombo.getSelectedItem();
+				HandStateItem hs = (HandStateItem) stateCombo.getSelectedItem();
 				if (hs != null) {
 					PokerFrame.getInstance().replayHand(hs.hand);
 				}
@@ -120,13 +124,13 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		handTable.setModel(new HandStateTableModel());
 		handTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		updateButton.setSelected(true);
+		autoButton.setSelected(true);
 		
 		JPanel topPanel = new JPanel();
 		topPanel.add(prevButton);
 		topPanel.add(stateCombo);
 		topPanel.add(nextButton);
-		topPanel.add(updateButton);
+		topPanel.add(autoButton);
 
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.add(equityButton);
@@ -146,6 +150,10 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			if (i >= 0 && i < stateCombo.getItemCount()) {
 				System.out.println("setting index " + i);
 				stateCombo.setSelectedIndex(i);
+				
+				// set auto if on last item
+				autoButton.setSelected(i == stateCombo.getItemCount() - 1);
+				
 				repaint();
 			}
 		}
@@ -169,41 +177,48 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		//
 	}
 
-	public void showHand(Hand hand) {
+	public void showHand(final Hand hand) {
 		// create hand states, add to list
 		// display most recent in hud
-		DefaultComboBoxModel model = (DefaultComboBoxModel)stateCombo.getModel();
+		final DefaultComboBoxModel model = (DefaultComboBoxModel) stateCombo.getModel();
 
 		for (int n = 0; n < model.getSize(); n++) {
-			HandStates hs = (HandStates) model.getElementAt(n);
+			HandStateItem hs = (HandStateItem) model.getElementAt(n);
 			if (hs.hand == hand) {
 				// already present, just select
 				stateCombo.setSelectedIndex(n);
 				return;
 			}
 		}
-
-		if (model.getSize() > 100) {
-			model.removeElementAt(0);
-		}
 		
-		// FIXME may add out of order...
-		// XXX does equity sample calc on awt thread... 
-		model.addElement(new HandStates(hand));
-		if (updateButton.isSelected()) {
-			stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
-		}
+		// do equity calculation on non-awt thread 
+		es.submit(new Runnable() {
+			@Override
+			public void run() {
+				final HandStateItem states = new HandStateItem(hand);
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						if (model.getSize() > 100) {
+							model.removeElementAt(0);
+						}
+						model.addElement(states);
+						if (autoButton.isSelected()) {
+							stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+						}
+					}
+				});
+			}
+		});
 	}
-
-
-
+	
 }
 
 /** represents a list of hand states for a hand */
-class HandStates {
+class HandStateItem {
 	public final List<HandState> states;
 	public final Hand hand;
-	public HandStates(Hand hand) {
+	public HandStateItem(Hand hand) {
 		this.hand = hand;
 		this.states = HandStateUtil.getStates(hand);
 	}

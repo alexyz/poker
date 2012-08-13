@@ -37,7 +37,7 @@ class HandCardPanel extends CardPanel {
 		return hands.size() == 0 ? null : hands.toArray(new String[hands.size()][]);
 	}
 	
-	private final JLabel totalLabel = new JLabel();
+	private final TotalPanel totalPanel = new TotalPanel();
 	private final EquityPanel[] equityPanels = new EquityPanel[3];
 	private final RanksPanel[] rankPanels = new RanksPanel[3];
 	private final OutsPanel[] outsPanels = new OutsPanel[3];
@@ -52,7 +52,7 @@ class HandCardPanel extends CardPanel {
 		g.weightx = 1;
 		
 		g.gridy = 0;
-		p.add(totalLabel, g);
+		p.add(totalPanel, g);
 		
 		for (int n = 0; n < 3; n++) {
 			equityPanels[n] = new EquityPanel();
@@ -74,13 +74,11 @@ class HandCardPanel extends CardPanel {
 	}
 	
 	private void clearEquity() {
-		totalLabel.setText("");
+		totalPanel.clearEquity();
 		for (int n = 0; n < 3; n++) {
 			equityPanels[n].clearEquity();
 			rankPanels[n].clearEquity();
 			outsPanels[n].clearEquity();
-		}
-		for (int n = 1; n < 3; n++) {
 			equityPanels[n].setVisible(false);
 			rankPanels[n].setVisible(false);
 			outsPanels[n].setVisible(false);
@@ -91,14 +89,13 @@ class HandCardPanel extends CardPanel {
 		clearEquity();
 		
 		if (me != null) {
-			totalLabel.setText("Total Equity: " + me.totaleq + " Low possible: " + me.lowPossible + " Scoop: " + me.scoop);
+			totalPanel.setEquity(me);
 			for (int n = 0; n < me.eqs.length; n++) {
-				equityPanels[n].setHandEquity(me, me.eqs[n]);
+				equityPanels[n].setEquity(me, me.eqs[n]);
 				equityPanels[n].setVisible(true);
 				rankPanels[n].setEquity(me.eqs[n]);
 				rankPanels[n].setVisible(true);
 				outsPanels[n].setEquity(me.eqs[n], me.remCards);
-				//outsPanels[n].setVisible(true);
 			}
 		}
 		
@@ -111,3 +108,27 @@ class HandCardPanel extends CardPanel {
 	}
 	
 }
+
+class TotalPanel extends JPanel {
+	private final JLabel totalLabel = new JLabel();
+	private final JLabel scoopLabel = new JLabel();
+	private final JLabel lowPossibleLabel = new JLabel();
+	public TotalPanel() {
+		super(new GridLayout(1,3));
+		add(totalLabel);
+		add(scoopLabel);
+		add(lowPossibleLabel);
+	}
+	void clearEquity() {
+		totalLabel.setText("");
+		scoopLabel.setText("");
+		lowPossibleLabel.setText("");
+	}
+	void setEquity(MEquity me) {
+		totalLabel.setText(String.format("Total equity: %.1f%%", me.totaleq));
+		scoopLabel.setText(String.format("Scoop: %.1f%%", me.scoop));
+		lowPossibleLabel.setText(String.format("Low possible: %.1f%%", me.lowPossible));
+	}
+}
+
+

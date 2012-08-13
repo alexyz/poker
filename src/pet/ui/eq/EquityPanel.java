@@ -1,9 +1,11 @@
 package pet.ui.eq;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 import pet.eq.*;
 
@@ -39,7 +41,13 @@ class EquityPanel extends JPanel {
 		setToolTipText(null);
 	}
 
-	public void setHandEquity(MEquity me, Equity e) {
+	public void setEquity(MEquity me, Equity e) {
+		if (e.curwin || e.curtie) {
+			setBorder(new LineBorder(Color.green));
+		} else {
+			setBorder(null);
+		}
+		
 		typeLab.setText(Equity.getEqTypeName(e.eqtype));
 		String s = String.format("Win: %.1f%%", e.won);
 		if (e.tied != 0) {
@@ -55,6 +63,8 @@ class EquityPanel extends JPanel {
 			valueLab.setFont(e.curwin ? boldfont : font);
 			valueLab.setText(Poker.valueString(e.current));
 		}
+		
+		revalidate();
 	}
 	
 }

@@ -62,21 +62,30 @@ public class HandsPanel extends JPanel {
 		replayButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PokerFrame.getInstance().replayHand(getHandInfo().hand);
+				HandInfo hi = getHandInfo();
+				if (hi != null) {
+					PokerFrame.getInstance().replayHand(hi.hand);
+				}
 			}
 		});
 		
 		lastHandButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PokerFrame.getInstance().displayHand(getHandInfo().hand);
+				HandInfo hi = getHandInfo();
+				if (hi != null) {
+					PokerFrame.getInstance().displayHand(hi.hand);
+				}
 			}
 		});
 		
 		hudButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PokerFrame.getInstance().getHudManager().showHand(getHandInfo().hand);
+				HandInfo hi = getHandInfo();
+				if (hi != null) {
+					PokerFrame.getInstance().getHudManager().showHand(hi.hand);
+				}
 			}
 		});
 
