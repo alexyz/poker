@@ -20,6 +20,7 @@ class DeckPanel extends JPanel {
 	public DeckPanel() {
 		super(new GridLayout(4, 13));
 		setBorder(BorderFactory.createTitledBorder("Deck"));
+		// propagate property changes upward
 		PropertyChangeListener l = new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
@@ -47,11 +48,11 @@ class DeckPanel extends JPanel {
 			cl.setCardHidden(hide);
 		}
 	}
-
-	public void deselectCard(String card) {
+	
+	public void setCardSelected(String card, boolean selected) {
 		for (CardLabel cl : labels) {
 			if (cl.getName().equals(card)) {
-				cl.setCardSelected(false);
+				cl.setCardSelected(selected);
 			}
 		}
 	}

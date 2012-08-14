@@ -42,7 +42,7 @@ public class Equity {
 	public static final int HILO_HI_HALF = 4;
 	/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
 	public static final int HILO_AFLO8_HALF = 5;
-	/** ace to five low 8 or better only equity type (not used by any game, as it's qualified) */
+	/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
 	public static final int AFLO8_ONLY = 6;
 	
 	/** get name of equity type */

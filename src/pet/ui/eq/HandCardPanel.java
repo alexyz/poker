@@ -125,7 +125,7 @@ class TotalPanel extends JPanel {
 		lowPossibleLabel.setText("");
 	}
 	void setEquity(MEquity me) {
-		totalLabel.setText(String.format("Total equity: %.1f%%", me.totaleq));
+		totalLabel.setText(String.format("Equity: %.1f%%", me.totaleq));
 		scoopLabel.setText(String.format("Scoop: %.1f%%", me.scoop));
 		lowPossibleLabel.setText(String.format("Low possible: %.1f%%", me.lowPossible));
 	}

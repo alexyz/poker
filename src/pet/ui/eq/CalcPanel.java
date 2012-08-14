@@ -49,6 +49,7 @@ public abstract class CalcPanel extends JPanel {
 				// set the selected card to the deck card and move to next card
 				cardLabels.get(selectedCard).setCard((String) e.getNewValue());
 				selectCard(selectedCard + 1);
+				deckPanel.setCardSelected((String) e.getNewValue(), true);
 			}
 		});
 		
@@ -62,6 +63,7 @@ public abstract class CalcPanel extends JPanel {
 						// remove the card
 						cl.setCard(null);
 						selectCard(n);
+						deckPanel.setCardSelected((String) e.getNewValue(), false);
 						break;
 					}
 				}
@@ -195,10 +197,21 @@ public abstract class CalcPanel extends JPanel {
 			cl.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, new PropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
-					deckPanel.deselectCard(cl.getCard());
-					cl.setCard(null);
-					cardLabels.get(selectedCard).setCardSelected(false);
-					selectedCard = cardLabels.indexOf(cl);
+					System.out.println("hand card selected: " + cardLabels.indexOf(cl) + " card " + cl.getCard());
+					if (cl.getCard() != null) {
+						System.out.println("  deselect deck card: " + cl.getCard());
+						deckPanel.setCardSelected(cl.getCard(), false);
+						cl.setCard(null);
+					}
+					if (cardLabels.indexOf(cl) == selectedCard) {
+						System.out.println("  hand card already selected");
+					} else {
+						System.out.println("  change selection from " + selectedCard);
+						cardLabels.get(selectedCard).setCardSelected(false);
+						selectedCard = cardLabels.indexOf(cl);
+						cardLabels.get(selectedCard).setCardSelected(true);
+						cardLabels.get(selectedCard).requestFocusInWindow();
+					}
 				}
 			});
 		}
@@ -208,8 +221,10 @@ public abstract class CalcPanel extends JPanel {
 	protected void selectCard(int n) {
 		System.out.println("calc panel select card " + n);
 		cardLabels.get(selectedCard).setCardSelected(false);
+		
 		selectedCard = n % cardLabels.size();
 		cardLabels.get(selectedCard).setCardSelected(true);
+		cardLabels.get(selectedCard).requestFocusInWindow();
 	}
 	
 	/**

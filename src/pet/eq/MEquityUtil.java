@@ -80,7 +80,7 @@ public class MEquityUtil {
 				
 				// count the cards as outs if this turns losing hand into
 				// win/tie or tying hand into win
-				if (cards != null && e.current > 0 && (!e.curwin || (e.curtie && maxcount == 1))) {
+				if (cards != null && e.current > 0 && (!(e.curwin || e.curtie) || (e.curtie && maxcount == 1))) {
 					for (int c = 0; c < cards.length; c++) {
 						String card = cards[c];
 						int cardIndex = Poker.cardToIndex(card);

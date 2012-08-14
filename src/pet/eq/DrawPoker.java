@@ -52,7 +52,10 @@ public class DrawPoker extends Poker {
 				int v = value.value(h);
 				vals[hn] = v;
 			}
-			MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
+			int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
+			if (hw >= 0) {
+				meqs[hw].scoopcount++;
+			}
 		}
 
 		MEquityUtil.summariseEquity(meqs, c, 0);

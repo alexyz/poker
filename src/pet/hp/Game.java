@@ -10,14 +10,23 @@ import java.io.Serializable;
 public class Game implements Serializable {
 	
 	/* game type constants */
+	/** five card draw (high) */
 	public static final int FCD_TYPE = 1;
+	/** hold'em (high) */
 	public static final int HE_TYPE = 2;
+	/** omaha (high) */
 	public static final int OM_TYPE = 3;
+	/** omaha high/low */
 	public static final int OMHL_TYPE = 4;
+	/** deuce to seven triple draw */
 	public static final int DSTD_TYPE = 5;
+	/** deuce to seven single draw */
 	public static final int DSSD_TYPE = 6;
+	/** razz (a-5 low) */
 	public static final int RAZZ_TYPE = 7;
+	/** stud (high) */
 	public static final int STUD_TYPE = 8;
+	/** stud high/low */
 	public static final int STUDHL_TYPE = 9;
 	/** limit type constants */
 	public static final int NO_LIMIT = 100, POT_LIMIT = 101, FIXED_LIMIT = 102;

@@ -3,6 +3,11 @@ package pet.ui.eq;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -51,6 +56,7 @@ class CardLabel extends JLabel {
 		setVerticalAlignment(CENTER);
 		setBackground(Color.white);
 		setBorder(BorderFactory.createRaisedBevelBorder());
+		setFocusable(true);
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
@@ -58,20 +64,45 @@ class CardLabel extends JLabel {
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//System.out.println("card label mouse clicked");
+				System.out.println("card label mouse clicked");
 				if (!hidden) {
-					setCardSelected(!selected);
-					firePropertyChange(selected ? CARD_SEL_PROP_CHANGE : CARD_DESEL_PROP_CHANGE, "", getName());
+					//setCardSelected(!selected);
+					firePropertyChange(!selected ? CARD_SEL_PROP_CHANGE : CARD_DESEL_PROP_CHANGE, "", getName());
+					update();
 				}
 			}
 			@Override
 			public void mouseExited(MouseEvent e) {
-				setBackground(selected && !hidden ? Color.gray : Color.white);
+				//setBackground(selected && !hidden ? Color.gray : Color.white);
+				update();
+			}
+		});
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyChar() == ' ') {
+					if (!hidden) {
+						//setCardSelected(!selected);
+						firePropertyChange(!selected ? CARD_SEL_PROP_CHANGE : CARD_DESEL_PROP_CHANGE, "", getName());
+					}
+				}
+			}
+		});
+		addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				update();
+			}
+			@Override
+			public void focusLost(FocusEvent e) {
+				update();
 			}
 		});
 		setCard(null);
 	}
+	/** set the selected flag and update the appearance */
 	public void setCardSelected(boolean sel) {
+		System.out.println("card label " + getName() + " set selected " + sel);
 		selected = sel;
 		update();
 	}
@@ -97,7 +128,7 @@ class CardLabel extends JLabel {
 			setText("  ");
 		}
 		if (selected && !hidden) {
-			setBackground(Color.gray);
+			setBackground(isFocusOwner() ? Color.gray : Color.lightGray);
 			setBorder(BorderFactory.createLoweredBevelBorder());
 		} else {
 			setBackground(Color.white);

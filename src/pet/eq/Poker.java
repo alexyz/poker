@@ -79,7 +79,7 @@ public abstract class Poker {
 		"Ah", "As", "Ac", "Ad" 
 	};
 	
-	private static final String[] deckArrS;
+	public static final String[] deckArrS;
 	
 	public static final List<String> deck = Collections.unmodifiableList(Arrays.asList(deckArr));
 	
