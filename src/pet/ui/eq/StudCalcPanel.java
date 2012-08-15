@@ -63,7 +63,7 @@ public class StudCalcPanel extends CalcPanel {
 	@Override
 	protected void hideOpp(boolean hidden) {
 		for (int n = 1; n < handPanels.length; n++) {
-			List<CardLabel> cardLabels = handPanels[n].getCardLabels();
+			List<CardButton> cardLabels = handPanels[n].getCardButtons();
 			cardLabels.get(0).setCardHidden(hidden);
 			cardLabels.get(1).setCardHidden(hidden);
 			cardLabels.get(6).setCardHidden(hidden);
@@ -74,14 +74,14 @@ public class StudCalcPanel extends CalcPanel {
 	protected void calc() {
 		// FIXME validate
 		
-		String[][] hands = HandCardPanel.getCards(handPanels);
+		List<String[]> hands = HandCardPanel.getCards(handPanels);
 		if (hands == null) {
 			System.out.println("no hands");
 			return;
 		}
 		
-		String[] blockers = getBlockers();
-		String[] board = boardPanel.getCards();
+		List<String> blockers = getBlockers();
+		List<String> board = boardPanel.getCards();
 		PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
 		MEquity[] meqs = pokerItem.poker.equity(board, hands, blockers);
 		
@@ -97,12 +97,14 @@ public class StudCalcPanel extends CalcPanel {
 		clear();
 		String[] deck = Poker.deck();
 		ArrayUtil.shuffle(deck, new Random());
+		
 		if (numPlayers >= 8 && numCards == 7) {
 			numCards = 6;
 			boardPanel.setCard(deck[51], 0);
 		}
+		
 		for (int n = 0; n < numPlayers; n++) {
-			handPanels[n].setCards(Arrays.copyOfRange(deck, n * numCards, (n + 1) * numCards));
+			handPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * numCards, (n + 1) * numCards)));
 		}
 		updateDeck();
 	}

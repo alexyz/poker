@@ -21,6 +21,7 @@ import pet.eq.*;
 /**
  * label to show blank or individual card. the name property of the component is the card
  */
+@Deprecated
 class CardLabel extends JLabel {
 	
 	public static final Font cardfont = new Font("SansSerif", Font.PLAIN, 24);

@@ -54,11 +54,10 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void calc() {
-		// XXX could be 0
-		String[][] hands = HandCardPanel.getCards(handPanels);
+		List<String[]> hands = HandCardPanel.getCards(handPanels);
 		if (hands != null) {
 			PokerItem item = (PokerItem) pokerCombo.getSelectedItem();
-			String[] blockers = getBlockers();
+			List<String> blockers = getBlockers();
 			MEquity[] meqs = item.poker.equity(null, hands, blockers);
 			for (int n = 0; n < meqs.length; n++) {
 				handPanels[n].setEquity(meqs[n]);
@@ -73,7 +72,7 @@ public class DrawCalcPanel extends CalcPanel {
 		String[] deck = Poker.deck();
 		ArrayUtil.shuffle(deck, new Random());
 		for (int n = 0; n < num; n++) {
-			handPanels[n].setCards(Arrays.copyOfRange(deck, n * 5, n * 5 + 5));
+			handPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * 5, n * 5 + 5)));
 		}
 		updateDeck();
 	}

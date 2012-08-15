@@ -1,14 +1,11 @@
 package pet.ui.eq;
 
 import java.awt.GridLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.util.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import pet.eq.*;
 
@@ -16,81 +13,82 @@ import pet.eq.*;
  * panel to show a whole deck of cards
  */
 class DeckPanel extends JPanel {
-	private final List<CardLabel> labels = new ArrayList<CardLabel>();
+	
+	public static final String CARD_SEL_PROP_CHANGE = "cardsel", CARD_DESEL_PROP_CHANGE = "carddesel";
+	private final List<CardButton> cardButtons = new ArrayList<CardButton>();
+	
 	public DeckPanel() {
 		super(new GridLayout(4, 13));
 		setBorder(BorderFactory.createTitledBorder("Deck"));
-		// propagate property changes upward
-		PropertyChangeListener l = new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
-			}
-		};
+		
 		List<String> deck = new ArrayList<String>(Poker.deck);
 		Collections.reverse(deck);
 		for (char s : Poker.suits) {
 			for (String c : deck) {
 				if (Poker.suit(c) == s) {
-					CardLabel cl = new CardLabel();
-					cl.setCard(c);
-					cl.addPropertyChangeListener(CardLabel.CARD_SEL_PROP_CHANGE, l);
-					cl.addPropertyChangeListener(CardLabel.CARD_DESEL_PROP_CHANGE, l);
-					add(cl);
-					labels.add(cl);
+					final CardButton b = new CardButton();
+					b.setName("Deck-" + c);
+					b.setCard(c);
+					b.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							if (b.isSelected()) {
+								System.out.println("deck panel card selected: " + b.getName());
+								firePropertyChange(CARD_SEL_PROP_CHANGE, "x", b.getCard());
+							} else {
+								System.out.println("deck panel card deselected: " + b.getName());
+								firePropertyChange(CARD_DESEL_PROP_CHANGE, "x", b.getCard());
+							}
+						}
+					});
+					add(b);
+					cardButtons.add(b);
 				}
 			}
 		}
 	}
 
+	/** call setCardHidden on all the card buttons */
 	public void setCardsHidden(boolean hide) {
-		for (CardLabel cl : labels) {
-			cl.setCardHidden(hide);
+		for (CardButton b : cardButtons) {
+			b.setCardHidden(hide);
 		}
 	}
 	
-	public void setCardSelected(String card, boolean selected) {
-		for (CardLabel cl : labels) {
-			if (cl.getName().equals(card)) {
-				cl.setCardSelected(selected);
+	/** select the given card, return true if the card was selected or is already selected */
+	public boolean setCardSelected(String card, boolean selected) {
+		for (CardButton b : cardButtons) {
+			if (b.getCard().equals(card)) {
+				b.setSelected(selected);
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	/**
-	 * get the unselected cards.
+	 * get the cards by selection status.
 	 * always returns a new list
 	 */
-	public List<String> getCards() {
+	public List<String> getCards(boolean selected) {
 		List<String> cards = new ArrayList<String>();
-		for (CardLabel cl : labels) {
-			if (!cl.isCardSelected()) {
-				cards.add(cl.getCard());
+		for (CardButton b : cardButtons) {
+			if (b.isSelected() == selected) {
+				cards.add(b.getCard());
 			}
 		}
 		return cards;
 	}
 
 	/**
-	 * deselect all cards and select the given cards
-	 */
-	public void selectCards(String[] cards) {
-		deselectCards();
-		for (CardLabel cl : labels) {
-			for (String c : cards) {
-				if (cl.getName().equals(c)) {
-					cl.setCardSelected(true);
-				}
-			}
-		}
-	}
-
-	/**
 	 * deselect all cards
 	 */
 	public void deselectCards() {
-		for (CardLabel cl : labels) {
-			cl.setCardSelected(false);
+		for (CardButton b : cardButtons) {
+			if (b.isSelected()) {
+				b.setSelected(false);
+			}
 		}
 	}
+	
 }

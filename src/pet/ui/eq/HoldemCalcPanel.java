@@ -45,7 +45,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// select first hole card
 		selectCard(5);
-
+		
 		randHandsBox.setSelected(true);
 		randFlopBox.setSelected(true);
 		
@@ -76,6 +76,9 @@ public class HoldemCalcPanel extends CalcPanel {
 
 	@Override
 	public void random(int numhands) {
+		System.out.println("holdem panel random hand");
+		
+		// clear
 		for (HandCardPanel hp : handPanels) {
 			if (randHandsBox.isSelected()) {
 				hp.clearCards();
@@ -83,13 +86,15 @@ public class HoldemCalcPanel extends CalcPanel {
 			hp.setEquity(null);
 		}
 		if (randFlopBox.isSelected()) {
-			boardPanel.clearCards(0, 3);
+			boardPanel.setCard(null, 0);
+			boardPanel.setCard(null, 1);
+			boardPanel.setCard(null, 2);
 		}
 		if (randFlopBox.isSelected() || randTurnBox.isSelected()) {
-			boardPanel.clearCards(3, 4);
+			boardPanel.setCard(null, 3);
 		}
 		if (randFlopBox.isSelected() || randTurnBox.isSelected() || randRiverBox.isSelected()) {
-			boardPanel.clearCards(4, 5);
+			boardPanel.setCard(null, 4);
 		}
 		
 		// update deck, get remaining cards
@@ -100,11 +105,11 @@ public class HoldemCalcPanel extends CalcPanel {
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
-				// XXX hack
-				handPanels[n].setCards(deck.subList(i, i + numHoleCards).toArray(new String[0]));
+				handPanels[n].setCards(deck.subList(i, i + numHoleCards));
 				i += numHoleCards;
 			}
 		}
+		
 		if (randFlopBox.isSelected()) {
 			boardPanel.setCard(deck.get(i++), 0);
 			boardPanel.setCard(deck.get(i++), 1);
@@ -118,6 +123,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 		
 		updateDeck();
+		
 		selectCard(5);
 	}
 
@@ -127,13 +133,13 @@ public class HoldemCalcPanel extends CalcPanel {
 			hp.setEquity(null);
 		}
 		
-		String[] board = boardPanel.getCards();
-		if (board.length == 1 || board.length == 2) {
+		List<String> board = boardPanel.getCards();
+		if (board.size() == 1 || board.size() == 2) {
 			System.out.println("incomplete board");
 			return;
 		}
 		
-		if (board.length == 0) {
+		if (board.size() == 0) {
 			board = null;
 		}
 		
@@ -141,15 +147,15 @@ public class HoldemCalcPanel extends CalcPanel {
 		final List<HandCardPanel> holeCardsHandPanels = new ArrayList<HandCardPanel>();
 		
 		for (HandCardPanel hp : handPanels) {
-			String[] hand = hp.getCards();
-			if (hand.length > 0) {
-				if (hand.length < hp.getMinCards()) {
+			List<String> hand = hp.getCards();
+			if (hand.size() > 0) {
+				if (hand.size() < hp.getMinCards()) {
 					System.out.println("incomplete hand");
 					return;
 					
 				} else {
 					holeCardsHandPanels.add(hp);
-					holeCards.add(hand);
+					holeCards.add(hand.toArray(new String[hand.size()]));
 				}
 			}
 		}
@@ -159,10 +165,9 @@ public class HoldemCalcPanel extends CalcPanel {
 			return;
 		}
 		
-		final String[] blockers = getBlockers();
-		final String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
+		final List<String> blockers = getBlockers();
 		final PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		final MEquity[] eqs = pokerItem.poker.equity(board, holeCardsArr, blockers);
+		final MEquity[] eqs = pokerItem.poker.equity(board, holeCards, blockers);
 		
 		for (int n = 0; n < eqs.length; n++) {
 			holeCardsHandPanels.get(n).setEquity(eqs[n]);

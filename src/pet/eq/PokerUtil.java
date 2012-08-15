@@ -45,6 +45,9 @@ public class PokerUtil {
 		return v;
 	}
 	
+	private static final Color C_COL = new Color(0, 128, 0);
+	private static final Color D_COL = new Color(0, 0, 128);
+	
 	/**
 	 * Return colour of suit
 	 */
@@ -53,9 +56,9 @@ public class PokerUtil {
 		// TODO could just use "schd".indexOf(suit)
 		switch (s) {
 			case Poker.S_SUIT: return Color.black;
-			case Poker.C_SUIT: return Color.green;
+			case Poker.C_SUIT: return C_COL;
 			case Poker.H_SUIT: return Color.red;
-			case Poker.D_SUIT: return Color.blue;
+			case Poker.D_SUIT: return D_COL;
 			default:
 				throw new RuntimeException("unknown suit: " + s);
 		}

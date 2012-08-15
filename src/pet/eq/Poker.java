@@ -485,6 +485,16 @@ public abstract class Poker {
 	/**
 	 * Calculate equity for given board and hands.
 	 */
+	public final MEquity[] equity(List<String> board, List<String[]> cards, List<String> blockers) {
+		String[] boardArr = board != null ? board.toArray(new String[board.size()]) : null;
+		String[][] cardsArr = cards != null ? cards.toArray(new String[cards.size()][]) : null;
+		String[] blockersArr = blockers != null ? blockers.toArray(new String[blockers.size()]) : null;
+		return equity(boardArr, cardsArr, blockersArr);
+	}
+	
+	/**
+	 * Calculate equity for given board and hands.
+	 */
 	public abstract MEquity[] equity(String[] board, String[][] holeCards, String[] blockers);
 	
 	/**

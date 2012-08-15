@@ -1,6 +1,7 @@
 package pet.ui.eq;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +13,7 @@ import javax.swing.*;
  */
 class CardPanel extends JPanel {
 
-	private final CardLabel[] cardLabels;
+	private final CardButton[] cardButtons;
 	private final int mincards;
 	
 	/**
@@ -22,12 +23,12 @@ class CardPanel extends JPanel {
 		super(new GridBagLayout());
 		this.mincards = mincards;
 		setBorder(BorderFactory.createTitledBorder(name));
-		cardLabels = new CardLabel[maxcards];
+		cardButtons = new CardButton[maxcards];
 		
 		JPanel p = new JPanel(new GridLayout(1, maxcards, 5, 5));
-		for (int n = 0; n < cardLabels.length; n++) {
-			CardLabel cl = new CardLabel();
-			cardLabels[n] = cl;
+		for (int n = 0; n < cardButtons.length; n++) {
+			CardButton cl = new CardButton();
+			cardButtons[n] = cl;
 			p.add(cl);
 		}
 		
@@ -49,50 +50,30 @@ class CardPanel extends JPanel {
 	/**
 	 * Get the card labels.
 	 */
-	public List<CardLabel> getCardLabels() {
-		return Collections.unmodifiableList(Arrays.asList(cardLabels));
+	public List<CardButton> getCardButtons() {
+		return Collections.unmodifiableList(Arrays.asList(cardButtons));
 	}
 	
 	/**
 	 * set all cards to blank
 	 */
 	public void clearCards() {
-		for (CardLabel cl : cardLabels) {
-			cl.setCard(null);
-		}
-	}
-	
-	/**
-	 * set the given cards to blank (indexed from 0)
-	 */
-	public void clearCards(int from, int to) {
-		for (int n = from; n < to; n++) {
-			cardLabels[n].setCard(null);
+		for (CardButton b : cardButtons) {
+			b.setCard(null);
 		}
 	}
 	
 	public void setCard(String c, int n) {
-		cardLabels[n].setCard(c);
+		cardButtons[n].setCard(c);
 	}
 	
 	/**
-	 * clears all cards and calls setCard for each card label
+	 * calls set card for each card label with the given cards or null
 	 */
-	public void setCards(String[] cards) {
-		clearCards();
-		for (int n = 0; n < Math.min(cardLabels.length, cards.length); n++) {
-			cardLabels[n].setCard(cards[n]);
+	public void setCards(List<String> cards) {
+		for (int n = 0; n < cardButtons.length; n++) {
+			cardButtons[n].setCard(n < cards.size() ? cards.get(n) : null);
 		}
-	}
-	
-	public int getCardCount() {
-		int c = 0;
-		for (CardLabel cl : cardLabels) { 
-			if (cl.getCard() != null) {
-				c++;
-			}
-		}
-		return c;
 	}
 	
 	public int getMinCards() {
@@ -102,13 +83,20 @@ class CardPanel extends JPanel {
 	/**
 	 * Get the cards displayed
 	 */
-	public String[] getCards() {
-		return CardLabel.getCards(Arrays.asList(cardLabels));
+	public List<String> getCards() {
+		List<String> cards = new ArrayList<String>();
+		for (CardButton b : cardButtons) {
+			if (b.getCard() != null) {
+				cards.add(b.getCard());
+			}
+		}
+		return cards;
 	}
 	
 	public void setCardsHidden(boolean hide) {
-		for (CardLabel cl : cardLabels) {
+		for (CardButton cl : cardButtons) {
 			cl.setCardHidden(hide);
 		}
 	}
+	
 }
