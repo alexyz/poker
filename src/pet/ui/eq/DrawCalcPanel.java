@@ -1,5 +1,6 @@
 package pet.ui.eq;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -23,7 +24,7 @@ public class DrawCalcPanel extends CalcPanel {
 			handPanels[n] = new HandCardPanel("Draw hand " + (n + 1), 1, 5, false);
 		}
 		
-		setCardPanels(handPanels);
+		setHandCardPanels(handPanels);
 		
 		initCardLabels();
 		
@@ -58,17 +59,22 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void calc() {
-		List<String[]> hands = HandCardPanel.getCards(handPanels);
-		if (hands != null) {
-			PokerItem item = (PokerItem) pokerCombo.getSelectedItem();
-			List<String> blockers = getBlockers();
-			int draws = ((SpinnerNumberModel) drawsSpinner.getModel()).getNumber().intValue();
-			MEquity[] meqs = item.poker.equity(null, hands, blockers, draws);
-			for (int n = 0; n < meqs.length; n++) {
-				handPanels[n].setEquity(meqs[n]);
-			}
-		} else {
+		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
+		List<String[]> cards = new ArrayList<String[]>();
+		collectCards(cards, cardPanels);
+		
+		if (cards.size() == 0) {
 			System.out.println("no hands");
+			return;
+		}
+		
+		PokerItem item = (PokerItem) pokerCombo.getSelectedItem();
+		List<String> blockers = getBlockers();
+		int draws = ((SpinnerNumberModel) drawsSpinner.getModel()).getNumber().intValue();
+		MEquity[] meqs = item.poker.equity(null, cards, blockers, draws);
+		
+		for (int n = 0; n < meqs.length; n++) {
+			cardPanels.get(n).setEquity(meqs[n]);
 		}
 	}
 	

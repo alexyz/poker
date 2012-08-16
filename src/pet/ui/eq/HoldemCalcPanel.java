@@ -1,6 +1,7 @@
 package pet.ui.eq;
 
 import java.util.*;
+
 import javax.swing.*;
 
 import pet.eq.*;
@@ -39,7 +40,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// add to layout
 		setBoard(boardPanel);
-		setCardPanels(handPanels);
+		setHandCardPanels(handPanels);
 		
 		initCardLabels();
 		
@@ -143,34 +144,21 @@ public class HoldemCalcPanel extends CalcPanel {
 			board = null;
 		}
 		
-		final List<String[]> holeCards = new ArrayList<String[]>();
-		final List<HandCardPanel> holeCardsHandPanels = new ArrayList<HandCardPanel>();
+		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
+		List<String[]> cards = new ArrayList<String[]>();
+		collectCards(cards, cardPanels);
 		
-		for (HandCardPanel hp : handPanels) {
-			List<String> hand = hp.getCards();
-			if (hand.size() > 0) {
-				if (hand.size() < hp.getMinCards()) {
-					System.out.println("incomplete hand");
-					return;
-					
-				} else {
-					holeCardsHandPanels.add(hp);
-					holeCards.add(hand.toArray(new String[hand.size()]));
-				}
-			}
-		}
-
-		if (holeCards.size() == 0) {
+		if (cards.size() == 0) {
 			System.out.println("no hands");
 			return;
 		}
 		
 		final List<String> blockers = getBlockers();
 		final PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		final MEquity[] eqs = pokerItem.poker.equity(board, holeCards, blockers, 0);
+		final MEquity[] meqs = pokerItem.poker.equity(board, cards, blockers, 0);
 		
-		for (int n = 0; n < eqs.length; n++) {
-			holeCardsHandPanels.get(n).setEquity(eqs[n]);
+		for (int n = 0; n < meqs.length; n++) {
+			cardPanels.get(n).setEquity(meqs[n]);
 		}
 
 	}

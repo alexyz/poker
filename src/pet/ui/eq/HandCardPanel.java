@@ -13,26 +13,6 @@ import pet.eq.*;
  */
 class HandCardPanel extends CardPanel {
 	
-	/**
-	 * get cards from array of hand card panels.
-	 * return null if no cards set or some hands incomplete
-	 */
-	public static List<String[]> getCards(HandCardPanel[] cps) {
-		List<String[]> hands = new ArrayList<String[]>();
-		for (HandCardPanel cp : cps) {
-			List<String> cards = cp.getCards();
-			if (cards.size() > 0) {
-				if (cards.size() < cp.getMinCards()) {
-					System.out.println("not enough cards for " + cp);
-					return null;
-				}
-				hands.add(cards.toArray(new String[cards.size()]));
-			}
-		}
-		System.out.println("hands: " + hands.size());
-		return hands.size() == 0 ? null : hands;
-	}
-	
 	private final TotalPanel totalPanel = new TotalPanel();
 	private final AllPanels[] panels = new AllPanels[3];
 	

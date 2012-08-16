@@ -1,5 +1,6 @@
 package pet.ui.eq;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -24,7 +25,7 @@ public class StudCalcPanel extends CalcPanel {
 			handPanels[n] = new HandCardPanel("Stud hand " + (n + 1), 1, 7, true);
 		}
 		
-		setCardPanels(handPanels);
+		setHandCardPanels(handPanels);
 		setBoard(boardPanel);
 		
 		randStreet.setModel(new DefaultComboBoxModel(new Object[] {
@@ -74,19 +75,24 @@ public class StudCalcPanel extends CalcPanel {
 	protected void calc() {
 		// FIXME validate
 		
-		List<String[]> hands = HandCardPanel.getCards(handPanels);
-		if (hands == null) {
+		// get the hands and the panels of those hands
+		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
+		List<String[]> cards = new ArrayList<String[]>();
+		collectCards(cards, cardPanels);
+		if (cards.size() == 0) {
 			System.out.println("no hands");
 			return;
 		}
 		
+		// get other stuff and calc equity
 		List<String> blockers = getBlockers();
 		List<String> board = boardPanel.getCards();
 		PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		MEquity[] meqs = pokerItem.poker.equity(board, hands, blockers, 0);
+		MEquity[] meqs = pokerItem.poker.equity(board, cards, blockers, 0);
 		
+		// update ui
 		for (int n = 0; n < meqs.length; n++) {
-			handPanels[n].setEquity(meqs[n]);
+			cardPanels.get(n).setEquity(meqs[n]);
 		}
 	}
 	

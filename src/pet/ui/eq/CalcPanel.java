@@ -31,7 +31,7 @@ public abstract class CalcPanel extends JPanel {
 	 */
 	private final List<CardButton> cardButtons = new ArrayList<CardButton>();
 	
-	private CardPanel[] cardPanels;
+	private HandCardPanel[] cardPanels;
 	private CardPanel boardPanel;
 
 	public CalcPanel() {
@@ -155,7 +155,7 @@ public abstract class CalcPanel extends JPanel {
 	/**
 	 * Set the card panels created by the subclass (not the actual hands)
 	 */
-	protected void setCardPanels(CardPanel[] cardPanels) {
+	protected void setHandCardPanels(HandCardPanel[] cardPanels) {
 		this.cardPanels = cardPanels;
 		
 		randNumOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
@@ -357,6 +357,26 @@ public abstract class CalcPanel extends JPanel {
 		}
 		randNumOppSpinner.setValue(holeCards.size());
 		updateDeck();
+	}
+	
+	/**
+	 * get cards from array of hand card panels.
+	 * return null if no cards set or some hands incomplete
+	 */
+	public void collectCards(List<String[]> hands, List<HandCardPanel> panels) {
+		for (HandCardPanel p : cardPanels) {
+			List<String> cards = p.getCards();
+			if (cards.size() > 0) {
+				if (cards.size() < p.getMinCards()) {
+					System.out.println("not enough cards for " + p);
+					panels.clear();
+					hands.clear();
+				}
+				hands.add(cards.toArray(new String[cards.size()]));
+				panels.add(p);
+			}
+		}
+		System.out.println("hands: " + hands.size());
 	}
 	
 	//

@@ -69,6 +69,7 @@ public class DrawPoker extends Poker {
 								hand[n] = deck[di];
 								// lots of hands and draws might use whole deck
 								// ideally should reshuffle but might get same card twice in hand
+								// could reshuf for each player
 								di = (di + 1) % deck.length;
 							}
 						}
@@ -194,7 +195,7 @@ public class DrawPoker extends Poker {
 	}
 	
 	@Override
-	public MEquity[] equity(String[] board, String[][] hands, String[] blockers, int draws) {
+	public synchronized MEquity[] equity(String[] board, String[][] hands, String[] blockers, int draws) {
 		if (board != null) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}
