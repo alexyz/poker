@@ -70,12 +70,17 @@ public class PokerFrame extends JFrame {
 	/**
 	 * display dialog
 	 */
-	private static void handleException(String title, Throwable e) {
+	public static void handleException(final String title, final Throwable e) {
 		e.printStackTrace(System.out);
-		JOptionPane.showMessageDialog(getInstance(), 
-				e.toString(), // + ": " + e.getMessage(), 
-				title, 
-				JOptionPane.ERROR_MESSAGE);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				JOptionPane.showMessageDialog(getInstance(), 
+						e.toString(), // + ": " + e.getMessage(), 
+						title, 
+						JOptionPane.ERROR_MESSAGE);
+			}
+		});
 	}
 	
 	/** all the parsed data */

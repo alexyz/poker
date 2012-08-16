@@ -83,7 +83,7 @@ public class StudCalcPanel extends CalcPanel {
 		List<String> blockers = getBlockers();
 		List<String> board = boardPanel.getCards();
 		PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		MEquity[] meqs = pokerItem.poker.equity(board, hands, blockers);
+		MEquity[] meqs = pokerItem.poker.equity(board, hands, blockers, 0);
 		
 		for (int n = 0; n < meqs.length; n++) {
 			handPanels[n].setEquity(meqs[n]);

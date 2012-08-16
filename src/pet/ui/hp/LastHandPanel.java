@@ -31,8 +31,6 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	private final JButton replayButton = new JButton("Replay");
 	private final JToggleButton autoButton = new JToggleButton("Auto");
 	private final JScrollPane tableScroller = new JScrollPane(handTable);
-	// XXX share with other classes?
-	private final ExecutorService es = Executors.newSingleThreadExecutor();
 
 	public LastHandPanel() {
 		super(new BorderLayout());
@@ -194,25 +192,40 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			}
 		}
 		
-		// do equity calculation on non-awt thread 
-		es.submit(new Runnable() {
+		// TODO display "please wait" or something
+		
+		// do equity calculation on non-awt thread
+		// don't use executor service because it doesn't tell you if an
+		// exception has occurred, or at least, not without calling get()
+		// (synchronously), which is stupid as the whole point is to avoid a
+		// synchronous call
+		Thread t = new Thread("last hand thread") {
 			@Override
 			public void run() {
-				final HandStateItem states = new HandStateItem(hand);
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						if (model.getSize() > 100) {
-							model.removeElementAt(0);
+				try {
+					System.out.println("last hand panel: getting hand states on background thread");
+					final HandStateItem states = new HandStateItem(hand);
+					System.out.println("last hand panel: got hand states " + states);
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							if (model.getSize() > 100) {
+								model.removeElementAt(0);
+							}
+							model.addElement(states);
+							if (autoButton.isSelected()) {
+								stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
+							}
 						}
-						model.addElement(states);
-						if (autoButton.isSelected()) {
-							stateCombo.setSelectedIndex(stateCombo.getModel().getSize() - 1);
-						}
-					}
-				});
+					});
+				} catch (Exception e) {
+					PokerFrame.handleException(Thread.currentThread().getName(), e);
+				}
 			}
-		});
+		};
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.setDaemon(true);
+		t.start();
 	}
 	
 }

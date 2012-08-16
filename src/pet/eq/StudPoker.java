@@ -66,7 +66,10 @@ public class StudPoker extends Poker {
 	}
 	
 	@Override
-	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsOrig, final String[] blockers) {
+	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsOrig, final String[] blockers, final int draws) {
+		if (draws != 0) {
+			throw new RuntimeException();
+		}
 		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsOrig) + " board " + Arrays.toString(board) + " blockers " + Arrays.toString(blockers));
 
 		// note: hole cards may be mixed length

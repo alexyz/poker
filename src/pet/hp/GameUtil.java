@@ -6,7 +6,8 @@ import java.util.Comparator;
 import pet.eq.*;
 
 /**
- * Utility methods for game objects, most methods are just interested in game type
+ * Utility methods for game objects, most methods are just interested in game
+ * type and return various fixed properties of that game
  */
 public class GameUtil {
 	
@@ -250,8 +251,8 @@ public class GameUtil {
 	/**
 	 * Get poker equity function for game type.
 	 */
-	public static Poker getPoker(Game game) {
-		switch (game.type) {
+	public static Poker getPoker(int gameType) {
+		switch (gameType) {
 			case Game.FCD_TYPE:
 				return drawPoker;
 			case Game.HE_TYPE:
@@ -270,10 +271,13 @@ public class GameUtil {
 			case Game.STUDHL_TYPE:
 				return studHLPoker;
 			default:
-				throw new RuntimeException("no poker for game " + game);
+				throw new RuntimeException("no poker for game " + gameType);
 		}
 	}
 	
+	/**
+	 * get the hi rank names for the game type (not low ranks if hi/lo split)
+	 */
 	public static String[] getRanksHi(int gameType) {
 		switch (gameType) {
 			case Game.FCD_TYPE:
@@ -293,4 +297,27 @@ public class GameUtil {
 		}
 	}
 	
+	/**
+	 * get the number of draws remaining for the game type and street index
+	 */
+	public static int getDraws(int gameType, int streetIndex) {
+		switch (gameType) {
+			case Game.HE_TYPE:
+			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
+			case Game.STUD_TYPE:
+			case Game.STUDHL_TYPE:
+			case Game.RAZZ_TYPE:
+				return 0;
+			case Game.FCD_TYPE:
+			case Game.DSSD_TYPE:
+				// 1, 0 draws
+				return 1 - streetIndex;
+			case Game.DSTD_TYPE:
+				// 3, 2, 1, 0 draws
+				return 3 - streetIndex; 
+			default:
+				throw new RuntimeException("no hi ranks for game " + gameType);
+		}
+	}
 }

@@ -8,7 +8,7 @@ import pet.hp.*;
 public class HandStateUtil {
 	
 	private static final ArrayList<List<HandState>> cache = new ArrayList<List<HandState>>();
-	private static final int cacheSize = 10;
+	private static final int cacheSize = 100;
 	
 	/**
 	 * Get the first seat state for each street for the given seat
@@ -33,7 +33,7 @@ public class HandStateUtil {
 	 */
 	// synchronize for cache, but sampled equity calc can be slow...
 	public static synchronized List<HandState> getStates(final Hand hand) {
-		System.out.println("get hands states for " + hand);
+		System.out.println("hand state util: get hand states for " + hand);
 		// see if we've already done this hand
 		for (List<HandState> l : cache) {
 			if (l.get(0).hand.id.equals(hand.id)) {
@@ -41,7 +41,7 @@ public class HandStateUtil {
 				return l;
 			}
 		}
-		
+
 		final List<HandState> states = new ArrayList<HandState>();
 		
 		// initial state (not displayed)
@@ -57,7 +57,7 @@ public class HandStateUtil {
 		}
 		
 		// equity stuff
-		final Poker poker = GameUtil.getPoker(hand.game);
+		final Poker poker = GameUtil.getPoker(hand.game.type);
 		final int minHoleCards = GameUtil.getMinHoleCards(hand.game.type);
 		final List<String[]> holeCards = new ArrayList<String[]>();
 		final List<SeatState> holeCardSeats = new ArrayList<SeatState>();
@@ -133,9 +133,10 @@ public class HandStateUtil {
 				}
 			}
 			
-			String[][] holeCardsArr = holeCards.toArray(new String[holeCards.size()][]);
-			String[] blockersArr = blockers.toArray(new String[blockers.size()]);
-			MEquity[] eqs = poker.equity(hs.board, holeCardsArr, blockersArr);
+			// draws depends on game and street
+			int draws = GameUtil.getDraws(hand.game.type, s);
+			List<String> boardList = hs.board != null ? Arrays.asList(hs.board) : null;
+			MEquity[] eqs = poker.equity(boardList, holeCards, blockers, draws);
 			for (int n = 0; n < holeCardSeats.size(); n++) {
 				SeatState ss = holeCardSeats.get(n);
 				ss.meq = eqs[n];
@@ -227,6 +228,7 @@ public class HandStateUtil {
 		}
 		cache.add(states);
 		
+		System.out.println("hand state util: returning " + states.size() + " hand states");
 		return states;
 	}
 	

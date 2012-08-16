@@ -12,15 +12,18 @@ public class DrawPoker extends Poker {
 	 * Calculate draw equity using random remaining cards.
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
-	private static MEquity[] equityImpl(Value value, String[][] holeCards, String[] blockers) {
-		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards));
-
+	private static MEquity[] equityImpl(Value value, String[][] holeCards, String[] blockers, int draws) {
+		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " draws " + draws);
+		if (draws < 0 || draws > 3) {
+			throw new RuntimeException("invalid draws: " + draws);
+		}
+		
 		// remaining cards in deck
 		final String[] deck = Poker.remdeck(holeCards, blockers);
-
+		
 		// return value
 		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, false, value.eqtype(), deck.length, false);
-
+		
 		// get current hand values (not equity)
 		final int[] vals = new int[holeCards.length];
 		for (int n = 0; n < holeCards.length; n++) {
@@ -29,50 +32,64 @@ public class DrawPoker extends Poker {
 			}
 		}
 		MEquityUtil.updateCurrent(meqs, value.eqtype(), vals);
-
-		final String[] h = new String[5];
-
-		// get hand values for picks
-		final int c = 100000;
-		final long[] pick = new long[1];
-		final Random r = new Random();
 		
-		for (int p = 0; p < c; p++) {
-			pick[0] = 0;
-			for (int hn = 0; hn < holeCards.length; hn++) {
-				// could be any length
-				String[] hand = holeCards[hn];
-				for (int n = 0; n < 5; n++) {
-					if (hand.length > n) {
-						h[n] = hand[n];
-					} else {
-						h[n] = ArrayUtil.pick(r, deck, pick);
-					}
-				}
-				int v = value.value(h);
-				vals[hn] = v;
-			}
+		if (draws == 0) {
+			// final street, just return current values
+			System.out.println("no draws, using current");
 			int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
 			if (hw >= 0) {
 				meqs[hw].scoopcount++;
 			}
+			MEquityUtil.summariseEquity(meqs, 1, 0);
+			
+		} else {
+			// draw at least once
+			final String[] hand = new String[5];
+			final int samples = 10000;
+			final Random r = new Random();
+			System.out.println("draw " + draws + ", " + samples + " samples");
+			
+			for (int s = 0; s < samples; s++) {
+				ArrayUtil.shuffle(deck, r);
+				int di = 0;
+				
+				for (int hn = 0; hn < holeCards.length; hn++) {
+					int maxv = 0;
+					// run the draw multiple times and keep the best
+					// this will tend to overestimate equity as players
+					// might stand pat on a later draw with a marginal hand
+					// XXX if cards length is 5, don't bother with multiple draws
+					for (int d = 0; d < draws; d++) {
+						// could be any length
+						String[] cards = holeCards[hn];
+						for (int n = 0; n < 5; n++) {
+							if (cards.length > n) {
+								hand[n] = cards[n];
+							} else {
+								hand[n] = deck[di];
+								// lots of hands and draws might use whole deck
+								// ideally should reshuffle but might get same card twice in hand
+								di = (di + 1) % deck.length;
+							}
+						}
+						int v = value.value(hand);
+						if (v > maxv) {
+							maxv = v;
+						}
+					}
+					vals[hn] = maxv;
+				}
+				int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
+				if (hw >= 0) {
+					meqs[hw].scoopcount++;
+				}
+			}
+			MEquityUtil.summariseEquity(meqs, samples, 0);
 		}
-
-		MEquityUtil.summariseEquity(meqs, c, 0);
+		
 		return meqs;
 	}
-
-	public static void main(String[] args) {
-		String[] x = new String[] { "Ah", "Ad", "2c", "3d", "4c" };
-		//String[] x = new String[] { "7c", "7s", "Qs", "7d", "Jd" };
-		//String[] x = new String[] { "Ah", "Kh", "Kc", "2h", "3h" };
-		//String[] x = new String[] { "4c", "5h", "6d", "7s", "9h" };
-		for (int n = 0; n <= 5; n++) {
-			String[] y = getDrawingHand(x, n);
-			System.out.println("draw " + n + " => " + Arrays.toString(y));
-		}
-	}
-
+	
 	/**
 	 * Guess the players drawing hand.
 	 * Always returns new array.
@@ -100,7 +117,7 @@ public class DrawPoker extends Poker {
 				throw new RuntimeException("invalid drawn " + drawn);
 		}
 	}
-
+	
 	/**
 	 * get the high card in the hand.
 	 * always returns new array
@@ -143,7 +160,7 @@ public class DrawPoker extends Poker {
 		final int pmax = MathsUtil.bincoff(5, 5 - drawn);
 		final int qmax = MathsUtil.bincoff(deck.length, drawn);
 		int maxv = 0;
-
+		
 		for (int p = 0; p < pmax; p++) {
 			// pick kept from hand
 			MathsUtil.kcomb(5 - drawn, p, hand, h, 0);
@@ -175,10 +192,13 @@ public class DrawPoker extends Poker {
 	public DrawPoker(boolean high) {
 		this.high = high;
 	}
-
+	
 	@Override
-	public MEquity[] equity(String[] board, String[][] hands, String[] blockers) {
-		return equityImpl(high ? Value.hiValue : Value.dsLowValue, hands, blockers);
+	public MEquity[] equity(String[] board, String[][] hands, String[] blockers, int draws) {
+		if (board != null) {
+			throw new RuntimeException("invalid board: " + Arrays.toString(board));
+		}
+		return equityImpl(high ? Value.hiValue : Value.dsLowValue, hands, blockers, draws);
 	}
 	
 	@Override
@@ -188,5 +208,5 @@ public class DrawPoker extends Poker {
 		}
 		return value(hole);
 	}
-
+	
 }

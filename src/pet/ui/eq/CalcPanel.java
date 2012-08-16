@@ -11,11 +11,6 @@ import javax.swing.*;
 
 /**
  * displays a deck and the game specific calc panel
- * [deck] gridy=0
- *   [board] setboard() gridy=1
- *   [hands scroll] sethands() gridy=2
- * [[rand opts] hide num rand] addrandopt() gridy=4
- * [[calc opts] clear calc] addcalcopt() gridy=5
  */
 public abstract class CalcPanel extends JPanel {
 	
@@ -122,6 +117,7 @@ public abstract class CalcPanel extends JPanel {
 		
 		randPanel.add(randOptsPanel);
 		randPanel.add(hideButton);
+		randPanel.add(new JLabel("Players"));
 		randPanel.add(randNumOppSpinner);
 		randPanel.add(randButton);
 		c.gridy = 4;

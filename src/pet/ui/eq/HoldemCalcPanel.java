@@ -167,7 +167,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		final List<String> blockers = getBlockers();
 		final PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		final MEquity[] eqs = pokerItem.poker.equity(board, holeCards, blockers);
+		final MEquity[] eqs = pokerItem.poker.equity(board, holeCards, blockers, 0);
 		
 		for (int n = 0; n < eqs.length; n++) {
 			holeCardsHandPanels.get(n).setEquity(eqs[n]);

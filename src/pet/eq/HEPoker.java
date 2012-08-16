@@ -44,7 +44,10 @@ public class HEPoker extends Poker {
 	
 	// sync to protect changes to temp
 	@Override
-	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers) {
+	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
+		if (draws != 0) {
+			throw new RuntimeException();
+		}
 		Arrays.fill(valueTemp, null);
 		validateBoard(board);
 		for (String[] hole : holeCards) {
