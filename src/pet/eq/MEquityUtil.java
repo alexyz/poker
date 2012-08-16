@@ -196,4 +196,38 @@ public class MEquityUtil {
 		return s;
 	}
 	
+
+	/** get name of equity type */
+	public static String getEqTypeName(int eqtype) {
+		switch (eqtype) {
+			case Equity.DSLO_ONLY: return "2-7 Low Only";
+			case Equity.AFLO_ONLY: return "A-5 Low Only";
+			case Equity.AFLO8_ONLY: return "A-5 Low (8) Only";
+			case Equity.HI_ONLY: return "High Only";
+			case Equity.HILO_HI_HALF: return "High Half";
+			case Equity.HILO_AFLO8_HALF: return "A-5 Low (8) Half";
+			default: throw new RuntimeException("no such equity type: " + eqtype);
+		}
+	}
+	
+	/**
+	 * get the array of rank names for the equity type. can't use current value
+	 * to get type because it might not be set
+	 */
+	public static String[] getRankNames(int eqtype) {
+		switch (eqtype) {
+			case Equity.DSLO_ONLY: 
+				return Poker.dsLowRankNames;
+			case Equity.AFLO_ONLY:
+			case Equity.HILO_AFLO8_HALF:
+			case Equity.AFLO8_ONLY: 
+				return Poker.afLowRankNames;
+			case Equity.HI_ONLY:
+			case Equity.HILO_HI_HALF:
+				return Poker.ranknames;
+			default: 
+				throw new RuntimeException("no such equity type: " + eqtype);
+		}
+	}
+	
 }

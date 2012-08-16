@@ -7,6 +7,10 @@ import java.awt.Color;
  */
 public class PokerUtil {
 	
+	public static String cardString(String card) {
+		return new String(new char[] { Poker.face(card), PokerUtil.suitSymbol(card, false) });
+	}
+	
 	/**
 	 * convert hand to unicode symbols
 	 */

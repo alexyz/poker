@@ -48,39 +48,6 @@ public class Equity {
 	/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
 	public static final int AFLO8_ONLY = 6;
 	
-	/** get name of equity type */
-	public static String getEqTypeName(int eqtype) {
-		switch (eqtype) {
-			case DSLO_ONLY: return "2-7 Low Only";
-			case AFLO_ONLY: return "A-5 Low Only";
-			case AFLO8_ONLY: return "A-5 Low (8) Only";
-			case HI_ONLY: return "High Only";
-			case HILO_HI_HALF: return "High Half";
-			case HILO_AFLO8_HALF: return "A-5 Low (8) Half";
-			default: throw new RuntimeException("no such equity type: " + eqtype);
-		}
-	}
-	
-	/**
-	 * get the array of rank names for the equity type. can't use current value
-	 * to get type because it might not be set
-	 */
-	public static String[] getRankNames(int eqtype) {
-		switch (eqtype) {
-			case DSLO_ONLY: 
-				return Poker.dsLowRankNames;
-			case AFLO_ONLY:
-			case HILO_AFLO8_HALF:
-			case AFLO8_ONLY: 
-				return Poker.afLowRankNames;
-			case HI_ONLY:
-			case HILO_HI_HALF:
-				return Poker.ranknames;
-			default: 
-				throw new RuntimeException("no such equity type: " + eqtype);
-		}
-	}
-	
 	/** equity type description */
 	public final int eqtype;
 	/** current value */
@@ -101,8 +68,8 @@ public class Equity {
 	public float total;
 	/** percentage of hands won or tied by rank (value >> 20) */
 	public final float[] wonrank = new float[Poker.RANKS];
-	/** map of cards to percentage times that card will make best hand */
-	public final List<Out> outs = new ArrayList<Out>();
+	/** list of cards and percentage times that card is included in a pick that will make best hand */
+	public final List<Out> outs;
 	
 	// transient stuff
 	
@@ -115,10 +82,12 @@ public class Equity {
 	/** winning ranks */
 	final int[] wonrankcount = new int[Poker.RANKS];
 	/** count that each card (as part of group of cards) will make the best hand */
-	final int[] outcount = new int[52];
+	final int[] outcount;
 	
-	public Equity(int eqtype) {
+	public Equity(int eqtype, boolean hasouts) {
 		this.eqtype = eqtype;
+		this.outcount = hasouts ? new int[52] : null;
+		this.outs = hasouts ? new ArrayList<Out>() : null;
 	}
 
 	/**
@@ -144,23 +113,25 @@ public class Equity {
 	 * Summarise out probabilities for given number of picks from remaining cards
 	 */
 	void summariseOuts(float remCards, float picks, float samples) {
-		// maximum number of times an out can appear (average if sampled)
-		// prob of appearing once is picks/remCards, just multiply by samples
-		// (n,k,s) = (k*s)/n
-		// (52,1,52) = 1,  (52,2,1326) = 51,  (52,3,100000) = 5769 
-		float max = (picks * samples) / remCards;
-		System.out.println(String.format("sum outs(%f,%f,%f) max=%f", remCards, picks, samples, max));
-		for (int n = 0; n < outcount.length; n++) {
-			int count = outcount[n];
-			if (count > 0) {
-				String card = Poker.indexToCard(n);
-				float pc = (count * 100f) / max;
-				outs.add(new Out(card, pc));
+		if (outcount != null) {
+			// maximum number of times an out can appear (average if sampled)
+			// prob of appearing once is picks/remCards, just multiply by samples
+			// (n,k,s) = (k*s)/n
+			// (52,1,52) = 1,  (52,2,1326) = 51,  (52,3,100000) = 5769 
+			float max = (picks * samples) / remCards;
+			System.out.println(String.format("sum outs(%f,%f,%f) max=%f", remCards, picks, samples, max));
+			for (int n = 0; n < outcount.length; n++) {
+				int count = outcount[n];
+				if (count > 0) {
+					String card = Poker.indexToCard(n);
+					float pc = (count * 100f) / max;
+					outs.add(new Out(card, pc));
+				}
 			}
+			Collections.sort(outs);
+			Collections.reverse(outs);
+			System.out.println("outs are " + outs);
 		}
-		Collections.sort(outs);
-		Collections.reverse(outs);
-		System.out.println("outs are " + outs);
 	}
 	
 }

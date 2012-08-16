@@ -27,15 +27,16 @@ public class MEquity {
 	/** create mequity - either hi/hi half/lo half or with given equity type, not both */
 	MEquity(boolean hilo, int eqtype, int rem, boolean exact) {
 		this.hilo = hilo;
+		// keep track of outs only if exact
 		if (hilo) {
 			this.eqs = new Equity[] { 
-					new Equity(Equity.HI_ONLY), 
-					new Equity(Equity.HILO_HI_HALF),
-					new Equity(Equity.HILO_AFLO8_HALF) 
+				new Equity(Equity.HI_ONLY, exact), 
+				new Equity(Equity.HILO_HI_HALF, exact),
+				new Equity(Equity.HILO_AFLO8_HALF, exact) 
 			};
 		} else {
 			this.eqs = new Equity[] { 
-					new Equity(eqtype) 
+				new Equity(eqtype, exact) 
 			};
 		}
 		this.remCards = rem;

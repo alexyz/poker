@@ -9,8 +9,8 @@ import pet.eq.*;
 /** show high hand ranks */
 public class RanksPanel extends JPanel {
 	
-	private final Font font = UIManager.getFont("Label.font");
-	private final Font fontbold = font.deriveFont(Font.BOLD);
+	private final Font font = new Font("SansSerif", Font.PLAIN, 12);
+	//private final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
 	
 	private final JLabel[] rankLabs;
 	
@@ -39,12 +39,13 @@ public class RanksPanel extends JPanel {
 	
 	/** populate the rank names and win percentages */
 	public void setEquity(Equity e) {
-		String[] names = Equity.getRankNames(e.eqtype);
+		String[] names = MEquityUtil.getRankNames(e.eqtype);
 		for (int n = 0; n < rankLabs.length; n++) {
 			JLabel rl = rankLabs[n];
 			if (names != null && names.length > n) {
 				rl.setForeground(e.wonrank[n] > 0 ? Color.black : Color.darkGray);
-				rl.setFont(e.wonrank[n] > 0 ? fontbold : font);
+				//rl.setFont(e.wonrank[n] > 0 ? boldfont : font);
+				rl.setFont(font);
 				rl.setText(String.format("%s: %.0f", names[n], e.wonrank[n]));
 			} else {
 				rl.setText("");

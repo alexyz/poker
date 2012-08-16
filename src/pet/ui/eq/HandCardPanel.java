@@ -4,16 +4,12 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.*;
 
 import pet.eq.*;
 
 /**
  * extends card panel to show hand equity statistics
- *        [total] [scoop] [low poss]
- *        [hi eq] [hi cur] [hi outs]
- * [hand] [hi ranks]
- *        [low eq] [low cur] [low outs]
- *        [low ranks]
  */
 class HandCardPanel extends CardPanel {
 	
@@ -38,9 +34,7 @@ class HandCardPanel extends CardPanel {
 	}
 	
 	private final TotalPanel totalPanel = new TotalPanel();
-	private final EquityPanel[] equityPanels = new EquityPanel[3];
-	private final RanksPanel[] rankPanels = new RanksPanel[3];
-	private final OutsPanel[] outsPanels = new OutsPanel[3];
+	private final AllPanels[] panels = new AllPanels[3];
 	
 	public HandCardPanel(String name, int mincards, int maxcards, boolean below) {
 		super(name, mincards, maxcards);
@@ -55,16 +49,9 @@ class HandCardPanel extends CardPanel {
 		p.add(totalPanel, g);
 		
 		for (int n = 0; n < 3; n++) {
-			equityPanels[n] = new EquityPanel();
-			rankPanels[n] = new RanksPanel();
-			outsPanels[n] = new OutsPanel();
-			
+			panels[n] = new AllPanels();
 			g.gridy++;
-			p.add(equityPanels[n], g);
-			g.gridy++;
-			p.add(rankPanels[n], g);
-			g.gridy++;
-			p.add(outsPanels[n], g);
+			p.add(panels[n], g);
 		}
 		
 		// add to superclass layout
@@ -76,12 +63,14 @@ class HandCardPanel extends CardPanel {
 	private void clearEquity() {
 		totalPanel.clearEquity();
 		for (int n = 0; n < 3; n++) {
-			equityPanels[n].clearEquity();
-			rankPanels[n].clearEquity();
-			outsPanels[n].clearEquity();
-			equityPanels[n].setVisible(false);
-			rankPanels[n].setVisible(false);
-			outsPanels[n].setVisible(false);
+			AllPanels p = panels[n];
+			p.setBorder(null);
+			p.equityPanel.clearEquity();
+			p.rankPanel.clearEquity();
+			p.outsPanel.clearEquity();
+			p.equityPanel.setVisible(false);
+			p.rankPanel.setVisible(false);
+			p.outsPanel.setVisible(false);
 		}
 	}
 	
@@ -91,11 +80,14 @@ class HandCardPanel extends CardPanel {
 		if (me != null) {
 			totalPanel.setEquity(me);
 			for (int n = 0; n < me.eqs.length; n++) {
-				equityPanels[n].setEquity(me, me.eqs[n]);
-				equityPanels[n].setVisible(true);
-				rankPanels[n].setEquity(me.eqs[n]);
-				rankPanels[n].setVisible(true);
-				outsPanels[n].setEquity(me.eqs[n], me.remCards);
+				Equity e = me.eqs[n];
+				AllPanels p = panels[n];
+				p.setBorder(e.curwin ? new LineBorder(Color.green) : e.curtie ? new LineBorder(Color.yellow) : null);
+				p.equityPanel.setEquity(e);
+				p.equityPanel.setVisible(true);
+				p.rankPanel.setEquity(e);
+				p.rankPanel.setVisible(true);
+				p.outsPanel.setEquity(e, me.remCards);
 			}
 		}
 		
@@ -107,6 +99,18 @@ class HandCardPanel extends CardPanel {
 		clearEquity();
 	}
 	
+}
+
+class AllPanels extends JPanel {
+	final EquityPanel equityPanel = new EquityPanel();
+	final RanksPanel rankPanel = new RanksPanel();
+	final OutsPanel outsPanel = new OutsPanel();
+	public AllPanels() {
+		super(new GridLayout(3,1));
+		add(equityPanel);
+		add(rankPanel);
+		add(outsPanel);
+	}
 }
 
 class TotalPanel extends JPanel {
