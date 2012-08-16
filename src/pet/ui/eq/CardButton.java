@@ -40,7 +40,7 @@ class CardButton extends JToggleButton {
 	}
 	
 	public void setCard(String card) {
-		System.out.println("card button " + getName() + " set card " + card);
+		//System.out.println("card button " + getName() + " set card " + card);
 		this.card = card;
 		update();
 	}

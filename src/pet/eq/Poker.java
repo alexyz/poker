@@ -19,12 +19,12 @@ public abstract class Poker {
 	
 	/** hand value type mask */
 	protected static final int TYPE = 0xf000000;
-	/** high hand value type */
+	/** high hand valuation type */
 	protected static final int HI_TYPE = 0;
-	/** deuce to seven low hand value type */
+	/** deuce to seven low hand valuation type */
 	protected static final int DS_LOW_TYPE = 0x1000000;
 	/**
-	 * ace to five low hand value type - do MAX_MASK - (value & HAND) to get
+	 * ace to five low hand valuation type - do MAX_MASK - (value & HAND) to get
 	 * apparent high value
 	 */
 	protected static final int AF_LOW_TYPE = 0x2000000;
@@ -52,10 +52,10 @@ public abstract class Poker {
 	protected static final int FK_MASK = 0x700000;
 	/** straight flush rank mask */
 	protected static final int SF_MASK = 0x800000;
-	/** impossible rank higher than straight flush */
+	/** impossible rank higher than straight flush for low hand value purposes */
 	protected static final int MAX_MASK = 0x900000;
 	
-	/** number of high ranks */
+	/** max number of possible ranks (all valuation types) */
 	public static final int RANKS = 9;
 	
 	/**
@@ -65,6 +65,8 @@ public abstract class Poker {
 	
 	/** short rank names for ace to five low hands */
 	public static final String[] afLowRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
+	
+	public static final String[] dsLowRankNames = { "7H", "8H", "9H", "TH", "Hc", "P+" };
 	
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
@@ -378,32 +380,36 @@ public abstract class Poker {
 	 * type
 	 */
 	public static int rank(int value) {
-		switch (value & TYPE) {
+		int t = value & TYPE;
+		int x;
+		switch (t) {
 			case HI_TYPE:
 				return (value & RANK) >> 20;
-				
 			case AF_LOW_TYPE:
-				// ranks are: 5, 6, 7, 8, Hc, P+
-				final int v = MAX_MASK - (value & HAND);
-				final int r = v & RANK;
-				if (r == H_MASK) {
-					// most significant card
-					switch ((v >> 16) & 0xf) {
-						case 5: return 0;
-						case 6: return 1;
-						case 7: return 2;
-						case 8: return 3;
-						default: return 4;
-					}
-				} else {
-					// pair or greater
-					return 5;
-				}
-				
-				// TODO 2-7 ranks
-				
+				x = 5;
+				break;
+			case DS_LOW_TYPE:
+				x = 7;
+				break;
 			default:
-				return 0;
+				throw new RuntimeException();
+		}
+		
+		// get low rank
+		final int v = MAX_MASK - (value & HAND);
+		final int r = v & RANK;
+		if (r == H_MASK) {
+			final int c = (v >> 16) & 0xf;
+			if (c < x + 4) {
+				// 5-8 or 7-10
+				return c - x;
+			} else {
+				// other high card
+				return 4;
+			}
+		} else {
+			// pair or greater
+			return 5;
 		}
 	}
 	

@@ -24,11 +24,12 @@ public class PlayerGameInfo {
 	public int pip = 0;
 	
 	/** number of hands won by rank */
-	private final int[] rankwon = new int[Poker.RANKS];
+	private final int[] rankwon;
 	/** number of hands lost by rank */
-	private final int[] ranklost = new int[Poker.RANKS];
+	private final int[] ranklost;
 	/** amount won - pip by rank */
-	private final int[] rankam = new int[Poker.RANKS];
+	private final int[] rankam;
+	
 	/** number of times initiative was taken on each street */
 	private final int[] streetinits;
 	/** number of times each street was seen */
@@ -56,12 +57,21 @@ public class PlayerGameInfo {
 		int s = GameUtil.getMaxStreets(game.type);
 		streetinits = new int[s];
 		streetsseen = new int[s];
+		
+		int r = GameUtil.getRanksHi(game.type).length;
+		rankwon = new int[r];
+		ranklost = new int[r];
+		rankam = new int[r];
 	}
 
 	/**
 	 * add this hand at this seat to the players game info
 	 */
 	public void add(Hand hand, Seat seat) {
+		if (hand.game.type != game.type) {
+			throw new RuntimeException();
+		}
+		
 		hands++;
 		pip += seat.pip;
 
@@ -88,12 +98,17 @@ public class PlayerGameInfo {
 		}
 
 		// count winning rank.. if you dare!
-		if (seat.showdown) {
-			Poker p = GameUtil.getPoker(hand.game);
-			int v = p.value(hand.board, seat.cards());
+		if (seat.showdown && (!game.hilo || hand.showdownNoLow)) {
+			Poker p = GameUtil.getPoker(game);
+			String[] cards = seat.cards();
+			int v = p.value(hand.board, cards);
 			int r = Poker.rank(v);
 			(seat.won > 0 ? rankwon : ranklost)[r]++;
-			rankam[r]+=seat.won-seat.pip;
+			int am = seat.won - seat.pip;
+			rankam[r] += am;
+			
+			// TODO
+			// count low ranks - but need to know which halfs we won for hi/lo split
 		}
 
 		boolean hasVpip = false;
@@ -331,9 +346,11 @@ public class PlayerGameInfo {
 				sb.append("\n");
 			}
 		}
-		sb.append("Showdown ranks:\n");
-		for (int n = 0; n < Poker.RANKS; n++) {
-			sb.append("  ").append(Poker.ranknames[n]);
+		
+		sb.append("Showdown ranks (hi only for hi/lo):\n");
+		String[] ranks = GameUtil.getRanksHi(game.type);
+		for (int n = 0; n < ranks.length; n++) {
+			sb.append("  ").append(ranks[n]);
 			sb.append(" times won ").append(rankwon[n]);
 			sb.append(" times lost ").append(ranklost[n]);
 			sb.append(" amount ").append(rankam[n]);

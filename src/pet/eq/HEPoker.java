@@ -73,7 +73,6 @@ public class HEPoker extends Poker {
 		if (board == null) {
 			// could use the draw poker getPair method...
 			return 0;
-			
 		} else {
 			return heValue(Value.hiValue, board, hole);
 		}

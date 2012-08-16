@@ -48,6 +48,7 @@ public class HandInfo {
 	public HandValue rank() {
 		if (rank == null) {
 			Poker p = GameUtil.getPoker(hand.game);
+			// XXX high only...
 			int v = p.value(hand.board, hand.myseat.cards());
 			rank = new HandValue(v);
 		}

@@ -120,6 +120,8 @@ public class History {
 		}
 
 		game.id = GameUtil.getGameId(game);
+		
+		// XXX should this be on the instance? or should it be GameUtil.isHilo(gameType)?
 		switch (game.type) {
 			case Game.STUDHL_TYPE:
 			case Game.OMHL_TYPE:
@@ -127,8 +129,9 @@ public class History {
 				break;
 			default:
 		}
+		
 		games.add(game);
-		System.out.println("new game " + game);
+		System.out.println("added game " + game);
 		
 		for (HistoryListener l : listeners) {
 			l.gameAdded(game);

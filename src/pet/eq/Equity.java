@@ -30,7 +30,10 @@ public class Equity {
 	
 	/*
 	 * equity types (note: hi/lo (8 or better) is not a type, it is actually
-	 * three types, hence the MEquity class)
+	 * three types, hence the MEquity class). These look similar to the
+	 * constants in the Poker class, such as AF_LOW_TYPE, but they deal with
+	 * hand valuation only, whereas these include the context of how that
+	 * valuation is used.
 	 */
 	/** deuce to seven low only equity type (single draw/triple draw) */
 	public static final int DSLO_ONLY = 1;
@@ -65,7 +68,7 @@ public class Equity {
 	public static String[] getRankNames(int eqtype) {
 		switch (eqtype) {
 			case DSLO_ONLY: 
-				return null;
+				return Poker.dsLowRankNames;
 			case AFLO_ONLY:
 			case HILO_AFLO8_HALF:
 			case AFLO8_ONLY: 

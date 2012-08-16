@@ -274,4 +274,23 @@ public class GameUtil {
 		}
 	}
 	
+	public static String[] getRanksHi(int gameType) {
+		switch (gameType) {
+			case Game.FCD_TYPE:
+			case Game.HE_TYPE:
+			case Game.OM_TYPE:
+			case Game.OMHL_TYPE:
+			case Game.STUD_TYPE:
+			case Game.STUDHL_TYPE:
+				return Poker.ranknames;
+			case Game.DSTD_TYPE:
+			case Game.DSSD_TYPE:
+				return Poker.dsLowRankNames;
+			case Game.RAZZ_TYPE:
+				return Poker.afLowRankNames;
+			default:
+				throw new RuntimeException("no hi ranks for game " + gameType);
+		}
+	}
+	
 }

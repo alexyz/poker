@@ -25,12 +25,18 @@ public abstract class DrawPoker2 extends Poker {
 	
 	
 	public static void main(String[] args) {
+		
+		int[] a = Poker.highValues();
+		for (int n = 0; n < a.length; n++) {
+			System.out.println(String.format("%.2f %03d -> %s", ((1f * n) / a.length), n, Poker.valueString(a[n])));
+		}
+		
 		/*
 		for (float f = 0; f <= 1f; f += (1f / 128)) {
-			i = (int) ((uniqueValues.length - 1) * f);
-			System.out.println("f " + f + " hand " + Poker.valueString(uniqueValues[i]));
+			int i = (int) ((a.length - 1) * f);
+			System.out.println("f " + f + " hand " + Poker.valueString(a[i]));
 		}
-		 */
+		*/
 		
 		//avghand();
 		
@@ -48,9 +54,9 @@ public abstract class DrawPoker2 extends Poker {
 		//String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
 		
 		String[] x = new String[] { "2c", "5d", "4h", "8d", "4c" };
-		
+
+		/*
 		List<Draw> l = new ArrayList<Draw>();
-		
 		for (int n = 0; n <= 5; n++) {
 			String[] y = getDrawingHand(l, x, n, Value.dsLowValue, 2f);
 			String[] z = DrawPoker.getDraw(x, n);
@@ -63,7 +69,7 @@ public abstract class DrawPoker2 extends Poker {
 		for (Draw d : l) {
 			System.out.println(String.format("%.6f -> %s", d.score, Arrays.toString(d.hole)));
 		}
-		
+		*/
 	}
 	
 	/*

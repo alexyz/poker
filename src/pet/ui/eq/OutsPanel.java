@@ -3,6 +3,7 @@ package pet.ui.eq;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +39,8 @@ class OutsPanel extends JPanel {
 					minor.add(o.card);
 				}
 			}
+			// FIXME might be too many to display...
+			// could push into tool tip
 			if (major.size() > 0) {
 				String[] majorArr = major.toArray(new String[major.size()]);
 				outsLabel.setText("Outs (" + major.size() + "/" + remCards + "): " + PokerUtil.cardsString(majorArr));

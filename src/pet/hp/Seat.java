@@ -32,13 +32,14 @@ public class Seat implements Serializable {
 	 * it's not very practical there as you can only draw once per street anyway
 	 */
 	public byte drawn0, drawn1, drawn2;
-	/** seats hand reached show down */
+	/** seats hand reached show down. implies hand.showdown is true */
 	public boolean showdown;
 	/** seat posted a big blind */
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;
 	
+	/** get seats final cards (both down and up) */
 	public String[] cards() {
 		if (finalHoleCards != null) {
 			if (finalUpCards != null) {

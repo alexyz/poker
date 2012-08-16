@@ -35,7 +35,7 @@ public class Hand implements Serializable {
 	public Action[][] streets;
 	/** did hand reach showdown (can't just count streets as could have folded on river) */
 	public boolean showdown;
-	/** showdown for hi/lo game type did not have a low hand */
+	/** showdown for hi/lo game type did not have a low hand. only use if game.hilo is true */
 	public boolean showdownNoLow;
 	/** community cards if any */
 	public String[] board;
