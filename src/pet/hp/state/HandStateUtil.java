@@ -5,6 +5,9 @@ import java.util.*;
 import pet.eq.*;
 import pet.hp.*;
 
+/**
+ * creates hand state and seat state objects
+ */
 public class HandStateUtil {
 	
 	private static final ArrayList<List<HandState>> cache = new ArrayList<List<HandState>>();
@@ -136,6 +139,7 @@ public class HandStateUtil {
 			// draws depends on game and street
 			int draws = GameUtil.getDraws(hand.game.type, s);
 			List<String> boardList = hs.board != null ? Arrays.asList(hs.board) : null;
+			// XXX save params here so it can be shown in equity ui page
 			MEquity[] eqs = poker.equity(boardList, holeCards, blockers, draws);
 			for (int n = 0; n < holeCardSeats.size(); n++) {
 				SeatState ss = holeCardSeats.get(n);

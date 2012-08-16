@@ -27,13 +27,14 @@ public abstract class CalcPanel extends JPanel {
 	private final JButton calcButton = new JButton("Calculate");
 	private final JScrollPane scroller = new JScrollPane();
 	/**
-	 * the list of card buttons used by the board, player hole cards and blockers
+	 * the list of all card buttons used by the board, player hole cards and
+	 * blockers (in that order)
 	 */
 	private final List<CardButton> cardButtons = new ArrayList<CardButton>();
 	
 	private HandCardPanel[] cardPanels;
 	private CardPanel boardPanel;
-
+	
 	public CalcPanel() {
 		setLayout(new GridBagLayout());
 		
@@ -54,26 +55,29 @@ public abstract class CalcPanel extends JPanel {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
 				System.out.println("calc panel deck card selected prop change");
-				// set the selected card to the deck card and move to next card
-				for (int n = 0; n < cardButtons.size(); n++) {
-					CardButton b = cardButtons.get(n);
-					if (b.isSelected()) {
-						String oldc = b.getCard();
-						String newc = (String) e.getNewValue();
-						if (oldc != null && !oldc.equals(newc)) {
-							deckPanel.setCardSelected(oldc, false);
+				find: {
+					String newCard = (String) e.getNewValue();
+					for (int n = 0; n < cardButtons.size(); n++) {
+						CardButton b = cardButtons.get(n);
+						if (b.isSelected()) {
+							// set the selected card to the deck card and move to next card
+							String oldCard = b.getCard();
+							if (oldCard != null && !oldCard.equals(newCard)) {
+								deckPanel.setCardSelected(oldCard, false);
+							}
+							b.setCard(newCard);
+							b.setSelected(false);
+							
+							// select next button
+							CardButton nb = cardButtons.get((n + 1) % cardButtons.size());
+							nb.setSelected(true);
+							// req focus? will take it from deck
+							break find;
 						}
-						b.setCard(newc);
-						b.setSelected(false);
-						
-						// select next button
-						CardButton nb = cardButtons.get((n + 1) % cardButtons.size());
-						nb.setSelected(true);
-						// req focus? will take it from deck
-						break;
 					}
+					// reject if no card selected
+					deckPanel.setCardSelected(newCard, false);
 				}
-				// FIXME if no card selected, set first (or reject)
 			}
 		});
 		
@@ -129,7 +133,7 @@ public abstract class CalcPanel extends JPanel {
 				clear();
 			}
 		});
-
+		
 		calcButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -194,7 +198,7 @@ public abstract class CalcPanel extends JPanel {
 	protected void addCalcOpt(JComponent c) {
 		calcOptsPanel.add(c);
 	}
-
+	
 	/**
 	 * Add selection listener to all the card labels. Need to call setBoard,
 	 * setCardPanels first.
@@ -248,28 +252,39 @@ public abstract class CalcPanel extends JPanel {
 				char c1 = 0;
 				@Override
 				public void keyTyped(KeyEvent e) {
-					// TODO also detect backspace, delete, return (next row/board if blank)
 					char c2 = e.getKeyChar();
-					if (c1 != 0) {
+					System.out.println("calc panel typed " + Integer.toHexString(e.getKeyChar()));
+					if (c2 == '\n') {
+						System.out.println("-- return --");
+						for (CardButton ob : cardButtons) {
+							ob.setSelected(false);
+						}
+						// shift doesn't work
+						CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
+						nb.setSelected(true);
+						nb.requestFocusInWindow();
+						c1 = 0;
+						
+						// TODO backspace
+						
+					} else if (c1 != 0) {
 						String c = new String(new char[] { 
 								Character.toUpperCase(c1), 
 								Character.toLowerCase(c2) 
 						});
-						System.out.println("-- typed " + c + " --");
 						
 						// note: may already be selected in deck
 						if (deckPanel.setCardSelected(c, true)) {
 							// unset card from any other buttons
 							for (CardButton ob : cardButtons) {
+								ob.setSelected(false);
 								if (ob != b && ob.getCard() != null && ob.getCard().equals(c)) {
 									ob.setCard(null);
-									break;
 								}
 							}
 							
 							// set the card on this button
 							b.setCard(c);
-							b.setSelected(false);
 							
 							// focus next button
 							CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
@@ -285,7 +300,7 @@ public abstract class CalcPanel extends JPanel {
 			});
 		}
 	}
-
+	
 	/** select the given board/hole card number. need to call initCardLabels first */
 	protected void selectCard(int n) {
 		System.out.println("calc panel select card " + n);
@@ -317,7 +332,7 @@ public abstract class CalcPanel extends JPanel {
 		cardButtons.get(n).requestFocusInWindow();
 		scroller.getVerticalScrollBar().getModel().setValue(0);
 	}
-
+	
 	/**
 	 * Select the deck cards according to cards displayed in the card labels
 	 */
@@ -388,11 +403,11 @@ public abstract class CalcPanel extends JPanel {
 	
 	/** random button pressed */
 	protected abstract void random(int num);
-
+	
 	/** calc button pressed */
 	protected abstract void calc();
-
+	
 	/** hide the cards in the deck. subclass should also hide opponents hole card */
 	protected abstract void hideOpp(boolean hide);
-
+	
 }
