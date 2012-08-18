@@ -119,8 +119,8 @@ public class PokerFrame extends JFrame {
 			e.printStackTrace();
 		}
 		
-		tabs.addTab("Equity Calculator", eqTabs);
-		tabs.addTab("History Parser", hisTabs);
+		tabs.addTab("Equity", eqTabs);
+		tabs.addTab("History", hisTabs);
 		tabs.addTab("About", aboutPanel);
 		
 		eqTabs.addTab("Hold'em", holdemPanel);
@@ -128,7 +128,7 @@ public class PokerFrame extends JFrame {
 		eqTabs.addTab("Draw", drawPanel);
 		eqTabs.addTab("Stud", studPanel);
 		
-		hisTabs.addTab("History", historyPanel);
+		hisTabs.addTab("Files", historyPanel);
 		hisTabs.addTab("Players", playerPanel);
 		hisTabs.addTab("Games", gamesPanel);
 		hisTabs.addTab("Tournaments", new TournPanel());
@@ -146,7 +146,7 @@ public class PokerFrame extends JFrame {
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
-		// XXX causes infinite loop in jeditorpane layout
+		// XXX can cause infinite loop in jeditorpane layout
 		pack();
 	}
 	

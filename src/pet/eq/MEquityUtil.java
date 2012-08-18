@@ -31,15 +31,17 @@ public class MEquityUtil {
 				times++;
 			}
 		}
-		for (int i = 0; i < vals.length; i++) {
-			//Equity e = meqs[i].eq[eqtype];
-			Equity e = meqs[i].getEq(eqtype);
-			e.current = vals[i];
-			if (e.current == max) {
-				if (times == 1) {
-					e.curwin = true;
-				} else {
-					e.curtie = true;
+		// only set curwin, curtie if there actually is non zero current value
+		if (max > 0) {
+			for (int i = 0; i < vals.length; i++) {
+				Equity e = meqs[i].getEq(eqtype);
+				e.current = vals[i];
+				if (e.current == max) {
+					if (times == 1) {
+						e.curwin = true;
+					} else {
+						e.curtie = true;
+					}
 				}
 			}
 		}

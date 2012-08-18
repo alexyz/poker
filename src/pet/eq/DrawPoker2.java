@@ -20,16 +20,35 @@ public abstract class DrawPoker2 extends Poker {
 		public int compareTo(Draw other) {
 			return (int) Math.signum(score - other.score);
 		}
+		@Override
+		public String toString() {
+			return String.format("%.3f -> ", score) + PokerUtil.cardsString(hole);
+		}
 	}
 	
 	
 	
 	public static void main(String[] args) {
 		
+		String[] x = new String[] { "8h", "7h", "5s", "4c", "3s" };
+		System.out.println("==" + PokerUtil.cardsString(x) + "==");
+		for (float b = 1; b < 5; b++) {
+			System.out.println("--" + b + "--");
+			List<Draw> l = new ArrayList<Draw>();
+			String[] y = getDrawingHand(l, x, 1, Value.dsLowValue, b);
+			Collections.sort(l);
+			Collections.reverse(l);
+			for (Draw d : l) {
+				System.out.println("  " + d);
+			}
+		}
+		
+		/*
 		int[] a = Poker.highValues();
 		for (int n = 0; n < a.length; n++) {
 			System.out.println(String.format("%.2f %03d -> %s", ((1f * n) / a.length), n, Poker.valueString(a[n])));
 		}
+		*/
 		
 		/*
 		for (float f = 0; f <= 1f; f += (1f / 128)) {
@@ -53,7 +72,7 @@ public abstract class DrawPoker2 extends Poker {
 		//String[] x = new String[] { "4d", "6d", "5c", "3h", "5h" };
 		//String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
 		
-		String[] x = new String[] { "2c", "5d", "4h", "8d", "4c" };
+		//String[] x = new String[] { "2c", "5d", "4h", "8d", "4c" };
 
 		/*
 		List<Draw> l = new ArrayList<Draw>();

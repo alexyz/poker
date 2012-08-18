@@ -59,6 +59,10 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void calc() {
+		for (HandCardPanel hp : handPanels) {
+			hp.setEquity(null);
+		}
+		
 		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
 		List<String[]> cards = new ArrayList<String[]>();
 		collectCards(cards, cardPanels);

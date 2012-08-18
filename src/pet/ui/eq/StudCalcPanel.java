@@ -73,7 +73,11 @@ public class StudCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void calc() {
-		// FIXME validate
+		// TODO validate, e.g. no seventh card if board card
+		
+		for (HandCardPanel hp : handPanels) {
+			hp.setEquity(null);
+		}
 		
 		// get the hands and the panels of those hands
 		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();

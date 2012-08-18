@@ -85,7 +85,6 @@ public class CardsStateUtil {
 					
 				} else if (hand.myseat == seat) {
 					// return starting hand
-					// XXX should also return discarded
 					hc = kept(hand.myDrawCards0, seat.finalHoleCards, seat.drawn0);
 					
 				} else {

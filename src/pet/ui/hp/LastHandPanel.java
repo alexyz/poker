@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.text.DateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -41,6 +39,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 				HandStateItem states = (HandStateItem) e.getItem();
 				tableScroller.setBorder(new TitledBorder(states.hand.game.id));
 				((HandStateTableModel)handTable.getModel()).setRows(states.states);
+				updateAuto();
 			}
 		});
 
@@ -64,7 +63,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 				// get player name for selected row
 				int r = handTable.getSelectionModel().getMinSelectionIndex();
 				if (r >= 0) {
-					// not really needed, can't be sorted
+					// not really needed, as table can't be sorted
 					int sr = handTable.convertRowIndexToModel(r);
 					HandStateTableModel m = (HandStateTableModel) handTable.getModel();
 					HandState hs = m.getRow(sr);
@@ -151,13 +150,15 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			if (i >= 0 && i < stateCombo.getItemCount()) {
 				System.out.println("setting index " + i);
 				stateCombo.setSelectedIndex(i);
-				
-				// set auto if on last item
-				autoButton.setSelected(i == stateCombo.getItemCount() - 1);
-				
+				updateAuto();
 				repaint();
 			}
 		}
+	}
+	
+	private void updateAuto() {
+		// set auto if on last item
+		autoButton.setSelected(stateCombo.getSelectedIndex() == stateCombo.getItemCount() - 1);
 	}
 	
 	@Override
