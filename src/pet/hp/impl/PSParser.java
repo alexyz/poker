@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.regex.*;
 
 import pet.eq.ArrayUtil;
+import pet.eq.Equity;
+import pet.eq.MEquity;
+import pet.eq.Poker;
 import pet.hp.*;
 
 /**
@@ -141,15 +144,26 @@ public class PSParser extends Parser {
 		if (line.length() == 0) {
 			if (summaryPhase && hand != null) {
 				// finalise hand and return
+				
+				// get seats
 				hand.seats = seatsMap.values().toArray(new Seat[seatsMap.size()]);
 				// prob already sorted
 				Arrays.sort(hand.seats, HandUtil.seatCmp);
+				
+				// get actions
 				hand.streets = new Action[streets.size()][];
 				for (int n = 0; n < streets.size(); n++) {
 					List<Action> street = streets.get(n);
 					hand.streets[n] = street.toArray(new Action[street.size()]);
 				}
+				
 				hand.showdown = showdown;
+				
+				// check hands and won
+				if (hand.showdown) {
+					updateWon();
+				}
+				
 				history.addHand(hand);
 				if (hand.tourn != null) {
 					history.addTournPlayers(hand.tourn.id, seatsMap.keySet());
@@ -320,6 +334,49 @@ public class PSParser extends Parser {
 		}
 		
 		return false;
+	}
+
+	private void updateWon() {
+		List<String[]> cards = new ArrayList<String[]>();
+		List<Seat> seats = new ArrayList<Seat>();
+		for (Seat seat : hand.seats) {
+			if (seat.showdown) {
+				cards.add(seat.cards());
+				seats.add(seat);
+			}
+		}
+		
+		Poker poker = GameUtil.getPoker(hand.game.type);
+		List<String> boardList = hand.board != null ? Arrays.asList(hand.board) : null;
+		MEquity[] meqs = poker.equity(boardList, cards, null, 0);
+		
+		for (int n = 0; n < meqs.length; n++) {
+			Equity e = meqs[n].eqs[0];
+			Seat s = seats.get(n);
+			if (hand.game.hilo) {
+				Equity eh = meqs[n].eqs[1];
+				Equity el = meqs[n].eqs[2];
+				if (e.curwin || e.curtie || eh.curwin || eh.curtie) {
+					if (s.won == 0) {
+						throw new RuntimeException("did not win with best hi hand");
+					}
+					s.wonMainHigh = true;
+				}
+				if (el.curwin || el.curtie) {
+					if (s.won == 0) {
+						throw new RuntimeException("did not win with best lo hand");
+					}
+					s.wonMainLow = true;
+				}
+			} else {
+				if (e.curwin || e.curtie) {
+					if (s.won == 0) {
+						throw new RuntimeException("did not win with best hand");
+					}
+					s.wonMainHigh = true;
+				}
+			}
+		}
 	}
 
 	private void parseCollect(String line, int a) {

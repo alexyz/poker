@@ -27,7 +27,7 @@ public class Hand implements Serializable {
 	public int sb;
 	/** dead blinds posted */
 	public int antes;
-	/** participants in hand in seat order */
+	/** participants in hand in seat order (no null elements, missing empty seats) */
 	public Seat[] seats;
 	/** current players seat */
 	public Seat myseat;

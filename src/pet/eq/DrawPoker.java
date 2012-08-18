@@ -13,7 +13,6 @@ public class DrawPoker extends Poker {
 	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
 	 */
 	private static MEquity[] equityImpl(Value value, String[][] holeCards, String[] blockers, int draws) {
-		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " draws " + draws);
 		if (draws < 0 || draws > 3) {
 			throw new RuntimeException("invalid draws: " + draws);
 		}
@@ -22,7 +21,7 @@ public class DrawPoker extends Poker {
 		final String[] deck = Poker.remdeck(holeCards, blockers);
 		
 		// return value
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, false, value.eqtype(), deck.length, false);
+		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, false, value.eqtype(), deck.length, false);
 		
 		// get current hand values (not equity)
 		final int[] vals = new int[holeCards.length];
@@ -36,10 +35,7 @@ public class DrawPoker extends Poker {
 		if (draws == 0) {
 			// final street, just return current values
 			System.out.println("no draws, using current");
-			int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
-			if (hw >= 0) {
-				meqs[hw].scoopcount++;
-			}
+			MEquityUtil.updateEquityHi(meqs, value.eqtype(), vals, null);
 			MEquityUtil.summariseEquity(meqs, 1, 0);
 			
 		} else {
@@ -80,11 +76,9 @@ public class DrawPoker extends Poker {
 					}
 					vals[hn] = maxv;
 				}
-				int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), vals, null);
-				if (hw >= 0) {
-					meqs[hw].scoopcount++;
-				}
+				MEquityUtil.updateEquityHi(meqs, value.eqtype(), vals, null);
 			}
+			
 			MEquityUtil.summariseEquity(meqs, samples, 0);
 		}
 		
@@ -196,6 +190,7 @@ public class DrawPoker extends Poker {
 	
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] hands, String[] blockers, int draws) {
+		System.out.println("draw sample equity: " + Arrays.deepToString(hands) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
 		if (board != null) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}

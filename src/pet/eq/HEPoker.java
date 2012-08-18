@@ -45,9 +45,11 @@ public class HEPoker extends Poker {
 	// sync to protect changes to temp
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
+		System.out.println("holdem/omaha equity: " + Arrays.deepToString(holeCards) + " board: " + Arrays.toString(board) + " blockers: " + Arrays.toString(blockers));
 		if (draws != 0) {
 			throw new RuntimeException();
 		}
+		
 		Arrays.fill(valueTemp, null);
 		validateBoard(board);
 		for (String[] hole : holeCards) {
@@ -95,7 +97,7 @@ public class HEPoker extends Poker {
 		}
 		
 		// equity type is ignored if hilo is true
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, heboard.exact());
+		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, heboard.exact());
 		final int[] hivals = new int[holeCards.length];
 		final int[] lovals = lowPossible ? new int[holeCards.length] : null;
 		
@@ -155,20 +157,11 @@ public class HEPoker extends Poker {
 			
 			if (hasLow) {
 				hiloCount++;
-				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, outs);
-				// low winner
-				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, outs);
-				if (hw >= 0 && hw == lw) {
-					meqs[hw].scoopcount++;
-				}
+				MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, outs);
 				
 			} else {
 				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HI_ONLY, hivals, outs);
-				if (hw >= 0) {
-					meqs[hw].scoopcount++;
-				}
+				MEquityUtil.updateEquityHi(meqs, Equity.HI_ONLY, hivals, null);
 			}
 		}
 

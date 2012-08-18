@@ -119,7 +119,7 @@ public class Equity {
 			// (n,k,s) = (k*s)/n
 			// (52,1,52) = 1,  (52,2,1326) = 51,  (52,3,100000) = 5769 
 			float max = (picks * samples) / remCards;
-			System.out.println(String.format("sum outs(%f,%f,%f) max=%f", remCards, picks, samples, max));
+			//System.out.println(String.format("sum outs(%f,%f,%f) max=%f", remCards, picks, samples, max));
 			for (int n = 0; n < outcount.length; n++) {
 				int count = outcount[n];
 				if (count > 0) {
@@ -130,7 +130,7 @@ public class Equity {
 			}
 			Collections.sort(outs);
 			Collections.reverse(outs);
-			System.out.println("outs are " + outs);
+			//System.out.println("outs are " + outs);
 		}
 	}
 	

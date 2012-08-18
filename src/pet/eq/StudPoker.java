@@ -8,7 +8,7 @@ import java.util.Random;
  * stud and razz poker calculations
  */
 public class StudPoker extends Poker {
-
+	
 	private final String[] tempHand = new String[5];
 	private final String[] tempHoleCards = new String[7];
 	private final Value value;
@@ -18,7 +18,7 @@ public class StudPoker extends Poker {
 		this.value = value;
 		this.hilo = hilo;
 	}
-
+	
 	/** 
 	 * passes 3-7 card hands and convert 6+1 card hands into 7 card hands
 	 */
@@ -71,7 +71,7 @@ public class StudPoker extends Poker {
 			throw new RuntimeException();
 		}
 		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsOrig) + " board " + Arrays.toString(board) + " blockers " + Arrays.toString(blockers));
-
+		
 		// note: hole cards may be mixed length
 		
 		// remaining cards in deck
@@ -81,11 +81,15 @@ public class StudPoker extends Poker {
 		// merge board with hole cards
 		final String[][] holeCards = new String[holeCardsOrig.length][];
 		int nonblanks = 0;
+		if (board != null && board.length > 0) {
+			nonblanks++;
+		}
 		for (int n = 0; n < holeCardsOrig.length; n++) {
+			nonblanks += holeCardsOrig[n].length;
 			holeCards[n] = merge(board, holeCardsOrig[n], true);
-			nonblanks += holeCards[n].length;
 		}
 		
+		// how many cards do we need to pick
 		int blanks;
 		if (holeCards.length == 8) {
 			// last card will be comm card
@@ -94,102 +98,118 @@ public class StudPoker extends Poker {
 			blanks = holeCards.length * 7 - nonblanks;
 		}
 		
-		System.out.println("deck: " + deck.length + " nonblanks: " + nonblanks + " blanks: " + blanks);
-		BigInteger combs = MathsUtil.bincoffslow(deck.length, blanks);
-		// if this is less than ~50k, should ideally do exact enumeration of combs and perms 
+		//System.out.println("deck: " + deck.length + " nonblanks: " + nonblanks + " blanks: " + blanks);
+		//BigInteger combs = MathsUtil.bincoffslow(deck.length, blanks);
+		// XXX if this is less than ~50k, should ideally do exact enumeration of combs and perms 
 		// though with 4 or more blanks it tends to be much higher
-		BigInteger combperms = MathsUtil.facslow(blanks).multiply(combs);
-		System.out.println("combs: " + combs + " combperms: " + combperms);
-
+		//BigInteger combperms = MathsUtil.facslow(blanks).multiply(combs);
+		//System.out.println("combs: " + combs + " combperms: " + combperms);
+		
 		// return value
-		final MEquity[] meqs = MEquityUtil.makeMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
-
+		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
+		
 		// get current hand values (not equity)
 		// note that "hi" doesn't necessarily mean high value, just non-hi/lo value
 		final int[] hivals = new int[holeCards.length];
 		final int[] lovals = hilo ? new int[holeCards.length] : null;
 		
 		// get current values
+		boolean hasLow = false;
 		for (int n = 0; n < holeCards.length; n++) {
 			// returns 0 if less than 5 cards
 			hivals[n] = studValue(value, holeCards[n]);
 			if (hilo) {
-				lovals[n] = studValue(Value.afLow8Value, holeCards[n]);
+				int lv = studValue(Value.afLow8Value, holeCards[n]);
+				lovals[n] = lv;
+				if (lv > 0) {
+					hasLow = true;
+				}
 			}
 		}
 		
 		// set current values
 		MEquityUtil.updateCurrent(meqs, value.eqtype(), hivals);
-		if (hilo) {
+		if (hasLow) {
 			MEquityUtil.updateCurrent(meqs, Equity.HILO_HI_HALF, hivals);
 			MEquityUtil.updateCurrent(meqs, Equity.HILO_AFLO8_HALF, lovals);
 		}
 		
-		final Random r = new Random();
-		final int samples = 10000;
-		int hiloCount = 0;
+		final int samples;
+		// how many hands had lo
+		int lowCount = 0;
 		
-		// sample remaining cards, but exact enumeration might be not be very big
-		for (int s = 0; s < samples; s++) {
-			// shuffle instead of pick, as stud tends to use most of the deck
-			ArrayUtil.shuffle(deck, r);
-			int di = 0;
-			String commCard = null;
-			if (holeCards.length >= 8) {
-				commCard = deck[di++];
-			}
-			boolean hasLow = false;
+		if (blanks == 0) {
+			System.out.println("no blanks, using current values");
+			samples = 1;
 			
-			for (int n = 0; n < holeCards.length; n++) {
-				// hole cards could be any length, copy to temp
-				for (int c = 0; c < 7; c++) {
-					if (holeCards[n].length > c) {
-						tempHoleCards[c] = holeCards[n][c];
-						
-					} else if (commCard == null || c < 6) {
-						// pick one from shuffled deck
-						tempHoleCards[c] = deck[di++];
-						
-					} else {
-						// use community card for last card
-						tempHoleCards[c] = commCard;
-					}
-				}
-				
-				hivals[n] = studValue(value, tempHoleCards);
-				if (hilo) {
-					int lv = studValue(Value.afLow8Value, tempHoleCards);
-					// always assign this as any of them could be low
-					lovals[n] = lv;
-					if (lv > 0) {
-						hasLow = true;
-					}
-				}
-			}
-			
-			// TODO count outs, but currently can only handle shared (board) outs
-			// and with sample, won't be very accurate anyway
-
+			// no blank cards, just use current as only sample
 			if (hasLow) {
-				hiloCount++;
-				// high winner
-				int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, null);
-				// low winner
-				int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, null);
-				if (hw >= 0 && hw == lw) {
-					meqs[hw].scoopcount++;
-				}
+				lowCount = 1;
+				MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, null);
 				
 			} else {
-				// high winner only
-				int hw = MEquityUtil.updateEquity(meqs, value.eqtype(), hivals, null);
-				if (hw >= 0) {
-					meqs[hw].scoopcount++;
+				MEquityUtil.updateEquityHi(meqs, value.eqtype(), hivals, null);
+			}
+			
+		} else {
+			final Random r = new Random();
+			samples = 10000;
+			System.out.println("blanks: " + blanks + ", using " + samples + " samples");
+			
+			// sample remaining cards, but exact enumeration might be not be very big
+			for (int s = 0; s < samples; s++) {
+				// shuffle instead of pick, as stud tends to use most of the deck
+				ArrayUtil.shuffle(deck, r);
+				int di = 0;
+				String commCard = null;
+				if (holeCards.length >= 8) {
+					commCard = deck[di++];
+				}
+				hasLow = false;
+				
+				for (int n = 0; n < holeCards.length; n++) {
+					// hole cards could be any length, copy to temp
+					for (int c = 0; c < 7; c++) {
+						if (holeCards[n].length > c) {
+							tempHoleCards[c] = holeCards[n][c];
+							
+						} else if (commCard == null || c < 6) {
+							// pick one from shuffled deck
+							tempHoleCards[c] = deck[di++];
+							
+						} else {
+							// use community card for last card
+							tempHoleCards[c] = commCard;
+						}
+					}
+					
+					hivals[n] = studValue(value, tempHoleCards);
+					if (hilo) {
+						int lv = studValue(Value.afLow8Value, tempHoleCards);
+						// always assign this as any of them could be low
+						lovals[n] = lv;
+						if (lv > 0) {
+							hasLow = true;
+						}
+					}
+				}
+				
+				// TODO count outs, but currently can only handle shared (board) outs
+				// and with sample, won't be very accurate anyway
+				
+				if (hasLow) {
+					lowCount++;
+					MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, null);
+					
+				} else {
+					// high winner only
+					MEquityUtil.updateEquityHi(meqs, value.eqtype(), hivals, null);
 				}
 			}
+			
 		}
-
-		MEquityUtil.summariseEquity(meqs, samples, hiloCount);
+		
+		MEquityUtil.summariseEquity(meqs, samples, lowCount);
 		return meqs;
 	}
 	

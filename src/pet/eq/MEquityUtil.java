@@ -9,7 +9,7 @@ public class MEquityUtil {
 	 * Make array of multiple hand equities for given number of remaining cards,
 	 * game type and calculation method
 	 */
-	static MEquity[] makeMEquity(int hands, boolean hilo, int eqtype, int rem, boolean exact) {
+	static MEquity[] createMEquity(int hands, boolean hilo, int eqtype, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
 			meqs[n] = new MEquity(hilo, eqtype, rem, exact);
@@ -46,13 +46,39 @@ public class MEquityUtil {
 			}
 		}
 	}
+	
+	/**
+	 * Update equities win, tie, win rank and scoop with given hand values for the
+	 * given cards.
+	 */
+	static void updateEquityHiLo(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
+		// high winner
+		int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, cards);
+		// low winner
+		int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, cards);
+		// have to win hi and low for scoop
+		if (hw >= 0 && hw == lw) {
+			meqs[hw].scoopcount++;
+		}
+	}
+	
+	/**
+	 * Update equities win, tie, win rank and scoop with given hand values for the
+	 * given cards.
+	 */
+	static void updateEquityHi(MEquity[] meqs, int eqtype, int[] hivals, String[] cards) {
+		int hw = MEquityUtil.updateEquity(meqs, eqtype, hivals, cards);
+		if (hw >= 0) {
+			meqs[hw].scoopcount++;
+		}
+	}
 
 	/**
 	 * Update equities win, tie and win rank with given hand values for the
 	 * given cards.
 	 * Return index of single winner (scoop), if any, or -1
 	 */
-	static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards) {
+	private static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards) {
 		// find highest hand and number of times it occurs
 		int max = 0, maxcount = 0;
 		for (int i = 0; i < vals.length; i++) {
@@ -109,7 +135,7 @@ public class MEquityUtil {
 	/**
 	 * summarise equities (convert counts to percentages)
 	 */
-	static void summariseEquity(MEquity[] meqs, int count, int hiloCount) {
+	static void summariseEquity(MEquity[] meqs, int count, int lowCount) {
 		//System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
 		for (MEquity meq : meqs) {
 			//System.out.println("  meq " + meq);
@@ -118,7 +144,7 @@ public class MEquityUtil {
 			hionly.summariseEquity(count);
 			//System.out.println("  hionly won: " + hionly.won + " tied: " + hionly.tied + " total: " + hionly.total);
 			
-			if (hiloCount == 0) {
+			if (lowCount == 0) {
 				meq.totaleq = hionly.total;
 				
 			} else {
@@ -132,7 +158,7 @@ public class MEquityUtil {
 				lohalf.summariseEquity(count);
 				//System.out.println("  lohalf won: " + lohalf.won + " tied: " + lohalf.tied + " total: " + lohalf.total);
 				
-				meq.lowPossible = (hiloCount * 100f) / count;
+				meq.lowPossible = (lowCount * 100f) / count;
 				//System.out.println("  low possible: " + meq.lowPossible);
 				
 				meq.totaleq = hionly.total + (hihalf.total + lohalf.total) / 2;

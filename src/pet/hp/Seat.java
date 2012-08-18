@@ -10,6 +10,8 @@ import pet.eq.ArrayUtil;
  * This object should be considered immutable.
  */
 public class Seat implements Serializable {
+	// There are a lot of instances of this object so use byte/short instead of
+	// int where possible
 	/** seat number */
 	public byte num;
 	/** player name */
@@ -38,6 +40,8 @@ public class Seat implements Serializable {
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;
+	public boolean wonMainHigh;
+	public boolean wonMainLow;
 	
 	/** get seats final cards (both down and up) */
 	public String[] cards() {
