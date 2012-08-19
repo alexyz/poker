@@ -25,6 +25,7 @@ public class FollowThread extends Thread {
 	private final Set<File> files = new TreeSet<File>();
 	/** rejected files */
 	private final Set<File> rejFiles = new TreeSet<File>();
+	private int age;
 
 	public FollowThread(Parser parser) {
 		super("follow thread");
@@ -45,6 +46,11 @@ public class FollowThread extends Thread {
 		} else {
 			System.out.println("not a directory: " + dir);
 		}
+	}
+	
+	public synchronized void setAge(int age) {
+		System.out.println("max age in days: " + age);
+		this.age = age;
 	}
 	
 	/** set whether the thread is currently scanning for file changes */
@@ -126,14 +132,17 @@ public class FollowThread extends Thread {
 		//System.out.println("collect files");
 		if (dir != null) {
 			// collect files to parse
+			long t = age > 0 ? System.currentTimeMillis() - (age * 24 * 60 * 60 * 1000L) : 0;
 			for (File f : dir.listFiles()) {
 				if (f.isFile() && parser.isHistoryFile(f.getName())) {
-					long[] s = fileMap.get(f.getName());
-					if (s == null) {
-						fileMap.put(f.getName(), s = new long[1]);
-					}
-					if (f.length() > s[0]) {
-						files.add(f);
+					if (f.lastModified() > t) {
+						long[] s = fileMap.get(f.getName());
+						if (s == null) {
+							fileMap.put(f.getName(), s = new long[1]);
+						}
+						if (f.length() > s[0]) {
+							files.add(f);
+						}
 					}
 				} else if (!rejFiles.contains(f)) {
 					System.out.println("rejected " + f);

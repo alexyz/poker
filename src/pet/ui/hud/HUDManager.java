@@ -12,7 +12,7 @@ import pet.hp.*;
 public class HUDManager implements HistoryListener {
 	
 	private final TreeMap<String,HUDsFrame> hudsFrames = new TreeMap<String,HUDsFrame>();
-	private boolean create = true;
+	private boolean create = false;
 	
 	@Override
 	public synchronized void handAdded(final Hand hand) {

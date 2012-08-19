@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.event.*;
 
 import pet.hp.info.*;
 import pet.ui.*;
@@ -25,9 +26,10 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final JButton addButton = new JButton("Add File");
 	private final ConsolePanel consolePanel = new ConsolePanel();
 	private final JCheckBox hudBox = new JCheckBox("Create HUDs");
-	private final JButton funcButton = new JButton("Function");
+	private final JButton funcButton = new JButton("Memory");
 	private final JButton clearButton = new JButton("Clear");
 	private final JPanel buttonPanel = new JPanel();
+	private final JSpinner ageSpinner = new JSpinner();
 	
 	public HistoryPanel() {
 		super(new BorderLayout());
@@ -45,19 +47,16 @@ public class HistoryPanel extends JPanel implements FollowListener {
 							ft.addFile(f);
 						}
 					}
-					// TODO add to follow thread
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					PokerFrame.handleException("DND", e1);
 				}
 			}
 		}));
 		
 		pathField.setEditable(false);
-		pathField.setBorder(BorderFactory.createTitledBorder("Path"));
-		pathField.setColumns(50);
-		// XXX
-		String home = System.getProperty("user.home");
-		pathField.setText(home + "/Library/Application Support/PokerStars/HandHistory/tawvx");
+		
+		String path = getPath();
+		pathField.setText(path);
 		
 		pathButton.addActionListener(new ActionListener() {
 			@Override
@@ -82,6 +81,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				boolean follow = e.getStateChange() == ItemEvent.SELECTED;
 				FollowThread ft = PokerFrame.getInstance().getFollow();
 				ft.setPath(new File(pathField.getText()));
+				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
 				ft.setFollow(follow);
 			}
 		});
@@ -105,7 +105,6 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		
 		// doesn't work because hud manager has not yet been created...
 		//hudBox.setSelected(PokerFrame.getInstance().getHudManager().isCreate());
-		hudBox.setSelected(true);
 		hudBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -128,16 +127,27 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			}
 		});
 		
+		ageSpinner.setModel(new SpinnerNumberModel(7, 0, 999, 1));
+		ageSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				FollowThread ft = PokerFrame.getInstance().getFollow();
+				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
+			}
+		});
+		
 		buttonPanel.add(clearButton);
 		buttonPanel.add(funcButton);
 		add(buttonPanel, BorderLayout.SOUTH);
 		
 		JPanel pathPanel = new JPanel();
 		pathPanel.add(pathField);
+		pathPanel.add(pathButton);
 		
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.add(pathButton);
 		buttonPanel.add(addButton);
+		buttonPanel.add(new JLabel("Age (days)"));
+		buttonPanel.add(ageSpinner);
 		buttonPanel.add(followButton);
 		buttonPanel.add(hudBox);
 		
@@ -149,6 +159,40 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(consolePanel, BorderLayout.CENTER);
+	}
+	
+	/** get the pokerstars hand history directory */
+	private static String getPath() {
+		// C:\Users\Alex\AppData\Local\PokerStars\HandHistory\
+		// /Users/alex/Library/Application Support/PokerStars/HandHistory/tawvx
+		String home = System.getProperty("user.home");
+		String os = System.getProperty("os.name");
+		String path = null;
+		if (os.equals("Mac OS X")) {
+			path = home + "/Library/Application Support/PokerStars/HandHistory";
+		} else if (os.contains("Windows")) {
+			// could be something like PokerStars.FR instead
+			path = home + "\\AppData\\Local\\PokerStars\\HandHistory";
+		}
+		if (path != null) {
+			File f = new File(path);
+			if (f.exists() && f.isDirectory()) {
+				// get the first directory
+				for (File f2 : f.listFiles()) {
+					if (f2.isDirectory()) {
+						path = f2.getPath();
+						break;
+					}
+				}
+			} else {
+				System.out.println("could not find dir " + f);
+				path = null;
+			}
+		}
+		if (path == null) {
+			path = home;
+		}
+		return path;
 	}
 	
 	private static void mem() {
