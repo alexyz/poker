@@ -46,7 +46,7 @@ public class PokerFrame extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		ToolTipManager.sharedInstance().setDismissDelay(20000);
+		ToolTipManager.sharedInstance().setDismissDelay(60000);
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -254,7 +254,7 @@ public class PokerFrame extends JFrame {
 					String[] h2 = hand.myseat.finalHoleCards;
 					int d = hand.myseat.drawn0;
 					if (h1 != null && h2 != null) {
-						String[] pre = DrawPoker2.getDrawingHand(h1, d, true);
+						String[] pre = DrawPoker.getDrawingHand(null, h1, d, true);
 						for (String c1 : pre) {
 							find: {
 								for (String c2 : h2) {

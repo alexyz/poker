@@ -4,10 +4,7 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 
-import pet.eq.ArrayUtil;
-import pet.eq.Equity;
-import pet.eq.MEquity;
-import pet.eq.Poker;
+import pet.eq.*;
 import pet.hp.*;
 
 /**
@@ -337,6 +334,7 @@ public class PSParser extends Parser {
 	}
 
 	private void updateWon() {
+		/*
 		List<String[]> cards = new ArrayList<String[]>();
 		List<Seat> seats = new ArrayList<Seat>();
 		for (Seat seat : hand.seats) {
@@ -361,12 +359,20 @@ public class PSParser extends Parser {
 						throw new RuntimeException("did not win with best hi hand");
 					}
 					s.wonMainHigh = true;
+					if (hand.winHighValue > Math.max(e.current, eh.current)) {
+						throw new RuntimeException();
+					}
+					hand.winHighValue = e.current;
 				}
 				if (el.curwin || el.curtie) {
 					if (s.won == 0) {
 						throw new RuntimeException("did not win with best lo hand");
 					}
 					s.wonMainLow = true;
+					if (hand.winLowValue > el.current) {
+						throw new RuntimeException();
+					}
+					hand.winLowValue = el.current;
 				}
 			} else {
 				if (e.curwin || e.curtie) {
@@ -374,9 +380,14 @@ public class PSParser extends Parser {
 						throw new RuntimeException("did not win with best hand");
 					}
 					s.wonMainHigh = true;
+					if (hand.winHighValue > e.current) {
+						throw new RuntimeException();
+					}
+					hand.winHighValue = e.current;
 				}
 			}
 		}
+		*/
 	}
 
 	private void parseCollect(String line, int a) {

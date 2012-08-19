@@ -78,12 +78,34 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		@Override
 		public String getToolTip(HandState hs) {
 			SeatState ss = hs.actionSeat();
-			if (ss != null) {
-				if (ss.meq != null) {
-					return MEquityUtil.currentString(ss.meq);
-				}
+			if (ss == null) {
+				return null;
 			}
-			return null;
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html>");
+			if (ss.meq != null) {
+				sb.append(MEquityUtil.currentString(ss.meq));
+			}
+			if (ss.cardsState != null && ss.cardsState.suggestedDraws != null) {
+				// suggested draws
+				sb.append("<table><tr><th>Hand</th><th>Score</th></tr>");
+				for (DrawPoker.Draw d : ss.cardsState.suggestedDraws) {
+					boolean e = Arrays.equals(ss.cardsState.cards, d.cards);
+					sb.append("<tr><td>");
+					if (e) {
+						sb.append("<u>");
+					}
+					sb.append(PokerUtil.cardsString(d.cards));
+					if (e) {
+						sb.append("</u>");
+					}
+					sb.append("</td>");
+					sb.append("<td>").append(d.score).append("</td></tr>");
+				}
+				sb.append("</table>");
+			}
+			return sb.toString();
 		}
 	};
 	

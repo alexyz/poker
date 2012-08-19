@@ -55,6 +55,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		pathField.setEditable(false);
 		pathField.setBorder(BorderFactory.createTitledBorder("Path"));
 		pathField.setColumns(50);
+		// XXX
 		String home = System.getProperty("user.home");
 		pathField.setText(home + "/Library/Application Support/PokerStars/HandHistory/tawvx");
 		
@@ -122,7 +123,8 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		funcButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PokerFrame.getInstance().f();
+				//PokerFrame.getInstance().f();
+				mem();
 			}
 		});
 		
@@ -147,6 +149,19 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(consolePanel, BorderLayout.CENTER);
+	}
+	
+	private static void mem() {
+		Runtime r = Runtime.getRuntime();
+		r.gc();
+		double mib = Math.pow(2,20);
+		int h = PokerFrame.getInstance().getHistory().getHands();
+		System.out.println(String.format("memory max: %.3f total: %.3f free: %.3f used: %.3f (MiB) hands: %d",
+				r.maxMemory() / mib,
+				r.totalMemory() / mib,
+				r.freeMemory() / mib,
+				(r.totalMemory() - r.freeMemory()) / mib,
+				h));
 	}
 	
 	@Override

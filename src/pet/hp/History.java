@@ -225,4 +225,8 @@ public class History {
 		return Arrays.asList(self.toArray(new String[self.size()]));
 	}
 
+	public synchronized int getHands() {
+		return hands.size();
+	}
+	
 }

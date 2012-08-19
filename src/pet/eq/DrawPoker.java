@@ -1,18 +1,46 @@
 package pet.eq;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Draw poker equity methods
  */
 public class DrawPoker extends Poker {
 	
-	/**
-	 * Calculate draw equity using random remaining cards.
-	 * (Exact equity using combinatorials is too hard with more than 2 blank cards).
-	 */
-	private static MEquity[] equityImpl(Value value, String[][] holeCards, String[] blockers, int draws) {
+	/** represents a possible draw and its average score */
+	public static class Draw implements Comparable<Draw> {
+		public final String[] cards;
+		public double score;
+		public Draw(String[] hole, double score) {
+			this.cards = hole;
+			this.score = score;
+		}
+		@Override
+		public int compareTo(Draw other) {
+			return (int) Math.signum(score - other.score);
+		}
+		@Override
+		public String toString() {
+			return String.format("%.3f -> ", score) + PokerUtil.cardsString(cards);
+		}
+	}
+	
+	//
+	// instance methods
+	//
+	
+	private final Value value;
+	
+	public DrawPoker(boolean high) {
+		this.value = high ? Value.hiValue : Value.dsLowValue;
+	}
+	
+	@Override
+	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
+		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
+		if (board != null) {
+			throw new RuntimeException("invalid board: " + Arrays.toString(board));
+		}
 		if (draws < 0 || draws > 3) {
 			throw new RuntimeException("invalid draws: " + draws);
 		}
@@ -85,124 +113,130 @@ public class DrawPoker extends Poker {
 		return meqs;
 	}
 	
-	/**
-	 * Guess the players drawing hand.
-	 * Always returns new array.
-	 */
-	public static String[] getDrawingHand(String[] hand, int drawn) {
-		switch (drawn) {
-			case 0:
-				// stand pat
-				return hand.clone();
-			case 1:
-			case 2:
-				// drawing at something
-				return getDraw(hand, drawn);
-			case 3:
-				// if pair, return pair, otherwise high cards
-				return getPair(hand);
-			case 4: {
-				// keep high card
-				return getHighCard(hand);
-			}
-			case 5:
-				// discard all
-				return new String[0];
-			default:
-				throw new RuntimeException("invalid drawn " + drawn);
-		}
-	}
-	
-	/**
-	 * get the high card in the hand.
-	 * always returns new array
-	 */
-	private static String[] getHighCard(String[] hand) {
-		String[] a = hand.clone();
-		Arrays.sort(a, Cmp.revCardCmp);
-		return new String[] { a[0] };
-	}
-	
-	/**
-	 * get best two cards in hand.
-	 * always returns new array
-	 */
-	private static String[] getPair(final String[] hand) {
-		String[] h = hand.clone();
-		Arrays.sort(h, Cmp.revCardCmp);
-		for (int n = 1; n < h.length; n++) {
-			if (faceToValue(h[n-1], true) == faceToValue(h[n], true)) {
-				// return highest pair
-				return new String[] { h[n-1], h[n] };
-			}
-		}
-		// return high cards
-		return new String[] { h[0], h[1] };
-	}
-	
-	/**
-	 * Get the trips/st/fl draw by brute force
-	 * FIXME
-	 * draw 1 with oesd and higher gutty -> assume oesd, not gutty
-	 * draw 2 with 3-flush and 3-broad -> assume high cards, not back door flush
-	 * draw 2 with 3-str -> keep 3-str not higher back door gutty
-	 */
-	public static String[] getDraw(final String[] hand, final int drawn) {
-		// from players point of view, all other cards are possible
-		final String[] deck = Poker.remdeck(null, hand);
-		final String[] h = new String[5];
-		final String[] maxh = new String[5 - drawn];
-		final int pmax = MathsUtil.bincoff(5, 5 - drawn);
-		final int qmax = MathsUtil.bincoff(deck.length, drawn);
-		int maxv = 0;
-		
-		for (int p = 0; p < pmax; p++) {
-			// pick kept from hand
-			MathsUtil.kcomb(5 - drawn, p, hand, h, 0);
-			for (int q = 0; q < qmax; q++) {
-				// pick drawn from deck
-				MathsUtil.kcomb(drawn, q, deck, h, 5 - drawn);
-				int v = value(h);
-				// ignore draws to straight flush...
-				if (v > maxv && v < SF_MASK) {
-					// copy new max hand
-					for (int n = 0; n < 5 - drawn; n++) {
-						maxh[n] = h[n];
-					}
-					maxv = v;
-				}
-			}
-		}
-		
-		//System.out.println("hand " + Arrays.toString(maxh) + " => " + valueString(maxv));
-		return maxh;
-	}
-	
-	//
-	// instance methods
-	//
-	
-	private final boolean high;
-	
-	public DrawPoker(boolean high) {
-		this.high = high;
-	}
-	
-	@Override
-	public synchronized MEquity[] equity(String[] board, String[][] hands, String[] blockers, int draws) {
-		System.out.println("draw sample equity: " + Arrays.deepToString(hands) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
-		if (board != null) {
-			throw new RuntimeException("invalid board: " + Arrays.toString(board));
-		}
-		return equityImpl(high ? Value.hiValue : Value.dsLowValue, hands, blockers, draws);
-	}
-	
 	@Override
 	public int value(String[] board, String[] hole) {
 		if (board != null || hole.length != 5) {
 			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
 		}
 		return value(hole);
+	}
+
+	/**
+	 * get the best drawing hand for the given hand, number drawn, hand valuation and big hand bias.
+	 * optionally returns score of all possible drawing hands.
+	 */
+	public static String[] getDrawingHand(List<DrawPoker.Draw> list, final String[] hand, final int drawn, boolean high) {
+		// high draw works best with around 0.9, low draw with 0.99
+		// generally, you can win in high with any top 10% hand, but low draw
+		// pretty much needs 7-high (75432, 76432, 76542, etc) to win
+		// XXX really should take into account multiple draws 
+		
+		final double bias = high ? 0.9 : 0.99;
+		final Value value = high ? Value.hiValue : Value.dsLowValue;
+		
+		if (drawn < 0 || drawn > 5) {
+			throw new RuntimeException("invalid drawn: " + drawn);
+			
+		} else if (drawn == 5) {
+			// special case, no draw and no meaningful score
+			return new String[0];
+			
+		} else if (drawn == 0) {
+			// special case, nothing to test other than given hand
+			if (list != null) {
+				int v = value.value(hand);
+				list.add(new DrawPoker.Draw(hand, score(v, bias)));
+			}
+			return hand.clone();
+		}
+		
+		// drawing 1-4
+		
+		// from players point of view, all other cards are possible
+		final String[] deck = Poker.remdeck(null, hand);
+		final String[] drawnHand = new String[5];
+		final int imax = MathsUtil.bincoff(5, 5 - drawn);
+		final int jmax = MathsUtil.bincoff(deck.length, drawn);
+		
+		String[] maxDrawingHand = null;
+		float maxScore = -1f;
+		
+		for (int i = 0; i < imax; i++) {
+			Arrays.fill(drawnHand, null);
+			// pick kept from hand
+			MathsUtil.kcomb(5 - drawn, i, hand, drawnHand, 0);
+			float score = 0;
+			
+			for (int j = 0; j < jmax; j++) {
+				// pick drawn from deck
+				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
+				int v = value.value(drawnHand);
+				score += score(v, bias);
+			}
+			
+			float averageScore = score / (1.0f * jmax);
+			String[] drawingHand = Arrays.copyOf(drawnHand, 5 - drawn);
+			if (list != null) {
+				Arrays.sort(drawingHand, Cmp.revCardCmp);
+				list.add(new DrawPoker.Draw(drawingHand, averageScore));
+			}
+			
+			if (score > maxScore) {
+				// copy new max hole cards
+				maxDrawingHand = drawingHand;
+				maxScore = score;
+			}
+		}
+		
+		if (list != null) {
+			Collections.sort(list);
+			Collections.reverse(list);
+		}
+		return maxDrawingHand;
+	}
+
+	/**
+	 * get normalised score of hand (i.e. hand value is 0-1), optionally
+	 * inverted. bias is 0.5 to 1, representing how many values are less than
+	 * 0.5, e.g. 0.9 means 90% of values are less than 0.5
+	 */
+	protected static double score(final int value, final double bias) {
+		if (bias < 0.5 || bias > 1.0) {
+			throw new RuntimeException("invalid bias " + bias);
+		}
+		
+		// get high value
+		final boolean high;
+		final int highValue;
+		switch (value & TYPE) {
+			case HI_TYPE:
+				high = true;
+				highValue = value;
+				break;
+			case DS_LOW_TYPE:
+				high = false;
+				highValue = MAX_MASK - (value & HAND);
+				break;
+			default:
+				// ace to five doesn't include str/fl
+				// but then, no drawing games use ace to five values so doesn't matter
+				throw new RuntimeException("can't get score of " + Poker.valueString(value));
+		}
+		
+		final int[] highValues = highValues();
+		int p = Arrays.binarySearch(highValues, highValue);
+		if (p < 0) {
+			throw new RuntimeException("not a high value: " + Poker.valueString(highValue));
+		}
+		
+		if (!high) {
+			// invert score for deuce to seven low
+			p = highValues.length - 1 - p;
+		}
+		
+		// raise score to some power to bias toward high values
+		// note: for k=x^y, y=log(k)/log(x)... i think
+		return Math.pow((1f * p) / (highValues.length - 1f), Math.log(0.5) / Math.log(bias));
 	}
 	
 }

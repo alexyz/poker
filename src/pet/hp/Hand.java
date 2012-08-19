@@ -9,6 +9,8 @@ import java.util.*;
  * This object should be considered immutable.
  */
 public class Hand implements Serializable {
+	// There are a lot of instances of this object so use byte/short instead of
+	// int where possible
 	/** hand id - object so it can be used in map/set */
 	public final Long id;
 	/** game type */

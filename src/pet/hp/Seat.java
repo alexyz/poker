@@ -40,8 +40,10 @@ public class Seat implements Serializable {
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;
-	public boolean wonMainHigh;
-	public boolean wonMainLow;
+	/** won or tied for main pot with hi value. implies showdown and won > 0 */
+	//public boolean wonMainHigh;
+	/** won or tied for main pot with low value. implies showdown and won > 0 */
+	//public boolean wonMainLow;
 	
 	/** get seats final cards (both down and up) */
 	public String[] cards() {

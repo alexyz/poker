@@ -8,39 +8,23 @@ import java.util.*;
  */
 public abstract class DrawPoker2 extends Poker {
 	
-	/** represents a possible draw and its average score */
-	public static class Draw implements Comparable<Draw> {
-		public final String[] hole;
-		public float score;
-		public Draw(String[] hole, float score) {
-			this.hole = hole;
-			this.score = score;
-		}
-		@Override
-		public int compareTo(Draw other) {
-			return (int) Math.signum(score - other.score);
-		}
-		@Override
-		public String toString() {
-			return String.format("%.3f -> ", score) + PokerUtil.cardsString(hole);
-		}
-	}
-	
-	
-	
 	public static void main(String[] args) {
 		
-		String[] x = new String[] { "8h", "7h", "5s", "4c", "3s" };
+		//String[] x = new String[] { "8h", "7h", "5s", "4c", "3s" };
+		//String[] x = new String[] { "5h", "4c", "3s", "2d", "Ts" };
+		//String[] x = new String[] { "7h", "6s", "5d", "3s", "2s" };
+		//String[] x = new String[] { "7s", "6h", "5s", "4h", "3s" };
+		//String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
+		String[] x = new String[] { "As", "Ac", "Tc", "5c", "2c" };
 		System.out.println("==" + PokerUtil.cardsString(x) + "==");
-		for (float b = 1; b < 5; b++) {
-			System.out.println("--" + b + "--");
-			List<Draw> l = new ArrayList<Draw>();
-			String[] y = getDrawingHand(l, x, 1, Value.dsLowValue, b);
-			Collections.sort(l);
-			Collections.reverse(l);
-			for (Draw d : l) {
-				System.out.println("  " + d);
-			}
+		List<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+		for (int n = 1; n < 5; n++) {
+			String[] y = DrawPoker.getDrawingHand(l, x, n, true);
+		}
+		Collections.sort(l);
+		Collections.reverse(l);
+		for (DrawPoker.Draw d : l) {
+			System.out.println("  " + d);
 		}
 		
 		/*
@@ -131,106 +115,12 @@ public abstract class DrawPoker2 extends Poker {
 	}
 	 */
 	
-	/**
-	 * get normalised score of hand (i.e. hand value is 0-1), optionally inverted
-	 */
-	protected static float score(final int value, final float bias) {
-		// get high value
-		final boolean high;
-		final int highValue;
-		switch (value & TYPE) {
-			case HI_TYPE:
-				high = true;
-				highValue = value;
-				break;
-			case DS_LOW_TYPE:
-				high = false;
-				highValue = MAX_MASK - (value & HAND);
-				break;
-			default:
-				// ace to five doesn't include str/fl
-				// but then, no drawing games use ace to five values so doesn't matter
-				throw new RuntimeException("can't get score of " + Poker.valueString(value));
-		}
-		
-		int[] highValues = highValues();
-		int p = Arrays.binarySearch(highValues, highValue);
-		if (p < 0) {
-			throw new RuntimeException("not a high value: " + Poker.valueString(highValue));
-		}
-		
-		if (!high) {
-			// invert score for deuce to seven low
-			p = highValues.length - 1 - p;
-		}
-		
-		return (float) Math.pow((1f * p) / (highValues.length - 1f), bias);
-	}
 	
+	
+	/*
 	public static String[] getDrawingHand(final String[] hand, final int drawn, boolean hi) {
 		return getDrawingHand(null, hand, drawn, hi ? Value.hiValue : Value.dsLowValue, 3f);
 	}
-	
-	/**
-	 * get the best drawing hand for the given hand, number drawn, hand valuation and big hand bias.
-	 * optionally returns score of all possible drawing hands.
-	 */
-	private static String[] getDrawingHand(List<Draw> draws, final String[] hand, final int drawn, Value value, float bias) {
-		
-		if (drawn < 0 || drawn > 5) {
-			throw new RuntimeException("invalid drawn: " + drawn);
-			
-		} else if (drawn == 5) {
-			// special case, no draw and no meaningful score
-			return new String[0];
-			
-		} else if (drawn == 0) {
-			// special case, nothing to test other than given hand
-			if (draws != null) {
-				int v = value.value(hand);
-				draws.add(new Draw(hand, score(v, bias)));
-			}
-			return hand.clone();
-		}
-		
-		// drawing 1-4
-		
-		// from players point of view, all other cards are possible
-		final String[] deck = Poker.remdeck(null, hand);
-		final String[] drawnHand = new String[5];
-		final int imax = MathsUtil.bincoff(5, 5 - drawn);
-		final int jmax = MathsUtil.bincoff(deck.length, drawn);
-		
-		String[] maxDrawingHand = null;
-		float maxScore = -1f;
-		
-		for (int i = 0; i < imax; i++) {
-			Arrays.fill(drawnHand, null);
-			// pick kept from hand
-			MathsUtil.kcomb(5 - drawn, i, hand, drawnHand, 0);
-			float score = 0;
-			
-			for (int j = 0; j < jmax; j++) {
-				// pick drawn from deck
-				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
-				int v = value.value(drawnHand);
-				score += score(v, bias);
-			}
-			
-			float averageScore = score / (1.0f * jmax);
-			String[] drawingHand = Arrays.copyOf(drawnHand, 5 - drawn);
-			if (draws != null) {
-				draws.add(new Draw(drawingHand, averageScore));
-			}
-			
-			if (score > maxScore) {
-				// copy new max hole cards
-				maxDrawingHand = drawingHand;
-				maxScore = score;
-			}
-		}
-		
-		return maxDrawingHand;
-	}
+	*/
 	
 }

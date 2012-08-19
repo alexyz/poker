@@ -10,21 +10,19 @@ public class CardsStateUtil {
 	/**
 	 * get the hole cards the current player kept and discarded
 	 */
-	private static CardsState kept(String[] hole1, String[] hole2, int discards) {
-		CardsState h = new CardsState(5 - discards, discards);
+	private static void kept(String[] hole1, String[] hole2, String[] in, String[] out) {
 		int i = 0, j = 0;
 		for (int n1 = 0; n1 < 5; n1++) {
 			find: {
 				for (int n2 = 0; n2 < 5; n2++) {
 					if (hole1[n1].equals(hole2[n2])) {
-						h.cards[i++] = hole1[n1];
+						in[i++] = hole1[n1];
 						break find;
 					}
 				}
-				h.discarded[j++] = hole1[n1];
+				out[j++] = hole1[n1];
 			}
 		}
-		return h;
 	}
 	
 	/**
@@ -37,8 +35,9 @@ public class CardsStateUtil {
 			return null;
 		}
 		
-		CardsState hc = null;
+		CardsState cs = null;
 		
+		boolean high = false;
 		switch (hand.game.type) {
 			case Game.STUD_TYPE:
 			case Game.STUDHL_TYPE:
@@ -49,13 +48,16 @@ public class CardsStateUtil {
 					cards = Arrays.copyOf(cards, streetIndex + 3);
 				}
 				// don't sort (though could sort first two)
-				return new CardsState(cards);
+				return new CardsState(cards, null, false, null);
 			
+			case Game.FCD_TYPE:
+				high = true;
+				
 			case Game.DSTD_TYPE:
 			case Game.DSSD_TYPE:
 				if (streetIndex == GameUtil.getMaxStreets(hand.game.type) - 1) {
 					// on final street just return final hand from seat
-					hc = new CardsState(seat.finalHoleCards.clone());
+					cs = new CardsState(seat.finalHoleCards.clone(), null, false, null);
 					
 				} else if (hand.myseat == seat) {
 					// get current player cards but also see which ones were kept
@@ -64,53 +66,45 @@ public class CardsStateUtil {
 						return null;
 					}
 					System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(x));
+					
 					String[] y = hand.myDrawCards(streetIndex + 1);
 					if (y == null) {
 						y = hand.myseat.finalHoleCards;
 					}
 					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
-					hc = kept(x, y, seat.drawn(streetIndex));
+					
+					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+					final int drawn = seat.drawn(streetIndex);
+					DrawPoker.getDrawingHand(l, x, drawn, high);
+					final String[] k = new String[5 - drawn];
+					final String[] d = new String[drawn];
+					kept(x, y, k, d);
+					cs = new CardsState(k, d, false, l);
 					
 				} else {
 					// guess opponents hole cards based on final hand
-					String[] h = DrawPoker2.getDrawingHand(seat.finalHoleCards, seat.drawn(streetIndex), false);
-					hc = new CardsState(h, null, true);
-				}
-				break;
-				
-			case Game.FCD_TYPE:
-				if (streetIndex == 1) {
-					// return final hand
-					hc = new CardsState(seat.finalHoleCards.clone());
-					
-				} else if (hand.myseat == seat) {
-					// return starting hand
-					hc = kept(hand.myDrawCards0, seat.finalHoleCards, seat.drawn0);
-					
-				} else {
-					// guess what cards the opponent kept
-					hc = new CardsState(DrawPoker.getDrawingHand(seat.finalHoleCards, seat.drawn0), null, true);
+					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+					final int drawn = seat.drawn(streetIndex);
+					String[] h = DrawPoker.getDrawingHand(l, seat.finalHoleCards, drawn, high);
+					cs = new CardsState(h, null, true, l);
 				}
 				break;
 				
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
-				hc = new CardsState(seat.finalHoleCards);
+				cs = new CardsState(seat.finalHoleCards, null, false, null);
 				break;
 				
 			default:
 				throw new RuntimeException("unknown game type " + hand.game);
 		}
 		
-		if (hc != null) {
-			Arrays.sort(hc.cards, Cmp.revCardCmp);
-			if (hc.discarded != null) {
-				Arrays.sort(hc.discarded, Cmp.revCardCmp);
-			}
+		Arrays.sort(cs.cards, Cmp.revCardCmp);
+		if (cs.discarded != null) {
+			Arrays.sort(cs.discarded, Cmp.revCardCmp);
 		}
-		
-		return hc;
+		return cs;
 	}
 	
 }
