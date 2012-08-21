@@ -93,7 +93,6 @@ public class PlayerPanel extends JPanel {
 		bankrollButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO get list of hands from history
 				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
 				if (r >= 0) {
 					int sr = gamesTable.convertRowIndexToModel(r);
