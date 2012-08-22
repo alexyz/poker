@@ -3,14 +3,11 @@ package pet.ui;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import pet.eq.*;
 import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.info.*;
@@ -241,41 +238,4 @@ public class PokerFrame extends JFrame {
 		return hudManager;
 	}
 	
-
-	public void f() {
-		// get all draw hands with hole cards
-		// compare predicted draw with actual draw
-		for (String gid : history.getGames()) {
-			if (gid.contains(GameUtil.getGameTypeName(Game.FCD_TYPE))) {
-				List<Hand> hands = history.getHands("tawvx", gid);
-				for (Hand hand : hands) {
-					// get pre-draw and post draw hands
-					String[] h1 = hand.myDrawCards0;
-					String[] h2 = hand.myseat.finalHoleCards;
-					int d = hand.myseat.drawn0;
-					if (h1 != null && h2 != null) {
-						String[] pre = DrawPoker.getDrawingHand(null, h1, d, true);
-						for (String c1 : pre) {
-							find: {
-								for (String c2 : h2) {
-									if (c1.equals(c2)) {
-										break find;
-									}
-								}
-								System.out.println();
-								System.out.println("hand " + hand);
-								System.out.println("hole " + Arrays.toString(h1) + " drawn " + d);
-								System.out.println("predicted " + Arrays.toString(pre));
-								System.out.println("actual " + Arrays.toString(h2));
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-	}
-	
-
 }

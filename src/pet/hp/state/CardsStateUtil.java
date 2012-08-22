@@ -28,7 +28,7 @@ public class CardsStateUtil {
 	/**
 	 * Get cards player had on this street
 	 */
-	public static CardsState getCards(final Hand hand, final Seat seat, final int streetIndex) {
+	public static CardsState getCards(final Hand hand, final Seat seat, final int streetIndex, String[] blockers) {
 		if (seat.finalHoleCards == null && seat.finalUpCards == null) {
 			// nothing to base return value on
 			// note that only stud has up cards and the hole cards could be null
@@ -75,7 +75,7 @@ public class CardsStateUtil {
 					
 					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
 					final int drawn = seat.drawn(streetIndex);
-					DrawPoker.getDrawingHand(l, x, drawn, high);
+					DrawPoker.getDrawingHand(l, x, drawn, high, blockers);
 					final String[] k = new String[5 - drawn];
 					final String[] d = new String[drawn];
 					kept(x, y, k, d);
@@ -85,7 +85,7 @@ public class CardsStateUtil {
 					// guess opponents hole cards based on final hand
 					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
 					final int drawn = seat.drawn(streetIndex);
-					String[] h = DrawPoker.getDrawingHand(l, seat.finalHoleCards, drawn, high);
+					String[] h = DrawPoker.getDrawingHand(l, seat.finalHoleCards, drawn, high, blockers);
 					cs = new CardsState(h, null, true, l);
 				}
 				break;

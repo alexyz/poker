@@ -1,5 +1,6 @@
 package pet.eq;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -118,19 +119,47 @@ public class DrawPoker extends Poker {
 		if (board != null || hole.length != 5) {
 			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
 		}
-		return value(hole);
+		return value.value(hole);
 	}
-
+	
 	/**
-	 * get the best drawing hand for the given hand, number drawn, hand valuation and big hand bias.
+	 * get the best drawing hand for the given hand, number drawn and hand valuation.
 	 * optionally returns score of all possible drawing hands.
 	 */
-	public static String[] getDrawingHand(List<DrawPoker.Draw> list, final String[] hand, final int drawn, boolean high) {
+	public static String[] getDrawingHand(List<DrawPoker.Draw> list, String[] hand, int drawn, boolean high, String[] blockers) {
+		System.out.println("get drawing hand: " + Arrays.toString(hand) + " drawn: " + drawn + " blockers: " + Arrays.toString(blockers) + " high: " + high);
+		if (hand.length > 5) {
+			throw new RuntimeException();
+		}
+		
+		// XXX really should take into account multiple draws, but thats only really a problem
+		// if you draw a greater number on a later street (which is a bad strategy and almost unheard of)
+		// e.g. draw 1, 1, 5 - obviously can't use final hand to predict any of them
+		// related problem is that a later hand might contain blockers from a reshuffle
+		// and so can't possibly occur on an earlier street
+		// i.e., bincoff(length(hand - blockers), 5 - drawn) needs to be >= 1
+		if (blockers != null && blockers.length > 0) {
+			String[] hand2 = ArrayUtil.sub(hand, blockers);
+			if (hand2.length != hand.length) {
+				// some of the cards were blocked
+				// cheat and increase the draw amount
+				drawn = Math.max(5 - hand2.length, drawn);
+				hand = hand2;
+				System.out.println("hand now: " + Arrays.toString(hand) + " drawn now: " + drawn);
+			}
+		}
+		
+		BigInteger combs = MathsUtil.bincoffslow(hand.length, 5 - drawn);
+		System.out.println("combs: " + combs);
+		if (combs.intValue() <= 0) {
+			throw new RuntimeException();
+		}
+		
+		// XXX if only 1 comb, just return hand?
+		
 		// high draw works best with around 0.9, low draw with 0.99
 		// generally, you can win in high with any top 10% hand, but low draw
 		// pretty much needs 7-high (75432, 76432, 76542, etc) to win
-		// XXX really should take into account multiple draws 
-		
 		final double bias = high ? 0.9 : 0.99;
 		final Value value = high ? Value.hiValue : Value.dsLowValue;
 		
@@ -144,19 +173,20 @@ public class DrawPoker extends Poker {
 		} else if (drawn == 0) {
 			// special case, nothing to test other than given hand
 			if (list != null) {
-				int v = value.value(hand);
-				list.add(new DrawPoker.Draw(hand, score(v, bias)));
+				double s = score(value.value(hand), bias);
+				list.add(new DrawPoker.Draw(hand, s));
 			}
 			return hand.clone();
 		}
 		
 		// drawing 1-4
 		
-		// from players point of view, all other cards are possible
+		// from players point of view, all other cards are possible (even the blockers)
 		final String[] deck = Poker.remdeck(null, hand);
 		final String[] drawnHand = new String[5];
-		final int imax = MathsUtil.bincoff(5, 5 - drawn);
+		final int imax = MathsUtil.bincoff(hand.length, 5 - drawn);
 		final int jmax = MathsUtil.bincoff(deck.length, drawn);
+		System.out.println("imax: " + imax + " jmax: " + jmax);
 		
 		String[] maxDrawingHand = null;
 		float maxScore = -1f;
@@ -165,11 +195,13 @@ public class DrawPoker extends Poker {
 			Arrays.fill(drawnHand, null);
 			// pick kept from hand
 			MathsUtil.kcomb(5 - drawn, i, hand, drawnHand, 0);
+			//System.out.println("drawnHand: " + Arrays.toString(drawnHand));
 			float score = 0;
 			
 			for (int j = 0; j < jmax; j++) {
 				// pick drawn from deck
 				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
+				//System.out.println("  drawnHand: " + Arrays.toString(drawnHand));
 				int v = value.value(drawnHand);
 				score += score(v, bias);
 			}

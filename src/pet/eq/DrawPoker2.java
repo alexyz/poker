@@ -10,22 +10,51 @@ public abstract class DrawPoker2 extends Poker {
 	
 	public static void main(String[] args) {
 		
+		// [4h 2d 5d 7h 3s] draw 1 blockers 7h
+		String[] x = new String[] { "4h", "2d", "5d", "7h", "3s" };
+		List<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+		
+		DrawPoker.getDrawingHand(l, x, 1, false, null);
+		Collections.sort(l);
+		Collections.reverse(l);
+		for (DrawPoker.Draw d : l) {
+			System.out.println("  " + d);
+		}
+		
+		l.clear();
+		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h" });
+		Collections.sort(l);
+		Collections.reverse(l);
+		for (DrawPoker.Draw d : l) {
+			System.out.println("  " + d);
+		}
+		
+		l.clear();
+		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h", "5d" });
+		Collections.sort(l);
+		Collections.reverse(l);
+		for (DrawPoker.Draw d : l) {
+			System.out.println("  " + d);
+		}
+		
 		//String[] x = new String[] { "8h", "7h", "5s", "4c", "3s" };
 		//String[] x = new String[] { "5h", "4c", "3s", "2d", "Ts" };
 		//String[] x = new String[] { "7h", "6s", "5d", "3s", "2s" };
 		//String[] x = new String[] { "7s", "6h", "5s", "4h", "3s" };
 		//String[] x = new String[] { "Kd", "Ks", "Qh", "Jc", "Tc" };
+		/*
 		String[] x = new String[] { "As", "Ac", "Tc", "5c", "2c" };
 		System.out.println("==" + PokerUtil.cardsString(x) + "==");
 		List<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
 		for (int n = 1; n < 5; n++) {
-			String[] y = DrawPoker.getDrawingHand(l, x, n, true);
+			String[] y = DrawPoker.getDrawingHand(l, x, n, true, null);
 		}
 		Collections.sort(l);
 		Collections.reverse(l);
 		for (DrawPoker.Draw d : l) {
 			System.out.println("  " + d);
 		}
+		*/
 		
 		/*
 		int[] a = Poker.highValues();

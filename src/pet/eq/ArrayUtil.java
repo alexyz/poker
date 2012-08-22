@@ -52,4 +52,19 @@ public class ArrayUtil {
 		}
 	}
 	
+	/**
+	 * subtract b from a
+	 */
+	static String[] sub(String[] a, String[] b) {
+		// inefficient...
+		TreeSet<String> s = new TreeSet<String>(Arrays.asList(a));
+		s.removeAll(Arrays.asList(b));
+		if (s.size() != a.length) {
+			//System.out.println("sub: " + Arrays.toString(a) + " - " + Arrays.toString(b) + " = " + s);
+			return s.toArray(new String[s.size()]);
+		} else {
+			return a;
+		}
+	}
+
 }

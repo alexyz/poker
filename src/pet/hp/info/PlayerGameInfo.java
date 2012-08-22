@@ -1,5 +1,7 @@
 package pet.hp.info;
 
+import java.util.Arrays;
+
 import pet.eq.*;
 import pet.hp.*;
 
@@ -103,6 +105,7 @@ public class PlayerGameInfo {
 			String[] cards = seat.cards();
 			int v = p.value(hand.board, cards);
 			int r = Poker.rank(v);
+			//System.out.println("cards: " + Arrays.toString(cards) + " value: " + Poker.valueString(v) + " rank: " + r);
 			//(seat.wonMainHigh ? rankwon : ranklost)[r]++;
 			(seat.won > 0 ? rankwon : ranklost)[r]++;
 			int am = seat.won - seat.pip;

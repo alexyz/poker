@@ -65,7 +65,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 						
 					} else {
 						String s = PokerUtil.cardsString(ss.cardsState.cards);
-						if (ss.cardsState.discarded != null) {
+						if (ss.cardsState.discarded != null && ss.cardsState.discarded.length > 0) {
 							s += " (" + PokerUtil.cardsString(ss.cardsState.discarded) + ")";
 						}
 						return s;

@@ -66,9 +66,11 @@ public class HandStateUtil {
 		final List<SeatState> holeCardSeats = new ArrayList<SeatState>();
 		final Set<String> blockers = new TreeSet<String>();
 		
+		System.out.println("reshuf on " + hand.reshuffleStreetIndex);
+		
 		// for each street
 		for (int s = 0; s < hand.streets.length; s++) {
-			
+			System.out.println("street index " + s);
 			//
 			// state for clear bets, place card
 			//
@@ -81,6 +83,9 @@ public class HandStateUtil {
 			holeCards.clear();
 			holeCardSeats.clear();
 			if (hand.reshuffleStreetIndex == s) {
+				System.out.println("clearing blockers");
+				// this actually can happen at any time during the draw
+				// so the blockers apply to some hands and not others
 				blockers.clear();
 			}
 			
@@ -92,7 +97,9 @@ public class HandStateUtil {
 					ss.actionNum = 0;
 					
 					// get cards of seat
-					CardsState cs = CardsStateUtil.getCards(hand, ss.seat, s);
+					System.out.println("get cards for " + ss.seat.name); 
+					String[] blockersArr = blockers.size() > 0 ? blockers.toArray(new String[blockers.size()]) : null;
+					CardsState cs = CardsStateUtil.getCards(hand, ss.seat, s, blockersArr);
 					//System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
 					ss.cardsState = cs;
 					
@@ -109,7 +116,11 @@ public class HandStateUtil {
 						// do we have 2 hole cards for omaha? other games just require 1
 						if (setCards.size() < minHoleCards || ss.folded) {
 							for (String c : setCards) {
-								blockers.add(c);
+								if (hand.reshuffleStreetIndex > s) {
+									// there are no reshuffles in omaha
+									// so condition will always be true
+									blockers.add(c);
+								}
 							}
 							
 						} else {
