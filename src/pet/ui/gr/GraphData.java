@@ -2,10 +2,11 @@ package pet.ui.gr;
 
 import java.util.*;
 
-public class GraphData {
+public class GraphData<T> {
 	
 	public final String name;
-	public final List<GraphDataPoint> points = new ArrayList<GraphDataPoint>();
+	// should really be unmodifiable list...
+	public final List<GraphDataPoint<T>> points = new ArrayList<GraphDataPoint<T>>();
 	/** x axis title */
 	public String x;
 	/** y axis title */

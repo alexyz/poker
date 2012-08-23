@@ -97,12 +97,17 @@ public class PlayerPanel extends JPanel {
 				if (r >= 0) {
 					int sr = gamesTable.convertRowIndexToModel(r);
 					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
-					PlayerGameInfo gi = gamesModel.getRow(sr);
-					System.out.println("selected " + r + " => " + sr + " => " + gi);
+					PlayerGameInfo pgi = gamesModel.getRow(sr);
+					System.out.println("selected " + r + " => " + sr + " => " + pgi);
 					PokerFrame pf = PokerFrame.getInstance();
-					List<Hand> hands = pf.getHistory().getHands(gi.player.name, gi.game.id);
-					GraphData bankRoll = BankrollUtil.getBankRoll(hands, gi.player.name, gi.game.id);
-					pf.displayBankRoll(bankRoll);
+					List<Hand> hands = pf.getHistory().getHands(pgi.player.name, pgi.game.id);
+					String title = pgi.player.name + " - " + pgi.game.id;
+					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
+					if (br != null) {
+						pf.displayBankRoll(br);
+					} else {
+						System.out.println("no bankroll for " + pgi);
+					}
 				}
 			}
 		});

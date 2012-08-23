@@ -1,5 +1,6 @@
 package pet.hp.info;
 
+import java.text.DateFormat;
 import java.util.*;
 import pet.hp.*;
 import pet.ui.gr.*;
@@ -12,7 +13,7 @@ public class BankrollUtil {
 	/**
 	 * get the graph data for the players all time bankroll
 	 */
-	public static GraphData getBankRoll(final List<Hand> hands, final String player, final String game) {
+	public static GraphData<Hand> getBankRoll(final String player, final List<Hand> hands, final String title) {
 		if (hands.size() <= 1) {
 			System.out.println("not enough hands for bankroll");
 			return null;
@@ -22,14 +23,19 @@ public class BankrollUtil {
 		final Hand firstHand = hands.get(0);
 		final char currency = firstHand.game.currency;
 		
-		final GraphData data = new GraphData(player + " * " + game, "hand", "money") {
+		final GraphData<Hand> data = new GraphData<Hand>(title, "hand", "money") {
 			@Override
 			public String getYName(int y) {
 				return GameUtil.formatMoney(currency, y);
 			}
 			@Override
 			public String getXDesc(int x) {
-				return "" + x;
+				if (x > 0 && x < points.size()) {
+					GraphDataPoint<Hand> p = points.get(x);
+					return DateFormat.getDateTimeInstance().format(p.ref.date);
+				} else {
+					return null;
+				}
 			}
 		};
 		
@@ -40,7 +46,8 @@ public class BankrollUtil {
 			for (Seat seat : hand.seats) {
 				if (seat.name.equals(player)) {
 					won += seat.won - seat.pip;
-					data.points.add(new GraphDataPoint(n, won));
+					data.points.add(new GraphDataPoint<Hand>(hand, n, won));
+					break;
 				}
 			}
 		}

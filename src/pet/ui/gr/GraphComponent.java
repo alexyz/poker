@@ -5,44 +5,15 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
+/** displays data in a graph */
 public class GraphComponent extends JComponent {
 	
-	public static void main(String[] args) {
-		GraphData data = new GraphData("sine", "x axis", "y axis") {
-			@Override
-			public String getXName(int x) {
-				return Double.toString(x / 100.0);
-			}
-			@Override
-			public String getYName(int y) {
-				return Double.toString(y / 100.0);
-			}
-			@Override
-			public String getXDesc(int x) {
-				return "-" + x + "-";
-			}
-		};
-		for (float x = -2; x < 2; x += 0.05f) {
-			float y = (float) Math.sin(x);
-			data.points.add(new GraphDataPoint((int)(x*100.0), (int)(y*100.0)));
-		}
-		JFrame f = new JFrame();
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		GraphComponent g = new GraphComponent();
-		g.setData(data);
-		g.setPreferredSize(new Dimension(800,600));
-		f.setContentPane(g);
-		f.pack();
-		f.show();
-	}
-	
-	private GraphData data;
+	private GraphData<?> data;
 	private int minx, miny, maxx, maxy;
 	private String xdesc;
 	
 	public GraphComponent() {
 		addMouseMotionListener(new MouseMotionAdapter() {
-		//addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				//System.out.println("mouse moved");
@@ -60,22 +31,22 @@ public class GraphComponent extends JComponent {
 		});
 	}
 	
-	public void setData(GraphData data) {
+	public void setData(GraphData<?> data) {
 		this.data = data;
 		System.out.println("data points: " + data.points.size());
 		int minx = Integer.MAX_VALUE;
 		int miny = Integer.MAX_VALUE;
 		int maxx = Integer.MIN_VALUE;
 		int maxy = Integer.MIN_VALUE;
-		for (GraphDataPoint d : data.points) {
-			int x = d.getX();
+		for (GraphDataPoint<?> d : data.points) {
+			int x = d.x;
 			if (x > maxx) {
 				maxx = x;
 			}
 			if (x < minx) {
 				minx = x;
 			}
-			int y = d.getY();
+			int y = d.y;
 			if (y > maxy) {
 				maxy = y;
 			}
@@ -101,6 +72,11 @@ public class GraphComponent extends JComponent {
 		// component size
 		final int w = getWidth();
 		final int h = getHeight();
+		
+		if (data.points.size() > w) {
+			// XXX should filter
+		}
+		
 		// margin
 		final int xm = w / 10;
 		final int ym = h / 10;
@@ -154,13 +130,13 @@ public class GraphComponent extends JComponent {
 
 		// data
 		g.setColor(Color.black);
-		GraphDataPoint prevd = data.points.get(0);
+		GraphDataPoint<?> prevd = data.points.get(0);
 		for (int n = 1; n < data.points.size(); n++) {
-			final GraphDataPoint d = data.points.get(n);
-			final int prevvx = getVX(gw, xm, prevd.getX());
-			final int prevvy = getVY(gh, ym, prevd.getY());
-			final int vx = getVX(gw, xm, d.getX());
-			final int vy = getVY(gh, ym, d.getY());
+			final GraphDataPoint<?> d = data.points.get(n);
+			final int prevvx = getVX(gw, xm, prevd.x);
+			final int prevvy = getVY(gh, ym, prevd.y);
+			final int vx = getVX(gw, xm, d.x);
+			final int vy = getVY(gh, ym, d.y);
 			g.drawLine(prevvx, prevvy, vx, vy);
 			prevd = d;
 		}

@@ -1,7 +1,5 @@
 package pet.hp.info;
 
-import java.util.Arrays;
-
 import pet.eq.*;
 import pet.hp.*;
 

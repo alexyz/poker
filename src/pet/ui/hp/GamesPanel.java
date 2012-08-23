@@ -10,6 +10,7 @@ import javax.swing.event.*;
 import pet.hp.*;
 import pet.hp.info.*;
 import pet.ui.PokerFrame;
+import pet.ui.gr.GraphData;
 import pet.ui.ta.*;
 
 public class GamesPanel extends JPanel implements HistoryListener {
@@ -17,6 +18,9 @@ public class GamesPanel extends JPanel implements HistoryListener {
 	private final JComboBox gameCombo = new JComboBox();
 	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
+	private final JButton playerButton = new JButton("Player");
+	private final JButton bankrollButton = new JButton("Bankroll");
+	private final JButton refreshButton = new JButton("Refresh");
 	
 	public GamesPanel() {
 		super(new BorderLayout());
@@ -41,6 +45,54 @@ public class GamesPanel extends JPanel implements HistoryListener {
 			}
 		});
 		
+		playerButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					int sr = gamesTable.convertRowIndexToModel(r);
+					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
+					PlayerGameInfo pgi = m.getRow(sr);
+					if (pgi != null) {
+						PokerFrame.getInstance().displayPlayer(pgi.player.name);
+					}
+				}
+			}
+		});
+		
+		bankrollButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+				if (r >= 0) {
+					int sr = gamesTable.convertRowIndexToModel(r);
+					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
+					PlayerGameInfo pgi = m.getRow(sr);
+					
+					PokerFrame pf = PokerFrame.getInstance();
+					List<Hand> hands = pf.getHistory().getHands(pgi.player.name, pgi.game.id);
+					String title = pgi.player.name + " - " + pgi.game.id;
+					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
+					if (br != null) {
+						pf.displayBankRoll(br);
+					} else {
+						System.out.println("no bank roll for " + pgi);
+					}
+				}
+			}
+		});
+		
+		// allow user to select game if there is only one in the list
+		// and update if more hands have been added
+		// though we could probably do both automatically
+		refreshButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateGame();
+			}
+		});
+		
+		// requires more than one in the list...
 		gameCombo.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -50,9 +102,10 @@ public class GamesPanel extends JPanel implements HistoryListener {
 			}
 		});
 		
-		JPanel topPanel = new JPanel();
-		topPanel.add(gameCombo);
-		add(topPanel, BorderLayout.NORTH);
+		JPanel northPanel = new JPanel();
+		northPanel.add(gameCombo);
+		northPanel.add(refreshButton);
+		add(northPanel, BorderLayout.NORTH);
 		
 		JScrollPane tableScroller = new JScrollPane(gamesTable);
 		tableScroller.setBorder(BorderFactory.createTitledBorder("Player Game Infos"));
@@ -63,6 +116,11 @@ public class GamesPanel extends JPanel implements HistoryListener {
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textAreaScroller);
 		splitPane.setResizeWeight(0.5);
 		add(splitPane, BorderLayout.CENTER);
+		
+		JPanel southPanel = new JPanel();
+		southPanel.add(playerButton);
+		southPanel.add(bankrollButton);
+		add(southPanel, BorderLayout.SOUTH);
 	}
 	
 	private void updateGame() {
@@ -78,7 +136,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 
 	@Override
 	public void handAdded(Hand hand) {
-		// could update table...
+		// XXX could update table...
 	}
 
 	@Override
@@ -87,6 +145,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 			@Override
 			public void run() {
 				// update the game combo
+				// XXX probably breaks current selection
 				List<String> games = PokerFrame.getInstance().getHistory().getGames();
 				gameCombo.setModel(new DefaultComboBoxModel(games.toArray(new String[games.size()])));
 			}

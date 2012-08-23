@@ -132,17 +132,19 @@ public class DrawPoker extends Poker {
 			throw new RuntimeException();
 		}
 		
-		// XXX really should take into account multiple draws, but thats only really a problem
-		// if you draw a greater number on a later street (which is a bad strategy and almost unheard of)
+		// XXX really should take into account multiple draws
+		// but thats only really a problem if you draw a greater number on a
+		// later street (which is a bad strategy and almost unheard of)
 		// e.g. draw 1, 1, 5 - obviously can't use final hand to predict any of them
-		// related problem is that a later hand might contain blockers from a reshuffle
-		// and so can't possibly occur on an earlier street
-		// i.e., bincoff(length(hand - blockers), 5 - drawn) needs to be >= 1
+		// related problem is that a later hand might contain blockers from a
+		// reshuffle and so can't possibly occur on an earlier street
+		// and you might not even have enough cards that aren't blocked,
+		// i.e. bincoff(length(hand - blockers), 5 - drawn) needs to be >= 1
 		if (blockers != null && blockers.length > 0) {
 			String[] hand2 = ArrayUtil.sub(hand, blockers);
 			if (hand2.length != hand.length) {
 				// some of the cards were blocked
-				// cheat and increase the draw amount
+				// cheat and increase the draw amount (if necessary)
 				drawn = Math.max(5 - hand2.length, drawn);
 				hand = hand2;
 				System.out.println("hand now: " + Arrays.toString(hand) + " drawn now: " + drawn);
@@ -160,6 +162,7 @@ public class DrawPoker extends Poker {
 		// high draw works best with around 0.9, low draw with 0.99
 		// generally, you can win in high with any top 10% hand, but low draw
 		// pretty much needs 7-high (75432, 76432, 76542, etc) to win
+		// XXX actually it probably depends if it's 2-7 single or triple draw
 		final double bias = high ? 0.9 : 0.99;
 		final Value value = high ? Value.hiValue : Value.dsLowValue;
 		

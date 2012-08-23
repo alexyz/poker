@@ -8,7 +8,7 @@ import java.util.*;
 public class HandUtil {
 	
 	/**
-	 * Compare hands by id
+	 * Compare hands by id, this is equivalent to sorting by date
 	 */
 	public static final Comparator<Hand> idCmp = new Comparator<Hand>() {
 		@Override

@@ -97,7 +97,7 @@ public class HandStateUtil {
 					ss.actionNum = 0;
 					
 					// get cards of seat
-					System.out.println("get cards for " + ss.seat.name); 
+					//System.out.println("get cards for " + ss.seat.name); 
 					String[] blockersArr = blockers.size() > 0 ? blockers.toArray(new String[blockers.size()]) : null;
 					CardsState cs = CardsStateUtil.getCards(hand, ss.seat, s, blockersArr);
 					//System.out.println("hole cards for seat " + ss.seat + " street " + s + " are " + hc);
