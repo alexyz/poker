@@ -2,11 +2,12 @@ package pet.ui.gr;
 
 import java.util.*;
 
-public class GraphData<T> {
+public class GraphData {
 	
 	public final String name;
 	// should really be unmodifiable list...
-	public final List<GraphDataPoint<T>> points = new ArrayList<GraphDataPoint<T>>();
+	//public final List<GraphDataPoint> points = new ArrayList<GraphDataPoint>();
+	public final Map<String,List<GraphDataPoint>> pointsMap = new TreeMap<String,List<GraphDataPoint>>();
 	/** x axis title */
 	public String x;
 	/** y axis title */

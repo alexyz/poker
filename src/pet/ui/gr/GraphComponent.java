@@ -2,14 +2,15 @@ package pet.ui.gr;
 
 import java.awt.*;
 import java.awt.event.*;
-
+import java.util.*;
+import java.util.List;
 import javax.swing.*;
 
 /** displays data in a graph */
 public class GraphComponent extends JComponent {
 	
-	private GraphData<?> data;
-	private int minx, miny, maxx, maxy;
+	private GraphData data;
+	private int modelminx, modelminy, modelmaxx, modelmaxy;
 	private String xdesc;
 	
 	public GraphComponent() {
@@ -31,34 +32,36 @@ public class GraphComponent extends JComponent {
 		});
 	}
 	
-	public void setData(GraphData<?> data) {
+	public void setData(GraphData data) {
 		this.data = data;
-		System.out.println("data points: " + data.points.size());
+		System.out.println("data points: " + data.pointsMap.size());
 		int minx = Integer.MAX_VALUE;
 		int miny = Integer.MAX_VALUE;
 		int maxx = Integer.MIN_VALUE;
 		int maxy = Integer.MIN_VALUE;
-		for (GraphDataPoint<?> d : data.points) {
-			int x = d.x;
-			if (x > maxx) {
-				maxx = x;
-			}
-			if (x < minx) {
-				minx = x;
-			}
-			int y = d.y;
-			if (y > maxy) {
-				maxy = y;
-			}
-			if (y < miny) {
-				miny = y;
+		for (List<GraphDataPoint> l : data.pointsMap.values()) {
+			for (GraphDataPoint d : l) {
+				int x = d.x;
+				if (x > maxx) {
+					maxx = x;
+				}
+				if (x < minx) {
+					minx = x;
+				}
+				int y = d.y;
+				if (y > maxy) {
+					maxy = y;
+				}
+				if (y < miny) {
+					miny = y;
+				}
 			}
 		}
 		System.out.println(String.format("x: %d to %d, y: %d to %d", minx, maxx, miny, maxy));
-		this.minx = minx;
-		this.miny = miny;
-		this.maxx = maxx;
-		this.maxy = maxy;
+		this.modelminx = minx;
+		this.modelminy = miny;
+		this.modelmaxx = maxx;
+		this.modelmaxy = maxy;
 	}
 	
 	@Override
@@ -73,21 +76,20 @@ public class GraphComponent extends JComponent {
 		final int w = getWidth();
 		final int h = getHeight();
 		
-		if (data.points.size() > w) {
-			// XXX should filter
-		}
+		// XXX should filter points list
+		// because there's not much point plotting 10k points on a 500px component
 		
 		// margin
-		final int xm = w / 10;
-		final int ym = h / 10;
+		final int xmargin = w / 10;
+		final int ymargin = h / 10;
 		// graph size
-		final int gw = w - xm * 2;
-		final int gh = h - ym * 2;
+		final int graphwidth = w - xmargin * 2;
+		final int graphheight = h - ymargin * 2;
 		// graph corners
-		final int vminx = getVX(gw, xm, minx);
-		final int vminy = getVY(gh, ym, miny);
-		final int vmaxx = getVX(gw, xm, maxx);
-		final int vmaxy = getVY(gh, ym, maxy);
+		final int viewminx = getVX(graphwidth, xmargin, modelminx);
+		final int viewminy = getVY(graphheight, ymargin, modelminy);
+		final int viewmaxx = getVX(graphwidth, xmargin, modelmaxx);
+		final int viewmaxy = getVY(graphheight, ymargin, modelmaxy);
 		
 		// title
 		if (data.name != null) {
@@ -98,55 +100,61 @@ public class GraphComponent extends JComponent {
 
 		// x axis
 		g.setColor(Color.red);
-		g.drawLine(vminx, vminy, vmaxx, vminy);
+		g.drawLine(viewminx, viewminy, viewmaxx, viewminy);
 		for (int xx = 0; xx <= 10; xx++) {
-			final int mx = minx + ((maxx - minx) * xx) / 10;
-			final int vx = getVX(gw, xm, mx);
+			final int mx = modelminx + ((modelmaxx - modelminx) * xx) / 10;
+			final int vx = getVX(graphwidth, xmargin, mx);
 			
-			g.drawLine(vx, vminy, vx, vminy + 5);
+			g.drawLine(vx, viewminy, vx, viewminy + 5);
 			String n = data.getXName(mx);
 			final int sw = g.getFontMetrics().stringWidth(n);
 			final int sh = g.getFontMetrics().getHeight();
-			g.drawString(n, vx - (sw / 2), vminy + sh + 2);
+			g.drawString(n, vx - (sw / 2), viewminy + sh + 2);
 		}
 		
 		// x label
-		final String xl = data.x + (xdesc != null ? " - " + xdesc : "");
-		final int xlw = g.getFontMetrics().stringWidth(xl);
-		g.drawString(xl, ((vmaxx - vminx - xlw) / 2) + vminx, h - (ym / 2));
+		final String xlabel = data.x + (xdesc != null ? " - " + xdesc : "");
+		final int xlabelwidth = g.getFontMetrics().stringWidth(xlabel);
+		g.drawString(xlabel, ((viewmaxx - viewminx - xlabelwidth) / 2) + viewminx, h - (ymargin / 2));
 		
 		// y axis
-		g.drawLine(vminx, vminy, vminx, vmaxy);
+		g.drawLine(viewminx, viewminy, viewminx, viewmaxy);
 		for (int yy = 0; yy <= 10; yy++) {
-			final int my = miny + ((maxy - miny) * yy) / 10;
-			final int vy = getVY(gh, ym, my);
+			final int my = modelminy + ((modelmaxy - modelminy) * yy) / 10;
+			final int vy = getVY(graphheight, ymargin, my);
 			
-			g.drawLine(vminx, vy, vminx - 5, vy);
+			g.drawLine(viewminx, vy, viewminx - 5, vy);
 			String n = data.getYName(my);
 			final int sw = g.getFontMetrics().stringWidth(n);
 			final int sh = g.getFontMetrics().getHeight();
-			g.drawString(n, vminx - sw - 10, vy + (sh / 2) - 3);
+			g.drawString(n, viewminx - sw - 10, vy + (sh / 2) - 3);
 		}
 
 		// data
-		g.setColor(Color.black);
-		GraphDataPoint<?> prevd = data.points.get(0);
-		for (int n = 1; n < data.points.size(); n++) {
-			final GraphDataPoint<?> d = data.points.get(n);
-			final int prevvx = getVX(gw, xm, prevd.x);
-			final int prevvy = getVY(gh, ym, prevd.y);
-			final int vx = getVX(gw, xm, d.x);
-			final int vy = getVY(gh, ym, d.y);
-			g.drawLine(prevvx, prevvy, vx, vy);
-			prevd = d;
+		for (List<GraphDataPoint> points : data.pointsMap.values()) {
+			GraphDataPoint prevd = points.get(0);
+			for (int n = 1; n < points.size(); n++) {
+				final GraphDataPoint d = points.get(n);
+				final int prevvx = getVX(graphwidth, xmargin, prevd.x);
+				final int prevvy = getVY(graphheight, ymargin, prevd.y);
+				final int vx = getVX(graphwidth, xmargin, d.x);
+				final int vy = getVY(graphheight, ymargin, d.y);
+				if (d.div) {
+					g.setColor(Color.white);
+					g.drawLine(vx, viewminy, vx, viewmaxy);
+				}
+				g.setColor(Color.black);
+				g.drawLine(prevvx, prevvy, vx, vy);
+				prevd = d;
+			}
 		}
 		
 		// y label
 		{
 			Graphics2D g2 = (Graphics2D) g.create();
 			final int ylw = g2.getFontMetrics().stringWidth(data.y);
-			final int ylvx = vminx - (xm / 2);
-			final int ylvy = ((vmaxy - vminy - ylw) / 2) + vminy;
+			final int ylvx = viewminx - (xmargin / 2);
+			final int ylvy = ((viewmaxy - viewminy - ylw) / 2) + viewminy;
 			// translate before rotate...
 			g2.translate(ylvx, ylvy);
 			g2.setColor(Color.red);
@@ -157,25 +165,25 @@ public class GraphComponent extends JComponent {
 	}
 
 	/** get view x for graph width, x margin and model x */
-	private int getVX(int gw, int xm, int mx) {
-		final int x1 = mx - minx;
-		final int x2 = x1 * gw;
-		final int x3 = x2 / Math.max(maxx - minx, 1);
-		final int x4 = x3 + xm;
+	private int getVX(int graphwidth, int xmargin, int modelx) {
+		final int x1 = modelx - modelminx;
+		final int x2 = x1 * graphwidth;
+		final int x3 = x2 / Math.max(modelmaxx - modelminx, 1);
+		final int x4 = x3 + xmargin;
 		return x4;
 	}
 	
-	private int getMX(int gw, int xm, int vx) {
-		final int y1 = vx - xm;
-		final int y2 = y1 * Math.max(maxx - minx, 1);
-		final int y3 = y2 / gw;
-		final int y4 = y3 + minx;
+	private int getMX(int graphwidth, int xmargin, int viewx) {
+		final int y1 = viewx - xmargin;
+		final int y2 = y1 * Math.max(modelmaxx - modelminx, 1);
+		final int y3 = y2 / graphwidth;
+		final int y4 = y3 + modelminx;
 		return y4;
 	}
 	
 	/** get view y for graph height and y margin */
-	private int getVY(int gh, int ym, int y) {
-		return (gh - (((y - miny) * gh) / Math.max(maxy - miny, 1))) + ym;
+	private int getVY(int graphheight, int ymargin, int modely) {
+		return (graphheight - (((modely - modelminy) * graphheight) / Math.max(modelmaxy - modelminy, 1))) + ymargin;
 	}
 
 }

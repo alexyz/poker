@@ -2,6 +2,7 @@ package pet.hp.info;
 
 import java.text.DateFormat;
 import java.util.*;
+
 import pet.hp.*;
 import pet.ui.gr.*;
 
@@ -13,7 +14,66 @@ public class BankrollUtil {
 	/**
 	 * get the graph data for the players all time bankroll
 	 */
-	public static GraphData<Hand> getBankRoll(final String player, final List<Hand> hands, final String title) {
+	public static GraphData getBankRoll(final String player, final List<Hand> hands, final String title) {
+		if (hands.size() <= 1) {
+			System.out.println("not enough hands for bankroll");
+			return null;
+		}
+
+		Collections.sort(hands, HandUtil.idCmp);
+		final Hand firstHand = hands.get(0);
+		final char currency = firstHand.game.currency;
+		final List<Hand> pointHands = new ArrayList<Hand>();
+		
+		final GraphData data = new GraphData(title, "hand", "money") {
+			@Override
+			public String getYName(int y) {
+				return GameUtil.formatMoney(currency, y);
+			}
+			@Override
+			public String getXDesc(int x) {
+				if (x > 0 && x < pointHands.size()) {
+					return DateFormat.getDateTimeInstance().format(pointHands.get(x).date);
+				} else {
+					return null;
+				}
+			}
+		};
+		
+		int won = 0;
+		long prevdate = 0;
+		final long t = 1000L * 60L * 60L;
+		data.pointsMap.put("x", new ArrayList<GraphDataPoint>());
+		
+		for (int n = 0; n < hands.size(); n++) {
+			final Hand hand = hands.get(n);
+			long d = hand.date.getTime();
+			boolean newsession = false;
+			if (d > (prevdate + t)) {
+				newsession = true;
+				// new session
+				// just do vertical line?
+			}
+			prevdate = d;
+			for (Seat seat : hand.seats) {
+				if (seat.name.equals(player)) {
+					won += seat.won - seat.pip;
+					data.pointsMap.get("x").add(new GraphDataPoint(n, won, newsession));
+					pointHands.add(hand);
+					break;
+				}
+			}
+		}
+		
+		System.out.println("bank roll data points: " + data.pointsMap.get("x").size());
+		return data;
+	}
+	
+
+	/**
+	 * get the graph data for the players all time bankroll
+	 */
+	public static GraphData getMultiBankRoll(final Set<String> players, final List<Hand> hands, final String title) {
 		if (hands.size() <= 1) {
 			System.out.println("not enough hands for bankroll");
 			return null;
@@ -23,36 +83,54 @@ public class BankrollUtil {
 		final Hand firstHand = hands.get(0);
 		final char currency = firstHand.game.currency;
 		
-		final GraphData<Hand> data = new GraphData<Hand>(title, "hand", "money") {
+		final Map<Long,Hand> ids = new TreeMap<Long,Hand>();
+		for (Hand h : hands) {
+			ids.put(h.id, h);
+		}
+		
+		final long[] idarr = new long[ids.size()];
+		{
+			int n = 0;
+			for (Long id : ids.keySet()) {
+				idarr[n++] = id;
+			}
+		}
+		
+		final GraphData data = new GraphData(title, "hand", "money") {
 			@Override
 			public String getYName(int y) {
 				return GameUtil.formatMoney(currency, y);
 			}
-			@Override
-			public String getXDesc(int x) {
-				if (x > 0 && x < points.size()) {
-					GraphDataPoint<Hand> p = points.get(x);
-					return DateFormat.getDateTimeInstance().format(p.ref.date);
-				} else {
-					return null;
-				}
-			}
 		};
 		
 		int won = 0;
+		long prevdate = 0;
+		final long t = 1000L * 60L * 60L;
 		
-		for (int n = 0; n < hands.size(); n++) {
-			final Hand hand = hands.get(n);
+		for (Hand hand : hands) {
+			long d = hand.date.getTime();
+			boolean newsession = false;
+			if (d > (prevdate + t)) {
+				newsession = true;
+				// new session
+				// just do vertical line?
+			}
+			prevdate = d;
 			for (Seat seat : hand.seats) {
-				if (seat.name.equals(player)) {
+				if (players.contains(seat.name)) {
+					List<GraphDataPoint> points = data.pointsMap.get(seat.name);
+					if (points == null) {
+						data.pointsMap.put(seat.name, points = new ArrayList<GraphDataPoint>());
+					}
 					won += seat.won - seat.pip;
-					data.points.add(new GraphDataPoint<Hand>(hand, n, won));
+					int n = Arrays.binarySearch(idarr, hand.id);
+					points.add(new GraphDataPoint(n, won, newsession));
 					break;
 				}
 			}
 		}
 		
-		System.out.println("bank roll data points: " + data.points.size());
+		System.out.println("bank roll data points: " + data.pointsMap.size());
 		return data;
 	}
 }

@@ -14,10 +14,6 @@ public class HandUtil {
 		@Override
 		public int compare(Hand h1, Hand h2) {
 			int c = h1.id.compareTo(h2.id);
-			int d = h1.date.compareTo(h2.date);
-			if (c != d) {
-				throw new RuntimeException("date/id mismatch: " + h1 + " and " + h2);
-			}
 			return c;
 		}
 	};

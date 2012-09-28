@@ -1,8 +1,9 @@
-package pet.ui.gr;
 
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
+
+import pet.ui.gr.*;
 
 public class GraphMain {
 
@@ -23,7 +24,7 @@ public class GraphMain {
 		};
 		for (float x = -2; x < 2; x += 0.05f) {
 			float y = (float) Math.sin(x);
-			data.points.add(new GraphDataPoint<Float>(x, (int)(x*100.0), (int)(y*100.0)));
+			//data.points.add(new GraphDataPoint((int)(x*100.0), (int)(y*100.0), false));
 		}
 		JFrame f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

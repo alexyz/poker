@@ -1,14 +1,14 @@
 package pet.ui.gr;
 
-public class GraphDataPoint<T> {
-	public final T ref;
+public class GraphDataPoint {
 	public final int x;
 	public final int y;
+	public final boolean div;
 
-	public GraphDataPoint(T ref, int x, int y) {
-		this.ref = ref;
+	public GraphDataPoint(int x, int y, boolean div) {
 		this.x = x;
 		this.y = y;
+		this.div = div;
 	}
 
 }

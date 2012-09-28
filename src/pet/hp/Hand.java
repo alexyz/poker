@@ -11,7 +11,9 @@ import java.util.*;
 public class Hand implements Serializable {
 	// There are a lot of instances of this object so use byte/short instead of
 	// int where possible
+	
 	/** hand id - object so it can be used in map/set */
+	// XXX should really just be long
 	public final Long id;
 	/** game type */
 	public Game game;
@@ -20,8 +22,10 @@ public class Hand implements Serializable {
 	/** tournament round */
 	public int round;
 	/** tournament level */
+	// XXX should be short as there are never more than 100 or so levels
 	public int level;
 	/** hand date */
+	// could replace with just long to save memory
 	public Date date;
 	/** big blind amount (may not be posted) */
 	public int bb;
@@ -72,6 +76,7 @@ public class Hand implements Serializable {
 		}
 	}
 	
+	// XXX should be like method above to be more regular
 	public void addMyDrawCards(String[] h) {
 		if (myDrawCards0 == null) {
 			// first hand for all games
