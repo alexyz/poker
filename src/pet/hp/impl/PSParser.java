@@ -53,14 +53,10 @@ public class PSParser extends Parser {
 	
 	// instance fields
 
-	/** where to send parsed data */
-	private final History history;
 	/** instance field for thread safety */
 	private final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	/** instance field for thread safety */
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
-	/** print everything to System.out */
-	public boolean debug;
 	
 	// stuff for current hand, cleared on clear()
 	/** map of player name to seat for current hand */
@@ -77,22 +73,13 @@ public class PSParser extends Parser {
 	private boolean showdown;
 	/** is in summary phase */
 	private boolean summaryPhase;
-	/** debug output in case of parse error */
-	private final List<String> debuglines = new ArrayList<String>();
 	/** has live sb been posted (others are dead) */
 	private boolean sbposted;
 	/** hand game instance */
 	private Game game;
 
 	public PSParser(History history) {
-		this.history = history;
-	}
-
-	private void println(String s) {
-		debuglines.add(s);
-		if (debug) {
-			System.out.println(s);
-		}
+		super(history);
 	}
 
 	@Override
@@ -106,6 +93,7 @@ public class PSParser extends Parser {
 	 */
 	@Override
 	public void clear() {
+		super.clear();
 		showdown = false;
 		summaryPhase = false;
 		seatsMap.clear();
@@ -113,14 +101,8 @@ public class PSParser extends Parser {
 		Arrays.fill(seatPip, 0);
 		pot = 0;
 		hand = null;
-		debuglines.clear();
 		sbposted = false;
 		game = null;
-	}
-
-	@Override
-	public List<String> getDebug() {
-		return debuglines;
 	}
 
 	/**

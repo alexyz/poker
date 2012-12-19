@@ -354,7 +354,7 @@ public abstract class Poker {
 		final char c5 = valueToFace(highValue >> 16);
 		
 		String s;
-		switch (highValue & 0xf00000) {
+		switch (highValue & RANK) {
 			case SF_MASK: s = "Straight Flush - " + c1 + " high"; break;
 			case FK_MASK: s = "Four of a Kind " + c2 + " - " + c1; break;
 			case FH_MASK: s = "Full House " + c2 + " full of " + c1; break;

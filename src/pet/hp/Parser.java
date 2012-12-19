@@ -1,15 +1,35 @@
 package pet.hp;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * abstract parser interface
  */
 public abstract class Parser {
+	
+	/** print everything to System.out */
+	public boolean debug;
+	/** debug output in case of parse error */
+	private final List<String> debuglines = new ArrayList<String>();
+	/** where to send parsed data */
+	protected final History history;
+	
+	public Parser(History history) {
+		this.history = history;
+	}
+	
+	protected void println(String s) {
+		debuglines.add(s);
+		if (debug) {
+			System.out.println(s);
+		}
+	}
+	
 	/**
 	 * Parse next line from file.
 	 */
 	public abstract boolean parseLine(String line);
+	
 	/**
 	 * Return true if this file can be parsed
 	 */
@@ -18,10 +38,15 @@ public abstract class Parser {
 	/**
 	 * reset state of parser for new file
 	 */
-	public abstract void clear();
+	public void clear() {
+		debuglines.clear();
+	}
 	
 	/**
 	 * Get debug output of parser for last hand
 	 */
-	public abstract List<String> getDebug();
+	public List<String> getDebug() {
+		return debuglines;
+	}
+	
 }

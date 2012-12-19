@@ -7,6 +7,29 @@ import java.math.BigInteger;
  */
 public class MathsUtil {
 	
+	/**
+	 * convert list/array to []
+	 * convert map to { }
+	 */
+	public static void main(String[] args) {
+		final BigInteger max = BigInteger.valueOf(Long.MAX_VALUE);
+		StringBuilder sb = new StringBuilder();
+		for (int n = 0; n < 52; n++) {
+			if (n > 0) {
+				sb.append(",\n  ");
+			}
+			sb.append("[");
+			for (int m = 0; m < 52; m++) {
+				if (m > 0) {
+					sb.append(", ");
+				}
+				sb.append(String.format("%15d", bincoffslow(n, m).longValue()));
+			}
+			sb.append("]");
+		}
+		System.out.println(sb);
+	}
+	
 	private static final int[][] C = mkbc(52, 52);
 
 	/**
