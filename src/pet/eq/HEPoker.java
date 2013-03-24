@@ -32,8 +32,8 @@ public class HEPoker extends Poker {
 	private final boolean omaha;
 	private final int min;
 	private final boolean hilo;
-	private Value hiValue;
-	private Value loValue;
+	private final Value hiValue;
+	private final Value loValue;
 
 	/**
 	 * create holdem equity calculator for given game type
@@ -184,6 +184,7 @@ public class HEPoker extends Poker {
 		MEquityUtil.summariseOuts(meqs, pick, count);
 		return meqs;
 	}
+	
 
 	/**
 	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 

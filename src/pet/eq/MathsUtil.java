@@ -1,6 +1,7 @@
 package pet.eq;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Mathematical utility methods
@@ -31,14 +32,14 @@ public class MathsUtil {
 	}
 	
 	private static final int[][] C = makeBinaryCoefficients(52, 52);
-
+	
 	/**
 	 * Factorial (slow)
 	 */
 	public static BigInteger factorial(int n) {
 		return n <= 1 ? BigInteger.ONE : BigInteger.valueOf(n).multiply(factorial(n - 1));
 	}
-
+	
 	/**
 	 * Binomial coefficient (slow)
 	 */
@@ -96,6 +97,29 @@ public class MathsUtil {
 				}
 			}
 		}
+	}
+	
+	public static abstract class Combination {
+		public String[] src;
+		public String[] dest;
+		public int pick;
+		public int off;
+		public final void run() {
+			run(0, pick);
+		}
+		private void run (int n, int p) {
+			if (p == 0) {
+				apply();
+			} else {
+				int m = src.length - pick;
+				while (n <= m) {
+					dest[off+pick-1] = src[n];
+					run(n+1, p-1);
+					n++;
+				}
+			}
+		}
+		public abstract void apply();
 	}
 	
 }

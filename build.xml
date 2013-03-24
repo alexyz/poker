@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="jar">
+
+  <target name="jar">
+    <jar destfile="pet.jar" basedir="bin/">
+      <manifest>
+        <attribute name="Main-Class" value="pet.PET" />
+      </manifest>
+    </jar>
+
+  </target>
+
+</project>
