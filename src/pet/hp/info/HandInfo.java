@@ -14,7 +14,7 @@ public class HandInfo {
 
 	/** convert hands to hand infos */
 	public static List<HandInfo> getHandInfos(List<Hand> hands) {
-		List<HandInfo> handInfos = new ArrayList<HandInfo>();
+		List<HandInfo> handInfos = new ArrayList<>();
 		for (Hand h : hands) {
 			handInfos.add(new HandInfo(h));
 		}

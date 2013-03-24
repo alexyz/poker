@@ -1,5 +1,6 @@
 package pet.ui.ta;
 
+import java.awt.Font;
 import java.util.*;
 
 import pet.eq.*;
@@ -12,7 +13,7 @@ import pet.hp.state.*;
  */
 public class HandStateTableModel extends MyTableModel<HandState> {
 	
-	private static final List<MyColumn<HandState>> cols = new ArrayList<MyColumn<HandState>>();
+	private static final List<MyColumn<HandState>> cols = new ArrayList<>();
 	
 	private static final MyColumn<HandState> playerNameCol = new HandStateColumn(String.class, "Player", "Player name") {
 		@Override
@@ -106,6 +107,10 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 				sb.append("</table>");
 			}
 			return sb.toString();
+		}
+		@Override
+		public Font getFont (HandState hs) {
+			return MyJTable.monoTableFont;
 		}
 	};
 	

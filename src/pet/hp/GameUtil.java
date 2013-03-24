@@ -83,6 +83,14 @@ public class GameUtil {
 				return "7 Card Stud";
 			case Game.STUDHL_TYPE:
 				return "7 Card Stud H/L";
+			case Game.OM5_TYPE:
+				return "5 Card Omaha";
+			case Game.OM51_TYPE:
+				return "5 Card Omaha + 1";
+			case Game.OM5HL_TYPE:
+				return "5 Card Omaha H/L";
+			case Game.OM51HL_TYPE:
+				return "5 Card Omaha + 1 H/L";
 			default: 
 				throw new RuntimeException("no such game type " + gametype);
 		}
@@ -146,6 +154,10 @@ public class GameUtil {
 			case Game.FCD_TYPE:
 			case Game.DSTD_TYPE:
 			case Game.DSSD_TYPE:
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
+			case Game.OM51HL_TYPE:
+			case Game.OM5HL_TYPE:
 				return 5;
 			case Game.STUD_TYPE:
 			case Game.RAZZ_TYPE:
@@ -170,6 +182,10 @@ public class GameUtil {
 				return 1;
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
+			case Game.OM5HL_TYPE:
+			case Game.OM51HL_TYPE:
 				return 2;
 			default: 
 				throw new RuntimeException("unknown game type " + gametype);
@@ -178,24 +194,12 @@ public class GameUtil {
 	
 	/** return a string representing unknown hole cards for this game */
 	public static String unknownCardsString(int gametype) {
-		// return string constant instead of making string
-		switch (gametype) {
-			case Game.HE_TYPE:
-				return "[ ][ ]";
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-				return "[ ][ ][ ][ ]";
-			case Game.FCD_TYPE:
-			case Game.DSTD_TYPE:
-			case Game.DSSD_TYPE:
-				return "[ ][ ][ ][ ][ ]";
-			case Game.STUD_TYPE:
-			case Game.RAZZ_TYPE:
-			case Game.STUDHL_TYPE:
-				return "[ ][ ][ ][ ][ ][ ][ ]";
-			default:
-				throw new RuntimeException("unknown game type " + gametype);
+		int c = getHoleCards(gametype);
+		StringBuilder sb = new StringBuilder(c*3);
+		for (int n = 0; n < c; n++) {
+			sb.append("[ ]");
 		}
+		return sb.toString();
 	}
 	
 	/** get street names for game type */
@@ -207,6 +211,10 @@ public class GameUtil {
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
+			case Game.OM5HL_TYPE:
+			case Game.OM51HL_TYPE:
 				return hestreetnames;
 			case Game.DSTD_TYPE:
 				return tripdrawstreetnames;
@@ -258,8 +266,12 @@ public class GameUtil {
 			case Game.HE_TYPE:
 				return holdemPoker;
 			case Game.OM_TYPE:
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
 				return omahaPoker;
 			case Game.OMHL_TYPE:
+			case Game.OM5HL_TYPE:
+			case Game.OM51HL_TYPE:
 				return omahaHLPoker;
 			case Game.DSTD_TYPE:
 			case Game.DSSD_TYPE:
@@ -280,20 +292,13 @@ public class GameUtil {
 	 */
 	public static String[] getRanksHi(int gameType) {
 		switch (gameType) {
-			case Game.FCD_TYPE:
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-				return Poker.ranknames;
 			case Game.DSTD_TYPE:
 			case Game.DSSD_TYPE:
 				return Poker.dsLowRankNames;
 			case Game.RAZZ_TYPE:
 				return Poker.afLowRankNames;
 			default:
-				throw new RuntimeException("no hi ranks for game " + gameType);
+				return Poker.ranknames;
 		}
 	}
 	
@@ -302,13 +307,6 @@ public class GameUtil {
 	 */
 	public static int getDraws(int gameType, int streetIndex) {
 		switch (gameType) {
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
-				return 0;
 			case Game.FCD_TYPE:
 			case Game.DSSD_TYPE:
 				// 1, 0 draws
@@ -317,7 +315,7 @@ public class GameUtil {
 				// 3, 2, 1, 0 draws
 				return 3 - streetIndex; 
 			default:
-				throw new RuntimeException("no hi ranks for game " + gameType);
+				return 0;
 		}
 	}
 }

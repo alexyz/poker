@@ -17,8 +17,8 @@ public class StudCalcPanel extends CalcPanel {
 	
 	private final HandCardPanel[] handPanels = new HandCardPanel[8];
 	private final CardPanel boardPanel = new CardPanel("Community Card", 0, 1);
-	private final JComboBox randStreet = new JComboBox();
-	private final JComboBox pokerCombo = new JComboBox();
+	private final JComboBox<StudStreetItem> randStreet = new JComboBox<>();
+	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>();
 	
 	public StudCalcPanel() {
 		for (int n = 0; n < handPanels.length; n++) {
@@ -28,7 +28,7 @@ public class StudCalcPanel extends CalcPanel {
 		setHandCardPanels(handPanels);
 		setBoard(boardPanel);
 		
-		randStreet.setModel(new DefaultComboBoxModel(new Object[] {
+		randStreet.setModel(new DefaultComboBoxModel<>(new StudStreetItem[] {
 				new StudStreetItem("3rd", 3),
 				new StudStreetItem("4th", 4),
 				new StudStreetItem("5th", 5),
@@ -43,7 +43,7 @@ public class StudCalcPanel extends CalcPanel {
 				new PokerItem(PokerItem.AFLOW, new StudPoker(Value.afLowValue, false)),
 				new PokerItem(PokerItem.HILO, new StudPoker(Value.hiValue, true))
 		};
-		pokerCombo.setModel(new DefaultComboBoxModel(items));
+		pokerCombo.setModel(new DefaultComboBoxModel<>(items));
 		
 		addCalcOpt(pokerCombo);
 		
@@ -80,8 +80,8 @@ public class StudCalcPanel extends CalcPanel {
 		}
 		
 		// get the hands and the panels of those hands
-		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
-		List<String[]> cards = new ArrayList<String[]>();
+		List<HandCardPanel> cardPanels = new ArrayList<>();
+		List<String[]> cards = new ArrayList<>();
 		collectCards(cards, cardPanels);
 		if (cards.size() == 0) {
 			System.out.println("no hands");

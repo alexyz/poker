@@ -23,7 +23,7 @@ public class StudPoker extends Poker {
 	 */
 	private String[] merge(final String[] board, final String[] holeCards, final boolean create) {
 		// validate
-		if (board != null && (board.length > 1 || (board.length == 1 && holeCards.length != 6))) {
+		if (board.length > 1) {
 			throw new RuntimeException("invalid board");
 		}
 		
@@ -31,13 +31,13 @@ public class StudPoker extends Poker {
 			throw new RuntimeException("invalid hand");
 		}
 		
-		if (board != null && board.length > 0) {
+		if (board.length > 0) {
 			// join board and hand
-			final String[] newHoleCards = create ? new String[7] : tempHoleCards;
+			final String[] newHoleCards = create ? new String[holeCards.length + 1] : tempHoleCards;
 			for (int n = 0; n < holeCards.length; n++) {
 				newHoleCards[n] = holeCards[n];
 			}
-			newHoleCards[6] = board[0];
+			newHoleCards[holeCards.length] = board[0];
 			return newHoleCards;
 			
 		} else {
@@ -52,9 +52,9 @@ public class StudPoker extends Poker {
 		int maxv = 0;
 		if (hand.length >= 5) {
 			// pick best 5 card hand
-			final int positions = MathsUtil.bincoff(hand.length, 5);
+			final int positions = MathsUtil.binaryCoefficientFast(hand.length, 5);
 			for (int p = 0; p < positions; p++) {
-				MathsUtil.kcomb(5, p, hand, tempHand, 0);
+				MathsUtil.kCombination(5, p, hand, tempHand, 0);
 				final int v = val.value(tempHand);
 				if (v > maxv) {
 					maxv = v;

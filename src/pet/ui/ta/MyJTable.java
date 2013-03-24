@@ -20,7 +20,10 @@ import javax.swing.table.TableCellRenderer;
 public class MyJTable extends JTable {
 	
 	public static final Color defcol = UIManager.getDefaults().getColor("Table.background");
-	public static final Font deffont = UIManager.getDefaults().getFont("Table.font");
+	
+	public static final Font tableFont = UIManager.getDefaults().getFont("Table.font");
+	public static final Font monoTableFont = new Font("Monospaced", 0, tableFont.getSize());
+	public static final Font boldTableFont = tableFont.deriveFont(Font.BOLD);
 	
 	public MyJTable() {
 		getTableHeader().addMouseListener(new MouseAdapter() {
@@ -76,19 +79,20 @@ public class MyJTable extends JTable {
 	}
 	
 	@Override
-	public Component prepareRenderer(TableCellRenderer renderer, int r, int c) {
-		Component comp = super.prepareRenderer(renderer, r, c);
+	public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
+		Component comp = super.prepareRenderer(renderer, row, col);
 		if (comp instanceof JComponent) {
 			JComponent jcomp = (JComponent)comp;
 			// need to convert before sending to table model
-			int r2 = convertRowIndexToModel(r);
-			int c2 = convertColumnIndexToModel(c);
-			if (!getSelectionModel().isSelectedIndex(r)) {
-				Color col = ((MyTableModel<?>)getModel()).getColour(r2, c2);
-				jcomp.setBackground(col != null ? col : defcol);
+			int row2 = convertRowIndexToModel(row);
+			int col2 = convertColumnIndexToModel(col);
+			if (!getSelectionModel().isSelectedIndex(row)) {
+				Color colour = ((MyTableModel<?>)getModel()).getColour(row2, col2);
+				jcomp.setBackground(colour != null ? colour : defcol);
+				//jcomp.setFont(new Font("Monospaced", 0, 8));
 			}
-			Font font = ((MyTableModel<?>)getModel()).getFont(r2, c2);
-			jcomp.setFont(font != null ? font : deffont);	
+			Font font = ((MyTableModel<?>)getModel()).getFont(row2, col2);
+			jcomp.setFont(font != null ? font : tableFont);	
 		}
 		return comp;
 	}

@@ -11,7 +11,7 @@ import pet.hp.*;
  */
 public class HUDManager implements HistoryListener {
 	
-	private final TreeMap<String,HUDsFrame> hudsFrames = new TreeMap<String,HUDsFrame>();
+	private final TreeMap<String,HUDsFrame> hudsFrames = new TreeMap<>();
 	private boolean create = false;
 	
 	@Override

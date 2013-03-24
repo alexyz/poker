@@ -3,7 +3,8 @@ package pet.eq;
 import java.util.*;
 
 /**
- * utilities for arrays
+ * utilities for arrays.
+ * Note: if you want subarrays, use Arrays.copyOfRange
  */
 public class ArrayUtil {
 
@@ -57,7 +58,7 @@ public class ArrayUtil {
 	 */
 	static String[] sub(String[] a, String[] b) {
 		// inefficient...
-		TreeSet<String> s = new TreeSet<String>(Arrays.asList(a));
+		TreeSet<String> s = new TreeSet<>(Arrays.asList(a));
 		s.removeAll(Arrays.asList(b));
 		if (s.size() != a.length) {
 			//System.out.println("sub: " + Arrays.toString(a) + " - " + Arrays.toString(b) + " = " + s);
@@ -66,5 +67,5 @@ public class ArrayUtil {
 			return a;
 		}
 	}
-
+	
 }

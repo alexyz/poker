@@ -15,13 +15,13 @@ import pet.eq.*;
 class DeckPanel extends JPanel {
 	
 	public static final String CARD_SEL_PROP_CHANGE = "cardsel", CARD_DESEL_PROP_CHANGE = "carddesel";
-	private final List<CardButton> cardButtons = new ArrayList<CardButton>();
+	private final List<CardButton> cardButtons = new ArrayList<>();
 	
 	public DeckPanel() {
 		super(new GridLayout(4, 13));
 		setBorder(BorderFactory.createTitledBorder("Deck"));
 		
-		List<String> deck = new ArrayList<String>(Poker.deck);
+		List<String> deck = new ArrayList<>(Poker.deck);
 		Collections.reverse(deck);
 		for (char s : Poker.suits) {
 			for (String c : deck) {
@@ -71,7 +71,7 @@ class DeckPanel extends JPanel {
 	 * always returns a new list
 	 */
 	public List<String> getCards(boolean selected) {
-		List<String> cards = new ArrayList<String>();
+		List<String> cards = new ArrayList<>();
 		for (CardButton b : cardButtons) {
 			if (b.isSelected() == selected) {
 				cards.add(b.getCard());

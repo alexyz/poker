@@ -17,7 +17,7 @@ public class HoldemCalcPanel extends CalcPanel {
 	private final JCheckBox randFlopBox = new JCheckBox("Flop");
 	private final JCheckBox randTurnBox = new JCheckBox("Turn");
 	private final JCheckBox randRiverBox = new JCheckBox("River");
-	private final JComboBox pokerCombo = new JComboBox();
+	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>();
 	private final int numHoleCards;
 
 	public HoldemCalcPanel(boolean omaha) {
@@ -26,7 +26,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		// create board and hands and collect card labels
 		boardPanel = new CardPanel("Community Cards", 0, 5);
 		
-		pokerCombo.setModel(new DefaultComboBoxModel(new PokerItem[] {
+		pokerCombo.setModel(new DefaultComboBoxModel<>(new PokerItem[] {
 				new PokerItem(PokerItem.HIGH, new HEPoker(omaha, false)),
 				new PokerItem(PokerItem.HILO, new HEPoker(omaha, true))
 		}));
@@ -135,17 +135,17 @@ public class HoldemCalcPanel extends CalcPanel {
 		}
 		
 		List<String> board = boardPanel.getCards();
-		if (board.size() == 1 || board.size() == 2) {
-			System.out.println("incomplete board");
-			return;
-		}
+//		if (board.size() == 1 || board.size() == 2) {
+//			System.out.println("incomplete board");
+//			return;
+//		}
 		
-		if (board.size() == 0) {
-			board = null;
-		}
+//		if (board.size() == 0) {
+//			board = null;
+//		}
 		
-		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
-		List<String[]> cards = new ArrayList<String[]>();
+		List<HandCardPanel> cardPanels = new ArrayList<>();
+		List<String[]> cards = new ArrayList<>();
 		collectCards(cards, cardPanels);
 		
 		if (cards.size() == 0) {

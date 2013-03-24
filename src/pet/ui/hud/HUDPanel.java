@@ -24,7 +24,7 @@ class HUDPanel extends JPanel {
 	public final int seat;
 	private final HUDsFrame hudsFrame;
 	private final JLabel nameLabel = new JLabel();
-	private final ArrayList<JLabel> statLabels = new ArrayList<JLabel>();
+	private final ArrayList<JLabel> statLabels = new ArrayList<>();
 	private final JLabel handLabel = new JLabel();
 	/** the window the hud is displayed in, if any */
 	private JFrame window;

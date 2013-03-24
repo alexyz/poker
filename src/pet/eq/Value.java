@@ -45,6 +45,16 @@ public abstract class Value {
 		}
 	};
 	
+	/**
+	 * straight hi value only (hi equity type)
+	 */
+	public static final Value strHiValue = new Value(Equity.HI_ONLY) {
+		@Override
+		public int value(String[] hand) {
+			return Poker.strValue(hand);
+		}
+	};
+	
 	private final int eqtype;
 	
 	private Value(int eqtype) {

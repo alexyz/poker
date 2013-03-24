@@ -11,21 +11,21 @@ import pet.eq.Poker;
 public class History {
 
 	/** string cache to avoid multiple instances of same string */
-	private final HashMap<String,String> cache = new HashMap<String,String>(1000);
+	private final HashMap<String,String> cache = new HashMap<>(1000);
 	/** game instances */
-	private final ArrayList<Game> games = new ArrayList<Game>();
+	private final ArrayList<Game> games = new ArrayList<>();
 	/** tournament instances */
-	private final TreeMap<Long,Tourn> tourns = new TreeMap<Long,Tourn>();
+	private final TreeMap<Long,Tourn> tourns = new TreeMap<>();
 	/** hands seen so far */
-	private final ArrayList<Hand> hands = new ArrayList<Hand>();
+	private final ArrayList<Hand> hands = new ArrayList<>();
 	/** hand ids seen so far */
-	private final HashSet<Long> handIds = new HashSet<Long>();
+	private final HashSet<Long> handIds = new HashSet<>();
 	/** listeners for history changes */
-	private final ArrayList<HistoryListener> listeners = new ArrayList<HistoryListener>();
+	private final ArrayList<HistoryListener> listeners = new ArrayList<>();
 	/** tournament players seen - XXX inefficient hack */
-	private final TreeMap<Long,TreeSet<String>> tp = new TreeMap<Long,TreeSet<String>>();
+	private final TreeMap<Long,TreeSet<String>> tp = new TreeMap<>();
 	/** current player names - i.e. the names of players the hand is played from the perspective of */
-	private final Set<String> self = new TreeSet<String>();
+	private final Set<String> self = new TreeSet<>();
 	
 	public History() {
 		for (String c : Poker.deck) {
@@ -88,7 +88,7 @@ public class History {
 	 * always returns a new list
 	 */
 	public synchronized List<String> getGames() {
-		ArrayList<String> gameids = new ArrayList<String>(games.size());
+		ArrayList<String> gameids = new ArrayList<>(games.size());
 		for (Game game : games) {
 			gameids.add(game.id);
 		}
@@ -164,7 +164,7 @@ public class History {
 	public synchronized void addTournPlayers(Long tournidobj, Collection<String> players) {
 		TreeSet<String> tps = tp.get(tournidobj);
 		if (tps == null) {
-			tp.put(tournidobj, tps = new TreeSet<String>());
+			tp.put(tournidobj, tps = new TreeSet<>());
 		}
 		for (String p : players) {
 			if (!tps.contains(p)) {
@@ -183,7 +183,7 @@ public class History {
 	 */
 	public synchronized List<Hand> getHands(String player, String gameid) {
 		System.out.println("get hands for " + player + " gameid " + gameid);
-		List<Hand> hands = new ArrayList<Hand>();
+		List<Hand> hands = new ArrayList<>();
 
 		for (Hand hand : this.hands) {
 			if (hand.game.id.equals(gameid)) {
@@ -206,7 +206,7 @@ public class History {
 	 */
 	public synchronized List<Hand> getHands(long tournid) {
 		System.out.println("get hands for tourn " + tournid);
-		List<Hand> hands = new ArrayList<Hand>();
+		List<Hand> hands = new ArrayList<>();
 
 		for (Hand hand : this.hands) {
 			if (hand.tourn != null && hand.tourn.id == tournid) {

@@ -73,7 +73,7 @@ public class CardsStateUtil {
 					}
 					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
 					
-					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+					final ArrayList<DrawPoker.Draw> l = new ArrayList<>();
 					final int drawn = seat.drawn(streetIndex);
 					DrawPoker.getDrawingHand(l, x, drawn, high, blockers);
 					final String[] k = new String[5 - drawn];
@@ -83,7 +83,7 @@ public class CardsStateUtil {
 					
 				} else {
 					// guess opponents hole cards based on final hand
-					final ArrayList<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+					final ArrayList<DrawPoker.Draw> l = new ArrayList<>();
 					final int drawn = seat.drawn(streetIndex);
 					String[] h = DrawPoker.getDrawingHand(l, seat.finalHoleCards, drawn, high, blockers);
 					cs = new CardsState(h, null, true, l);
@@ -93,6 +93,10 @@ public class CardsStateUtil {
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
+			case Game.OM5HL_TYPE:
+			case Game.OM51HL_TYPE:
 				cs = new CardsState(seat.finalHoleCards, null, false, null);
 				break;
 				

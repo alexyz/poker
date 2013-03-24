@@ -105,13 +105,12 @@ public class PokerFrame extends JFrame {
 	
 	public PokerFrame() {
 		super("Poker Equity Tool");
-		try {
-			InputStream iconIs = getClass().getResourceAsStream("/pet32.png");
+		try (InputStream iconIs = getClass().getResourceAsStream("/pet32.png")) {
 			BufferedImage icon = ImageIO.read(iconIs);
-			iconIs.close();
 		    setIconImage(icon);
 		    //com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
 		    //app.setDockIconImage (icon);
+		    
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

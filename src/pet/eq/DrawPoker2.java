@@ -12,7 +12,7 @@ public abstract class DrawPoker2 extends Poker {
 		
 		// [4h 2d 5d 7h 3s] draw 1 blockers 7h
 		String[] x = new String[] { "4h", "2d", "5d", "7h", "3s" };
-		List<DrawPoker.Draw> l = new ArrayList<DrawPoker.Draw>();
+		List<DrawPoker.Draw> l = new ArrayList<>();
 		
 		DrawPoker.getDrawingHand(l, x, 1, false, null);
 		Collections.sort(l);

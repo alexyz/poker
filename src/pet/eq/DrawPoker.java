@@ -39,7 +39,7 @@ public class DrawPoker extends Poker {
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
-		if (board != null) {
+		if (board.length > 0) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}
 		if (draws < 0 || draws > 3) {
@@ -116,7 +116,7 @@ public class DrawPoker extends Poker {
 	
 	@Override
 	public int value(String[] board, String[] hole) {
-		if (board != null || hole.length != 5) {
+		if (board.length > 0 || hole.length != 5) {
 			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
 		}
 		return value.value(hole);
@@ -151,7 +151,7 @@ public class DrawPoker extends Poker {
 			}
 		}
 		
-		BigInteger combs = MathsUtil.bincoffslow(hand.length, 5 - drawn);
+		BigInteger combs = MathsUtil.binaryCoefficient(hand.length, 5 - drawn);
 		System.out.println("combs: " + combs);
 		if (combs.intValue() <= 0) {
 			throw new RuntimeException();
@@ -187,8 +187,8 @@ public class DrawPoker extends Poker {
 		// from players point of view, all other cards are possible (even the blockers)
 		final String[] deck = Poker.remdeck(null, hand);
 		final String[] drawnHand = new String[5];
-		final int imax = MathsUtil.bincoff(hand.length, 5 - drawn);
-		final int jmax = MathsUtil.bincoff(deck.length, drawn);
+		final int imax = MathsUtil.binaryCoefficientFast(hand.length, 5 - drawn);
+		final int jmax = MathsUtil.binaryCoefficientFast(deck.length, drawn);
 		System.out.println("imax: " + imax + " jmax: " + jmax);
 		
 		String[] maxDrawingHand = null;
@@ -197,13 +197,13 @@ public class DrawPoker extends Poker {
 		for (int i = 0; i < imax; i++) {
 			Arrays.fill(drawnHand, null);
 			// pick kept from hand
-			MathsUtil.kcomb(5 - drawn, i, hand, drawnHand, 0);
+			MathsUtil.kCombination(5 - drawn, i, hand, drawnHand, 0);
 			//System.out.println("drawnHand: " + Arrays.toString(drawnHand));
 			float score = 0;
 			
 			for (int j = 0; j < jmax; j++) {
 				// pick drawn from deck
-				MathsUtil.kcomb(drawn, j, deck, drawnHand, 5 - drawn);
+				MathsUtil.kCombination(drawn, j, deck, drawnHand, 5 - drawn);
 				//System.out.println("  drawnHand: " + Arrays.toString(drawnHand));
 				int v = value.value(drawnHand);
 				score += score(v, bias);

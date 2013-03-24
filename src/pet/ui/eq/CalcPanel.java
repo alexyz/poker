@@ -30,7 +30,7 @@ public abstract class CalcPanel extends JPanel {
 	 * the list of all card buttons used by the board, player hole cards and
 	 * blockers (in that order)
 	 */
-	private final List<CardButton> cardButtons = new ArrayList<CardButton>();
+	private final List<CardButton> cardButtons = new ArrayList<>();
 	
 	private HandCardPanel[] cardPanels;
 	private CardPanel boardPanel;

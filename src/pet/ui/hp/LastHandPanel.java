@@ -20,7 +20,7 @@ import pet.ui.ta.*;
  */
 public class LastHandPanel extends JPanel implements HistoryListener {
 	
-	private final JComboBox stateCombo = new JComboBox(new DefaultComboBoxModel());
+	private final JComboBox<HandStateItem> stateCombo = new JComboBox<>(new DefaultComboBoxModel<HandStateItem>());
 	private final MyJTable handTable = new MyJTable();
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
@@ -182,10 +182,10 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	public void showHand(final Hand hand) {
 		// create hand states, add to list
 		// display most recent in hud
-		final DefaultComboBoxModel model = (DefaultComboBoxModel) stateCombo.getModel();
+		final DefaultComboBoxModel<HandStateItem> model = (DefaultComboBoxModel<HandStateItem>) stateCombo.getModel();
 
 		for (int n = 0; n < model.getSize(); n++) {
-			HandStateItem hs = (HandStateItem) model.getElementAt(n);
+			HandStateItem hs = model.getElementAt(n);
 			if (hs.hand == hand) {
 				// already present, just select
 				stateCombo.setSelectedIndex(n);

@@ -14,7 +14,7 @@ import pet.ui.PokerFrame;
 public class ReplayPanel extends JPanel {
 
 	private final TableComponent tableComp = new TableComponent();
-	private final JComboBox stateCombo = new JComboBox();
+	private final JComboBox<HandState> stateCombo = new JComboBox<>();
 	private final JButton prevButton = new JButton(PokerFrame.LEFT_TRI);
 	private final JButton nextButton = new JButton(PokerFrame.RIGHT_TRI);
 
@@ -73,7 +73,7 @@ public class ReplayPanel extends JPanel {
 	 */
 	public void setHand(Hand h) {
 		List<HandState> states = HandStateUtil.getStates(h);
-		stateCombo.setModel(new DefaultComboBoxModel(states.toArray(new Object[states.size()])));
+		stateCombo.setModel(new DefaultComboBoxModel<>(states.toArray(new HandState[states.size()])));
 		stateCombo.setSelectedIndex(0);
 		tableComp.setHand(h);
 		tableComp.setState(states.get(0));

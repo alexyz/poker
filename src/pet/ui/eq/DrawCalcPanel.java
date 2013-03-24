@@ -14,7 +14,7 @@ import pet.eq.*;
  */
 public class DrawCalcPanel extends CalcPanel {
 	
-	private final JComboBox pokerCombo = new JComboBox();
+	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>();
 	private final JSpinner drawsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 3, 1));
 	
 	private final HandCardPanel[] handPanels = new HandCardPanel[6];
@@ -33,7 +33,7 @@ public class DrawCalcPanel extends CalcPanel {
 				new PokerItem(PokerItem.DSLOW, new DrawPoker(false)),
 		};
 		
-		pokerCombo.setModel(new DefaultComboBoxModel(items));
+		pokerCombo.setModel(new DefaultComboBoxModel<>(items));
 		addCalcOpt(pokerCombo);
 		addCalcOpt(new JLabel("Draws"));
 		addCalcOpt(drawsSpinner);
@@ -63,8 +63,8 @@ public class DrawCalcPanel extends CalcPanel {
 			hp.setEquity(null);
 		}
 		
-		List<HandCardPanel> cardPanels = new ArrayList<HandCardPanel>();
-		List<String[]> cards = new ArrayList<String[]>();
+		List<HandCardPanel> cardPanels = new ArrayList<>();
+		List<String[]> cards = new ArrayList<>();
 		collectCards(cards, cardPanels);
 		
 		if (cards.size() == 0) {

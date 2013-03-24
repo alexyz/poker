@@ -12,13 +12,13 @@ public class Info implements HistoryListener {
 	/**
 	 * players seen
 	 */
-	private final Map<String, PlayerInfo> playerMap = new TreeMap<String, PlayerInfo>();
+	private final Map<String, PlayerInfo> playerMap = new TreeMap<>();
 	/**
 	 * the player info representing the whole population
 	 */
 	private final PlayerInfo population = new PlayerInfo("*");
 	
-	private final Map<Long,TournInfo> tournInfos = new TreeMap<Long,TournInfo>();
+	private final Map<Long,TournInfo> tournInfos = new TreeMap<>();
 	
 	public PlayerInfo getPopulation() {
 		return population;
@@ -42,7 +42,7 @@ public class Info implements HistoryListener {
 	public synchronized List<PlayerInfo> getPlayers(String pattern) {
 		pattern = pattern.toLowerCase();
 		System.out.println("get players " + pattern);
-		List<PlayerInfo> players = new ArrayList<PlayerInfo>();
+		List<PlayerInfo> players = new ArrayList<>();
 		for (Map.Entry<String,PlayerInfo> e : this.playerMap.entrySet()) {
 			if (e.getKey().toLowerCase().contains(pattern)) {
 				players.add(e.getValue());
@@ -54,7 +54,7 @@ public class Info implements HistoryListener {
 	
 	public synchronized List<PlayerInfo> getPlayers(Collection<String> names) {
 		System.out.println("get players " + names);
-		List<PlayerInfo> pinfos = new ArrayList<PlayerInfo>();
+		List<PlayerInfo> pinfos = new ArrayList<>();
 		for (String name : names) {
 			PlayerInfo pinfo = playerMap.get(name);
 			if (pinfo != null) {
@@ -70,7 +70,7 @@ public class Info implements HistoryListener {
 	 */
 	public synchronized List<PlayerGameInfo> getGameInfos(String gameid) {
 		System.out.println("get game infos for " + gameid);
-		List<PlayerGameInfo> gameinfos = new ArrayList<PlayerGameInfo>();
+		List<PlayerGameInfo> gameinfos = new ArrayList<>();
 		for (PlayerInfo pi : playerMap.values()) {
 			PlayerGameInfo pgi = pi.getGameInfo(gameid);
 			if (pgi != null) {
@@ -101,7 +101,7 @@ public class Info implements HistoryListener {
 	 * always returns new list
 	 */
 	public synchronized List<TournInfo> getTournInfos() {
-		ArrayList<TournInfo> l = new ArrayList<TournInfo>(tournInfos.values());
+		ArrayList<TournInfo> l = new ArrayList<>(tournInfos.values());
 		return l;
 	}
 

@@ -7,6 +7,8 @@ import java.util.*;
  */
 public abstract class Poker {
 	
+	public static final String[] emptyBoard = new String[0];
+	
 	/* 
 	 * poker hand values are represented by 7 x 4 bit values (28 bits total):
 	 * 0x7654321
@@ -34,6 +36,16 @@ public abstract class Poker {
 	/** rank and hand value mask */
 	protected static final int HAND = 0xffffff;
 	
+	public static final int H_RANK = 0;
+	public static final int P_RANK = 1;
+	public static final int TP_RANK = 2;
+	public static final int TK_RANK = 3;
+	public static final int S_RANK = 4;
+	public static final int F_RANK = 5;
+	public static final int FH_RANK = 6;
+	public static final int Q_RANK = 7;
+	public static final int SF_RANK = 8;
+	
 	/** high card bit mask (always zero) */
 	protected static final int H_MASK = 0;
 	/** pair rank bit mask */
@@ -43,7 +55,7 @@ public abstract class Poker {
 	/** three of a kind rank bit mask */
 	protected static final int TK_MASK = 0x300000;
 	/** straight bit mask */
-	protected static final int ST_MASK = 0x400000;
+	public static final int ST_MASK = 0x400000;
 	/** flush bit mask */
 	protected static final int FL_MASK = 0x500000;
 	/** full house bit mask */
@@ -110,6 +122,9 @@ public abstract class Poker {
 		return i;
 	}
 	
+	/**
+	 * return a clone of the deck
+	 */
 	public static String[] deck() {
 		return deckArr.clone();
 	}
@@ -177,9 +192,21 @@ public abstract class Poker {
 	}
 	
 	/**
+	 * return straight value of hand, or 0, no other ranks
+	 */
+	public static int strValue (String[] hand) {
+		int s = isStraight(hand);
+		if (s > 0) {
+			return ST_MASK | s;
+		} else {
+			return 0;
+		}
+	}
+	
+	/**
 	 * Get high value of 5 card hand
 	 */
-	static int value(String[] hand) {
+	public static int value (String[] hand) {
 		validate(hand);
 		int p = isPair(hand, true);
 		if (p < P_MASK) {
@@ -212,7 +239,7 @@ public abstract class Poker {
 	}
 	
 	/** 
-	 * return value of high card of straight or 0 
+	 * return value of high card of straight (5-14) or 0 
 	 */
 	private static int isStraight(String[] hand) {
 		int x = 0;
@@ -418,7 +445,7 @@ public abstract class Poker {
 	 * always returns new array
 	 */
 	public static String[] remdeck(String[][] aa, String[]... a) {
-		ArrayList<String> list = new ArrayList<String>(deck);
+		ArrayList<String> list = new ArrayList<>(deck);
 		if (aa != null) {
 			for (String[] x : aa) {
 				rem1(list, x);
@@ -451,7 +478,7 @@ public abstract class Poker {
 		}
 		
 		// TODO this is not very efficient, could just serialise/deserialise array
-		Set<Integer> uniqueValueSet = new TreeSet<Integer>();
+		Set<Integer> uniqueValueSet = new TreeSet<>();
 		String[] hand = new String[5];
 		int valueCount = 0;
 		for (int n0 = 0; n0 < deckArr.length; n0++) {
@@ -492,9 +519,9 @@ public abstract class Poker {
 	 * Calculate equity for given board and hands.
 	 */
 	public final MEquity[] equity(Collection<String> board, Collection<String[]> cards, Collection<String> blockers, int draws) {
-		String[] boardArr = board != null ? board.toArray(new String[board.size()]) : null;
-		String[][] cardsArr = cards != null ? cards.toArray(new String[cards.size()][]) : null;
-		String[] blockersArr = blockers != null ? blockers.toArray(new String[blockers.size()]) : null;
+		String[] boardArr = board.toArray(new String[board.size()]);
+		String[][] cardsArr = cards.toArray(new String[cards.size()][]);
+		String[] blockersArr = blockers.toArray(new String[blockers.size()]);
 		return equity(boardArr, cardsArr, blockersArr, draws);
 	}
 	
@@ -505,6 +532,7 @@ public abstract class Poker {
 	
 	/**
 	 * Calculate value of exact hi hand.
+	 * The hand can be incomplete as long as it has at least 5 cards in the required format.
 	 */
 	public abstract int value(String[] board, String[] hole);
 	

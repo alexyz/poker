@@ -23,7 +23,7 @@ public class PlayerInfo {
 	public Date lastDate;
 	
 	/** players games */
-	private final TreeMap<String,PlayerGameInfo> games = new TreeMap<String,PlayerGameInfo>();
+	private final TreeMap<String,PlayerGameInfo> games = new TreeMap<>();
 	
 	public PlayerInfo(String name) {
 		this.name = name;

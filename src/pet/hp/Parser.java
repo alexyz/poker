@@ -10,7 +10,7 @@ public abstract class Parser {
 	/** print everything to System.out */
 	public boolean debug;
 	/** debug output in case of parse error */
-	private final List<String> debuglines = new ArrayList<String>();
+	private final List<String> debuglines = new ArrayList<>();
 	/** where to send parsed data */
 	protected final History history;
 	
@@ -18,7 +18,10 @@ public abstract class Parser {
 		this.history = history;
 	}
 	
-	protected void println(String s) {
+	/**
+	 * add a line to the debug log for this hand
+	 */
+	protected void debug(String s) {
 		debuglines.add(s);
 		if (debug) {
 			System.out.println(s);

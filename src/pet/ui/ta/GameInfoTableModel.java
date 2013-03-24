@@ -6,13 +6,13 @@ import pet.hp.info.*;
 
 public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	
-	public static final List<MyColumn<PlayerGameInfo>> allCols = new ArrayList<MyColumn<PlayerGameInfo>>();
+	public static final List<MyColumn<PlayerGameInfo>> allCols = new ArrayList<>();
 	
 	/** columns for displaying many games for one player */
-	public static final List<MyColumn<PlayerGameInfo>> playerCols = new ArrayList<MyColumn<PlayerGameInfo>>();
+	public static final List<MyColumn<PlayerGameInfo>> playerCols = new ArrayList<>();
 	
 	/** columns for displaying the one game for many players */
-	public static final List<MyColumn<PlayerGameInfo>> gameCols = new ArrayList<MyColumn<PlayerGameInfo>>();
+	public static final List<MyColumn<PlayerGameInfo>> gameCols = new ArrayList<>();
 	
 	private static final MyColumn<PlayerGameInfo> player = new MyColumn<PlayerGameInfo>(String.class, "Player", "Player Name") {
 		@Override

@@ -10,14 +10,14 @@ import pet.hp.*;
  */
 public class HandStateUtil {
 	
-	private static final ArrayList<List<HandState>> cache = new ArrayList<List<HandState>>();
+	private static final ArrayList<List<HandState>> cache = new ArrayList<>();
 	private static final int cacheSize = 100;
 	
 	/**
 	 * Get the first seat state for each street for the given seat
 	 */
 	public static List<SeatState> getFirst(List<HandState> handStates, int seatNum) {
-		ArrayList<SeatState> seatStates = new ArrayList<SeatState>();
+		ArrayList<SeatState> seatStates = new ArrayList<>();
 		int s = -1;
 		for (HandState hs : handStates) {
 			SeatState as = hs.actionSeat();
@@ -45,7 +45,7 @@ public class HandStateUtil {
 			}
 		}
 
-		final List<HandState> states = new ArrayList<HandState>();
+		final List<HandState> states = new ArrayList<>();
 		
 		// initial state (not displayed)
 		// will be reassigned after each action
@@ -62,9 +62,9 @@ public class HandStateUtil {
 		// equity stuff
 		final Poker poker = GameUtil.getPoker(hand.game.type);
 		final int minHoleCards = GameUtil.getMinHoleCards(hand.game.type);
-		final List<String[]> holeCards = new ArrayList<String[]>();
-		final List<SeatState> holeCardSeats = new ArrayList<SeatState>();
-		final Set<String> blockers = new TreeSet<String>();
+		final List<String[]> holeCards = new ArrayList<>();
+		final List<SeatState> holeCardSeats = new ArrayList<>();
+		final Set<String> blockers = new TreeSet<>();
 		
 		System.out.println("reshuf on " + hand.reshuffleStreetIndex);
 		
@@ -106,7 +106,7 @@ public class HandStateUtil {
 					if (cs != null) {
 						// do we have enough cards for stud?
 						// unknown down cards will be null (holdem/draw never have null cards)
-						List<String> setCards = new ArrayList<String>();
+						List<String> setCards = new ArrayList<>();
 						for (String c : cs.cards) {
 							if (c != null) {
 								setCards.add(c);
@@ -149,7 +149,7 @@ public class HandStateUtil {
 			
 			// draws depends on game and street
 			int draws = GameUtil.getDraws(hand.game.type, s);
-			List<String> boardList = hs.board != null ? Arrays.asList(hs.board) : null;
+			List<String> boardList = Arrays.asList(hs.board);
 			// XXX save params here so it can be shown in equity ui page
 			MEquity[] eqs = poker.equity(boardList, holeCards, blockers, draws);
 			for (int n = 0; n < holeCardSeats.size(); n++) {

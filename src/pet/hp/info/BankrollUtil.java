@@ -23,7 +23,7 @@ public class BankrollUtil {
 		Collections.sort(hands, HandUtil.idCmp);
 		final Hand firstHand = hands.get(0);
 		final char currency = firstHand.game.currency;
-		final List<Hand> pointHands = new ArrayList<Hand>();
+		final List<Hand> pointHands = new ArrayList<>();
 		
 		final GraphData data = new GraphData(title, "hand", "money") {
 			@Override
@@ -83,7 +83,7 @@ public class BankrollUtil {
 		final Hand firstHand = hands.get(0);
 		final char currency = firstHand.game.currency;
 		
-		final Map<Long,Hand> ids = new TreeMap<Long,Hand>();
+		final Map<Long,Hand> ids = new TreeMap<>();
 		for (Hand h : hands) {
 			ids.put(h.id, h);
 		}
@@ -120,7 +120,7 @@ public class BankrollUtil {
 				if (players.contains(seat.name)) {
 					List<GraphDataPoint> points = data.pointsMap.get(seat.name);
 					if (points == null) {
-						data.pointsMap.put(seat.name, points = new ArrayList<GraphDataPoint>());
+						data.pointsMap.put(seat.name, points = new ArrayList<>());
 					}
 					won += seat.won - seat.pip;
 					int n = Arrays.binarySearch(idarr, hand.id);

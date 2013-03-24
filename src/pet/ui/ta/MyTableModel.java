@@ -8,9 +8,9 @@ import javax.swing.table.AbstractTableModel;
 
 public class MyTableModel<T> extends AbstractTableModel {
 
-	private final ArrayList<MyColumn<T>> cols = new ArrayList<MyColumn<T>>();
+	private final ArrayList<MyColumn<T>> cols = new ArrayList<>();
 
-	private final ArrayList<T> rows = new ArrayList<T>();
+	private final ArrayList<T> rows = new ArrayList<>();
 
 	private final List<MyColumn<T>> allcols;
 

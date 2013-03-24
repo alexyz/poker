@@ -152,7 +152,7 @@ class TableComponent extends JComponent {
 			
 			if (ss != null) {
 				
-				List<String> lines = new ArrayList<String>();
+				List<String> lines = new ArrayList<>();
 				lines.add(ss.seat.name);
 				lines.add(GameUtil.formatMoney(hand.game.currency, ss.stack));
 				if (!ss.folded || ss.cardsState != null) {

@@ -14,19 +14,19 @@ public class FollowThread extends Thread {
 	/** parser implementation */
 	private final Parser parser;
 	/** map of found files to position read to */
-	private final Map<String,long[]> fileMap = new TreeMap<String,long[]>();
+	private final Map<String,long[]> fileMap = new TreeMap<>();
 	/** listeners to send hands to */
-	private final List<FollowListener> listeners = new ArrayList<FollowListener>();
+	private final List<FollowListener> listeners = new ArrayList<>();
 	/** should scan directory or just wait */
 	private volatile boolean follow;
 	/** directory to scan */
 	private File dir;
 	/** files to parse */
-	private final Set<File> files = new TreeSet<File>();
+	private final Set<File> files = new TreeSet<>();
 	/** rejected files */
-	private final Set<File> rejFiles = new TreeSet<File>();
+	private final Set<File> rejFiles = new TreeSet<>();
 	private int age;
-
+	
 	public FollowThread(Parser parser) {
 		super("follow thread");
 		setPriority(Thread.MIN_PRIORITY);
@@ -83,7 +83,7 @@ public class FollowThread extends Thread {
 					System.out.println("parsed in " + (t / 1000000000.0) + " seconds");
 				}
 			}
-
+			
 			try {
 				if (follow) {
 					Thread.sleep(1000);
@@ -101,7 +101,7 @@ public class FollowThread extends Thread {
 			}
 		}
 	}
-
+	
 	private void process() {
 		System.out.println("process " + files.size() + " files");
 		for (FollowListener l : listeners) {
@@ -127,7 +127,7 @@ public class FollowThread extends Thread {
 		}
 		files.clear();
 	}
-
+	
 	private void collect() {
 		//System.out.println("collect files");
 		if (dir != null) {
@@ -154,28 +154,26 @@ public class FollowThread extends Thread {
 	
 	private long read(File file, long offset) {
 		System.out.println("parsing " + file.getName());
-		FileInputStream fis = null;
-		BufferedReader br = null;
 		
-		try {
-			fis = new FileInputStream(file);
+		try (FileInputStream fis = new FileInputStream(file)) {
 			long skip = fis.skip(offset);
 			if (skip != offset) {
 				System.out.println("skip " + offset + " of " + file + " actually skipped " + skip);
 			}
-			br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-			long pos = 0;
-			String line;
-			while ((line = br.readLine()) != null) {
-				boolean hand = parser.parseLine(line);
-				if (hand) {
-					pos = fis.getChannel().position();
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"))) {
+				long pos = 0;
+				String line;
+				while ((line = br.readLine()) != null) {
+					boolean hand = parser.parseLine(line);
+					if (hand) {
+						pos = fis.getChannel().position();
+					}
 				}
+				
+				// XXX should check if halfway though hand
+				System.out.println("  read from " + offset + " to " + pos);
+				return pos;
 			}
-			
-			// XXX should check if halfway though hand
-			System.out.println("  read from " + offset + " to " + pos);
-			return pos;
 			
 		} catch (IOException e) {
 			e.printStackTrace(System.out);
@@ -188,22 +186,6 @@ public class FollowThread extends Thread {
 			}
 			throw e;
 			
-		} finally {
-			// gotta love java exception handling
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 	

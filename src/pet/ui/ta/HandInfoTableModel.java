@@ -1,5 +1,6 @@
 package pet.ui.ta;
 
+import java.awt.Font;
 import java.util.*;
 
 import pet.hp.info.*;
@@ -9,7 +10,7 @@ import pet.hp.info.*;
  */
 public class HandInfoTableModel extends MyTableModel<HandInfo> {
 	
-	private static final List<MyColumn<HandInfo>> cols = new ArrayList<MyColumn<HandInfo>>();
+	private static final List<MyColumn<HandInfo>> cols = new ArrayList<>();
 	
 	static {
 		cols.add(new MyColumn<HandInfo>(Date.class, "Date", "Date") {
@@ -23,11 +24,19 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 			public HoleCards getValue(HandInfo o) {
 				return o.hole();
 			}
+			@Override
+			public Font getFont (HandInfo row) {
+				return MyJTable.monoTableFont;
+			}
 		});
 		cols.add(new MyColumn<HandInfo>(String[].class, "Board", "Community cards") {
 			@Override
 			public String[] getValue(HandInfo o) {
 				return o.hand.board;
+			}
+			@Override
+			public Font getFont (HandInfo row) {
+				return MyJTable.monoTableFont;
 			}
 		});
 		cols.add(new MyColumn<HandInfo>(Integer.class, "Seats", "Number of players") {

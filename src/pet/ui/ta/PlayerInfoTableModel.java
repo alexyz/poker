@@ -6,7 +6,7 @@ import pet.hp.info.PlayerInfo;
 
 public class PlayerInfoTableModel extends MyTableModel<PlayerInfo> {
 	
-	private static final List<MyColumn<PlayerInfo>> cols = new ArrayList<MyColumn<PlayerInfo>>();
+	private static final List<MyColumn<PlayerInfo>> cols = new ArrayList<>();
 	
 	private static final MyColumn<PlayerInfo> name = new MyColumn<PlayerInfo>(String.class, "Player", "Player name") {
 		@Override

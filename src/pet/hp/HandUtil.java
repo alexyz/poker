@@ -2,6 +2,8 @@ package pet.hp;
 
 import java.util.*;
 
+import pet.eq.Poker;
+
 /**
  * Utilities for hands (no analysis - see HandInfo)
  */
@@ -33,15 +35,19 @@ public class HandUtil {
 			case Game.FCD_TYPE:
 			case Game.DSTD_TYPE:
 			case Game.DSSD_TYPE:
-				return null;
+				return Poker.emptyBoard;
 			case Game.HE_TYPE:
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
-				return streetIndex > 0 ? Arrays.copyOf(hand.board, streetIndex + 2) : null;
+			case Game.OM5_TYPE:
+			case Game.OM51_TYPE:
+			case Game.OM5HL_TYPE:
+			case Game.OM51HL_TYPE:
+				return streetIndex > 0 ? Arrays.copyOf(hand.board, streetIndex + 2) : Poker.emptyBoard;
 			case Game.STUD_TYPE:
 			case Game.RAZZ_TYPE:
 			case Game.STUDHL_TYPE:
-				return streetIndex == 4 && hand.board != null ? hand.board : null;
+				return streetIndex == 4 && hand.board.length > 0 ? hand.board : Poker.emptyBoard;
 			default:
 				throw new RuntimeException("unknown game type " + hand.game.type);
 		}
@@ -84,7 +90,7 @@ public class HandUtil {
 	 * Get all final hole cards for hand and the blockers
 	 */
 	public static List<String[]> getFinalCards(Hand hand) {
-		List<String[]> cardsList = new ArrayList<String[]>();
+		List<String[]> cardsList = new ArrayList<>();
 		for (Seat seat : hand.seats) {
 			String[] cards = getFinalCards(hand.game.type, seat);
 			if (cards != null) {

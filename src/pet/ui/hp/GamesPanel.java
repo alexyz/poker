@@ -15,7 +15,7 @@ import pet.ui.ta.*;
 
 public class GamesPanel extends JPanel implements HistoryListener {
 	
-	private final JComboBox gameCombo = new JComboBox();
+	private final JComboBox<String> gameCombo = new JComboBox<>();
 	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
 	private final JButton playerButton = new JButton("Player");
@@ -147,7 +147,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 				// update the game combo
 				// XXX probably breaks current selection
 				List<String> games = PokerFrame.getInstance().getHistory().getGames();
-				gameCombo.setModel(new DefaultComboBoxModel(games.toArray(new String[games.size()])));
+				gameCombo.setModel(new DefaultComboBoxModel<>(games.toArray(new String[games.size()])));
 			}
 		});
 	}

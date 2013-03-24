@@ -12,9 +12,9 @@ public class PokerItem {
 	/**
 	 * select the item in the combo box
 	 */
-	public static void select(JComboBox combo, String name) {
+	public static void select(JComboBox<PokerItem> combo, String name) {
 		for (int n = 0; n < combo.getItemCount(); n++) {
-			PokerItem p = (PokerItem) combo.getItemAt(n);
+			PokerItem p = combo.getItemAt(n);
 			if (p.name.equals(name)) {
 				combo.setSelectedIndex(n);
 				return;

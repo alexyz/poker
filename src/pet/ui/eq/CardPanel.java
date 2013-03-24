@@ -84,7 +84,7 @@ class CardPanel extends JPanel {
 	 * Get the cards displayed
 	 */
 	public List<String> getCards() {
-		List<String> cards = new ArrayList<String>();
+		List<String> cards = new ArrayList<>();
 		for (CardButton b : cardButtons) {
 			if (b.getCard() != null) {
 				cards.add(b.getCard());

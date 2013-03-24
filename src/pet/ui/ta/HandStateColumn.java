@@ -10,7 +10,6 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 
 	private static final Color playerColour = new Color(192, 255, 192);
 	private static final Color winColour = new Color(255, 255, 128);
-	private static final Font boldfont = MyJTable.deffont.deriveFont(Font.BOLD);
 	
 	public HandStateColumn(Class<?> cl, String name, String desc) {
 		super(cl, name, desc);
@@ -34,7 +33,7 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 	@Override
 	public Font getFont(HandState hs) {
 		if (hs.actionSeatIndex < 0) {
-			return boldfont;
+			return MyJTable.boldTableFont;
 		} 
 		return null;
 	}

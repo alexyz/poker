@@ -34,7 +34,7 @@ class OutsPanel extends JPanel {
 			setVisible(false);
 			
 		} else {
-			List<String> minor = new ArrayList<String>(), major = new ArrayList<String>();
+			List<String> minor = new ArrayList<>(), major = new ArrayList<>();
 			for (Equity.Out o : e.outs) {
 				if (o.pc > 50) {
 					major.add(o.card);

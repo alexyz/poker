@@ -14,13 +14,14 @@ public class FTParser extends Parser {
 	 */
 	public static void main(String[] args) throws Exception {
 		Parser parser = new FTParser();
-		FileInputStream fis = new FileInputStream("ftgames.txt");
-		BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-		String line;
-		while ((line = br.readLine()) != null) {
-			boolean hand = parser.parseLine(line);
+		try (FileInputStream fis = new FileInputStream("ftgames.txt")) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					boolean hand = parser.parseLine(line);
+				}
+			}
 		}
-		br.close();
 	}
 	
 	private Hand hand;
@@ -38,7 +39,7 @@ public class FTParser extends Parser {
 	public boolean parseLine(String line0) {
 		Pattern p = Pattern.compile("(\\d),(\\d)");
 		String line = line0.replaceAll("(\\d),(\\d)", "$1$2").replaceAll("  +", " ").trim();
-		println(">>> " + line);
+		debug(">>> " + line);
 		
 		if (line.startsWith("Full Tilt Poker Game")) {
 			parseGame(line);

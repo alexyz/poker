@@ -19,10 +19,10 @@ import pet.ui.ta.*;
 public class HandsPanel extends JPanel {
 	
 	private final JTextField playerField = new JTextField();
-	private final JComboBox gameCombo = new JComboBox();
+	private final JComboBox<String> gameCombo = new JComboBox<>();
 	private final MyJTable handTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
-	private final JComboBox dateCombo = new JComboBox();
+	private final JComboBox<String> dateCombo = new JComboBox<>();
 	private final JButton replayButton = new JButton("Replay");
 	private final JButton lastHandButton = new JButton("Last Hand");
 	private final JButton hudButton = new JButton("HUD");
@@ -159,7 +159,7 @@ public class HandsPanel extends JPanel {
 	 */
 	public void displayHands(long tournid) {
 		playerField.setText("");
-		gameCombo.setModel(new DefaultComboBoxModel());
+		gameCombo.setModel(new DefaultComboBoxModel<String>());
 		List<HandInfo> hands = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(tournid));
 		((HandInfoTableModel)handTable.getModel()).setRows(hands);
 		repaint();
@@ -179,13 +179,13 @@ public class HandsPanel extends JPanel {
 		
 		PlayerInfo pi = PokerFrame.getInstance().getInfo().getPlayerInfo(player);
 		if (pi != null) {
-			Vector<String> games = new Vector<String>(pi.getGames().keySet());
-			gameCombo.setModel(new DefaultComboBoxModel(games));
+			Vector<String> games = new Vector<>(pi.getGames().keySet());
+			gameCombo.setModel(new DefaultComboBoxModel<>(games));
 			if (selectGameid != null) {
 				gameCombo.setSelectedItem(selectGameid);
 			}
 		} else {
-			gameCombo.setModel(new DefaultComboBoxModel());
+			gameCombo.setModel(new DefaultComboBoxModel<String>());
 		}
 		
 		updateDate();
@@ -201,21 +201,21 @@ public class HandsPanel extends JPanel {
 		handInfos = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(player, gameId));
 		
 		// build date lookup
-		Map<String,Date> dateMap = new TreeMap<String,Date>();
+		Map<String,Date> dateMap = new TreeMap<>();
 		for (HandInfo hi : handInfos) {
 			String datestr = DateFormat.getDateInstance().format(hi.hand.date);
 			if (!dateMap.containsKey(datestr)) {
 				dateMap.put(datestr, hi.hand.date);
 			}
 		}
-		List<Date> dateList = new ArrayList<Date>(dateMap.values());
+		List<Date> dateList = new ArrayList<>(dateMap.values());
 		Collections.sort(dateList);
-		Vector<String> dates = new Vector<String>();
+		Vector<String> dates = new Vector<>();
 		dates.add("");
 		for (Date date : dateList) {
 			dates.add(DateFormat.getDateInstance().format(date));
 		}
-		dateCombo.setModel(new DefaultComboBoxModel(dates));
+		dateCombo.setModel(new DefaultComboBoxModel<>(dates));
 		
 		updateTable();
 	}
@@ -237,7 +237,7 @@ public class HandsPanel extends JPanel {
 				throw new RuntimeException(e);
 			}
 			Date date2 = new Date(date.getTime() + (24 * 60 * 60 * 1000L));
-			dateHandInfos = new ArrayList<HandInfo>();
+			dateHandInfos = new ArrayList<>();
 			for (HandInfo hi : handInfos) {
 				if (hi.hand.date.after(date) && hi.hand.date.before(date2)) {
 					dateHandInfos.add(hi);

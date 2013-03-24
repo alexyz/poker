@@ -8,7 +8,7 @@ import pet.hp.info.TournInfo;
 
 public class TournInfoTableModel extends MyTableModel<TournInfo> {
 	
-	public static final List<MyColumn<TournInfo>> allCols = new ArrayList<MyColumn<TournInfo>>();
+	public static final List<MyColumn<TournInfo>> allCols = new ArrayList<>();
 	
 	private static final MyColumn<TournInfo> id = new MyColumn<TournInfo>(Long.class, "ID", "Tournament identifier") {
 		@Override

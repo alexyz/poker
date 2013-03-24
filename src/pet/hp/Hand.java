@@ -3,6 +3,8 @@ package pet.hp;
 import java.io.Serializable;
 import java.util.*;
 
+import pet.eq.Poker;
+
 /**
  * represents a single hand at a table.
  * No analysis - see HandUtil, HandInfo and HandState.
@@ -43,8 +45,8 @@ public class Hand implements Serializable {
 	public boolean showdown;
 	/** showdown for hi/lo game type did not have a low hand. only use if game.hilo is true */
 	public boolean showdownNoLow;
-	/** community cards if any */
-	public String[] board;
+	/** community cards if any, otherwise empty array */
+	public String[] board = Poker.emptyBoard;
 	/** total pot size */
 	public int pot;
 	/** pokerstars wealth delta */
