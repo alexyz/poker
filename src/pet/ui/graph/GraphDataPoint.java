@@ -1,4 +1,4 @@
-package pet.ui.gr;
+package pet.ui.graph;
 
 public class GraphDataPoint {
 	public final int x;

@@ -1,4 +1,4 @@
-package pet.ui.ta;
+package pet.ui.table;
 
 import java.text.DateFormat;
 import java.util.Date;

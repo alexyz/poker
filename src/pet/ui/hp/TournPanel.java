@@ -6,9 +6,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import pet.PET;
 import pet.hp.info.TournInfo;
-import pet.ui.PokerFrame;
-import pet.ui.ta.*;
+import pet.ui.table.*;
 
 /**
  * Shows all the tournaments
@@ -37,7 +37,7 @@ public class TournPanel extends JPanel {
 					int sr = tournTable.convertRowIndexToModel(r);
 					TournInfoTableModel m = (TournInfoTableModel) tournTable.getModel();
 					TournInfo ti = m.getRow(sr);
-					PokerFrame.getInstance().displayHands(ti.tourn.id);
+					PET.getInstance().displayHands(ti.tourn.id);
 				}
 			}
 		});
@@ -61,7 +61,7 @@ public class TournPanel extends JPanel {
 	}
 	
 	public void refresh() {
-		List<TournInfo> tis = PokerFrame.getInstance().getInfo().getTournInfos();
+		List<TournInfo> tis = PET.getInstance().getInfo().getTournInfos();
 		((TournInfoTableModel)tournTable.getModel()).setRows(tis);
 	}
 	

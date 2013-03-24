@@ -9,9 +9,9 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import pet.PET;
 import pet.hp.info.*;
-import pet.ui.PokerFrame;
-import pet.ui.ta.*;
+import pet.ui.table.*;
 
 /**
  * displays a list of hands for a particular game
@@ -64,7 +64,7 @@ public class HandsPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				HandInfo hi = getHandInfo();
 				if (hi != null) {
-					PokerFrame.getInstance().replayHand(hi.hand);
+					PET.getInstance().replayHand(hi.hand);
 				}
 			}
 		});
@@ -74,7 +74,7 @@ public class HandsPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				HandInfo hi = getHandInfo();
 				if (hi != null) {
-					PokerFrame.getInstance().displayHand(hi.hand);
+					PET.getInstance().displayHand(hi.hand);
 				}
 			}
 		});
@@ -84,7 +84,7 @@ public class HandsPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				HandInfo hi = getHandInfo();
 				if (hi != null) {
-					PokerFrame.getInstance().getHudManager().showHand(hi.hand);
+					PET.getInstance().getHudManager().showHand(hi.hand);
 				}
 			}
 		});
@@ -113,7 +113,7 @@ public class HandsPanel extends JPanel {
 					if (r >= 0) {
 						int sr = handTable.convertRowIndexToModel(r);
 						HandInfo hi = ((HandInfoTableModel)handTable.getModel()).getRow(sr);
-						PokerFrame.getInstance().replayHand(hi.hand);
+						PET.getInstance().replayHand(hi.hand);
 					}
 					System.out.println("double click");
 				}
@@ -160,7 +160,7 @@ public class HandsPanel extends JPanel {
 	public void displayHands(long tournid) {
 		playerField.setText("");
 		gameCombo.setModel(new DefaultComboBoxModel<String>());
-		List<HandInfo> hands = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(tournid));
+		List<HandInfo> hands = HandInfo.getHandInfos(PET.getInstance().getHistory().getHands(tournid));
 		((HandInfoTableModel)handTable.getModel()).setRows(hands);
 		repaint();
 	}
@@ -177,7 +177,7 @@ public class HandsPanel extends JPanel {
 		String player = playerField.getText();
 		System.out.println("update player " + player + " game " + selectGameid);
 		
-		PlayerInfo pi = PokerFrame.getInstance().getInfo().getPlayerInfo(player);
+		PlayerInfo pi = PET.getInstance().getInfo().getPlayerInfo(player);
 		if (pi != null) {
 			Vector<String> games = new Vector<>(pi.getGames().keySet());
 			gameCombo.setModel(new DefaultComboBoxModel<>(games));
@@ -198,7 +198,7 @@ public class HandsPanel extends JPanel {
 		System.out.println("update game");
 		String player = playerField.getText();
 		String gameId = (String) gameCombo.getSelectedItem();
-		handInfos = HandInfo.getHandInfos(PokerFrame.getInstance().getHistory().getHands(player, gameId));
+		handInfos = HandInfo.getHandInfos(PET.getInstance().getHistory().getHands(player, gameId));
 		
 		// build date lookup
 		Map<String,Date> dateMap = new TreeMap<>();

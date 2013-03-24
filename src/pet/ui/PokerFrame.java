@@ -12,10 +12,10 @@ import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.info.*;
 import pet.ui.eq.*;
-import pet.ui.gr.GraphData;
+import pet.ui.graph.GraphData;
 import pet.ui.hp.*;
 import pet.ui.hud.HUDManager;
-import pet.ui.rep.ReplayPanel;
+import pet.ui.replay.ReplayPanel;
 
 /**
  * Poker equity GUI tool.
@@ -27,58 +27,6 @@ public class PokerFrame extends JFrame {
 	public static final String RIGHT_TRI = "\u25b6";
 	public static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
 	public static final Font bigfont = new Font("SansSerif", Font.BOLD, 24);
-	
-	private static PokerFrame instance;
-	
-	public static PokerFrame getInstance() {
-		return instance;
-	}
-	
-	public static void main(String[] args) {
-		// os x assumes US locale if system language is english...
-		// user needs to add british english to list of languages in system preferences/language and text
-		System.out.println("locale " + Locale.getDefault());
-		try {
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		ToolTipManager.sharedInstance().setDismissDelay(60000);
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-					@Override
-					public void uncaughtException(Thread t, Throwable e) {
-						handleException("Error", e);
-					}
-				});
-				// need to create and pack in awt thread otherwise it can deadlock
-				// due to the java console panel
-				instance = new PokerFrame();
-				System.out.println("Poker Equity Tool - https://github.com/alexyz");
-				instance.start();
-				instance.setVisible(true);
-			}
-		});
-		
-	}
-	
-	/**
-	 * display dialog
-	 */
-	public static void handleException(final String title, final Throwable e) {
-		e.printStackTrace(System.out);
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				JOptionPane.showMessageDialog(getInstance(), 
-						e.toString(), // + ": " + e.getMessage(), 
-						title, 
-						JOptionPane.ERROR_MESSAGE);
-			}
-		});
-	}
 	
 	/** all the parsed data */
 	private final History history = new History();
@@ -94,8 +42,9 @@ public class PokerFrame extends JFrame {
 	private final LastHandPanel lastHandPanel = new LastHandPanel();
 	private final HistoryPanel historyPanel = new HistoryPanel();
 	private final HandsPanel handsPanel = new HandsPanel();
-	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel(false);
-	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel(true);
+	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel("Hold'em", 1, 2);
+	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel("Omaha", 2, 4);
+	private final HoldemCalcPanel omaha5Panel = new HoldemCalcPanel("5 Card Omaha", 2, 5);
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
 	private final GamesPanel gamesPanel = new GamesPanel();
 	private final PlayerPanel playerPanel = new PlayerPanel();
@@ -121,6 +70,7 @@ public class PokerFrame extends JFrame {
 		
 		eqTabs.addTab("Hold'em", holdemPanel);
 		eqTabs.addTab("Omaha", omahaPanel);
+		eqTabs.addTab("5 Card Omaha", omaha5Panel);
 		eqTabs.addTab("Draw", drawPanel);
 		eqTabs.addTab("Stud", studPanel);
 		

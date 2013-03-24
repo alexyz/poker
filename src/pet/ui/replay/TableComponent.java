@@ -1,4 +1,4 @@
-package pet.ui.rep;
+package pet.ui.replay;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;

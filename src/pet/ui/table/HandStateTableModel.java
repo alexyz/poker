@@ -1,4 +1,4 @@
-package pet.ui.ta;
+package pet.ui.table;
 
 import java.awt.Font;
 import java.util.*;

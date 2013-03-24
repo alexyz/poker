@@ -40,10 +40,11 @@ public class HandUtil {
 			case Game.OM_TYPE:
 			case Game.OMHL_TYPE:
 			case Game.OM5_TYPE:
-			case Game.OM51_TYPE:
 			case Game.OM5HL_TYPE:
-			case Game.OM51HL_TYPE:
 				return streetIndex > 0 ? Arrays.copyOf(hand.board, streetIndex + 2) : Poker.emptyBoard;
+			case Game.OM51_TYPE:
+			case Game.OM51HL_TYPE:
+				return Arrays.copyOf(hand.board, streetIndex == 0 ? 1 : streetIndex + 2);
 			case Game.STUD_TYPE:
 			case Game.RAZZ_TYPE:
 			case Game.STUDHL_TYPE:

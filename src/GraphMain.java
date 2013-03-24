@@ -3,7 +3,7 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
-import pet.ui.gr.*;
+import pet.ui.graph.*;
 
 public class GraphMain {
 

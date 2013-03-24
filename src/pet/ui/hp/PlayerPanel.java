@@ -9,12 +9,13 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import pet.PET;
 import pet.hp.Hand;
 import pet.hp.History;
 import pet.hp.info.*;
 import pet.ui.PokerFrame;
-import pet.ui.gr.GraphData;
-import pet.ui.ta.*;
+import pet.ui.graph.GraphData;
+import pet.ui.table.*;
 
 /**
  * player info and player game info panel
@@ -99,7 +100,7 @@ public class PlayerPanel extends JPanel {
 					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo pgi = gamesModel.getRow(sr);
 					System.out.println("selected " + r + " => " + sr + " => " + pgi);
-					PokerFrame pf = PokerFrame.getInstance();
+					PokerFrame pf = PET.getInstance();
 					List<Hand> hands = pf.getHistory().getHands(pgi.player.name, pgi.game.id);
 					String title = pgi.player.name + " - " + pgi.game.id;
 					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
@@ -120,7 +121,7 @@ public class PlayerPanel extends JPanel {
 					int sr = gamesTable.convertRowIndexToModel(r);
 					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo gi = gamesModel.getRow(sr);
-					PokerFrame.getInstance().displayHands(gi.player.name, gi.game.id);
+					PET.getInstance().displayHands(gi.player.name, gi.game.id);
 				}
 			}
 		});
@@ -154,7 +155,7 @@ public class PlayerPanel extends JPanel {
 	
 	/** search for player and update table */
 	private void find() {
-		PokerFrame pf = PokerFrame.getInstance();
+		PokerFrame pf = PET.getInstance();
 		Info info = pf.getInfo();
 		
 		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();

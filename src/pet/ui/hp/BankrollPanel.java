@@ -4,8 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import pet.ui.gr.GraphComponent;
-import pet.ui.gr.GraphData;
+import pet.ui.graph.*;
 
 /**
  * TODO session button

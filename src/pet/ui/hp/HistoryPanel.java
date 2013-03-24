@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import pet.PET;
 import pet.hp.info.*;
 import pet.ui.*;
 
@@ -42,13 +43,13 @@ public class HistoryPanel extends JPanel implements FollowListener {
 					List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 					System.out.println("dropped " + files);
 					if (files != null && files.size() > 0) {
-						FollowThread ft = PokerFrame.getInstance().getFollow();
+						FollowThread ft = PET.getInstance().getFollow();
 						for (File f : files) {
 							ft.addFile(f);
 						}
 					}
 				} catch (Exception e1) {
-					PokerFrame.handleException("DND", e1);
+					PET.handleException("DND", e1);
 				}
 			}
 		}));
@@ -69,7 +70,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 					File f = fc.getSelectedFile();
 					if (f != null) {
 						pathField.setText(f.toString());
-						PokerFrame.getInstance().getFollow().setPath(f);
+						PET.getInstance().getFollow().setPath(f);
 					}
 				}
 			}
@@ -79,7 +80,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean follow = e.getStateChange() == ItemEvent.SELECTED;
-				FollowThread ft = PokerFrame.getInstance().getFollow();
+				FollowThread ft = PET.getInstance().getFollow();
 				ft.setPath(new File(pathField.getText()));
 				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
 				ft.setFollow(follow);
@@ -96,7 +97,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 					File[] fs = fc.getSelectedFiles();
 					if (fs != null && fs.length > 0) {
 						for (File f : fs) {
-							PokerFrame.getInstance().getFollow().addFile(f);
+							PET.getInstance().getFollow().addFile(f);
 						}
 					}
 				}
@@ -108,7 +109,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		hudBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				PokerFrame.getInstance().getHudManager().setCreate(hudBox.isSelected());
+				PET.getInstance().getHudManager().setCreate(hudBox.isSelected());
 			}
 		});
 		
@@ -131,7 +132,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		ageSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				FollowThread ft = PokerFrame.getInstance().getFollow();
+				FollowThread ft = PET.getInstance().getFollow();
 				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
 			}
 		});
@@ -199,7 +200,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		Runtime r = Runtime.getRuntime();
 		r.gc();
 		double mib = Math.pow(2,20);
-		int h = PokerFrame.getInstance().getHistory().getHands();
+		int h = PET.getInstance().getHistory().getHands();
 		System.out.println(String.format("memory max: %.3f total: %.3f free: %.3f used: %.3f (MiB) hands: %d",
 				r.maxMemory() / mib,
 				r.totalMemory() / mib,

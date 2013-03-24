@@ -7,11 +7,11 @@ import java.util.List;
 
 import javax.swing.*;
 
+import pet.PET;
 import pet.eq.*;
 import pet.hp.*;
 import pet.hp.info.PlayerGameInfo;
 import pet.hp.state.*;
-import pet.ui.PokerFrame;
 
 /**
  * displays information for a player at a table
@@ -212,7 +212,7 @@ class HUDPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					hudsFrame.setHudsAlwaysOnTop(false);
-					PokerFrame.getInstance().toFront();
+					PET.getInstance().toFront();
 				}
 			}));
 			menu.add(new JMenuItem(new AbstractAction("Clear All") {

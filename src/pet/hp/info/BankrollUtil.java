@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 import pet.hp.*;
-import pet.ui.gr.*;
+import pet.ui.graph.*;
 
 /**
  * Methods for getting bank roll graph data
