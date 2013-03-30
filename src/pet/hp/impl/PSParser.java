@@ -533,8 +533,8 @@ public class PSParser extends Parser {
 			game.subtype |= Game.ZOOM_SUBTYPE;
 		}
 		
-		long hid = Long.parseLong(m.group(H.handid));
-		Hand hand = new Hand(hid);
+		Hand hand = new Hand();
+		hand.id = Long.parseLong(m.group(H.handid));
 		
 		// get all the tournament stuff if there is tourn id
 		String tournids = m.group(H.tournid);

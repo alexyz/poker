@@ -30,7 +30,6 @@ public class PlayerField extends JPanel {
 			}
 		});
 		
-		nameButton.setSelected(true);
 		nameButton.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -48,6 +47,7 @@ public class PlayerField extends JPanel {
 			}
 		});
 
+		selfButton.setSelected(true);
 		add(selfButton);
 		add(nameButton);
 		add(nameField);

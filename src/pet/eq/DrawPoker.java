@@ -39,7 +39,7 @@ public class DrawPoker extends Poker {
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
-		if (board.length > 0) {
+		if (board != null) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}
 		if (draws < 0 || draws > 3) {

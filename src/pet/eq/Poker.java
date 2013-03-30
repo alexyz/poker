@@ -519,7 +519,7 @@ public abstract class Poker {
 	 * Calculate equity for given board and hands.
 	 */
 	public final MEquity[] equity(Collection<String> board, Collection<String[]> cards, Collection<String> blockers, int draws) {
-		String[] boardArr = board.toArray(new String[board.size()]);
+		String[] boardArr = board != null ? board.toArray(new String[board.size()]) : null;
 		String[][] cardsArr = cards.toArray(new String[cards.size()][]);
 		String[] blockersArr = blockers.toArray(new String[blockers.size()]);
 		return equity(boardArr, cardsArr, blockersArr, draws);
