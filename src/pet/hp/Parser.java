@@ -21,7 +21,7 @@ public abstract class Parser {
 	/**
 	 * add a line to the debug log for this hand
 	 */
-	protected void debug(String s) {
+	protected void println(String s) {
 		debuglines.add(s);
 		if (debug) {
 			System.out.println(s);

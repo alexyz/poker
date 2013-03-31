@@ -20,7 +20,7 @@ abstract class HandStateColumn extends MyColumn<HandState> {
 		if (hs.actionSeatIndex == -1) {
 			return Color.lightGray;
 			
-		} else if (hs.action.type == Action.COLLECT_TYPE) {
+		} else if (hs.action.type == Action.Type.COLLECT) {
 			return winColour;
 			
 		} else if (hs.actionSeat().seat == hs.hand.myseat) {

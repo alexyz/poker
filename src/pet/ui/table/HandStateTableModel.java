@@ -198,7 +198,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 		public String getValue(HandState hs) {
 			SeatState ss = hs.actionSeat();
 			if (ss != null) {
-				if (hs.action.type == Action.COLLECT_TYPE && ss.tev != 0) {
+				if (hs.action.type == Action.Type.COLLECT && ss.tev != 0) {
 					return GameUtil.formatMoney(hs.hand.game.currency, (int) ss.tev);
 				} else if (ss.ev != 0) {
 					return GameUtil.formatMoney(hs.hand.game.currency, (int) ss.ev);

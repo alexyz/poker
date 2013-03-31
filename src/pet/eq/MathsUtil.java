@@ -1,35 +1,11 @@
 package pet.eq;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * Mathematical utility methods
  */
 public class MathsUtil {
-	
-	/**
-	 * convert list/array to []
-	 * convert map to { }
-	 */
-	public static void main(String[] args) {
-		final BigInteger max = BigInteger.valueOf(Long.MAX_VALUE);
-		StringBuilder sb = new StringBuilder();
-		for (int n = 0; n < 52; n++) {
-			if (n > 0) {
-				sb.append(",\n  ");
-			}
-			sb.append("[");
-			for (int m = 0; m < 52; m++) {
-				if (m > 0) {
-					sb.append(", ");
-				}
-				sb.append(String.format("%15d", binaryCoefficient(n, m).longValue()));
-			}
-			sb.append("]");
-		}
-		System.out.println(sb);
-	}
 	
 	private static final int[][] C = makeBinaryCoefficients(52, 52);
 	
@@ -97,29 +73,6 @@ public class MathsUtil {
 				}
 			}
 		}
-	}
-	
-	public static abstract class Combination {
-		public String[] src;
-		public String[] dest;
-		public int pick;
-		public int off;
-		public final void run() {
-			run(0, pick);
-		}
-		private void run (int n, int p) {
-			if (p == 0) {
-				apply();
-			} else {
-				int m = src.length - pick;
-				while (n <= m) {
-					dest[off+pick-1] = src[n];
-					run(n+1, p-1);
-					n++;
-				}
-			}
-		}
-		public abstract void apply();
 	}
 	
 }

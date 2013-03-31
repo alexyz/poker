@@ -35,7 +35,7 @@ public class PlayerGameInfo {
 	/** number of times each street was seen */
 	private final int[] streetsseen;
 	/** number of times each action performed */
-	private final int[] actionCount = new int[Action.TYPES];
+	private final int[] actionCount = new int[Action.Type.values().length];
 	
 	/** number of hands where player raised preflop */
 	private int pfr;
@@ -126,40 +126,40 @@ public class PlayerGameInfo {
 
 			for (Action act : street) {
 				if (act.seat == seat) {
-					actionCount[act.type]++;
+					actionCount[act.type.ordinal()]++;
 					
 					// has previously checked this street
 					if (hasChecked) {
-						if (act.type == Action.FOLD_TYPE) {
+						if (act.type == Action.Type.FOLD) {
 							checkfold++;
-						} else if (act.type == Action.CALL_TYPE) {
+						} else if (act.type == Action.Type.CALL) {
 							checkcall++;
-						} else if (act.type == Action.RAISE_TYPE) {
+						} else if (act.type == Action.Type.RAISE) {
 							checkraise++;
 						}
 					}
 					
 					// pre flop raise
-					if (s == 0 && act.type == Action.RAISE_TYPE) {
+					if (s == 0 && act.type == Action.Type.RAISE) {
 						hasPfr = true;
 					}
 					
-					if (act.type == Action.CHECK_TYPE) {
+					if (act.type == Action.Type.CHECK) {
 						hasChecked = true;
 					}
 					
 					// voluntarily put money in pot
-					if (act.type != Action.POST_TYPE && act.amount > 0) {
+					if (act.type != Action.Type.POST && act.amount > 0) {
 						hasVpip = true;
 					}
 					
-					if (act.type == Action.FOLD_TYPE) {
+					if (act.type == Action.Type.FOLD) {
 						// no more actions for us
 						break streets;
 					}
 				}
 				
-				if (act.type == Action.BET_TYPE || act.type == Action.RAISE_TYPE) {
+				if (act.type == Action.Type.BET || act.type == Action.Type.RAISE) {
 					// get last action on street with initiative
 					init = act;
 				}
@@ -266,7 +266,7 @@ public class PlayerGameInfo {
 	 * check fold, check call, check raise to checks ratio
 	 */
 	public String cxr() {
-		int checks = actionCount[Action.CHECK_TYPE];
+		int checks = actionCount[Action.Type.CHECK.ordinal()];
 		if (checks > 0) {
 			float f = (checkfold * 100f) / checks;
 			float c = (checkcall * 100f) / checks;
@@ -285,10 +285,10 @@ public class PlayerGameInfo {
 	/** aggression factor count */
 	public float af(boolean ch) {
 		// amount bet+raise / call
-		float a = actionCount[Action.BET_TYPE] + actionCount[Action.RAISE_TYPE];
-		float p = actionCount[Action.CALL_TYPE];
+		float a = actionCount[Action.Type.BET.ordinal()] + actionCount[Action.Type.RAISE.ordinal()];
+		float p = actionCount[Action.Type.CALL.ordinal()];
 		if (ch) {
-				p += actionCount[Action.CHECK_TYPE];
+				p += actionCount[Action.Type.CHECK.ordinal()];
 		}
 		if (p > 0) {
 			return a / p;
@@ -344,7 +344,7 @@ public class PlayerGameInfo {
 		sb.append("Actions:\n");
 		for (int n = 0; n < actionCount.length; n++) {
 			if (actionCount[n] > 0) {
-				sb.append("  " + Action.TYPENAME[n] + " times: " + actionCount[n]);
+				sb.append("  " + Action.getTypeName(Action.Type.values()[n]) + " times: " + actionCount[n]);
 				sb.append("\n");
 			}
 		}

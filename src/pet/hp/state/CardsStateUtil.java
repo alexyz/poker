@@ -39,9 +39,9 @@ public class CardsStateUtil {
 		
 		boolean high = false;
 		switch (hand.game.type) {
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				// XXX should maybe emphasise difference between down and up cards
 				String[] cards = HandUtil.getFinalCards(hand.game.type, seat);
 				if (streetIndex < 4) {
@@ -50,11 +50,11 @@ public class CardsStateUtil {
 				// don't sort (though could sort first two)
 				return new CardsState(cards, null, false, null);
 			
-			case Game.FCD_TYPE:
+			case FCD:
 				high = true;
 				
-			case Game.DSTD_TYPE:
-			case Game.DSSD_TYPE:
+			case DSTD:
+			case DSSD:
 				if (streetIndex == GameUtil.getMaxStreets(hand.game.type) - 1) {
 					// on final street just return final hand from seat
 					cs = new CardsState(seat.finalHoleCards.clone(), null, false, null);
@@ -90,13 +90,13 @@ public class CardsStateUtil {
 				}
 				break;
 				
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-			case Game.OM5_TYPE:
-			case Game.OM51_TYPE:
-			case Game.OM5HL_TYPE:
-			case Game.OM51HL_TYPE:
+			case HE:
+			case OM:
+			case OMHL:
+			case OM5:
+			case OM51:
+			case OM5HL:
+			case OM51HL:
 				cs = new CardsState(seat.finalHoleCards, null, false, null);
 				break;
 				

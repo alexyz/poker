@@ -57,13 +57,13 @@ public class PSParser extends Parser2 {
 	public boolean parseLine(String line) {
 		if (line.length() > 0 && line.charAt(0) == 0xfeff) {
 			line = line.substring(1);
-			debug("skip bom");
+			println("skip bom");
 		}
 		
 		int i = 0;
 		line = line.trim();
-		debug("");
-		debug(line);
+		println("");
+		println(line);
 		
 		if (line.length() == 0) {
 			if (summaryPhase && hand != null) {
@@ -87,7 +87,7 @@ public class PSParser extends Parser2 {
 				if (hand.tourn != null) {
 					history.addTournPlayers(hand.tourn.id, seatsMap.keySet());
 				}
-				debug("end of hand " + hand);
+				println("end of hand " + hand);
 				
 				clear();
 				return true;				
@@ -97,7 +97,7 @@ public class PSParser extends Parser2 {
 			parseHand(line);
 			
 		} else if (line.startsWith("Betting is capped")) {
-			debug("capped");
+			println("capped");
 			
 		} else if (line.startsWith("Table ")) {
 			parseTable(line);
@@ -112,7 +112,7 @@ public class PSParser extends Parser2 {
 			// Board [6d 3s Qc 8s 5d]
 			int cardsStart = ParseUtil.nextToken(line, 0);
 			hand.board = checkCards(hand.board, parseCards(line, cardsStart));
-			debug("board " + Arrays.asList(hand.board));
+			println("board " + Arrays.asList(hand.board));
 			
 		} else if (line.startsWith("Dealt to ")) {
 			parseDeal(line);
@@ -128,17 +128,17 @@ public class PSParser extends Parser2 {
 			
 			
 		} else if (line.equals("No low hand qualified")) {
-			debug("no low");
+			println("no low");
 			// need to check game.hilo to see if this can be used
 			hand.showdownNoLow = true;
 			
 		} else if (line.equals("The deck is reshuffled")) {
-			debug("deck reshuffled");
+			println("deck reshuffled");
 			// don't think of discarded cards as blockers...
-			hand.reshuffleStreetIndex = (byte) (streets.size() - 1);
+			hand.reshuffleStreetIndex = (byte) currentStreetIndex();
 			
 		} else if (line.equals("Pair on board - a double bet is allowed")) {
-			debug("double bet allowed");
+			println("double bet allowed");
 			
 			
 			/// ---------- ends with ----------
@@ -146,41 +146,41 @@ public class PSParser extends Parser2 {
 			
 		} else if (line.endsWith(" sits out")) {
 			// h_fa: sits out 
-			debug("sit out");
+			println("sit out");
 			
 		} else if (line.endsWith(" is sitting out")) {
 			// scotty912: is sitting out 
-			debug("sitting out");
+			println("sitting out");
 			
 		} else if (line.endsWith(" has timed out")) {
 			// Festo5811 has timed out
-			debug("timed out");
+			println("timed out");
 			
 		} else if (line.endsWith(" leaves the table")) {
 			// kuca444 leaves the table
-			debug("leaves");
+			println("leaves");
 			
 		} else if (line.endsWith(" is connected")) {
-			debug("connected");
+			println("connected");
 			
 		} else if (line.endsWith(" is disconnected")) {
-			debug("connected");
+			println("connected");
 			
 		} else if (line.endsWith(" has timed out while disconnected")) {
-			debug("timed out");
+			println("timed out");
 			
 		} else if (line.endsWith(" has timed out while being disconnected")) {
-			debug("timed out");
+			println("timed out");
 			
 		} else if (line.endsWith(" was removed from the table for failing to post")) {
-			debug("kicked");
+			println("kicked");
 			
 		} else if (line.endsWith(" will be allowed to play after the button")) {
-			debug("play after");
+			println("play after");
 			
 		} else if (line.endsWith(" has returned")) {
 			// Flawless Gem has returned
-			debug("he's back");
+			println("he's back");
 			
 			
 			// -------- contains ---------
@@ -188,11 +188,11 @@ public class PSParser extends Parser2 {
 			
 		} else if (line.contains(" said, ")) {
 			// tawvx said, "it's not a race"
-			debug("talk");
+			println("talk");
 			
 		} else if (line.contains(" joins the table at seat ")) {
 			// scotty912 joins the table at seat #6 
-			debug("joins");
+			println("joins");
 			
 		} else if ((i = line.indexOf(" collected ")) > 0) {
 			parseCollect(line, i);
@@ -213,17 +213,17 @@ public class PSParser extends Parser2 {
 				// get finish position and win amount
 				int p = ParseUtil.parseInt(line, i + 28);
 				hand.tourn.pos = p;
-				debug("player finished " + p);
+				println("player finished " + p);
 				
 				int m = line.indexOf("received", i);
 				if (m > 0) {
 					int won = ParseUtil.parseMoney(line, m + 9);
 					hand.tourn.won = won;
-					debug("player won " + won);
+					println("player won " + won);
 				}
 				
 			} else {
-				debug("finished");
+				println("finished");
 			}
 			
 		} else if ((i = line.indexOf(" wins the tournament and receives ")) > 0) {
@@ -241,14 +241,14 @@ public class PSParser extends Parser2 {
 				int m = line.indexOf("receives", i);
 				int won = ParseUtil.parseMoney(line, m + 9);
 				hand.tourn.won = won;
-				debug("player won " + won);
+				println("player won " + won);
 				
 			} else {
-				debug("won");
+				println("won");
 			}
 			
 		} else {
-			debug("unknown line: " + line);
+			println("unknown line: " + line);
 			throw new RuntimeException("unknown line " + line);
 		}
 		
@@ -271,10 +271,10 @@ public class PSParser extends Parser2 {
 		// add the collect as a fake action so the action amounts sum to pot size
 		Action act = new Action(seat);
 		act.amount = -amount;
-		act.type = Action.COLLECT_TYPE;
-		streets.get(streets.size() - 1).add(act);
+		act.type = Action.Type.COLLECT;
+		currentStreet().add(act);
 		
-		debug("collected " + name + " " + amount);
+		println("collected " + name + " " + amount);
 	}
 	
 	private void parseTotal(final String line) {
@@ -311,7 +311,7 @@ public class PSParser extends Parser2 {
 			throw new RuntimeException("actsum " + asum + " not zero");
 		}
 		
-		debug("total " + hand.pot + " rake " + hand.rake);
+		println("total " + hand.pot + " rake " + hand.rake);
 	}
 	
 	private void parseUncall(final String line) {
@@ -330,10 +330,10 @@ public class PSParser extends Parser2 {
 		// add the uncall as a fake action so the action amounts sum to pot size
 		Action act = new Action(seat);
 		act.amount = -amount;
-		act.type = Action.UNCALL_TYPE;
-		streets.get(streets.size() - 1).add(act);
+		act.type = Action.Type.UNCALL;
+		currentStreet().add(act);
 		
-		debug("uncalled " + name + " " + amount);
+		println("uncalled " + name + " " + amount);
 	}
 	
 	private void parseDeal(final String line) {
@@ -365,19 +365,19 @@ public class PSParser extends Parser2 {
 		if (cardsStart2 > 0) {
 			cards = ArrayUtil.join(cards, parseCards(line, cardsStart2));
 		}
-		debug(name + " dealt " + Arrays.asList(cards));
+		println(name + " dealt " + Arrays.asList(cards));
 		
 		// get current player seat - always has more than 1 initial hole card
 		if (hand.myseat == null && cards.length > 1) {
-			debug("this is my seat");
+			println("this is my seat");
 			hand.myseat = theseat;
 		}
 		
 		if (theseat == hand.myseat) {
 			switch (hand.game.type) {
-				case Game.FCD_TYPE:
-				case Game.DSSD_TYPE:
-				case Game.DSTD_TYPE:
+				case FCD:
+				case DSSD:
+				case DSTD:
 					// hole cards can be changed in draw so store them all on hand
 					hand.addMyDrawCards(cards);
 				default:
@@ -417,10 +417,10 @@ public class PSParser extends Parser2 {
 						seat.finalUpCards = checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
 					}
 				}
-				debug("seat " + seatno + " mucked " + Arrays.asList(cards));
+				println("seat " + seatno + " mucked " + Arrays.asList(cards));
 				
 			} else {
-				debug("seat summary");
+				println("seat summary");
 			}
 			
 		} else {
@@ -437,7 +437,7 @@ public class PSParser extends Parser2 {
 			seat.name = history.getString(line.substring(col + 2, chStart - 1));
 			seat.chips = ParseUtil.parseMoney(line, chStart + 1);
 			seatsMap.put(seat.name, seat);
-			debug("seat " + seat);
+			println("seat " + seat);
 		}
 	}
 	
@@ -457,9 +457,9 @@ public class PSParser extends Parser2 {
 		}
 		
 		String handline = ParseUtil.strip(line.substring(0, dateIndex), "()#:,-");
-		debug("hand line: " + handline);
+		println("hand line: " + handline);
 		String dateline = line.substring(dateIndex + 2);
-		debug("date line: " + dateline);
+		println("date line: " + dateline);
 		
 		Matcher m = PSHandRE.pat.matcher(handline);
 		if (!m.matches()) {
@@ -499,7 +499,7 @@ public class PSParser extends Parser2 {
 			
 			Tourn t = history.getTourn(tournid, tourncurrency, tournbuyin, tourncost);
 			
-			debug("tourn " + t);
+			println("tourn " + t);
 			hand.tourn = t;
 		}
 		
@@ -540,7 +540,7 @@ public class PSParser extends Parser2 {
 			throw new RuntimeException("invalid blinds " + game.sb + "/" + game.bb);
 		}
 		
-		if (game.limit == Game.FIXED_LIMIT) {
+		if (game.limit == Game.Limit.FL) {
 			// fixed limit has big bet and small bet not blinds
 			game.bb = game.sb;
 			game.sb = game.sb / 2;
@@ -575,10 +575,10 @@ public class PSParser extends Parser2 {
 		}
 		
 		// create first street
-		streets.add(new ArrayList<Action>());
+		newStreet();
 		
 		this.hand = hand;
-		debug("hand " + hand);
+		println("hand " + hand);
 	}
 	
 	private void parseTable(final String line) {
@@ -592,7 +592,7 @@ public class PSParser extends Parser2 {
 		int tableStart = line.indexOf("'");
 		int tableEnd = line.indexOf("'", tableStart + 1);
 		hand.tablename = history.getString(line.substring(tableStart + 1, tableEnd));
-		debug("table " + hand.tablename);
+		println("table " + hand.tablename);
 		
 		// fix limit real money holdem games can be 10 player
 		int maxStart = ParseUtil.nextToken(line, tableEnd + 1);
@@ -600,12 +600,12 @@ public class PSParser extends Parser2 {
 		if (game.max == 0 || game.max > 10) {
 			throw new RuntimeException("invalid max " + line);
 		}
-		debug("max " + game.max);
+		println("max " + game.max);
 		
 		// get the definitive game instance
 		game = history.getGame(game);
 		hand.game = game;
-		debug("game " + game);
+		println("game " + game);
 		
 		int d = line.indexOf("Seat");
 		if (d > 0) {
@@ -642,13 +642,13 @@ public class PSParser extends Parser2 {
 		boolean ignoreStreet = false;
 		
 		switch (hand.game.type) {
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-			case Game.OM5_TYPE:
-			case Game.OM51_TYPE:
-			case Game.OM5HL_TYPE:
-			case Game.OM51HL_TYPE:
+			case HE:
+			case OM:
+			case OMHL:
+			case OM5:
+			case OM51:
+			case OM5HL:
+			case OM51HL:
 				if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
 					newStreet = true;
 				} else if (name.equals("HOLE CARDS") || name.equals("PRE-FLOP")) {
@@ -656,15 +656,15 @@ public class PSParser extends Parser2 {
 				}
 				break;
 				
-			case Game.FCD_TYPE:
-			case Game.DSSD_TYPE:
+			case FCD:
+			case DSSD:
 				if (name.equals("DEALING HANDS")) {
 					ignoreStreet = true;
 				}
 				// have to manually make new street in first draw/stand pat action
 				break;
 				
-			case Game.DSTD_TYPE:
+			case DSTD:
 				//*** DEALING HANDS ***
 				//*** FIRST DRAW ***
 				//*** SECOND DRAW ***
@@ -676,9 +676,9 @@ public class PSParser extends Parser2 {
 				}
 				break;
 				
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				// *** 3rd STREET ***
 				// *** 4th STREET ***
 				// *** 5th STREET ***
@@ -698,15 +698,15 @@ public class PSParser extends Parser2 {
 		
 		if (newStreet) {
 			pip();
-			streets.add(new ArrayList<Action>());
-			debug("new street index " + (streets.size() - 1));
+			newStreet();
+			println("new street index " + currentStreetIndex());
 			
 		} else if (name.equals("SHOW DOWN")) {
-			debug("showdown");
+			println("showdown");
 			showdown = true;
 			
 		} else if (name.equals("SUMMARY")) {
-			debug("summary");
+			println("summary");
 			// pip in case there is only one street
 			pip();
 			summaryPhase = true;
@@ -728,20 +728,20 @@ public class PSParser extends Parser2 {
 		int actEnd = skipToken(line, actStart);
 		Action action = new Action(seat);
 		String actString = line.substring(actStart, actEnd);
-		byte actByte = ParseUtil.getAction(actString);
+		Action.Type actByte = ParseUtil.getAction(actString);
 		action.type = actByte;
 		boolean drawAct = false;
 		
 		switch (action.type) {
-			case Action.CHECK_TYPE:
-			case Action.MUCK_TYPE:
-			case Action.DOESNTSHOW_TYPE:
+			case CHECK:
+			case MUCK:
+			case DOESNTSHOW:
 				// NSavov: checks 
 				// scotty912: doesn't show hand
 				// not sure what difference is between muck and doesn't show
 				break;
 				
-			case Action.FOLD_TYPE: {
+			case FOLD: {
 				// azacel77: folds
 				// Ninjajundiai: folds [5d 5s]
 				// tawvx: folds [2h Tc 7s 4h Js 2c]
@@ -754,7 +754,7 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.BRINGSIN_TYPE: {
+			case BRINGSIN: {
 				// trinitycubed: brings in for 3
 				// i assume this is the same as calling
 				int amountStart = line.indexOf("for", actEnd) + 4;
@@ -764,8 +764,8 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.CALL_TYPE:
-			case Action.BET_TYPE: {
+			case CALL:
+			case BET: {
 				// Bumerang16: calls $0.01
 				int amountStart = ParseUtil.nextToken(line, actEnd);
 				int amount = ParseUtil.parseMoney(line, amountStart);
@@ -774,7 +774,7 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.RAISE_TYPE: {
+			case RAISE: {
 				// bluff.tb: raises $0.05 to $0.07
 				int amountStart = line.indexOf("to ", actEnd) + 3;
 				// subtract what seat has already put in this round
@@ -784,7 +784,7 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.POST_TYPE: {
+			case POST: {
 				// Bumerang16: posts small blind $0.01
 				// pisti361: posts small & big blinds $0.03
 				// Yury.Nik: posts big blind 50 and is all-in
@@ -806,12 +806,12 @@ public class PSParser extends Parser2 {
 						throw new RuntimeException("invalid small blind");
 					}
 					if (!sbposted) {
-						debug("small blind " + amount);
+						println("small blind " + amount);
 						sbposted = true;
 						
 					} else {
 						// dead small blind
-						debug("dead small blind " + amount);
+						println("dead small blind " + amount);
 						hand.antes += amount;
 						// doesn't count toward player pip
 						pot += amount;
@@ -820,7 +820,7 @@ public class PSParser extends Parser2 {
 					seat.smallblind = true;
 					
 				} else if (line.indexOf(" small & big blinds ", actEnd) > 0) {
-					debug("dead small and big blind " + amount);
+					println("dead small and big blind " + amount);
 					if (amount != hand.bb + hand.sb) {
 						throw new RuntimeException("invalid small and big blind");
 					}
@@ -832,7 +832,7 @@ public class PSParser extends Parser2 {
 					seat.smallblind = true;
 					
 				} else if (line.indexOf(" big blind ", actEnd) > 0) {
-					debug("big blind " + amount);
+					println("big blind " + amount);
 					if (amount > hand.bb) {
 						throw new RuntimeException("invalid big blind");
 					}
@@ -840,7 +840,7 @@ public class PSParser extends Parser2 {
 					
 				} else if (line.indexOf(" the ante ", actEnd) > 0) {
 					// TODO change action to ante
-					debug("ante " + amount);
+					println("ante " + amount);
 					if (amount >= hand.sb) {
 						throw new RuntimeException("invalid ante");
 					}
@@ -857,7 +857,7 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.SHOW_TYPE: {
+			case SHOW: {
 				// bluff.tb: shows [Jc 8h Js Ad] (two pair, Aces and Kings)
 				// tudy31: shows [7d Ad 4d Kd 8h Jh 3d] (Lo: 8,7,4,3,A)
 				int handStart = ParseUtil.nextToken(line, actEnd);
@@ -867,7 +867,7 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.DRAW_TYPE: {
+			case DRAW: {
 				drawAct = true;
 				// tawvx: discards 1 card [Ah]
 				// joven2010: discards 3 cards
@@ -875,7 +875,7 @@ public class PSParser extends Parser2 {
 				// five card draw: always draw 0
 				// street 0 (size 1): no draw
 				// street 1 (size 2): draw 0, etc
-				int draw = hand.game.type == Game.DSTD_TYPE ? streets.size() - 2 : 0;
+				int draw = hand.game.type == Game.Type.DSTD ? streets.size() - 2 : 0;
 				if (seat.drawn(draw) > 0) {
 					throw new RuntimeException("already discarded " + seat.drawn(draw));
 				}
@@ -885,14 +885,14 @@ public class PSParser extends Parser2 {
 				break;
 			}
 			
-			case Action.STANDPAT_TYPE: {
+			case STANDPAT: {
 				// stands pat
 				if (hand.myseat == seat) {
 					// there is no deal so push previous hole cards here
 					hand.addMyDrawCards(seat.finalHoleCards);
 				}
 				drawAct = true;
-				debug("stands");
+				println("stands");
 				break;
 			}
 			
@@ -910,17 +910,16 @@ public class PSParser extends Parser2 {
 			action.allin = true;
 		}
 		
-		debug("action " + action);
+		println("action " + action);
 		
-		if (drawAct && streets.size() == 1) {
+		if (drawAct && currentStreetIndex() == 0) {
 			// there is no draw phase, so pip and fake a new street
-			debug("new street for draw");
+			println("new street for draw");
 			pip();
-			streets.add(new ArrayList<Action>());
+			newStreet();
 		}
 		
-		List<Action> street = streets.get(streets.size() - 1);
-		street.add(action);
+		currentStreet().add(action);
 	}
 	
 	/**
@@ -930,13 +929,13 @@ public class PSParser extends Parser2 {
 		for (Seat seat : seatsMap.values()) {
 			int pip = seatPip[seat.num];
 			if (pip > 0) {
-				debug("seat " + seat + " pip " + pip); 
+				println("seat " + seat + " pip " + pip); 
 				pot += pip;
 				seat.pip += pip;
 				seatPip[seat.num] = 0;
 			}
 		}
-		debug("pot now " + pot);
+		println("pot now " + pot);
 	}
 	
 	/**
@@ -990,11 +989,11 @@ public class PSParser extends Parser2 {
 	
 	
 	/** get the up cards from the array depending on the game type */
-	private static String[] getUpCards(final int gametype, final String[] cards) {
+	private static String[] getUpCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				// first two cards and last are hole, others are pub
 				// cards length is 3,4,5,6,7
 				return Arrays.copyOfRange(cards, 2, Math.min(cards.length, 6));
@@ -1013,11 +1012,11 @@ public class PSParser extends Parser2 {
 	}
 	
 	/** get the hole cards from the array depending on game type */
-	private static String[] getHoleCards(final int gametype, final String[] cards) {
+	private static String[] getHoleCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				// first two cards and last are hole, others are pub
 				// cards length is 3,4,5,6,7
 				if (cards.length < 7) {
@@ -1031,18 +1030,18 @@ public class PSParser extends Parser2 {
 		}
 	}
 	
-	private static int getMixType(String mixs) {
+	private static Game.Mix getMixType(String mixs) {
 		switch (mixs) {
 			case "Mixed NLH/PLO":
 			case "Mixed PLH/PLO":
-				return Game.HE_OM_MIX;
+				return Game.Mix.HE_OM_MIX;
 			case "Triple Stud":
-				return Game.TRIPSTUD_MIX;
+				return Game.Mix.TRIPSTUD_MIX;
 				// dashes are removed
 			case "8Game":
-				return Game.EIGHT_MIX;
+				return Game.Mix.EIGHT_MIX;
 			case "HORSE":
-				return Game.HORSE_MIX;
+				return Game.Mix.HORSE_MIX;
 			default:
 				throw new RuntimeException("unknown mix type " + mixs);
 		}

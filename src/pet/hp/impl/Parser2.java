@@ -27,6 +27,32 @@ public abstract class Parser2 extends Parser {
 	/** hand game instance */
 	protected Game game;
 	
+	/**
+	 * get the current street number, starting at 0
+	 */
+	protected int currentStreetIndex() {
+		return streets.size() - 1;
+	}
+	
+	/**
+	 * add a new street
+	 */
+	protected List<Action> newStreet() {
+		println("new street");
+		streets.add(new ArrayList<Action>());
+		return currentStreet();
+	}
+	
+	protected List<Action> currentStreet() {
+		return streets.get(streets.size() - 1);
+	}
+	
+	@Override
+	public void clear() {
+		super.clear();
+		streets.clear();
+	}
+	
 	public Parser2(History history) {
 		super(history);
 	}

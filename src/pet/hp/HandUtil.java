@@ -32,22 +32,22 @@ public class HandUtil {
 	 */
 	public static String[] getStreetBoard(Hand hand, int streetIndex) {
 		switch (hand.game.type) {
-			case Game.FCD_TYPE:
-			case Game.DSTD_TYPE:
-			case Game.DSSD_TYPE:
+			case FCD:
+			case DSTD:
+			case DSSD:
 				return Poker.emptyBoard;
-			case Game.HE_TYPE:
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
-			case Game.OM5_TYPE:
-			case Game.OM5HL_TYPE:
+			case HE:
+			case OM:
+			case OMHL:
+			case OM5:
+			case OM5HL:
 				return streetIndex > 0 ? Arrays.copyOf(hand.board, streetIndex + 2) : Poker.emptyBoard;
-			case Game.OM51_TYPE:
-			case Game.OM51HL_TYPE:
+			case OM51:
+			case OM51HL:
 				return Arrays.copyOf(hand.board, streetIndex == 0 ? 1 : streetIndex + 2);
-			case Game.STUD_TYPE:
-			case Game.RAZZ_TYPE:
-			case Game.STUDHL_TYPE:
+			case STUD:
+			case RAZZ:
+			case STUDHL:
 				return streetIndex == 4 && hand.board.length > 0 ? hand.board : Poker.emptyBoard;
 			default:
 				throw new RuntimeException("unknown game type " + hand.game.type);
@@ -58,11 +58,11 @@ public class HandUtil {
 	 * get the final cards this seat had for display purposes returns null if no
 	 * known cards, array may contain null if some are unknown
 	 */
-	public static String[] getFinalCards(int gametype, Seat seat) {
+	public static String[] getFinalCards(Game.Type gametype, Seat seat) {
 		switch (gametype) {
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				String[] holeCards = seat.finalHoleCards;
 				String[] upCards = seat.finalUpCards;
 				if (holeCards == null && upCards == null) {

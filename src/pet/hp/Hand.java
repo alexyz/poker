@@ -11,14 +11,11 @@ import pet.eq.Poker;
  * This object should be considered immutable.
  */
 public class Hand implements Serializable {
-	// There are a lot of instances of this object so use byte/short instead of
-	// int where possible
 	
 	public static final long PS = 1L << 60;
 	public static final long FT = 2L << 60;
 	
-	/** hand id - object so it can be used in map/set */
-	// XXX should really just be long
+	/** hand id - object so it can be used in map/set without being recreated */
 	public Long id;
 	/** game type */
 	public Game game;

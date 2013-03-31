@@ -3,7 +3,6 @@ package pet.ui;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.Locale;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -149,24 +148,24 @@ public class PokerFrame extends JFrame {
 	 * display the calc panel for the game type and return it so you can set the
 	 * hand
 	 */
-	public CalcPanel displayCalcPanel(int gameType) {
+	public CalcPanel displayCalcPanel(Game.Type gameType) {
 		CalcPanel p;
 		switch (gameType) {
-			case Game.HE_TYPE: 
+			case HE: 
 				p = holdemPanel;
 				break;
-			case Game.OM_TYPE:
-			case Game.OMHL_TYPE:
+			case OM:
+			case OMHL:
 				p = omahaPanel;
 				break;
-			case Game.DSTD_TYPE:
-			case Game.FCD_TYPE:
-			case Game.DSSD_TYPE: 
+			case DSTD:
+			case FCD:
+			case DSSD: 
 				p = drawPanel;
 				break;
-			case Game.STUD_TYPE:
-			case Game.STUDHL_TYPE:
-			case Game.RAZZ_TYPE:
+			case STUD:
+			case STUDHL:
+			case RAZZ:
 				p = studPanel;
 				break;
 			default:

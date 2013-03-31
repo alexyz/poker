@@ -188,7 +188,7 @@ public class HandStateUtil {
 				ss.ev = 0;
 				ss.actionNum++;
 				
-				if (act.type == Action.FOLD_TYPE) {
+				if (act.type == Action.Type.FOLD) {
 					ss.folded = true;
 					ss.spr = 0;
 					
@@ -201,14 +201,14 @@ public class HandStateUtil {
 					int tocall = 0;
 					
 					switch (act.type) {
-						case Action.BRINGSIN_TYPE:
-						case Action.BET_TYPE:
-						case Action.RAISE_TYPE:
+						case BRINGSIN:
+						case BET:
+						case RAISE:
 							ss.bpr = (act.amount * 100f) / potraise;
 							// the opponent will need to call this much
 							tocall = act.amount - lastbet;
 							
-						case Action.CALL_TYPE:
+						case CALL:
 							// use default equity if no showdown
 							//float eq = ss.meq != null ? ss.meq.totaleq / 100f : 0;
 							float eq = ss.deq / 100f;
@@ -220,7 +220,7 @@ public class HandStateUtil {
 							//System.out.println("EV:   eq=" + eq + " p*eq=" + (totalpot*eq) + " cost=" + act.amount + " => ev " + ss.ev);
 							break;
 							
-						case Action.COLLECT_TYPE:
+						case COLLECT:
 							// XXX should clear amounts of others who arn't winning, also remove from pot (leave rake)
 							ss.won = true;
 							ss.amount = -act.amount;

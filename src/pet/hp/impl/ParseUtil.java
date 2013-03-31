@@ -140,75 +140,76 @@ public class ParseUtil {
 		}
 	}
 
-	static int getLimitType (String limits) {
+	static Game.Limit getLimitType (String limits) {
 		switch (limits) {
 			case "Pot Limit":
-				return Game.POT_LIMIT;
+				return Game.Limit.PL;
 			case "No Limit":
-				return Game.NO_LIMIT;
+				return Game.Limit.NL;
 			case "Limit":
-				return Game.FIXED_LIMIT;
+				return Game.Limit.FL;
 			default:
 				throw new RuntimeException("unknown limit");
 		}
 	}
 
-	static int getGameType (String gameStr) {
+	static Game.Type getGameType (String gameStr) {
 		switch (gameStr) {
 			case "Hold'em":
-				return Game.HE_TYPE;
+				return Game.Type.HE;
 			case "Omaha Hi/Lo":
-				return Game.OMHL_TYPE;
+				return Game.Type.OMHL;
 			case "Omaha":
 			case "Omaha Hi":
-				return Game.OM_TYPE;
+				return Game.Type.OM;
 			case "5 Card Draw":
-				return Game.FCD_TYPE;
+				return Game.Type.FCD;
 			case "Triple Draw 27 Lowball":
-				return Game.DSTD_TYPE;
+				return Game.Type.DSTD;
 			case "Razz":
-				return Game.RAZZ_TYPE;
+				return Game.Type.RAZZ;
 			case "7 Card Stud":
-				return Game.STUD_TYPE;
+				return Game.Type.STUD;
 			case "7 Card Stud Hi/Lo":
-				return Game.STUDHL_TYPE;
+				return Game.Type.STUDHL;
 			case "Single Draw 27 Lowball":
-				return Game.DSSD_TYPE;
+				return Game.Type.DSSD;
 			case "Courchevel":
-				return Game.OM51_TYPE;
+				return Game.Type.OM51;
 			case "5 Card Omaha":
-				return Game.OM5_TYPE;
+				return Game.Type.OM5;
 			case "5 Card Omaha Hi/Lo":
-				return Game.OM5HL_TYPE;
+				return Game.Type.OM5HL;
 			case "Courchevel Hi/Lo":
-				return Game.OM51HL_TYPE;
+				return Game.Type.OM51HL;
 			default:
 				throw new RuntimeException("unknown game " + gameStr);
 		}
 	}
 
-	static byte getAction(String act) {
+	static Action.Type getAction(String act) {
 		switch (act) {
 			// map stars terms to action constants
-			case "checks": return Action.CHECK_TYPE;
-			case "folds": return Action.FOLD_TYPE;
-			case "mucks": return Action.MUCK_TYPE;
-			case "doesn't": return Action.DOESNTSHOW_TYPE;
-			case "bets": return Action.BET_TYPE;
-			case "calls": return Action.CALL_TYPE;
-			case "raises": return Action.RAISE_TYPE;
-			case "antes": return Action.ANTES_TYPE;
-			case "posts": return Action.POST_TYPE;
-			case "shows": return Action.SHOW_TYPE;
-			case "discards": return Action.DRAW_TYPE;
-			case "stands": return Action.STANDPAT_TYPE;
-			case "brings": return Action.BRINGSIN_TYPE;
+			case "checks": return Action.Type.CHECK;
+			case "folds": return Action.Type.FOLD;
+			case "mucks": return Action.Type.MUCK;
+			case "doesn't": return Action.Type.DOESNTSHOW;
+			case "bets": return Action.Type.BET;
+			case "calls": return Action.Type.CALL;
+			case "raises": return Action.Type.RAISE;
+			case "antes": return Action.Type.ANTE;
+			case "posts": return Action.Type.POST;
+			case "shows": return Action.Type.SHOW;
+			case "discards": return Action.Type.DRAW;
+			case "stands": return Action.Type.STANDPAT;
+			case "brings": return Action.Type.BRINGSIN;
 			default: throw new RuntimeException("unknown action " + act);
 		}
 	}
 	
 	/**
-	 * return index of first char after the player name at given offset
+	 * return player name at given offset.
+	 * return null if no name found
 	 */
 	static String parseName(Map<String,?> seatsMap, String line, int off) {
 		String name = "";
@@ -218,9 +219,6 @@ public class ParseUtil {
 				name = n;
 			}
 		}
-		if (name.length() == 0) {
-			throw new RuntimeException();
-		}
-		return name;
+		return name.length() == 0 ? null : name;
 	}
 }

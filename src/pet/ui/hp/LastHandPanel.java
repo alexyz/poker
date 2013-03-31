@@ -83,21 +83,21 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 				HandStateItem hs = (HandStateItem) stateCombo.getSelectedItem();
 				String type;
 				switch (hs.hand.game.type) {
-					case Game.HE_TYPE:
-					case Game.OM_TYPE:
-					case Game.FCD_TYPE:
-					case Game.STUD_TYPE:
+					case HE:
+					case OM:
+					case FCD:
+					case STUD:
 						type = PokerItem.HIGH;
 						break;
-					case Game.OMHL_TYPE:
-					case Game.STUDHL_TYPE:
+					case OMHL:
+					case STUDHL:
 						type = PokerItem.HILO;
 						break;
-					case Game.DSSD_TYPE:
-					case Game.DSTD_TYPE:
+					case DSSD:
+					case DSTD:
 						type = PokerItem.DSLOW;
 						break;
-					case Game.RAZZ_TYPE:
+					case RAZZ:
 						type = PokerItem.AFLOW;
 						break;
 					default:

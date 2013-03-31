@@ -90,7 +90,7 @@ public class HandInfo {
 		Action[] acts = hand.streets[0];
 		for (int n = 0; n < acts.length; n++) {
 			Action act = acts[n];
-			if (act.type != Action.POST_TYPE) {
+			if (act.type != Action.Type.POST && act.type != Action.Type.ANTE) {
 				utg = act.seat == hand.myseat;
 				break;
 			}

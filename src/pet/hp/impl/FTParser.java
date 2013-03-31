@@ -23,10 +23,23 @@ public class FTParser extends Parser2 {
 		}
 	}
 	
+	private void fail(String desc) {
+		throw new RuntimeException("Failure: " + desc + " Line: " + line);
+	}
+	
+	private void assert_(boolean cond, String desc) {
+		if (!cond) {
+			throw new RuntimeException("Assertion failed: " + desc + " Line: " + line);
+		}
+	}
+	
+	/** current line */
+	private String line;
 
 	public FTParser() {
 		// XXX shouldnt be in constructor
 		super(new History());
+		debug = true;
 	}
 	
 	@Override
@@ -36,49 +49,111 @@ public class FTParser extends Parser2 {
 	
 	@Override
 	public boolean parseLine(final String line0) {
-		final String line = line0.replaceAll("(\\d),(\\d)", "$1$2").replaceAll("  +", " ").trim();
-		System.out.println(">>> " + line);
-		debug(">>> " + line);
+		line = line0.replaceAll("(\\d),(\\d)", "$1$2").replaceAll("  +", " ").trim();
+		println(">>> " + line);
+		
 		String name;
+		String buttonExp = "The button is in seat #";
 		if (line.startsWith("Full Tilt Poker Game")) {
-			parseHand(line);
+			parseHand();
+			
 		} else if (line.startsWith("Seat ")) {
-			parseSeat(line);
+			println("seat");
+			parseSeat();
+			
+		} else if (line.startsWith("*** ")) {
+			println("phase");
+			parsePhase();
+			
+		} else if (line.startsWith("Dealt to ")) {
+			println("dealt");
+			parseDeal();
+			
+		} else if (line.startsWith(buttonExp)) {
+			println("button");
+			int but = Integer.parseInt(line.substring(buttonExp.length()));
+			hand.button = (byte) but;
+			
 		} else if ((name = ParseUtil.parseName(seatsMap, line, 0)) != null) {
-			parseAction(line, name);
+			parseAction(name);
+			
 		} else {
-			throw new RuntimeException("unmatched line: " + line);
+			fail("unmatched line");
 		}
 		
 		return false;
 	}
 	
-	private void parseAction (String line, String name) {
+	private void parseDeal () {
+		// omaha:
+		// Dealt to Keynell [Tc As Qd 3s]
+		// stud:
+		// Dealt to mamie2k [4d]
+		// Dealt to doubleupnow [3h]
+		// Dealt to bcs75 [5d]
+		// Dealt to mymommy [Jh]
+		// Dealt to Keynell [Qs 3s] [5s]
+		// after draw: [kept] [received]
+		// Dealt to Keynell [2h 4c] [Qs Kd Kh]
+		
+	}
+
+	private void parsePhase () {
+		// *** HOLE CARDS ***
+	}
+
+	private void parseAction (String name) {
 		// Keynell antes 100
-		System.out.println("action: name=" + name);
+		println("action: name=" + name);
 		Seat seat = seatsMap.get(name);
-		String a = line.substring(name.length() + 1, line.indexOf(" ", name.length() + 1));
-		System.out.println("a=" + a);
-		byte action = ParseUtil.getAction(a);
-		switch (action) {
-			case Action.ANTES_TYPE: {
-//				int amountStart = ParseUtil.nextToken(line, blindStart);
-//				int amount = ParseUtil.parseMoney(line, amountStart);
-//				if (amount >= hand.sb) {
-//					throw new RuntimeException("invalid ante");
-//				}
-//				hand.antes += amount;
-//				pot += amount;
-//				amount = 0;
+		
+		int actIndex = name.length() + 1;
+		int spaceIndex = line.indexOf(" ", actIndex);
+		String actStr = line.substring(actIndex, spaceIndex);
+		println("actStr=" + actStr);
+		
+		Action action = new Action(seat);
+		action.type = ParseUtil.getAction(actStr);
+		
+		switch (action.type) {
+			case ANTE: {
+				int amount = ParseUtil.parseMoney(line, spaceIndex + 1);
+				assert_(amount < hand.sb, "ante < sb");
+				hand.antes += amount;
+				pot += amount;
+				amount = 0;
+				break;
+			}
+			case POST: {
+				String sbExp = "posts the small blind of ";
+				String bbExp = "posts the big blind of ";
+				if (line.startsWith(sbExp, actIndex)) {
+					action.amount = ParseUtil.parseMoney(line, actIndex + sbExp.length());
+					seat.smallblind = true;
+					assert_(action.amount == hand.sb, "post sb = hand sb");
+					assert_(line.indexOf(" ", actIndex + sbExp.length()) == -1, "line complete");
+					
+				} else if (line.startsWith(bbExp, actIndex)) {
+					action.amount = ParseUtil.parseMoney(line, actIndex + bbExp.length());
+					seat.bigblind = true;
+					assert_(action.amount == hand.bb, "action bb = hand bb");
+					assert_(line.indexOf(" ", actIndex + bbExp.length()) == -1, "line complete");
+					
+				} else {
+					fail("unknown post");
+				}
+				
 				break;
 			}
 			default:
-				throw new RuntimeException("unknown action " + action);
+				fail("action " + action.type);
 		}
+		
+		currentStreet().add(action);
 	}
 
 
-	private void parseSeat(final String line) {
+	private void parseSeat() {
 		if (!summaryPhase) {
 			// Seat 3: Keynell (90000)
 			int seatno = ParseUtil.parseInt(line, 5);
@@ -93,28 +168,26 @@ public class FTParser extends Parser2 {
 		}
 	}
 	
-	private void parseHand(final String line) {
-		if (hand != null) {
-			throw new RuntimeException("did not finish last hand");
-		}
+	private void parseHand() {
+		assert_(hand == null, "finished last hand");
 		
 		Matcher m = FTHandRe.pattern.matcher(line);
 		if (!m.matches()) {
 			throw new RuntimeException("does not match: " + line);
 		}
 		
-		System.out.println("hid=" + m.group(FTHandRe.hid));
-		System.out.println("tname=" + m.group(FTHandRe.tname));
-		System.out.println("tid=" + m.group(FTHandRe.tid));
-		System.out.println("table=" + m.group(FTHandRe.table));
-		System.out.println("tabletype=" + m.group(FTHandRe.tabletype));
-		System.out.println("sb=" + m.group(FTHandRe.sb));
-		System.out.println("bb=" + m.group(FTHandRe.bb));
-		System.out.println("ante=" + m.group(FTHandRe.ante));
-		System.out.println("lim=" + m.group(FTHandRe.lim));
-		System.out.println("game=" + m.group(FTHandRe.game));
-		System.out.println("date1=" + m.group(FTHandRe.date1));
-		System.out.println("date2=" + m.group(FTHandRe.date2));
+		println("hid=" + m.group(FTHandRe.hid));
+		println("tname=" + m.group(FTHandRe.tname));
+		println("tid=" + m.group(FTHandRe.tid));
+		println("table=" + m.group(FTHandRe.table));
+		println("tabletype=" + m.group(FTHandRe.tabletype));
+		println("sb=" + m.group(FTHandRe.sb));
+		println("bb=" + m.group(FTHandRe.bb));
+		println("ante=" + m.group(FTHandRe.ante));
+		println("lim=" + m.group(FTHandRe.lim));
+		println("game=" + m.group(FTHandRe.game));
+		println("date1=" + m.group(FTHandRe.date1));
+		println("date2=" + m.group(FTHandRe.date2));
 		
 		hand = new Hand();
 		hand.id = Long.parseLong(m.group(FTHandRe.hid));
@@ -130,6 +203,7 @@ public class FTParser extends Parser2 {
 		game.limit = ParseUtil.getLimitType(m.group(FTHandRe.lim));
 		game.type = ParseUtil.getGameType(m.group(FTHandRe.game));
 		
+		newStreet();
 	}
 	
 }

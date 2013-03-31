@@ -100,7 +100,7 @@ public class History {
 	 * get the game for the hand line and table details
 	 */
 	public synchronized Game getGame(final Game game) { 
-		if (game.type == 0 || game.limit == 0 || game.max == 0 || game.currency == 0 || game.id != null) {
+		if (game.type == null || game.limit == null || game.max == 0 || game.currency == 0 || game.id != null) {
 			throw new RuntimeException("invalid game");
 		}
 		
@@ -123,8 +123,8 @@ public class History {
 		
 		// XXX should this be on the instance? or should it be GameUtil.isHilo(gameType)?
 		switch (game.type) {
-			case Game.STUDHL_TYPE:
-			case Game.OMHL_TYPE:
+			case STUDHL:
+			case OMHL:
 				game.hilo = true;
 				break;
 			default:
