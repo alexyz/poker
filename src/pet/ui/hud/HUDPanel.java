@@ -212,7 +212,7 @@ class HUDPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					hudsFrame.setHudsAlwaysOnTop(false);
-					PET.getInstance().toFront();
+					PET.getPokerFrame().toFront();
 				}
 			}));
 			menu.add(new JMenuItem(new AbstractAction("Clear All") {

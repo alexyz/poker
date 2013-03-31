@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import javax.swing.*;
 
+import pet.hp.History;
 import pet.ui.PokerFrame;
 
 /**
@@ -13,11 +14,18 @@ public class PET {
 	
 	private static PokerFrame instance;
 	
+	/** all the parsed data */
+	private static final History history = new History();
+	
 	/**
 	 * get instance of gui
 	 */
-	public static PokerFrame getInstance() {
+	public static PokerFrame getPokerFrame() {
 		return instance;
+	}
+	
+	public static History getHistory() {
+		return history;
 	}
 	
 	public static void main(String[] args) {
@@ -43,7 +51,6 @@ public class PET {
 				// due to the java console panel
 				instance = new PokerFrame();
 				System.out.println("Poker Equity Tool - https://github.com/alexyz");
-				instance.start();
 				instance.setVisible(true);
 			}
 		});
@@ -58,7 +65,7 @@ public class PET {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				JOptionPane.showMessageDialog(getInstance(), 
+				JOptionPane.showMessageDialog(instance, 
 						e.toString(), // + ": " + e.getMessage(), 
 						title, 
 						JOptionPane.ERROR_MESSAGE);

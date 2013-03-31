@@ -10,7 +10,6 @@ import javax.swing.event.*;
 import pet.PET;
 import pet.hp.*;
 import pet.hp.info.*;
-import pet.ui.PokerFrame;
 import pet.ui.graph.GraphData;
 import pet.ui.table.*;
 
@@ -55,7 +54,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo pgi = m.getRow(sr);
 					if (pgi != null) {
-						PET.getInstance().displayPlayer(pgi.player.name);
+						PET.getPokerFrame().displayPlayer(pgi.player.name);
 					}
 				}
 			}
@@ -70,12 +69,11 @@ public class GamesPanel extends JPanel implements HistoryListener {
 					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo pgi = m.getRow(sr);
 					
-					PokerFrame pf = PET.getInstance();
-					List<Hand> hands = pf.getHistory().getHands(pgi.player.name, pgi.game.id);
+					List<Hand> hands = PET.getHistory().getHands(pgi.player.name, pgi.game.id);
 					String title = pgi.player.name + " - " + pgi.game.id;
 					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
 					if (br != null) {
-						pf.displayBankRoll(br);
+						PET.getPokerFrame().displayBankRoll(br);
 					} else {
 						System.out.println("no bank roll for " + pgi);
 					}
@@ -127,7 +125,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 	private void updateGame() {
 		System.out.println("update game");
 		String selectedGameId = (String) gameCombo.getSelectedItem();
-		Info info = PET.getInstance().getInfo();
+		Info info = PET.getPokerFrame().getInfo();
 		List<PlayerGameInfo> gameInfos = info.getGameInfos(selectedGameId);
 		GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 		gamesModel.setRows(gameInfos);
@@ -147,7 +145,7 @@ public class GamesPanel extends JPanel implements HistoryListener {
 			public void run() {
 				// update the game combo
 				// XXX probably breaks current selection
-				List<String> games = PET.getInstance().getHistory().getGames();
+				List<String> games = PET.getHistory().getGames();
 				gameCombo.setModel(new DefaultComboBoxModel<>(games.toArray(new String[games.size()])));
 			}
 		});

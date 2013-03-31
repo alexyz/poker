@@ -37,7 +37,7 @@ public class TournPanel extends JPanel {
 					int sr = tournTable.convertRowIndexToModel(r);
 					TournInfoTableModel m = (TournInfoTableModel) tournTable.getModel();
 					TournInfo ti = m.getRow(sr);
-					PET.getInstance().displayHands(ti.tourn.id);
+					PET.getPokerFrame().displayHands(ti.tourn.id);
 				}
 			}
 		});
@@ -61,7 +61,7 @@ public class TournPanel extends JPanel {
 	}
 	
 	public void refresh() {
-		List<TournInfo> tis = PET.getInstance().getInfo().getTournInfos();
+		List<TournInfo> tis = PET.getPokerFrame().getInfo().getTournInfos();
 		((TournInfoTableModel)tournTable.getModel()).setRows(tis);
 	}
 	

@@ -25,12 +25,10 @@ public class HistoryPanel extends JPanel implements FollowListener {
 	private final JToggleButton followButton = new JToggleButton("Follow");
 	private final JProgressBar progressBar = new JProgressBar();
 	private final JButton addButton = new JButton("Add File");
-	private final ConsolePanel consolePanel = new ConsolePanel();
 	private final JCheckBox hudBox = new JCheckBox("Create HUDs");
-	private final JButton funcButton = new JButton("Memory");
-	private final JButton clearButton = new JButton("Clear");
-	private final JPanel buttonPanel = new JPanel();
 	private final JSpinner ageSpinner = new JSpinner();
+	
+	private FollowThread thread;
 	
 	public HistoryPanel() {
 		super(new BorderLayout());
@@ -40,12 +38,12 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				e.acceptDrop(TransferHandler.LINK);
 				Transferable t = e.getTransferable();
 				try {
+					@SuppressWarnings("unchecked")
 					List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 					System.out.println("dropped " + files);
 					if (files != null && files.size() > 0) {
-						FollowThread ft = PET.getInstance().getFollow();
 						for (File f : files) {
-							ft.addFile(f);
+							thread.addFile(f);
 						}
 					}
 				} catch (Exception e1) {
@@ -55,9 +53,6 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		}));
 		
 		pathField.setEditable(false);
-		
-		String path = getPath();
-		pathField.setText(path);
 		
 		pathButton.addActionListener(new ActionListener() {
 			@Override
@@ -70,7 +65,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 					File f = fc.getSelectedFile();
 					if (f != null) {
 						pathField.setText(f.toString());
-						PET.getInstance().getFollow().setPath(f);
+						thread.setPath(f);
 					}
 				}
 			}
@@ -80,10 +75,9 @@ public class HistoryPanel extends JPanel implements FollowListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean follow = e.getStateChange() == ItemEvent.SELECTED;
-				FollowThread ft = PET.getInstance().getFollow();
-				ft.setPath(new File(pathField.getText()));
-				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
-				ft.setFollow(follow);
+				thread.setPath(new File(pathField.getText()));
+				thread.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
+				thread.setFollow(follow);
 			}
 		});
 		
@@ -97,7 +91,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 					File[] fs = fc.getSelectedFiles();
 					if (fs != null && fs.length > 0) {
 						for (File f : fs) {
-							PET.getInstance().getFollow().addFile(f);
+							thread.addFile(f);
 						}
 					}
 				}
@@ -109,22 +103,7 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		hudBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				PET.getInstance().getHudManager().setCreate(hudBox.isSelected());
-			}
-		});
-		
-		clearButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				consolePanel.clear();
-			}
-		});
-		
-		funcButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				//PokerFrame.getInstance().f();
-				mem();
+				PET.getPokerFrame().getHudManager().setCreate(hudBox.isSelected());
 			}
 		});
 		
@@ -132,14 +111,9 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		ageSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				FollowThread ft = PET.getInstance().getFollow();
-				ft.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
+				thread.setAge(((SpinnerNumberModel)ageSpinner.getModel()).getNumber().intValue());
 			}
 		});
-		
-		buttonPanel.add(clearButton);
-		buttonPanel.add(funcButton);
-		add(buttonPanel, BorderLayout.SOUTH);
 		
 		JPanel pathPanel = new JPanel();
 		pathPanel.add(pathField);
@@ -159,54 +133,10 @@ public class HistoryPanel extends JPanel implements FollowListener {
 		topPanel.add(progressBar);
 		
 		add(topPanel, BorderLayout.NORTH);
-		add(consolePanel, BorderLayout.CENTER);
 	}
 	
-	/** get the pokerstars hand history directory */
-	private static String getPath() {
-		// C:\Users\Alex\AppData\Local\PokerStars\HandHistory\
-		// /Users/alex/Library/Application Support/PokerStars/HandHistory/tawvx
-		String home = System.getProperty("user.home");
-		String os = System.getProperty("os.name");
-		String path = null;
-		if (os.equals("Mac OS X")) {
-			path = home + "/Library/Application Support/PokerStars/HandHistory";
-		} else if (os.contains("Windows")) {
-			// could be something like PokerStars.FR instead
-			path = home + "\\AppData\\Local\\PokerStars\\HandHistory";
-		}
-		if (path != null) {
-			File f = new File(path);
-			if (f.exists() && f.isDirectory()) {
-				// get the first directory
-				for (File f2 : f.listFiles()) {
-					if (f2.isDirectory()) {
-						path = f2.getPath();
-						break;
-					}
-				}
-			} else {
-				System.out.println("could not find dir " + f);
-				path = null;
-			}
-		}
-		if (path == null) {
-			path = home;
-		}
-		return path;
-	}
-	
-	private static void mem() {
-		Runtime r = Runtime.getRuntime();
-		r.gc();
-		double mib = Math.pow(2,20);
-		int h = PET.getInstance().getHistory().getHands();
-		System.out.println(String.format("memory max: %.3f total: %.3f free: %.3f used: %.3f (MiB) hands: %d",
-				r.maxMemory() / mib,
-				r.totalMemory() / mib,
-				r.freeMemory() / mib,
-				(r.totalMemory() - r.freeMemory()) / mib,
-				h));
+	public void setPath(File path) {
+		pathField.setText(path.getPath());
 	}
 	
 	@Override
@@ -218,6 +148,14 @@ public class HistoryPanel extends JPanel implements FollowListener {
 				progressBar.setValue(done);
 			}
 		});
+	}
+
+	public FollowThread getThread () {
+		return thread;
+	}
+
+	public void setThread (FollowThread thread) {
+		this.thread = thread;
 	}
 	
 }

@@ -71,7 +71,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 					SeatState as = hs.actionSeat();
 					if (as != null) {
 						String player = as.seat.name;
-						PET.getInstance().displayPlayer(player);
+						PET.getPokerFrame().displayPlayer(player);
 					}
 				}
 			}
@@ -104,7 +104,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 						throw new RuntimeException("unknown game type " + hs.hand);
 				}
 				
-				PokerFrame pf = PET.getInstance();
+				PokerFrame pf = PET.getPokerFrame();
 				CalcPanel calcPanel = pf.displayCalcPanel(hs.hand.game.type);
 				// TODO maybe take hands for selected street instead
 				List<String[]> cards = HandUtil.getFinalCards(hs.hand);
@@ -117,7 +117,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 			public void actionPerformed(ActionEvent e) {
 				HandStateItem hs = (HandStateItem) stateCombo.getSelectedItem();
 				if (hs != null) {
-					PET.getInstance().replayHand(hs.hand);
+					PET.getPokerFrame().replayHand(hs.hand);
 				}
 			}
 		});

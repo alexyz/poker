@@ -2,16 +2,12 @@ package pet.hp;
 
 import java.util.*;
 
-import pet.eq.Poker;
-
 /**
  * stores hands, games and tournaments.
  * thread safe (all methods synchronized)
  */
 public class History {
 
-	/** string cache to avoid multiple instances of same string */
-	private final HashMap<String,String> cache = new HashMap<>(1000);
 	/** game instances */
 	private final ArrayList<Game> games = new ArrayList<>();
 	/** tournament instances */
@@ -28,9 +24,7 @@ public class History {
 	private final Set<String> self = new TreeSet<>();
 	
 	public History() {
-		for (String c : Poker.deck) {
-			getString(c);
-		}
+		//
 	}
 	
 	/**
@@ -54,23 +48,6 @@ public class History {
 		}
 	}
 
-	/**
-	 * get cached string instance
-	 */
-	public synchronized String getString(String s) {
-		if (s != null) {
-			String s2 = cache.get(s);
-			if (s2 != null) {
-				return s2;
-			}
-			// create a new string that does not share the potentially large
-			// backing array of the original
-			s = new String(s);
-			cache.put(s, s);
-		}
-		return s;
-	}
-	
 	/**
 	 * Get game instance by game id string
 	 */

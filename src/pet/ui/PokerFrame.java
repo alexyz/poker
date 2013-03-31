@@ -7,6 +7,7 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import pet.PET;
 import pet.hp.*;
 import pet.hp.impl.PSParser;
 import pet.hp.info.*;
@@ -27,19 +28,17 @@ public class PokerFrame extends JFrame {
 	public static final Font boldfont = new Font("SansSerif", Font.BOLD, 12);
 	public static final Font bigfont = new Font("SansSerif", Font.BOLD, 24);
 	
-	/** all the parsed data */
-	private final History history = new History();
-	/** thread that feeds the parser */
-	private final FollowThread followThread = new FollowThread(new PSParser(history));
 	/** data analysis */
+	// TODO should move to PET
 	private final Info info = new Info();
+	
 	private final JTabbedPane tabs = new JTabbedPane();
 	private final JTabbedPane eqTabs = new JTabbedPane();
 	private final JTabbedPane hisTabs = new JTabbedPane();
 	private final ReplayPanel replayPanel = new ReplayPanel();
 	private final BankrollPanel bankrollPanel = new BankrollPanel();
 	private final LastHandPanel lastHandPanel = new LastHandPanel();
-	private final HistoryPanel historyPanel = new HistoryPanel();
+	private final FilesPanel filesPanel = new FilesPanel();
 	private final HandsPanel handsPanel = new HandsPanel();
 	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel("Hold'em", 1, 2);
 	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel("Omaha", 2, 4);
@@ -73,7 +72,7 @@ public class PokerFrame extends JFrame {
 		eqTabs.addTab("Draw", drawPanel);
 		eqTabs.addTab("Stud", studPanel);
 		
-		hisTabs.addTab("Files", historyPanel);
+		hisTabs.addTab("Files", filesPanel);
 		hisTabs.addTab("Players", playerPanel);
 		hisTabs.addTab("Games", gamesPanel);
 		hisTabs.addTab("Tournaments", new TournPanel());
@@ -82,12 +81,13 @@ public class PokerFrame extends JFrame {
 		hisTabs.addTab("Replay", replayPanel);
 		hisTabs.addTab("Last Hand", lastHandPanel);
 		
-		history.addListener(lastHandPanel);
-		history.addListener(gamesPanel);
-		history.addListener(info);
-		history.addListener(hudManager);
+		PET.getHistory().addListener(lastHandPanel);
+		PET.getHistory().addListener(gamesPanel);
+		PET.getHistory().addListener(info);
+		PET.getHistory().addListener(hudManager);
 		
-		followThread.addListener(historyPanel);
+		// TODO
+//		followThread.addListener(historyPanel);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(tabs);
@@ -95,16 +95,8 @@ public class PokerFrame extends JFrame {
 		pack();
 	}
 	
-	public void start() {
-		followThread.start();
-	}
-	
 	public Info getInfo() {
 		return info;
-	}
-	
-	public History getHistory() {
-		return history;
 	}
 	
 	/** display hand in replayer */
@@ -125,10 +117,6 @@ public class PokerFrame extends JFrame {
 		bankrollPanel.setData(bankRoll);
 		hisTabs.setSelectedComponent(bankrollPanel);
 		tabs.setSelectedComponent(hisTabs);
-	}
-	
-	public FollowThread getFollow() {
-		return followThread;
 	}
 	
 	/** display hands in hands tab */

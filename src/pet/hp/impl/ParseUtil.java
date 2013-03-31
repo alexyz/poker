@@ -1,9 +1,11 @@
 package pet.hp.impl;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import pet.hp.Action;
 import pet.hp.Game;
+import pet.hp.Game.Type;
 
 /**
  * utility methods for strings
@@ -220,5 +222,68 @@ public class ParseUtil {
 			}
 		}
 		return name.length() == 0 ? null : name;
+	}
+
+	/**
+	 * get the cards
+	 */
+	static String[] parseCards(String line, int off) {
+		// [Jc 8h Js Ad]
+		if (line.startsWith("[", off)) {
+			int end = line.indexOf("]", off);
+			int num = (end - off) / 3;
+			String[] cards = new String[num];
+			for (int n = 0; n < num; n++) {
+				int a = off + 1 + (n * 3);
+				// could validate this, but pretty unlikely to be invalid
+				cards[n] = StringCache.get(line.substring(a, a+2));
+			}
+			return cards;
+			
+		} else {
+			throw new RuntimeException("no hand at " + off);
+		}
+	}
+
+	/** get the hole cards from the array depending on game type */
+	static String[] getHoleCards(final Game.Type gametype, final String[] cards) {
+		switch (gametype) {
+			case STUD:
+			case STUDHL:
+			case RAZZ:
+				// first two cards and last are hole, others are pub
+				// cards length is 3,4,5,6,7
+				if (cards.length < 7) {
+					return new String[] { cards[0], cards[1] };
+				} else {
+					return new String[] { cards[0], cards[1], cards[6] }; 
+				}
+			default:
+				// all cards are hole cards
+				return cards;
+		}
+	}
+
+	/** get the up cards from the array depending on the game type */
+	static String[] getUpCards(final Game.Type gametype, final String[] cards) {
+		switch (gametype) {
+			case STUD:
+			case STUDHL:
+			case RAZZ:
+				// first two cards and last are hole, others are pub
+				// cards length is 3,4,5,6,7
+				return Arrays.copyOfRange(cards, 2, Math.min(cards.length, 6));
+			default:
+				// none are up cards
+				return null;
+		}
+	}
+
+	/** check cards haven't got shorter */
+	static String[] checkCards(String[] oldCards, String[] cards) {
+		if (oldCards != null && (cards == null || oldCards.length > cards.length)) {
+			throw new RuntimeException("old: " + Arrays.toString(oldCards) + " new: " + Arrays.toString(cards));
+		}
+		return cards;
 	}
 }

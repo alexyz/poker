@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+import pet.eq.ArrayUtil;
 import pet.hp.*;
 
 public class FTParser extends Parser2 {
@@ -96,6 +97,44 @@ public class FTParser extends Parser2 {
 		// after draw: [kept] [received]
 		// Dealt to Keynell [2h 4c] [Qs Kd Kh]
 		
+		// get seat
+		// have to skip over name which could be anything
+		String prefix = "Dealt to ";
+		String name = ParseUtil.parseName(seatsMap, line, prefix.length());
+		int cardsStart = line.indexOf("[", prefix.length() + name.length());
+		Seat theseat = seatsMap.get(name);
+		
+		// get cards and cards 2
+		String[] cards = ParseUtil.parseCards(line, cardsStart);
+		int cardsStart2 = line.indexOf("[", cardsStart + 1);
+		if (cardsStart2 > 0) {
+			cards = ArrayUtil.join(cards, ParseUtil.parseCards(line, cardsStart2));
+		}
+		println(name + " dealt " + Arrays.asList(cards));
+		
+		// get current player seat - always has more than 1 initial hole card
+		if (hand.myseat == null && cards.length > 1) {
+			println("this is my seat");
+			hand.myseat = theseat;
+		}
+		
+		if (theseat == hand.myseat) {
+			switch (hand.game.type) {
+				case FCD:
+				case DSSD:
+				case DSTD:
+					// hole cards can be changed in draw so store them all on hand
+					hand.addMyDrawCards(cards);
+				default:
+			}
+			theseat.finalHoleCards = ParseUtil.checkCards(theseat.finalHoleCards, ParseUtil.getHoleCards(hand.game.type, cards));
+			theseat.finalUpCards = ParseUtil.checkCards(theseat.finalUpCards, ParseUtil.getUpCards(hand.game.type, cards));
+			
+		} else {
+			// not us, all cards are up cards
+			theseat.finalUpCards = ParseUtil.checkCards(theseat.finalUpCards, cards);
+		}
+		
 	}
 
 	private void parsePhase () {
@@ -162,7 +201,7 @@ public class FTParser extends Parser2 {
 			
 			Seat seat = new Seat();
 			seat.num = (byte) seatno;
-			seat.name = history.getString(line.substring(col + 2, braStart - 1));
+			seat.name = StringCache.get(line.substring(col + 2, braStart - 1));
 			seat.chips = ParseUtil.parseMoney(line, braStart + 1);
 			seatsMap.put(seat.name, seat);
 		}

@@ -100,12 +100,11 @@ public class PlayerPanel extends JPanel {
 					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo pgi = gamesModel.getRow(sr);
 					System.out.println("selected " + r + " => " + sr + " => " + pgi);
-					PokerFrame pf = PET.getInstance();
-					List<Hand> hands = pf.getHistory().getHands(pgi.player.name, pgi.game.id);
+					List<Hand> hands = PET.getHistory().getHands(pgi.player.name, pgi.game.id);
 					String title = pgi.player.name + " - " + pgi.game.id;
 					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
 					if (br != null) {
-						pf.displayBankRoll(br);
+						PET.getPokerFrame().displayBankRoll(br);
 					} else {
 						System.out.println("no bankroll for " + pgi);
 					}
@@ -121,7 +120,7 @@ public class PlayerPanel extends JPanel {
 					int sr = gamesTable.convertRowIndexToModel(r);
 					GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
 					PlayerGameInfo gi = gamesModel.getRow(sr);
-					PET.getInstance().displayHands(gi.player.name, gi.game.id);
+					PET.getPokerFrame().displayHands(gi.player.name, gi.game.id);
 				}
 			}
 		});
@@ -155,12 +154,11 @@ public class PlayerPanel extends JPanel {
 	
 	/** search for player and update table */
 	private void find() {
-		PokerFrame pf = PET.getInstance();
-		Info info = pf.getInfo();
+		Info info = PET.getPokerFrame().getInfo();
 		
 		PlayerInfoTableModel playersModel = (PlayerInfoTableModel) playersTable.getModel();
 		if (playerField.isSelfSelected()) {
-			History history = pf.getHistory();
+			History history = PET.getHistory();
 			playersModel.setRows(info.getPlayers(history.getSelf()));
 		} else {
 			String pattern = playerField.getPlayerName();
