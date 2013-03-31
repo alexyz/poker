@@ -28,9 +28,11 @@ public class Action implements Serializable {
 	/** win */
 	public static final byte COLLECT_TYPE = 13;
 	public static final byte BRINGSIN_TYPE = 14;
+	/** posts ante */
+	public static final byte ANTES_TYPE = 15;
 	
 	/** total number of types */
-	public static final int TYPES = 15;
+	public static final int TYPES = 16;
 	
 	public Action(Seat seat) {
 		this.seat = seat;

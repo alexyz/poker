@@ -11,46 +11,9 @@ import pet.hp.*;
  * PokerStars hand parser - primarily for Omaha/Hold'em/5 Card Draw PL/NL games but
  * also tournaments and FL games.
  */
-public class PSParser extends Parser {
+public class PSParser extends Parser2 {
 	
 	private static final TimeZone ET = TimeZone.getTimeZone("US/Eastern");
-	
-	private static class H {
-		/** hand start pattern - no punctuation */
-		// PokerStars Hand #84322807903:  Triple Draw 2-7 Lowball No Limit (5/10) - 2012/08/05 14:07:58 ET
-		// PokerStars Hand #84393778794:  7 Card Stud Limit (20/40) - 2012/08/07 4:39:16 ET
-		// PokerStars Hand #79306750218:  Triple Stud (7 Card Stud Limit, 4/8) - 2012/04/23 5:55:37 UTC [2012/04/23 1:55:37 ET]
-		// PokerStars Hand #83338296941:  8-Game (Razz Limit, 100/200) - 2012/07/15 1:45:25 ET
-		static final Pattern pat = Pattern.compile("PokerStars (?:(Zoom) )?(?:Hand|Game) (\\d+) "
-				+ "(?:Tournament (\\d+) (?:(Freeroll)|(\\S+?)\\+(\\S+?)(?: (USD))?) )?" 
-				+ "(?:(Mixed \\S+|Triple Stud|8Game|HORSE) )?"
-				+ "(.+?) "
-				+ "(No Limit|Pot Limit|Limit) "
-				+ "(?:(?:Match Round (\\w+) )?(?:Level (\\w+)) )?" 
-				+ "(\\S+?)/(\\S+?)(?: (USD))?");
-		/** hand pattern capturing group constants */
-		static final int zoom = 1, handid = 2, tournid = 3, freeroll = 4, tbuyin = 5, tcost = 6, tcur = 7, mix = 8, game = 9,
-				limit = 10, tround = 11, tlevel = 12, sb = 13, bb = 14, blindcur = 15;
-	}
-	
-	private static byte getAction(String act) {
-		switch (act) {
-			// map stars terms to action constants
-			case "checks": return Action.CHECK_TYPE;
-			case "folds": return Action.FOLD_TYPE;
-			case "mucks": return Action.MUCK_TYPE;
-			case "doesn't": return Action.DOESNTSHOW_TYPE;
-			case "bets": return Action.BET_TYPE;
-			case "calls": return Action.CALL_TYPE;
-			case "raises": return Action.RAISE_TYPE;
-			case "posts": return Action.POST_TYPE;
-			case "shows": return Action.SHOW_TYPE;
-			case "discards": return Action.DRAW_TYPE;
-			case "stands": return Action.STANDPAT_TYPE;
-			case "brings": return Action.BRINGSIN_TYPE;
-			default: throw new RuntimeException("unknown action " + act);
-		}
-	}
 	
 	// instance fields
 	
@@ -58,26 +21,6 @@ public class PSParser extends Parser {
 	private final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	/** instance field for thread safety */
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
-	
-	// stuff for current hand, cleared on clear()
-	/** map of player name to seat for current hand */
-	private final Map<String,Seat> seatsMap = new TreeMap<>();
-	/** array of seat num to seat pip for this street. seat numbers are 1-10 */
-	private final int[] seatPip = new int[11];
-	/** running pot - updated when pip() is called */
-	private int pot;
-	/** streets of action for current hand */
-	private final List<List<Action>> streets = new ArrayList<>();
-	/** current hand */
-	private Hand hand;
-	/** hand reached showdown */
-	private boolean showdown;
-	/** is in summary phase */
-	private boolean summaryPhase;
-	/** has live sb been posted (others are dead) */
-	private boolean sbposted;
-	/** hand game instance */
-	private Game game;
 	
 	public PSParser(History history) {
 		super(history);
@@ -412,7 +355,7 @@ public class PSParser extends Parser {
 		// get seat
 		// have to skip over name which could be anything
 		String prefix = "Dealt to ";
-		String name = parseName(line, prefix.length());
+		String name = ParseUtil.parseName(seatsMap, line, prefix.length());
 		int cardsStart = line.indexOf("[", prefix.length() + name.length());
 		Seat theseat = seatsMap.get(name);
 		
@@ -494,7 +437,6 @@ public class PSParser extends Parser {
 			seat.name = history.getString(line.substring(col + 2, chStart - 1));
 			seat.chips = ParseUtil.parseMoney(line, chStart + 1);
 			seatsMap.put(seat.name, seat);
-			//seatsList.add(seat);
 			debug("seat " + seat);
 		}
 	}
@@ -519,7 +461,7 @@ public class PSParser extends Parser {
 		String dateline = line.substring(dateIndex + 2);
 		debug("date line: " + dateline);
 		
-		Matcher m = H.pat.matcher(handline);
+		Matcher m = PSHandRE.pat.matcher(handline);
 		if (!m.matches()) {
 			throw new RuntimeException("could not match first line");
 		}
@@ -528,29 +470,29 @@ public class PSParser extends Parser {
 		
 		// sub type - currently just zoom
 		// in future maybe turbo, matrix etc
-		String zoom = m.group(H.zoom);
+		String zoom = m.group(PSHandRE.zoom);
 		if (zoom != null && zoom.equals("Zoom")) {
 			game.subtype |= Game.ZOOM_SUBTYPE;
 		}
 		
 		Hand hand = new Hand();
-		hand.id = Long.parseLong(m.group(H.handid));
+		hand.id = Long.parseLong(m.group(PSHandRE.handid));
 		
 		// get all the tournament stuff if there is tourn id
-		String tournids = m.group(H.tournid);
+		String tournids = m.group(PSHandRE.tournid);
 		if (tournids != null) {
 			game.currency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
 			long tournid = Long.parseLong(tournids);
 			
-			String tournbuyins = m.group(H.tbuyin);
-			String tourncosts = m.group(H.tcost);
+			String tournbuyins = m.group(PSHandRE.tbuyin);
+			String tourncosts = m.group(PSHandRE.tcost);
 			
 			char tourncurrency = 0;
 			int tournbuyin = 0, tourncost = 0;
 			
 			if (tournbuyins != null) {
-				tourncurrency = parseCurrency(tournbuyins, 0);
+				tourncurrency = ParseUtil.parseCurrency(tournbuyins, 0);
 				tournbuyin = ParseUtil.parseMoney(tournbuyins, 0);
 				tourncost = ParseUtil.parseMoney(tourncosts, 0);
 			}
@@ -562,37 +504,37 @@ public class PSParser extends Parser {
 		}
 		
 		// mixed game type, if any
-		String mixs = m.group(H.mix);
+		String mixs = m.group(PSHandRE.mix);
 		if (mixs != null) {
 			game.mix = getMixType(mixs);
 		}
 		
-		String gameStr = m.group(H.game);
-		game.type = getGameType(gameStr);
+		String gameStr = m.group(PSHandRE.game);
+		game.type = ParseUtil.getGameType(gameStr);
 		
-		String limits = m.group(H.limit);
-		game.limit = getLimitType(limits);
+		String limits = m.group(PSHandRE.limit);
+		game.limit = ParseUtil.getLimitType(limits);
 		
-		String round = m.group(H.tround);
+		String round = m.group(PSHandRE.tround);
 		if (round != null) {
 			int r = ParseUtil.parseRoman(round, 0);
 			hand.round = r;
 		}
 		
-		String level = m.group(H.tlevel);
+		String level = m.group(PSHandRE.tlevel);
 		if (level != null) {
 			int l = ParseUtil.parseRoman(level, 0);
 			hand.level = l;
 		}
 		
-		String sbs = m.group(H.sb);
+		String sbs = m.group(PSHandRE.sb);
 		if (game.currency == 0) {
 			// if hand isn't tournament, set cash game currency
-			game.currency = parseCurrency(sbs, 0);
+			game.currency = ParseUtil.parseCurrency(sbs, 0);
 		}
 		game.sb = ParseUtil.parseMoney(sbs, 0);
 		
-		String bbs = m.group(H.bb);
+		String bbs = m.group(PSHandRE.bb);
 		game.bb = ParseUtil.parseMoney(bbs, 0);
 		if (game.sb == 0 || game.bb == 0 || game.sb >= game.bb) {
 			throw new RuntimeException("invalid blinds " + game.sb + "/" + game.bb);
@@ -637,52 +579,6 @@ public class PSParser extends Parser {
 		
 		this.hand = hand;
 		debug("hand " + hand);
-	}
-	
-	private static int getLimitType (String limits) {
-		switch (limits) {
-			case "Pot Limit":
-				return Game.POT_LIMIT;
-			case "No Limit":
-				return Game.NO_LIMIT;
-			case "Limit":
-				return Game.FIXED_LIMIT;
-			default:
-				throw new RuntimeException("unknown limit");
-		}
-	}
-	
-	private static int getGameType (String gameStr) {
-		switch (gameStr) {
-			case "Hold'em":
-				return Game.HE_TYPE;
-			case "Omaha Hi/Lo":
-				return Game.OMHL_TYPE;
-			case "Omaha":
-				return Game.OM_TYPE;
-			case "5 Card Draw":
-				return Game.FCD_TYPE;
-			case "Triple Draw 27 Lowball":
-				return Game.DSTD_TYPE;
-			case "Razz":
-				return Game.RAZZ_TYPE;
-			case "7 Card Stud":
-				return Game.STUD_TYPE;
-			case "7 Card Stud Hi/Lo":
-				return Game.STUDHL_TYPE;
-			case "Single Draw 27 Lowball":
-				return Game.DSSD_TYPE;
-			case "Courchevel":
-				return Game.OM51_TYPE;
-			case "5 Card Omaha":
-				return Game.OM5_TYPE;
-			case "5 Card Omaha Hi/Lo":
-				return Game.OM5HL_TYPE;
-			case "Courchevel Hi/Lo":
-				return Game.OM51HL_TYPE;
-			default:
-				throw new RuntimeException("unknown game " + gameStr);
-		}
 	}
 	
 	private void parseTable(final String line) {
@@ -832,7 +728,7 @@ public class PSParser extends Parser {
 		int actEnd = skipToken(line, actStart);
 		Action action = new Action(seat);
 		String actString = line.substring(actStart, actEnd);
-		byte actByte = getAction(actString);
+		byte actByte = ParseUtil.getAction(actString);
 		action.type = actByte;
 		boolean drawAct = false;
 		
@@ -943,6 +839,7 @@ public class PSParser extends Parser {
 					seat.bigblind = true;
 					
 				} else if (line.indexOf(" the ante ", actEnd) > 0) {
+					// TODO change action to ante
 					debug("ante " + amount);
 					if (amount >= hand.sb) {
 						throw new RuntimeException("invalid ante");
@@ -1090,37 +987,7 @@ public class PSParser extends Parser {
 		return off + i;
 	}
 	
-	/**
-	 * return index of first char after the player name at given offset
-	 */
-	private String parseName(String line, int off) {
-		String name = "";
-		// find longest matching name
-		for (String n : seatsMap.keySet()) {
-			if (n.length() > name.length() && line.startsWith(n, off)) {
-				name = n;
-			}
-		}
-		if (name.length() == 0) {
-			throw new RuntimeException();
-		}
-		return name;
-	}
 	
-	/**
-	 * get the currency symbol or play currency symbol if there is no symbol
-	 */
-	private static char parseCurrency(String line, int off) {
-		char c = line.charAt(off);
-		if ("$€".indexOf(c) >= 0) {
-			return c;
-		} else if (c >= '0' && c <= '9') {
-			// could be tourn chips...
-			return Game.PLAY_CURRENCY;
-		} else {
-			throw new RuntimeException("unknown currency " + c);
-		}
-	}
 	
 	/** get the up cards from the array depending on the game type */
 	private static String[] getUpCards(final int gametype, final String[] cards) {

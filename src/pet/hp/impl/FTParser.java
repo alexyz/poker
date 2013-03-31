@@ -1,19 +1,19 @@
 package pet.hp.impl;
 
 import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+import java.util.regex.*;
 
 import pet.hp.*;
 
-public class FTParser extends Parser {
+public class FTParser extends Parser2 {
 	
 	/**
 	 * @param args
 	 */
 	public static void main(final String[] args) throws Exception {
 		final Parser parser = new FTParser();
-		try (FileInputStream fis = new FileInputStream("ftgames.txt")) {
+		try (FileInputStream fis = new FileInputStream("ft.txt")) {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"))) {
 				String line;
 				while ((line = br.readLine()) != null) {
@@ -23,10 +23,9 @@ public class FTParser extends Parser {
 		}
 	}
 	
-	private Hand hand;
-	private Game game;
-	
+
 	public FTParser() {
+		// XXX shouldnt be in constructor
 		super(new History());
 	}
 	
@@ -37,71 +36,99 @@ public class FTParser extends Parser {
 	
 	@Override
 	public boolean parseLine(final String line0) {
-		final Pattern p = Pattern.compile("(\\d),(\\d)");
-		System.out.println(line0);
 		final String line = line0.replaceAll("(\\d),(\\d)", "$1$2").replaceAll("  +", " ").trim();
-		System.out.println(line);
+		System.out.println(">>> " + line);
 		debug(">>> " + line);
-		
+		String name;
 		if (line.startsWith("Full Tilt Poker Game")) {
-			parseGame(line);
+			parseHand(line);
+		} else if (line.startsWith("Seat ")) {
+			parseSeat(line);
+		} else if ((name = ParseUtil.parseName(seatsMap, line, 0)) != null) {
+			parseAction(line, name);
+		} else {
+			throw new RuntimeException("unmatched line: " + line);
 		}
 		
 		return false;
 	}
 	
-	private void parseGame(final String line) {
+	private void parseAction (String line, String name) {
+		// Keynell antes 100
+		System.out.println("action: name=" + name);
+		Seat seat = seatsMap.get(name);
+		String a = line.substring(name.length() + 1, line.indexOf(" ", name.length() + 1));
+		System.out.println("a=" + a);
+		byte action = ParseUtil.getAction(a);
+		switch (action) {
+			case Action.ANTES_TYPE: {
+//				int amountStart = ParseUtil.nextToken(line, blindStart);
+//				int amount = ParseUtil.parseMoney(line, amountStart);
+//				if (amount >= hand.sb) {
+//					throw new RuntimeException("invalid ante");
+//				}
+//				hand.antes += amount;
+//				pot += amount;
+//				amount = 0;
+				break;
+			}
+			default:
+				throw new RuntimeException("unknown action " + action);
+		}
+	}
+
+
+	private void parseSeat(final String line) {
+		if (!summaryPhase) {
+			// Seat 3: Keynell (90000)
+			int seatno = ParseUtil.parseInt(line, 5);
+			int col = line.indexOf(": ");
+			int braStart = line.lastIndexOf("(");
+			
+			Seat seat = new Seat();
+			seat.num = (byte) seatno;
+			seat.name = history.getString(line.substring(col + 2, braStart - 1));
+			seat.chips = ParseUtil.parseMoney(line, braStart + 1);
+			seatsMap.put(seat.name, seat);
+		}
+	}
+	
+	private void parseHand(final String line) {
 		if (hand != null) {
 			throw new RuntimeException("did not finish last hand");
 		}
-		if (!line.startsWith("Full Tilt Poker Game #")) {
-			throw new RuntimeException();
-		}
 		
-		String re = "";
-		// Full Tilt Poker Game #31364220549:
-		re += "Full Tilt Poker Game #(\\d+):";
-		int hid = 1;
-		// 2,000 Play Money Sit & Go (243729666),
-		re += "(?: (.+?) \\((\\d+)\\),)?";
-		int tname = 2, tid = 3;
-		// Table .COM Play 2    (6 max, ante, deep)
-		re += " Table (.+?)(?: \\((.+?)\\))?";
-		int table = 4, tabletype = 5;
-		// - 300/600 Ante 100
-		re += " - (\\S+)/(\\S+)( Ante \\S+)?";
-		int sb = 6, bb = 7, ante = 8;
-		// No Limit  
-		re += " - (Limit|Pot Limit|No Limit)";
-		int lim = 9;
-		// 2-7 Triple Draw
-		re += " (.+)";
-		int game = 10;
-		// 20:01:13 UTC - 2012/11/05
-		re += " - (\\d+:\\d+:\\d+ \\w+ - \\d+/\\d+/\\d+)";
-		int date1 = 11;
-		// [02:07:17 ET - 2012/11/10]
-		re += "(?: (\\[\\d+:\\d+:\\d+ \\w+ - \\d+/\\d+/\\d+\\]))?";
-		int date2 = 12;
-		
-		Pattern p = Pattern.compile(re);
-		Matcher m = p.matcher(line);
+		Matcher m = FTHandRe.pattern.matcher(line);
 		if (!m.matches()) {
 			throw new RuntimeException("does not match: " + line);
 		}
 		
-		System.out.println("hid=" + m.group(hid));
-		System.out.println("tname=" + m.group(tname));
-		System.out.println("tid=" + m.group(tid));
-		System.out.println("table=" + m.group(table));
-		System.out.println("tabletype=" + m.group(tabletype));
-		System.out.println("sb=" + m.group(sb));
-		System.out.println("bb=" + m.group(bb));
-		System.out.println("ante=" + m.group(ante));
-		System.out.println("lim=" + m.group(lim));
-		System.out.println("game=" + m.group(game));
-		System.out.println("date1=" + m.group(date1));
-		System.out.println("date2=" + m.group(date2));
+		System.out.println("hid=" + m.group(FTHandRe.hid));
+		System.out.println("tname=" + m.group(FTHandRe.tname));
+		System.out.println("tid=" + m.group(FTHandRe.tid));
+		System.out.println("table=" + m.group(FTHandRe.table));
+		System.out.println("tabletype=" + m.group(FTHandRe.tabletype));
+		System.out.println("sb=" + m.group(FTHandRe.sb));
+		System.out.println("bb=" + m.group(FTHandRe.bb));
+		System.out.println("ante=" + m.group(FTHandRe.ante));
+		System.out.println("lim=" + m.group(FTHandRe.lim));
+		System.out.println("game=" + m.group(FTHandRe.game));
+		System.out.println("date1=" + m.group(FTHandRe.date1));
+		System.out.println("date2=" + m.group(FTHandRe.date2));
+		
+		hand = new Hand();
+		hand.id = Long.parseLong(m.group(FTHandRe.hid));
+		hand.tablename = m.group(FTHandRe.table);
+		hand.sb = ParseUtil.parseMoney(m.group(FTHandRe.sb), 0);
+		hand.bb = ParseUtil.parseMoney(m.group(FTHandRe.bb), 0);
+		hand.antes = ParseUtil.parseMoney(m.group(FTHandRe.ante), 0);
+		
+		game = new Game();
+		game.currency = ParseUtil.parseCurrency(m.group(FTHandRe.sb), 0);
+		game.sb = hand.sb;
+		game.bb = hand.bb;
+		game.limit = ParseUtil.getLimitType(m.group(FTHandRe.lim));
+		game.type = ParseUtil.getGameType(m.group(FTHandRe.game));
 		
 	}
 	
