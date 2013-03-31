@@ -45,7 +45,7 @@ public class FTParser extends Parser2 {
 	
 	@Override
 	public boolean isHistoryFile(final String name) {
-		return name.toLowerCase().endsWith(".txt");
+		return name.startsWith("FT") && name.endsWith(".txt");
 	}
 	
 	@Override
@@ -77,6 +77,10 @@ public class FTParser extends Parser2 {
 			
 		} else if ((name = ParseUtil.parseName(seatsMap, line, 0)) != null) {
 			parseAction(name);
+			
+		} else if (line.endsWith(" sits down")) {
+			println("sit down");
+			assert_(seatsMap.size() + 1 <= hand.game.max, "sit down seats < max");
 			
 		} else {
 			fail("unmatched line");
@@ -147,8 +151,11 @@ public class FTParser extends Parser2 {
 		Seat seat = seatsMap.get(name);
 		
 		int actIndex = name.length() + 1;
-		int spaceIndex = line.indexOf(" ", actIndex);
-		String actStr = line.substring(actIndex, spaceIndex);
+		int actEndIndex = line.indexOf(" ", actIndex);
+		if (actEndIndex == -1) {
+			actEndIndex = line.length();
+		}
+		String actStr = line.substring(actIndex, actEndIndex);
 		println("actStr=" + actStr);
 		
 		Action action = new Action(seat);
@@ -156,13 +163,14 @@ public class FTParser extends Parser2 {
 		
 		switch (action.type) {
 			case ANTE: {
-				int amount = ParseUtil.parseMoney(line, spaceIndex + 1);
+				int amount = ParseUtil.parseMoney(line, actEndIndex + 1);
 				assert_(amount < hand.sb, "ante < sb");
 				hand.antes += amount;
 				pot += amount;
 				amount = 0;
 				break;
 			}
+			
 			case POST: {
 				String sbExp = "posts the small blind of ";
 				String bbExp = "posts the big blind of ";
@@ -184,6 +192,43 @@ public class FTParser extends Parser2 {
 				
 				break;
 			}
+			
+			case CALL:
+			case BET: {
+				// Keynell calls 300
+				assert_(line.indexOf(" ", actEndIndex + 1) == -1, "line complete");
+				int amount = ParseUtil.parseMoney(line, actEndIndex + 1);
+				action.amount = amount;
+				seatPip(seat, amount);
+				break;
+			}
+			
+			case RAISE: {
+				// x-G-MONEY raises to 2000
+				String raiseExp = "raises to ";
+				assert_(line.startsWith(raiseExp, actIndex), "raise exp");
+				assert_(line.indexOf(" ", actIndex + raiseExp.length()) == -1, "line complete");
+				int amountStart = actIndex + raiseExp.length();
+				// subtract what seat has already put in this round
+				// otherwise would double count
+				int amount = ParseUtil.parseMoney(line, amountStart) - seatPip(seat);
+				action.amount = amount;
+				seatPip(seat, amount);
+				break;
+			}
+			
+			case FOLD: {
+				// Keynell folds
+				assert_(line.indexOf(" ", actEndIndex) == -1, "line complete");
+//				int handStart = line.indexOf("[", actEnd);
+//				if (handStart > 0) {
+//					String[] cards = ParseUtil.parseCards(line, handStart);
+//					seat.finalHoleCards = ParseUtil.checkCards(seat.finalHoleCards, ParseUtil.getHoleCards(hand.game.type, cards));
+//					seat.finalUpCards = ParseUtil.checkCards(seat.finalUpCards, ParseUtil.getUpCards(hand.game.type, cards));
+//				}
+				break;
+			}
+			
 			default:
 				fail("action " + action.type);
 		}
@@ -205,6 +250,7 @@ public class FTParser extends Parser2 {
 			seat.chips = ParseUtil.parseMoney(line, braStart + 1);
 			seatsMap.put(seat.name, seat);
 		}
+		assert_ (seatsMap.size() <= hand.game.max, "seats < max");
 	}
 	
 	private void parseHand() {
@@ -233,14 +279,27 @@ public class FTParser extends Parser2 {
 		hand.tablename = m.group(FTHandRe.table);
 		hand.sb = ParseUtil.parseMoney(m.group(FTHandRe.sb), 0);
 		hand.bb = ParseUtil.parseMoney(m.group(FTHandRe.bb), 0);
-		hand.antes = ParseUtil.parseMoney(m.group(FTHandRe.ante), 0);
+		String ante = m.group(FTHandRe.ante);
+		if (ante != null) {
+			hand.antes = ParseUtil.parseMoney(ante, 0);
+		}
 		
-		game = new Game();
+		Game game = new Game();
 		game.currency = ParseUtil.parseCurrency(m.group(FTHandRe.sb), 0);
 		game.sb = hand.sb;
 		game.bb = hand.bb;
 		game.limit = ParseUtil.getLimitType(m.group(FTHandRe.lim));
 		game.type = ParseUtil.getGameType(m.group(FTHandRe.game));
+		String tabletype = m.group(FTHandRe.tabletype);
+		if (tabletype != null && tabletype.contains("heads up")) {
+			game.max = 2;
+		} else if (tabletype != null && tabletype.matches("\\d max")) {
+			game.max = Integer.parseInt(tabletype.substring(0,1));
+		} else {
+			// ehhhh
+			game.max = 9;
+		}
+		hand.game = history.getGame(game);
 		
 		newStreet();
 	}

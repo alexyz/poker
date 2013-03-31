@@ -98,7 +98,7 @@ public class PlayerGameInfo {
 		}
 		
 		// count winning rank.. if you dare!
-		if (seat.showdown && (!game.hilo || hand.showdownNoLow)) {
+		if (seat.showdown && (!GameUtil.isHilo(game.type) || hand.showdownNoLow)) {
 			Poker p = GameUtil.getPoker(game.type);
 			String[] cards = seat.cards();
 			int v = p.value(hand.board, cards);

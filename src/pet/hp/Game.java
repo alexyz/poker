@@ -75,10 +75,8 @@ public class Game implements Serializable {
 	public char currency;
 	/** sub type, e.g. zoom */
 	public int subtype;
-	/** blinds XXX cash game only */
-	public int sb, bb;
-	/** is a hi/lo game */
-	public boolean hilo;
+	/** blinds - cash game only. also on each hand. */
+	public int sb, bb, ante;
 	
 	public Game() {
 		//

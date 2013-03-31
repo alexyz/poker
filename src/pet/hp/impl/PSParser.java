@@ -21,6 +21,8 @@ public class PSParser extends Parser2 {
 	private final DateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	/** instance field for thread safety */
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss zzz");
+	/** hand game instance - can only determine game after two lines */
+	protected Game game;
 	
 	public PSParser(History history) {
 		super(history);
@@ -40,12 +42,6 @@ public class PSParser extends Parser2 {
 		super.clear();
 		showdown = false;
 		summaryPhase = false;
-		seatsMap.clear();
-		streets.clear();
-		Arrays.fill(seatPip, 0);
-		pot = 0;
-		hand = null;
-		sbposted = false;
 		game = null;
 	}
 	
@@ -325,7 +321,7 @@ public class PSParser extends Parser2 {
 			throw new RuntimeException("could not get seat " + name);
 		}
 		//seat.uncalled = amount;
-		seatPip[seat.num] -= amount;
+		seatPip(seat, -amount);
 		
 		// add the uncall as a fake action so the action amounts sum to pot size
 		Action act = new Action(seat);
@@ -760,7 +756,7 @@ public class PSParser extends Parser2 {
 				int amountStart = line.indexOf("for", actEnd) + 4;
 				int amount = ParseUtil.parseMoney(line, amountStart);
 				action.amount = amount;
-				seatPip[seat.num] += amount;
+				seatPip(seat, amount);
 				break;
 			}
 			
@@ -770,7 +766,7 @@ public class PSParser extends Parser2 {
 				int amountStart = ParseUtil.nextToken(line, actEnd);
 				int amount = ParseUtil.parseMoney(line, amountStart);
 				action.amount = amount;
-				seatPip[seat.num] += amount;
+				seatPip(seat, amount);
 				break;
 			}
 			
@@ -778,9 +774,9 @@ public class PSParser extends Parser2 {
 				// bluff.tb: raises $0.05 to $0.07
 				int amountStart = line.indexOf("to ", actEnd) + 3;
 				// subtract what seat has already put in this round
-				int amount = ParseUtil.parseMoney(line, amountStart) - seatPip[seat.num];
+				int amount = ParseUtil.parseMoney(line, amountStart) - seatPip(seat);
 				action.amount = amount;
-				seatPip[seat.num] += amount;
+				seatPip(seat, amount);
 				break;
 			}
 			
@@ -852,7 +848,7 @@ public class PSParser extends Parser2 {
 					throw new RuntimeException("unknown post");
 				}
 				
-				seatPip[seat.num] += amount;
+				seatPip(seat, amount);
 				action.amount = amount;
 				break;
 			}
@@ -923,22 +919,6 @@ public class PSParser extends Parser2 {
 	}
 	
 	/**
-	 * put in pot - update running pot with seat pips
-	 */
-	private void pip() {
-		for (Seat seat : seatsMap.values()) {
-			int pip = seatPip[seat.num];
-			if (pip > 0) {
-				println("seat " + seat + " pip " + pip); 
-				pot += pip;
-				seat.pip += pip;
-				seatPip[seat.num] = 0;
-			}
-		}
-		println("pot now " + pot);
-	}
-	
-	/**
 	 * return index of first character after token
 	 */
 	private static int skipToken(String line, int off) {
@@ -946,23 +926,6 @@ public class PSParser extends Parser2 {
 			off++;
 		}
 		return off;
-	}
-	
-	/**
-	 * return index of first char after the player name at given offset
-	 */
-	private int skipName(String line, int off) {
-		int i = -1;
-		// find longest matching name
-		for (String n : seatsMap.keySet()) {
-			if (n.length() > i && line.startsWith(n, off)) {
-				i = n.length();
-			}
-		}
-		if (i == -1) {
-			throw new RuntimeException();
-		}
-		return off + i;
 	}
 	
 	private static Game.Mix getMixType(String mixs) {

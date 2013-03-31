@@ -74,7 +74,8 @@ public class History {
 	}
 
 	/**
-	 * get the game for the hand line and table details
+	 * get the game for the hand line and table details.
+	 * requires game type, limit, max, currency, bb/sb for non tourn, optionally mix, subtype
 	 */
 	public synchronized Game getGame(final Game game) { 
 		if (game.type == null || game.limit == null || game.max == 0 || game.currency == 0 || game.id != null) {
@@ -85,27 +86,19 @@ public class History {
 			// don't store blinds for tournament hands as they are variable
 			game.sb = 0;
 			game.bb = 0;
+			game.ante = 0;
 		}
 		
 		// find game, otherwise create it
 		for (Game g : games) {
 			if (g.currency == game.currency && g.type == game.type && g.limit == game.limit
 					&& g.subtype == game.subtype && g.sb == game.sb && g.bb == game.bb && g.mix == game.mix
-					&& g.max == game.max) {
+					&& g.max == game.max && g.ante == game.ante) {
 				return g;
 			}
 		}
 
 		game.id = GameUtil.getGameId(game);
-		
-		// XXX should this be on the instance? or should it be GameUtil.isHilo(gameType)?
-		switch (game.type) {
-			case STUDHL:
-			case OMHL:
-				game.hilo = true;
-				break;
-			default:
-		}
 		
 		games.add(game);
 		System.out.println("added game " + game);

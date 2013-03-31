@@ -138,8 +138,12 @@ public class GameUtil {
 		if (game.subtype != 0) {
 			sb.append(getSubTypeName(game.subtype)).append(" ");
 		}
+		// XXX 0 for tourn...
 		sb.append(formatMoney(game.currency, game.sb)).append("/");
 		sb.append(formatMoney(game.currency, game.bb));
+		if (game.ante != 0) {
+			sb.append(formatMoney(game.currency, game.ante));
+		}
 		return sb.toString();
 	}
 	
@@ -316,6 +320,18 @@ public class GameUtil {
 				return 3 - streetIndex; 
 			default:
 				return 0;
+		}
+	}
+	
+	public static boolean isHilo(Game.Type gameType) {
+		switch (gameType) {
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
+			case STUDHL:
+				return true;
+			default:
+				return false;
 		}
 	}
 }

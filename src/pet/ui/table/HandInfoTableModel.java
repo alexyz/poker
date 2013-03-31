@@ -3,6 +3,7 @@ package pet.ui.table;
 import java.awt.Font;
 import java.util.*;
 
+import pet.hp.GameUtil;
 import pet.hp.info.*;
 
 /**
@@ -69,7 +70,7 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 			@Override
 			public String getValue(HandInfo o) {
 				if (o.hand.showdown) {
-					if (o.hand.game.hilo && !o.hand.showdownNoLow) {
+					if (GameUtil.isHilo(o.hand.game.type) && !o.hand.showdownNoLow) {
 						return "Y+L";
 					} else {
 						return "Y";

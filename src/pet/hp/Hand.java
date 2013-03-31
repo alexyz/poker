@@ -28,7 +28,7 @@ public class Hand implements Serializable {
 	public int level;
 	/** hand date */
 	// could replace with just long to save memory
-	public Date date;
+	public long date;
 	/** big blind amount (may not be posted) */
 	public int bb;
 	/** small blind amount (may not be posted) */
@@ -43,7 +43,7 @@ public class Hand implements Serializable {
 	public Action[][] streets;
 	/** did hand reach showdown (can't just count streets as could have folded on river) */
 	public boolean showdown;
-	/** showdown for hi/lo game type did not have a low hand. only use if game.hilo is true */
+	/** showdown for hi/lo game type did not have a low hand. only use if game type is hilo */
 	public boolean showdownNoLow;
 	/** community cards if any, otherwise empty array */
 	public String[] board = Poker.emptyBoard;
@@ -54,8 +54,9 @@ public class Hand implements Serializable {
 	/**
 	 * Draw games only - original and subsequent hole cards dealt to
 	 * player. since we only ever know the original cards for current player,
-	 * these are here and not on seat instance.
+	 * these are here and not on current players seat instance.
 	 */
+	// TODO should probably be [][]
 	public String[] myDrawCards0, myDrawCards1, myDrawCards2, myDrawCards3;
 	/** name of table */
 	public String tablename;
