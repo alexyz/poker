@@ -165,7 +165,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 	@Override
 	public void handAdded(final Hand hand) {
 		long t = System.currentTimeMillis() - (1000 * 60 * 10);
-		if (hand.date.getTime() > t) {
+		if (hand.date > t) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
@@ -243,6 +243,6 @@ class HandStateItem {
 	@Override
 	public String toString() {
 		// user readable description of hand
-		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(hand.date) + (hand.showdown ? " *" : "");
+		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(new Date(hand.date)) + (hand.showdown ? " *" : "");
 	}
 }

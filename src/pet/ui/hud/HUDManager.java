@@ -17,7 +17,7 @@ public class HUDManager implements HistoryListener {
 	@Override
 	public synchronized void handAdded(final Hand hand) {
 		long t = System.currentTimeMillis() - (1000 * 60 * 10);
-		if (hand.date.getTime() > t) {
+		if (hand.date > t) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {

@@ -20,6 +20,9 @@ public class HandUtil {
 		}
 	};
 	
+	/**
+	 * compare by seat number
+	 */
 	public static final Comparator<Seat> seatCmp = new Comparator<Seat>() {
 		@Override
 		public int compare(Seat s1, Seat s2) {

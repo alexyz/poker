@@ -26,8 +26,7 @@ public class Hand implements Serializable {
 	/** tournament level */
 	// XXX should be short as there are never more than 100 or so levels
 	public int level;
-	/** hand date */
-	// could replace with just long to save memory
+	/** hand date, as long to save memory */
 	public long date;
 	/** big blind amount (may not be posted) */
 	public int bb;
@@ -45,8 +44,8 @@ public class Hand implements Serializable {
 	public boolean showdown;
 	/** showdown for hi/lo game type did not have a low hand. only use if game type is hilo */
 	public boolean showdownNoLow;
-	/** community cards if any, otherwise empty array */
-	public String[] board = Poker.emptyBoard;
+	/** community cards if any */
+	public String[] board;
 	/** total pot size */
 	public int pot;
 	/** pokerstars wealth delta */

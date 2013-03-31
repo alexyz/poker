@@ -56,11 +56,12 @@ public class PlayerInfo {
 	 */
 	public synchronized void add(Hand h, Seat s) {
 		hands++;
-		if (lastDate == null || lastDate.before(h.date)) {
-			lastDate = h.date;
+		Date hdate = new Date(h.date);
+		if (lastDate == null || lastDate.before(hdate)) {
+			lastDate = hdate;
 		}
-		if (firstDate == null || firstDate.after(h.date)) {
-			firstDate = h.date;
+		if (firstDate == null || firstDate.after(hdate)) {
+			firstDate = hdate;
 		}
 		
 		Game game = h.game;

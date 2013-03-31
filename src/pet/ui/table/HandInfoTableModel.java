@@ -17,7 +17,7 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 		cols.add(new MyColumn<HandInfo>(Date.class, "Date", "Date") {
 			@Override
 			public Date getValue(HandInfo o) {
-				return o.hand.date;
+				return new Date(o.hand.date);
 			}
 		});
 		cols.add(new MyColumn<HandInfo>(HoleCards.class, "MyHole", "Final hole cards") {

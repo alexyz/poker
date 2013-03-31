@@ -33,7 +33,7 @@ public class BankrollUtil {
 			@Override
 			public String getXDesc(int x) {
 				if (x > 0 && x < pointHands.size()) {
-					return DateFormat.getDateTimeInstance().format(pointHands.get(x).date);
+					return DateFormat.getDateTimeInstance().format(new Date(pointHands.get(x).date));
 				} else {
 					return null;
 				}
@@ -47,7 +47,7 @@ public class BankrollUtil {
 		
 		for (int n = 0; n < hands.size(); n++) {
 			final Hand hand = hands.get(n);
-			long d = hand.date.getTime();
+			long d = hand.date;
 			boolean newsession = false;
 			if (d > (prevdate + t)) {
 				newsession = true;
@@ -108,7 +108,7 @@ public class BankrollUtil {
 		final long t = 1000L * 60L * 60L;
 		
 		for (Hand hand : hands) {
-			long d = hand.date.getTime();
+			long d = hand.date;
 			boolean newsession = false;
 			if (d > (prevdate + t)) {
 				newsession = true;

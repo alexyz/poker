@@ -189,10 +189,12 @@ public class ParseUtil {
 		}
 	}
 
+	/** map stars terms to action constants */
 	static Action.Type getAction(String act) {
 		switch (act) {
-			// map stars terms to action constants
 			case "checks": return Action.Type.CHECK;
+			// tilt only
+			case "wins": return Action.Type.COLLECT;
 			case "folds": return Action.Type.FOLD;
 			case "mucks": return Action.Type.MUCK;
 			case "doesn't": return Action.Type.DOESNTSHOW;

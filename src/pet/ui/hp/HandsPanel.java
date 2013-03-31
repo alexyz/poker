@@ -203,9 +203,9 @@ public class HandsPanel extends JPanel {
 		// build date lookup
 		Map<String,Date> dateMap = new TreeMap<>();
 		for (HandInfo hi : handInfos) {
-			String datestr = DateFormat.getDateInstance().format(hi.hand.date);
+			String datestr = DateFormat.getDateInstance().format(new Date(hi.hand.date));
 			if (!dateMap.containsKey(datestr)) {
-				dateMap.put(datestr, hi.hand.date);
+				dateMap.put(datestr, new Date(hi.hand.date));
 			}
 		}
 		List<Date> dateList = new ArrayList<>(dateMap.values());
@@ -239,7 +239,8 @@ public class HandsPanel extends JPanel {
 			Date date2 = new Date(date.getTime() + (24 * 60 * 60 * 1000L));
 			dateHandInfos = new ArrayList<>();
 			for (HandInfo hi : handInfos) {
-				if (hi.hand.date.after(date) && hi.hand.date.before(date2)) {
+				Date hdate = new Date(hi.hand.date);
+				if (hdate.after(date) && hdate.before(date2)) {
 					dateHandInfos.add(hi);
 				}
 			}

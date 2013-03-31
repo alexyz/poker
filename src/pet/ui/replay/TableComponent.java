@@ -90,7 +90,7 @@ class TableComponent extends JComponent {
 			g2.setFont(PokerFrame.boldfont);
 			g2.drawString(hand.game.id, 18, 18);
 			g2.drawString(String.valueOf(hand.tablename), 18, 36);
-			g2.drawString(DateFormat.getDateTimeInstance().format(hand.date), 18, 52);
+			g2.drawString(DateFormat.getDateTimeInstance().format(new Date(hand.date)), 18, 52);
 		}
 
 		if (hs == null)

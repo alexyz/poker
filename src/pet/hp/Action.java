@@ -71,6 +71,9 @@ public class Action implements Serializable {
 	/** this action put the player all in */
 	public boolean allin;
 	
+	/**
+	 * return string rep of action
+	 */
 	@Override
 	public String toString () {
 		String s = seat.name + " " + Action.getTypeName(type);
