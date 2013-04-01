@@ -74,7 +74,7 @@ public class History {
 	}
 
 	/**
-	 * get the game for the hand line and table details.
+	 * get the definitive game instance for the given game.
 	 * requires game type, limit, max, currency, bb/sb for non tourn, optionally mix, subtype
 	 */
 	public synchronized Game getGame(final Game game) { 

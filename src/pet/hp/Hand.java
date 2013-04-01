@@ -1,6 +1,7 @@
 package pet.hp;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.*;
 
 import pet.eq.Poker;
@@ -28,12 +29,14 @@ public class Hand implements Serializable {
 	public int level;
 	/** hand date, as long to save memory */
 	public long date;
-	/** big blind amount (may not be posted) */
+	/** formal big blind amount (may not be posted) */
 	public int bb;
-	/** small blind amount (may not be posted) */
+	/** formal small blind amount (may not be posted) */
 	public int sb;
-	/** dead blinds posted */
-	public int antes;
+	/** formal ante amount (may not be posted) */
+	public int ante;
+	/** actual dead blinds (including antes, dead blinds) */
+	public int db = 0;
 	/** participants in hand in seat order (no null elements, missing empty seats) */
 	public Seat[] seats;
 	/** current players seat */
@@ -103,8 +106,9 @@ public class Hand implements Serializable {
 
 	@Override
 	public String toString() {
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 		return String.format("Hand[%s '%s' at '%s' on %s seats=%s str=%d]", 
-				id, game, tablename, date, seats != null ? seats.length : -1, streets != null ? streets.length : -1);
+				id, game, tablename, df.format(new Date(date)), seats != null ? seats.length : -1, streets != null ? streets.length : -1);
 	}
 	
 }

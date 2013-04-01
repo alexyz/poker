@@ -22,12 +22,8 @@ public abstract class Parser2 extends Parser {
 	private final int[] seatPip = new int[11];
 	/** map of player name to seat for current hand */
 	protected final Map<String,Seat> seatsMap = new TreeMap<>();
-	/** hand reached showdown */
-	protected boolean showdown;
 	/** streets of action for current hand */
 	protected final List<List<Action>> streets = new ArrayList<>();
-	/** is in summary phase */
-	protected boolean summaryPhase;
 	
 	public Parser2(History history) {
 		super(history);
@@ -61,6 +57,9 @@ public abstract class Parser2 extends Parser {
 		return streets.size() - 1;
 	}
 	
+	/**
+	 * throw runtime exception
+	 */
 	protected void fail (String desc) {
 		throw new RuntimeException("Failure: " + desc);
 	}
@@ -69,13 +68,7 @@ public abstract class Parser2 extends Parser {
 	 * validate and finalise hand
 	 */
 	protected void finish() {
-		assert_ (hand.date != 0, "has date");
-		assert_ (hand.button != 0, "has button");
-		assert_ (hand.game != null, "has game");
-		assert_ (hand.id != 0, "has id");
-		assert_ (hand.myseat != null, "has my seat");
-		
-		// finalise hand and return
+		validateHand();
 		validatePot();
 		
 		// get seats
@@ -89,8 +82,6 @@ public abstract class Parser2 extends Parser {
 			hand.streets[n] = street.toArray(new Action[street.size()]);
 		}
 		
-		hand.showdown = showdown;
-		
 		history.addHand(hand);
 		if (hand.tourn != null) {
 			history.addTournPlayers(hand.tourn.id, seatsMap.keySet());
@@ -99,6 +90,22 @@ public abstract class Parser2 extends Parser {
 		println("end of hand " + hand);
 		
 		clear();
+	}
+
+	private void validateHand () {
+		assert_ (hand.date != 0, "has date");
+		assert_ (hand.button != 0, "has button");
+		assert_ (hand.game != null, "has game");
+		assert_ (hand.id != 0, "has id");
+		assert_ (hand.myseat != null, "has my seat");
+		if (hand.showdown) {
+			assert_ (streets.size() == GameUtil.getMaxStreets(hand.game.type), "all streets");
+		} else {
+			assert_ (streets.size() <= GameUtil.getMaxStreets(hand.game.type), "streets");
+		}
+		if (!GameUtil.isHilo(hand.game.type)) {
+			assert_ (!hand.showdownNoLow, "no low for non hilo");
+		}
 	}
 	
 	/**
@@ -123,15 +130,17 @@ public abstract class Parser2 extends Parser {
 				seatPip[seat.num] = 0;
 			}
 		}
+		// could check if pip amounts are same for those not all in
 		println("pot now " + pot);
 	}
 
 	/**
-	 * put an amount in the pot without using the player pip
+	 * put an amount in the pot anonymously (dead blinds and antes)
 	 */
-	protected void post(int amount) {
+	protected void anonPip(int amount) {
 		assert_ (amount > 0, "am > 0");
 		pot += amount;
+		println("pot now " + pot);
 	}
 	
 	protected int pot() {
@@ -153,25 +162,32 @@ public abstract class Parser2 extends Parser {
 	}
 	
 	protected void validatePot() {
+		println("hand pot=" + hand.pot + " rake=" + hand.rake + " antes=" + hand.db);
 		// validate pot size
 		assert_(hand.pot == pot, "total pot " + hand.pot + " equal to running pot " + pot);
 		
 		int won = 0;
-		int lost = 0;
+		int pip = 0;
 		for (Seat seat : seatsMap.values()) {
 			won += seat.won;
-			lost += seat.pip;
+			pip += seat.pip;
 		}
-		assert_(won == (hand.pot - hand.rake), "pot " + pot + " equal to total won " + won + " - rake " + hand.rake);
-		assert_(won == (lost - hand.rake + hand.antes), "won " + won + " equal to lost " + lost);
+		println("won=" + won + " pip=" + pip);
 		
-		int asum = hand.antes - hand.rake;
+		assert_(won == (hand.pot - hand.rake), 
+				"won " + won + " equal to pot " + pot + " - rake " + hand.rake);
+		assert_(won == (pip - hand.rake + hand.db), 
+				"won " + won + " equal to pip " + pip + " - rake " + hand.rake + " + antes " + hand.db);
+		
+		int asum = -hand.rake;
 		for (List<Action> str : streets) {
 			for (Action ac : str) {
-				asum += ac.amount;
+				if (ac.amount != 0) {
+					asum += ac.amount;
+				}
 			}
 		}
-		assert_(asum == 0, "actsum " + asum + " zero");
+		assert_(asum == 0, "actsum " + asum + " = zero");
 		
 	}
 	

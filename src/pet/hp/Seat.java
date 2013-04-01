@@ -36,7 +36,7 @@ public class Seat implements Serializable {
 	public byte drawn0, drawn1, drawn2;
 	/** seats hand reached show down. implies hand.showdown is true */
 	public boolean showdown;
-	/** seat posted a big blind */
+	/** seat posted a big blind (could be in position other than bb) */
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;

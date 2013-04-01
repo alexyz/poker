@@ -50,7 +50,7 @@ public class HandStateUtil {
 		// initial state (not displayed)
 		// will be reassigned after each action
 		HandState hs = new HandState(hand);
-		hs.pot = hand.antes;
+		hs.pot = 0;
 		hs.buttonIndex = hand.button - 1;
 		for (Seat seat : hand.seats) {
 			SeatState ss = new SeatState(seat);

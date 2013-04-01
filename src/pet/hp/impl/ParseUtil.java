@@ -1,11 +1,10 @@
 package pet.hp.impl;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.text.DateFormat;
+import java.util.*;
 
 import pet.hp.Action;
 import pet.hp.Game;
-import pet.hp.Game.Type;
 
 /**
  * utility methods for strings
@@ -14,7 +13,8 @@ public class ParseUtil {
 	
 	private static final String romanDigits = "IVXLCDM";
 	private static final int[] romanValues = new int[] { 1, 5, 10, 50, 100, 500, 1000 };
-
+	private static final TimeZone ET = TimeZone.getTimeZone("US/Eastern");
+	
 	/**
 	 * remove the extraneous characters from the string, including duplicate
 	 * spaces, and remove space from start and end
@@ -42,7 +42,7 @@ public class ParseUtil {
 		}
 		return sb.toString();
 	}
-
+	
 	/**
 	 * poker stars actually uses roman numerals for tournament levels...
 	 */
@@ -101,7 +101,7 @@ public class ParseUtil {
 		}
 		return v;
 	}
-
+	
 	/**
 	 * get integer at offset
 	 */
@@ -113,7 +113,7 @@ public class ParseUtil {
 		String s = line.substring(off, end);
 		return Integer.parseInt(s);
 	}
-
+	
 	/**
 	 * skip non spaces then skip spaces
 	 */
@@ -126,7 +126,46 @@ public class ParseUtil {
 		}
 		return off;
 	}
-
+	
+	/**
+	 * parse one or both dates as ET or UTC
+	 */
+	protected static Date parseDates(DateFormat df, String dateStr1, String dateStr2) {
+		Date date1 = parseDate(df, dateStr1);
+		Date date2 = parseDate(df, dateStr2);
+		if (date1 != null && date2 != null && !date1.equals(date2)) {
+			throw new RuntimeException("date1=" + date1 + " date2=" + date2);
+		}
+		return date1 != null ? date1 : date2;
+	}
+	
+	/**
+	 * parse date as ET or UTC
+	 */
+	protected static Date parseDate(DateFormat df, String dateStr) {
+		Date date = null;
+		if (dateStr != null && dateStr.length() > 0) {
+			try {
+				if (dateStr.contains("UTC")) {
+					date = df.parse(dateStr);
+				} else if (dateStr.contains("ET")) {
+					// parse as winter time
+					date = df.parse(dateStr.replace("ET", "EST"));
+					// EDT - summer, EST - winter
+					// daylight savings is summer time
+					if (ET.inDaylightTime(date)) {
+						// reparse as summer time
+						date = df.parse(dateStr.replace("ET", "EDT"));
+					}
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			System.out.println("date " + dateStr + " -> " + date);
+		}
+		return date;
+	}
+	
 	/**
 	 * get the currency symbol or play currency symbol if there is no symbol
 	 */
@@ -141,7 +180,7 @@ public class ParseUtil {
 			throw new RuntimeException("unknown currency " + c);
 		}
 	}
-
+	
 	static Game.Limit getLimitType (String limits) {
 		switch (limits) {
 			case "Pot Limit":
@@ -154,7 +193,7 @@ public class ParseUtil {
 				throw new RuntimeException("unknown limit");
 		}
 	}
-
+	
 	static Game.Type getGameType (String gameStr) {
 		switch (gameStr) {
 			case "Hold'em":
@@ -188,7 +227,7 @@ public class ParseUtil {
 				throw new RuntimeException("unknown game " + gameStr);
 		}
 	}
-
+	
 	/** map stars terms to action constants */
 	static Action.Type getAction(String act) {
 		switch (act) {
@@ -225,7 +264,7 @@ public class ParseUtil {
 		}
 		return name.length() == 0 ? null : name;
 	}
-
+	
 	/**
 	 * get the cards
 	 */
@@ -246,7 +285,7 @@ public class ParseUtil {
 			throw new RuntimeException("no hand at " + off);
 		}
 	}
-
+	
 	/** get the hole cards from the array depending on game type */
 	static String[] getHoleCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
@@ -265,7 +304,7 @@ public class ParseUtil {
 				return cards;
 		}
 	}
-
+	
 	/** get the up cards from the array depending on the game type */
 	static String[] getUpCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
@@ -280,12 +319,16 @@ public class ParseUtil {
 				return null;
 		}
 	}
-
+	
 	/** check cards haven't got shorter */
 	static String[] checkCards(String[] oldCards, String[] cards) {
 		if (oldCards != null && (cards == null || oldCards.length > cards.length)) {
 			throw new RuntimeException("old: " + Arrays.toString(oldCards) + " new: " + Arrays.toString(cards));
 		}
 		return cards;
+	}
+	
+	private ParseUtil() {
+		//
 	}
 }

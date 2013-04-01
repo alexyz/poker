@@ -46,6 +46,7 @@ public class Action implements Serializable {
 		}
 	}
 	
+	/** action types */
 	public enum Type {
 		CHECK, FOLD, RAISE, CALL, BET, 
 		/** post blind, not ante */
