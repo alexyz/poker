@@ -32,14 +32,14 @@ public class DrawPoker extends Poker {
 	
 	private final Value value;
 	
-	public DrawPoker(boolean high) {
-		this.value = high ? Value.hiValue : Value.dsLowValue;
+	public DrawPoker(Value value) {
+		this.value = value;
 	}
 	
 	@Override
 	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
-		if (board != null) {
+		if (board != null && board.length > 0) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}
 		if (draws < 0 || draws > 3) {
@@ -116,7 +116,7 @@ public class DrawPoker extends Poker {
 	
 	@Override
 	public int value(String[] board, String[] hole) {
-		if (board.length > 0 || hole.length != 5) {
+		if (board != null || hole.length != 5) {
 			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
 		}
 		return value.value(hole);

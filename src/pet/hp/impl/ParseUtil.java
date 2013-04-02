@@ -161,7 +161,7 @@ public class ParseUtil {
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-			System.out.println("date " + dateStr + " -> " + date);
+			//System.out.println("date " + dateStr + " -> " + date);
 		}
 		return date;
 	}
@@ -206,14 +206,17 @@ public class ParseUtil {
 			case "5 Card Draw":
 				return Game.Type.FCD;
 			case "Triple Draw 27 Lowball":
+			case "2-7 Triple Draw":
 				return Game.Type.DSTD;
 			case "Razz":
 				return Game.Type.RAZZ;
 			case "7 Card Stud":
 				return Game.Type.STUD;
 			case "7 Card Stud Hi/Lo":
+			case "Stud H/L":
 				return Game.Type.STUDHL;
 			case "Single Draw 27 Lowball":
+			case "2-7 Single Draw":
 				return Game.Type.DSSD;
 			case "Courchevel":
 				return Game.Type.OM51;
@@ -223,6 +226,10 @@ public class ParseUtil {
 				return Game.Type.OM5HL;
 			case "Courchevel Hi/Lo":
 				return Game.Type.OM51HL;
+			case "Badugi":
+				return Game.Type.BG;
+			case "A-5 Triple Draw":
+				return Game.Type.AFTD;
 			default:
 				throw new RuntimeException("unknown game " + gameStr);
 		}
@@ -232,7 +239,7 @@ public class ParseUtil {
 	static Action.Type getAction(String act) {
 		switch (act) {
 			case "checks": return Action.Type.CHECK;
-			// tilt only
+			case "ties":
 			case "wins": return Action.Type.COLLECT;
 			case "folds": return Action.Type.FOLD;
 			case "mucks": return Action.Type.MUCK;
@@ -286,7 +293,7 @@ public class ParseUtil {
 		}
 	}
 	
-	/** get the hole cards from the array depending on game type */
+	/** get the (private) hole cards from the array depending on game type */
 	static String[] getHoleCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
 			case STUD:

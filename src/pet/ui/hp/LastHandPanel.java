@@ -87,10 +87,15 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 					case OM:
 					case FCD:
 					case STUD:
+					case FCSTUD:
+					case OM5:
+					case OM51:
 						type = PokerItem.HIGH;
 						break;
 					case OMHL:
 					case STUDHL:
+					case OM51HL:
+					case OM5HL:
 						type = PokerItem.HILO;
 						break;
 					case DSSD:
@@ -98,6 +103,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 						type = PokerItem.DSLOW;
 						break;
 					case RAZZ:
+					case AFTD:
 						type = PokerItem.AFLOW;
 						break;
 					default:

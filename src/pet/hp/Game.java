@@ -12,31 +12,41 @@ public class Game implements Serializable {
 	/** game type constants */
 	public enum Type {
 		/** five card draw (high) */
-		FCD,
+		FCD("5 Card Draw"),
 		/** hold'em (high) */
-		HE,
+		HE("Hold'em"),
 		/** omaha (high) */
-		OM,
+		OM("Omaha"),
 		/** omaha high/low */
-		OMHL,
+		OMHL("Omaha H/L"),
 		/** deuce to seven triple draw */
-		DSTD,
+		DSTD("2-7 Triple Draw"),
+		/** ace to five triple draw */
+		AFTD("A-5 Triple Draw"),
 		/** deuce to seven single draw */
-		DSSD,
+		DSSD("2-7 Single Draw"),
 		/** razz (a-5 low) */
-		RAZZ,
+		RAZZ("Razz"),
 		/** stud (high) */
-		STUD,
+		STUD("7 Card Stud"),
 		/** stud high/low */
-		STUDHL,
+		STUDHL("7 Card Stud H/L"),
+		/** 5 card stud */
+		FCSTUD("5 Card Stud"),
 		/** stars Courchevel */
-		OM51,
+		OM51("5+1 Card Omaha"),
 		/** stars 5 card omaha */
-		OM5,
+		OM5("5 Card Omaha"),
 		/** stars Courchevel high/lo */
-		OM51HL,
+		OM51HL("5+1 Card Omaha H/L"),
 		/** stars 5 card omaha high/lo */
-		OM5HL,
+		OM5HL("5 Card Omaha H/L"),
+		/** badugi (ugh) */
+		BG("Badugi");
+		public final String desc;
+		private Type(String desc) {
+			this.desc = desc;
+		}
 	}
 	
 	/** limit type constants */
@@ -51,7 +61,18 @@ public class Game implements Serializable {
 	
 	/** mix type constants */
 	public enum Mix {
-		HE_OM_MIX, TRIPSTUD_MIX, EIGHT_MIX, HORSE_MIX;
+		/** holdem/omaha */
+		HO("Mixed HE/OM"), 
+		/** triple stud */
+		TS("Triple Stud"),
+		/** eight game */
+		EG("8-Game"), 
+		/** horse */
+		HORSE("HORSE");
+		public final String desc;
+		private Mix(String desc) {
+			this.desc = desc;
+		}
 	}
 	
 	/** currency type constants (excluding $ and €) */

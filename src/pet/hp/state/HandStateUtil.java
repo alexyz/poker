@@ -149,7 +149,7 @@ public class HandStateUtil {
 			
 			// draws depends on game and street
 			int draws = GameUtil.getDraws(hand.game.type, s);
-			List<String> boardList = Arrays.asList(hs.board);
+			List<String> boardList = hs.board != null ? Arrays.asList(hs.board) : null;
 			// XXX save params here so it can be shown in equity ui page
 			MEquity[] eqs = poker.equity(boardList, holeCards, blockers, draws);
 			for (int n = 0; n < holeCardSeats.size(); n++) {
@@ -200,6 +200,8 @@ public class HandStateUtil {
 					ss.amount += act.amount;
 					int tocall = 0;
 					
+					// actions that involve money
+					// XXX ante/post?
 					switch (act.type) {
 						case BRINGSIN:
 						case BET:

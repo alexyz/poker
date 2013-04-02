@@ -38,13 +38,15 @@ public class FilesPanel extends JPanel {
 	public FilesPanel() {
 		super(new BorderLayout());
 		
-		PSParser psParser = new PSParser(PET.getHistory());
+		PSParser psParser = new PSParser();
+		psParser.setHistory(PET.getHistory());
 		starsPanel.setPath(HistoryUtil.getStarsPath(psParser));
 		FollowThread psThread = new FollowThread(psParser);
 		psThread.start();
 		starsPanel.setThread(psThread);
 		
 		FTParser ftParser = new FTParser();
+		ftParser.setHistory(PET.getHistory());
 		tiltPanel.setPath(HistoryUtil.getTiltPath(ftParser));
 		FollowThread ftThread = new FollowThread(ftParser);
 		ftThread.start();

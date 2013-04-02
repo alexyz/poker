@@ -29,8 +29,9 @@ public class DrawCalcPanel extends CalcPanel {
 		initCardLabels();
 		
 		PokerItem[] items = new PokerItem[] {
-				new PokerItem(PokerItem.HIGH, new DrawPoker(true)),
-				new PokerItem(PokerItem.DSLOW, new DrawPoker(false)),
+				new PokerItem(PokerItem.HIGH, new DrawPoker(Value.hiValue)),
+				new PokerItem(PokerItem.AFLOW, new DrawPoker(Value.afLowValue)),
+				new PokerItem(PokerItem.DSLOW, new DrawPoker(Value.dsLowValue)),
 		};
 		
 		pokerCombo.setModel(new DefaultComboBoxModel<>(items));

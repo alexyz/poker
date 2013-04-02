@@ -68,11 +68,14 @@ public class Seat implements Serializable {
 		}
 	}
 	
-	public void setDrawn(int draw, byte drawn) {
+	/**
+	 * set number of cards drawn, index from 0
+	 */
+	public void setDrawn(int draw, int drawn) {
 		switch (draw) {
-			case 0: drawn0 = drawn; return;
-			case 1: drawn1 = drawn; return;
-			case 2: drawn2 = drawn; return;
+			case 0: drawn0 = (byte) drawn; return;
+			case 1: drawn1 = (byte) drawn; return;
+			case 2: drawn2 = (byte) drawn; return;
 			default: throw new RuntimeException("invalid draw " + draw);
 		}
 	}

@@ -32,13 +32,17 @@ public class HandUtil {
 	
 	/**
 	 * get board for street (index from 0).
+	 * return null if the game doesn't use a board
 	 */
 	public static String[] getStreetBoard(Hand hand, int streetIndex) {
 		switch (hand.game.type) {
 			case FCD:
 			case DSTD:
 			case DSSD:
-				return Poker.emptyBoard;
+			case FCSTUD:
+			case BG:
+			case AFTD:
+				return null;
 			case HE:
 			case OM:
 			case OMHL:
@@ -84,6 +88,8 @@ public class HandUtil {
 					cards[5] = upCards.length > 3 ? upCards[3] : null;
 				}
 				return cards;
+			case FCSTUD:
+				throw new RuntimeException();
 			default:
 				// TODO sort them?
 				return seat.finalHoleCards;

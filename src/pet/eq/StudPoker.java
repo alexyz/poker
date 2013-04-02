@@ -23,7 +23,7 @@ public class StudPoker extends Poker {
 	 */
 	private String[] merge(final String[] board, final String[] holeCards, final boolean create) {
 		// validate
-		if (board.length > 1) {
+		if (board != null && board.length > 1) {
 			throw new RuntimeException("invalid board");
 		}
 		
@@ -31,7 +31,7 @@ public class StudPoker extends Poker {
 			throw new RuntimeException("invalid hand");
 		}
 		
-		if (board.length > 0) {
+		if (board != null && board.length > 0) {
 			// join board and hand
 			final String[] newHoleCards = create ? new String[holeCards.length + 1] : tempHoleCards;
 			for (int n = 0; n < holeCards.length; n++) {

@@ -12,10 +12,10 @@ public abstract class Parser {
 	/** debug output in case of parse error */
 	private final List<String> debuglines = new ArrayList<>();
 	/** where to send parsed data */
-	protected final History history;
+	private History history;
 	
-	public Parser(History history) {
-		this.history = history;
+	public Parser() {
+		//
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public abstract class Parser {
 	public abstract boolean isHistoryFile(String name);
 	
 	/**
-	 * reset state of parser for new file
+	 * reset state of parser for new hand
 	 */
 	public void clear() {
 		debuglines.clear();
@@ -50,6 +50,14 @@ public abstract class Parser {
 	 */
 	public List<String> getDebug() {
 		return debuglines;
+	}
+
+	public History getHistory () {
+		return history;
+	}
+
+	public void setHistory (History history) {
+		this.history = history;
 	}
 	
 }

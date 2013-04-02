@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.*;
 
-import pet.eq.Poker;
-
 /**
  * represents a single hand at a table.
  * No analysis - see HandUtil, HandInfo and HandState.

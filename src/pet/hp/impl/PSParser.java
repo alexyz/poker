@@ -28,11 +28,9 @@ public class PSParser extends Parser2 {
 	protected Game game;
 	/** is in summary phase */
 	protected boolean summaryPhase;
-	/** hand reached showdown */
-	protected boolean showdown;
 	
-	public PSParser(History history) {
-		super(history);
+	public PSParser() {
+		//
 	}
 	
 	@Override
@@ -47,7 +45,6 @@ public class PSParser extends Parser2 {
 	@Override
 	public void clear () {
 		super.clear();
-		showdown = false;
 		summaryPhase = false;
 		game = null;
 	}
@@ -321,14 +318,10 @@ public class PSParser extends Parser2 {
 		}
 		
 		if (theseat == hand.myseat) {
-			switch (hand.game.type) {
-				case FCD:
-				case DSSD:
-				case DSTD:
-					// hole cards can be changed in draw so store them all on
-					// hand
-					hand.addMyDrawCards(cards);
-				default:
+			if (GameUtil.isDraw(hand.game.type)) {
+				// hole cards can be changed in draw so store them all on
+				// hand
+				hand.addMyDrawCards(cards);
 			}
 			theseat.finalHoleCards = checkCards(theseat.finalHoleCards,
 					getHoleCards(hand.game.type, cards));
@@ -451,7 +444,7 @@ public class PSParser extends Parser2 {
 				tourncost = parseMoney(tourncosts, 0);
 			}
 			
-			Tourn t = history.getTourn(tournid, tourncurrency, tournbuyin, tourncost);
+			Tourn t = getHistory().getTourn(tournid, tourncurrency, tournbuyin, tourncost);
 			
 			println("tourn " + t);
 			hand.tourn = t;
@@ -558,7 +551,7 @@ public class PSParser extends Parser2 {
 		println("max " + game.max);
 		
 		// get the definitive game instance
-		game = history.getGame(game);
+		game = getHistory().getGame(game);
 		hand.game = game;
 		println("game " + game);
 		
@@ -660,7 +653,7 @@ public class PSParser extends Parser2 {
 			
 		} else if (name.equals("SHOW DOWN")) {
 			println("showdown");
-			showdown = true;
+			hand.showdown = true;
 			
 		} else if (name.equals("SUMMARY")) {
 			println("summary");
@@ -773,7 +766,6 @@ public class PSParser extends Parser2 {
 					} else {
 						// dead small blind
 						println("dead small blind " + action.amount);
-						hand.db += action.amount;
 						// doesn't count toward player pip
 						anonPip(action.amount);
 					}
@@ -786,7 +778,6 @@ public class PSParser extends Parser2 {
 					
 					// dead small blind doesn't count towards pip (but does
 					// count towards pot)
-					hand.db += hand.sb;
 					anonPip(hand.sb);
 					seatPip(seat, hand.bb);
 					
@@ -802,7 +793,6 @@ public class PSParser extends Parser2 {
 					println("ante " + action.amount);
 					assert_ (action.amount < hand.sb, "ante < sb");
 					
-					hand.db += action.amount;
 					anonPip(action.amount);
 					
 				} else {
@@ -857,7 +847,7 @@ public class PSParser extends Parser2 {
 				throw new RuntimeException("unknown action: " + action.type);
 		}
 		
-		if (showdown) {
+		if (hand.showdown) {
 			// action after show down phase
 			seat.showdown = true;
 		}
@@ -893,14 +883,14 @@ public class PSParser extends Parser2 {
 		switch (mixs) {
 			case "Mixed NLH/PLO":
 			case "Mixed PLH/PLO":
-				return Game.Mix.HE_OM_MIX;
+				return Game.Mix.HO;
 			case "Triple Stud":
-				return Game.Mix.TRIPSTUD_MIX;
+				return Game.Mix.TS;
 				// dashes are removed
 			case "8Game":
-				return Game.Mix.EIGHT_MIX;
+				return Game.Mix.EG;
 			case "HORSE":
-				return Game.Mix.HORSE_MIX;
+				return Game.Mix.HORSE;
 			default:
 				throw new RuntimeException("unknown mix type " + mixs);
 		}
