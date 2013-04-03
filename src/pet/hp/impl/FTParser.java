@@ -1,7 +1,6 @@
 
 package pet.hp.impl;
 
-import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,15 +16,37 @@ import static pet.hp.impl.ParseUtil.*;
  */
 public class FTParser extends Parser2 {
 	
+	/** line endings to ignore */
+	private static String[] endsWithIgnore = {
+		" seconds left to act",
+		" has returned",
+		" has reconnected",
+		" is feeling happy",
+		" is feeling confused",
+		" is feeling normal",
+		" is feeling angry",
+		" has timed out",
+		" is sitting out",
+		" has been disconnected",
+		" has requested TIME",
+		" is dealt 1 card",
+		" is dealt 2 cards",
+		" is dealt 3 cards",
+		" is dealt 4 cards",
+		" is dealt 5 cards",
+		" stands up",
+		" sits down",
+		" has registered late for the tournament and will be dealt in on their big blind"
+	};
+	
 	private final DateFormat df = new SimpleDateFormat("HH:mm:ss zzz - yyyy/MM/dd");
 	
 	/** current line */
 	private String line;
 	/** is in summary phase */
 	protected boolean summaryPhase;
-	/** number of extra players who wander in */
-	private int sitdown = 0;
 	private boolean won;
+	private boolean partial;
 	
 	public FTParser() {
 		//
@@ -36,8 +57,8 @@ public class FTParser extends Parser2 {
 		super.clear();
 		summaryPhase = false;
 		line = null;
-		sitdown = 0;
 		won = false;
+		partial = false;
 	}
 	
 	@Override
@@ -61,7 +82,7 @@ public class FTParser extends Parser2 {
 		println("action str " + actStr);
 		
 		final Action action = new Action(seat);
-		action.type = getAction(actStr);
+		action.type = ParseUtil.parseAction(actStr);
 		
 		switch (action.type) {
 			case ANTE: {
@@ -70,14 +91,11 @@ public class FTParser extends Parser2 {
 				assert_(action.amount < hand.sb, "ante < sb");
 				// doesn't count toward pip
 				anonPip(action.amount);
-				
-				println("ante " + action.amount);
 				break;
 			}
 			
 			case POST: {
 				// Keynell posts a dead small blind of 5
-				
 				// blinds always count toward player pip
 				// TODO except dead blinds...
 				final String sbExp = "posts the small blind of ";
@@ -89,7 +107,6 @@ public class FTParser extends Parser2 {
 					assert_(action.amount == hand.sb, "post sb " + action.amount + " = hand sb " + hand.sb);
 					seat.smallblind = true;
 					seatPip(seat, action.amount);
-					
 					println("post sb " + action.amount);
 					
 				} else if (line.startsWith(bbExp, actIndex)) {
@@ -97,14 +114,12 @@ public class FTParser extends Parser2 {
 					assert_(action.amount == hand.bb, "action bb = hand bb");
 					seat.bigblind = true;
 					seatPip(seat, action.amount);
-					
 					println("post bb " + action.amount);
 					
 				} else if (line.startsWith(dsbExp, actIndex)) {
 					action.amount = parseMoney(line, actIndex + dsbExp.length());
 					assert_(action.amount == hand.sb, "action dsb = hand sb");
 					anonPip(action.amount);
-					
 					println("post dead sb " + action.amount);
 					
 				} else if (line.indexOf(" ", actEndIndex + 1) == -1) {
@@ -113,7 +128,6 @@ public class FTParser extends Parser2 {
 					assert_(action.amount == hand.bb, "inspecific post = bb");
 					seat.bigblind = true;
 					seatPip(seat, action.amount);
-					
 					println("inspecific post " + action.amount);
 					
 				} else {
@@ -126,10 +140,14 @@ public class FTParser extends Parser2 {
 			case CALL:
 			case BET: {
 				// Keynell calls 300
-				action.amount = parseMoney(line, actEndIndex + 1);
+				// doubleupnow completes it to 10
+				String compExp = "completes it to ";
+				if (line.startsWith(compExp, actIndex)) {
+					action.amount = parseMoney(line, actIndex + compExp.length());
+				} else {
+					action.amount = parseMoney(line, actEndIndex + 1);
+				}
 				seatPip(seat, action.amount);
-				
-				println("call/bet " + action.amount);
 				break;
 			}
 			
@@ -142,15 +160,12 @@ public class FTParser extends Parser2 {
 				// have to do inverse when replaying..
 				action.amount = parseMoney(line, actIndex + raiseExp.length()) - seatPip(seat);
 				seatPip(seat, action.amount);
-				
-				println("raise " + action.amount);
 				break;
 			}
 			
 			case FOLD: {
 				// Keynell folds
 				assert_(line.indexOf(" ", actEndIndex) == -1, "fold eol");
-				println("fold");
 				break;
 			}
 			
@@ -162,9 +177,6 @@ public class FTParser extends Parser2 {
 					seat.finalHoleCards = checkCards(seat.finalHoleCards, getHoleCards(hand.game.type, cards));
 					seat.finalUpCards = checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
 					println("show " + Arrays.toString(cards));
-					
-				} else {
-					println("show");
 				}
 				break;
 			}
@@ -187,8 +199,6 @@ public class FTParser extends Parser2 {
 					// assume this means it was a showdown and not just a flash
 					hand.showdown = true;
 				}
-				
-				println("collect " + amount);
 				break;
 			}
 			
@@ -197,8 +207,6 @@ public class FTParser extends Parser2 {
 			case DOESNTSHOW:
 				// x-G-MONEY mucks
 				assert_(line.indexOf(" ", actEndIndex) == -1, "check/muck eol");
-				
-				println("check/muck");
 				break;
 				
 			case DRAW: {
@@ -209,8 +217,7 @@ public class FTParser extends Parser2 {
 				assert_(seat.drawn(draw) == 0, "first draw on street");
 				final int drawn = parseInt(line, actEndIndex + 1);
 				seat.setDrawn(draw, drawn);
-				
-				println("draw " + draw + " drawn " + drawn);
+				println("drawn " + drawn);
 				break;
 			}
 			
@@ -220,11 +227,21 @@ public class FTParser extends Parser2 {
 					// there is no deal so push previous hole cards here
 					hand.addMyDrawCards(seat.finalHoleCards);
 				}
-				
-				println("stands pat");
 				break;
 			}
 			
+			case BRINGSIN: {
+				// obvid0nkkk brings in for 3
+				Pattern p = Pattern.compile(".+ brings in for (\\d)");
+				Matcher m = p.matcher(line);
+				assert_(m.matches(), "brings in");
+				action.amount = parseMoney(m.group(1), 0);
+				seatPip(seat, action.amount);
+				break;
+			}
+			
+			case UNCALL:
+				// handled elsewhere
 			default:
 				fail("missing action " + action.type);
 		}
@@ -320,6 +337,14 @@ public class FTParser extends Parser2 {
 		println("game=" + m.group(FTHandRe.game));
 		println("date1=" + m.group(FTHandRe.date1));
 		println("date2=" + m.group(FTHandRe.date2));
+		println("partial=" + m.group(FTHandRe.partial));
+		
+		if (m.group(FTHandRe.partial) != null) {
+			// don't bother with partial hands, they won't validate
+			println("ignore partial hand");
+			partial = true;
+			return;
+		}
 		
 		hand = new Hand();
 		hand.id = Long.parseLong(m.group(FTHandRe.hid));
@@ -340,8 +365,8 @@ public class FTParser extends Parser2 {
 		game.sb = hand.sb;
 		game.bb = hand.bb;
 		game.ante = hand.ante;
-		game.limit = getLimitType(m.group(FTHandRe.lim));
-		game.type = getGameType(m.group(FTHandRe.game));
+		game.limit = parseLimit(m.group(FTHandRe.lim));
+		game.type = parseGame(m.group(FTHandRe.game));
 		final String tabletype = m.group(FTHandRe.tabletype);
 		if (tabletype != null && tabletype.contains("heads up")) {
 			game.max = 2;
@@ -397,11 +422,17 @@ public class FTParser extends Parser2 {
 		String name;
 		
 		if (line.length() == 0) {
-			if (summaryPhase && hand != null) {
+			if (partial) {
+				clear();
+				
+			} else if (summaryPhase && hand != null) {
 				println("end of hand");
 				finish();
 				return true;
 			}
+			
+		} else if (partial) {
+			println("ignore partial");
 			
 		} else if (line.startsWith("Full Tilt Poker Game")) {
 			parseHand();
@@ -420,72 +451,32 @@ public class FTParser extends Parser2 {
 			parseBoard();
 			
 		} else if (line.startsWith("*** ")) {
-			println("phase");
 			parsePhase();
 			
 		} else if (line.startsWith("Dealt to ")) {
-			println("dealt");
 			parseDeal();
 			
 		} else if (line.startsWith("The button is in seat #")) {
-			println("button");
-			final Matcher m = Pattern.compile("The button is in seat #(\\d)").matcher(line);
-			assert_ (m.matches(), "button pattern");
-			final int but = Integer.parseInt(m.group(1));
-			hand.button = (byte) but;
+			parseButton(line);
 			
-		} else if (line.matches(".+: .+")) {
-			println("talk");
+		} else if (line.equals("No low hand qualified")) {
+			println("no low");
+			hand.showdownNoLow = true;
+			
+		} else if (line.indexOf(": ") > 0) {
 			// following checks assume no talk, i.e. use endsWith
 			
-		} else if (line.endsWith(" seconds left to act")) {
-			println("left");
+		} else if (endsWith(endsWithIgnore, line)) {
+			println("ignore");
 			
-		} else if (line.endsWith(" has returned")) {
-			println("return");	
-			
-		} else if (line.endsWith(" has reconnected")) {
-			println("reconn");
-			
-		} else if (line.endsWith(" is feeling happy")) {
-			println("happy");
-			
-		} else if (line.endsWith(" is feeling confused")) {
-			println("conf");
-			
-		} else if (line.endsWith(" is feeling normal")) {
-			println("normal");
-			
-		} else if (line.endsWith(" is feeling angry")) {
-			println("angry");
-			
-		} else if (line.endsWith(" has timed out")) {
-			println("timeout");
-			
-		} else if (line.endsWith(" stands up")) {
-			println("stands up");
-			sitdown--;
-			
-		} else if (line.endsWith(" is sitting out")) {
-			println("sit out");
-			
-		} else if (line.endsWith(" has been disconnected")) {
-			println("dis");
-			
-		} else if (line.endsWith(" has requested TIME")) {
-			println("time");
-			
-		} else if (line.endsWith(" sits down")) {
-			// unrecognised name sits down
-			println("sit down");
-			sitdown++;
-			assert_(seatsMap.size() + sitdown <= hand.game.max, "sit down seats < max");
-			
-		} else if (line.matches(".+ is dealt \\d cards?")) {
-			println("dealt card(s)");
-			
-		} else if (line.matches(".+ adds .+")) {
+		} else if (line.indexOf(" adds ") > 0) {
 			println("adds");
+			
+		} else if (line.indexOf(" is low with ") > 0) {
+			println("low");
+			
+		} else if (line.indexOf(" is high with ") > 0) {
+			println("high");
 			
 		} else if ((name = parseName(seatsMap, line, 0)) != null) {
 			parseAction(name);
@@ -495,6 +486,14 @@ public class FTParser extends Parser2 {
 		}
 		
 		return false;
+	}
+
+	private void parseButton (String line) {
+		println("button");
+		final Matcher m = Pattern.compile("The button is in seat #(\\d)").matcher(line);
+		assert_ (m.matches(), "button pattern");
+		final int but = Integer.parseInt(m.group(1));
+		hand.button = (byte) but;
 	}
 	
 	private void parsePhase () {
@@ -518,23 +517,34 @@ public class FTParser extends Parser2 {
 			case "FIRST DRAW":
 			case "SECOND DRAW":
 			case "THIRD DRAW":
+			case "4TH STREET":
+			case "5TH STREET":
+			case "6TH STREET":
+			case "7TH STREET":
 				println("new street " + name);
 				pip();
 				newStreet();
 				println("new street index " + currentStreetIndex());
 				break;
+				
 			case "SHOW DOWN":
+				// note there may not be a show down phase even if there is a showdown
 				hand.showdown = true;
+				break;
+				
+			case "3RD STREET":
 			case "HOLE CARDS":
 			case "PRE-FLOP":
 				println("ignore street " + name);
 				break;
+				
 			case "SUMMARY":
 				println("summary");
 				// pip in case there is only one street
 				pip();
 				summaryPhase = true;
 				break;
+				
 			default:
 				fail("unknown phase: " + name);
 		}

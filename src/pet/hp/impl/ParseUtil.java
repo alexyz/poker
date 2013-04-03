@@ -181,7 +181,7 @@ public class ParseUtil {
 		}
 	}
 	
-	static Game.Limit getLimitType (String limits) {
+	static Game.Limit parseLimit (String limits) {
 		switch (limits) {
 			case "Pot Limit":
 				return Game.Limit.PL;
@@ -194,10 +194,11 @@ public class ParseUtil {
 		}
 	}
 	
-	static Game.Type getGameType (String gameStr) {
+	static Game.Type parseGame (String gameStr) {
 		switch (gameStr) {
 			case "Hold'em":
 				return Game.Type.HE;
+			case "Omaha H/L":
 			case "Omaha Hi/Lo":
 				return Game.Type.OMHL;
 			case "Omaha":
@@ -211,6 +212,7 @@ public class ParseUtil {
 			case "Razz":
 				return Game.Type.RAZZ;
 			case "7 Card Stud":
+			case "Stud Hi":
 				return Game.Type.STUD;
 			case "7 Card Stud Hi/Lo":
 			case "Stud H/L":
@@ -236,7 +238,7 @@ public class ParseUtil {
 	}
 	
 	/** map stars terms to action constants */
-	static Action.Type getAction(String act) {
+	static Action.Type parseAction(String act) {
 		switch (act) {
 			case "checks": return Action.Type.CHECK;
 			case "ties":
@@ -245,6 +247,7 @@ public class ParseUtil {
 			case "mucks": return Action.Type.MUCK;
 			case "doesn't": return Action.Type.DOESNTSHOW;
 			case "bets": return Action.Type.BET;
+			case "completes":
 			case "calls": return Action.Type.CALL;
 			case "raises": return Action.Type.RAISE;
 			case "antes": return Action.Type.ANTE;
@@ -333,6 +336,18 @@ public class ParseUtil {
 			throw new RuntimeException("old: " + Arrays.toString(oldCards) + " new: " + Arrays.toString(cards));
 		}
 		return cards;
+	}
+	
+	/**
+	 * return true if line ends with something in the array
+	 */
+	static boolean endsWith(String[] endsWith, String line) {
+		for (String s : endsWith) {
+			if (line.endsWith(s)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private ParseUtil() {

@@ -69,7 +69,7 @@ public class HandUtil {
 		switch (gametype) {
 			case STUD:
 			case STUDHL:
-			case RAZZ:
+			case RAZZ: {
 				String[] holeCards = seat.finalHoleCards;
 				String[] upCards = seat.finalUpCards;
 				if (holeCards == null && upCards == null) {
@@ -88,11 +88,25 @@ public class HandUtil {
 					cards[5] = upCards.length > 3 ? upCards[3] : null;
 				}
 				return cards;
-			case FCSTUD:
-				throw new RuntimeException();
-			default:
+			}
+			
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
 				// TODO sort them?
 				return seat.finalHoleCards;
+				
+			default:
+				throw new RuntimeException();
 		}
 	}
 	

@@ -12,7 +12,8 @@ final class FTHandRe {
 	static final int game = 10;
 	static final int date1 = 11;
 	static final int date2 = 12;
-	static final String s = 
+	static final int partial = 13;
+	static final String re = 
 			// Full Tilt Poker Game #31364220549:
 			"Full Tilt Poker Game #(\\d+):"
 			// 2,000 Play Money Sit & Go (243729666),
@@ -28,6 +29,8 @@ final class FTHandRe {
 			// 20:01:13 UTC - 2012/11/05
 			+ " - (\\d+:\\d+:\\d+ \\w+ - \\d+/\\d+/\\d+)"
 			// [02:07:17 ET - 2012/11/10]
-			+ "(?: \\[(\\d+:\\d+:\\d+ \\w+ - \\d+/\\d+/\\d+)\\])?";
-	static final Pattern pattern = Pattern.compile(s);
+			+ "(?: \\[(\\d+:\\d+:\\d+ \\w+ - \\d+/\\d+/\\d+)\\])?"
+			//  (partial)
+			+ "( \\(partial\\))?";
+	static final Pattern pattern = Pattern.compile(re);
 }

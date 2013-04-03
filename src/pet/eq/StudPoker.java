@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
- * stud and razz poker calculations
+ * 7 card stud and razz poker calculations
  */
 public class StudPoker extends Poker {
 	

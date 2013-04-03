@@ -60,10 +60,10 @@ public class Hand implements Serializable {
 	public String[] myDrawCards0, myDrawCards1, myDrawCards2, myDrawCards3;
 	/** name of table */
 	public String tablename;
-	/** button seat number */
+	/** button seat number. note that stud games do not have a button */
 	public byte button;
-	/** the street index the deck was reshuffled on (default 99, i.e. never reshuffled) */
-	public byte reshuffleStreetIndex = 99;
+	/** the street index the deck was reshuffled on (default max, i.e. never reshuffled) */
+	public byte reshuffleStreetIndex = Byte.MAX_VALUE;
 	
 	public Hand() {
 		//

@@ -111,21 +111,32 @@ public abstract class Parser2 extends Parser {
 					case POST:
 						assert_(a.amount > 0, "am > 0");
 						break;
-					
+						
 					case COLLECT:
 					case UNCALL:
 						assert_(a.amount < 0, "am < 0");
 						break;
-					
-					default:
+						
+					case DRAW:
+					case CHECK:
+					case DOESNTSHOW:
+					case SHOW:
+					case STANDPAT:
+					case MUCK:
+					case FOLD:
 						assert_(a.amount == 0, "am = 0");
+						break;
+						
+					default:
+						throw new RuntimeException();
 				}
-				
 			}
 		}
 	}
 	
 	private void validateSeats () {
+		// can't check bb or sb as there may be 0-many
+		assert_(seatsMap.size() <= hand.game.max, "seats < max");
 		int s = 0;
 		for (Seat seat : seatsMap.values()) {
 			assert_(seat.pip <= seat.chips, "chips");
@@ -152,8 +163,12 @@ public abstract class Parser2 extends Parser {
 	
 	private void validateHand () {
 		assert_(hand.date != 0, "has date");
-		assert_(hand.button != 0, "has button");
 		assert_(hand.game != null, "has game");
+		if (GameUtil.isStud(hand.game.type)) {
+			assert_(hand.button == 0, "no button");
+		} else {
+			assert_(hand.button != 0, "has button");
+		}
 		assert_(hand.id != 0, "has id");
 		assert_(hand.myseat != null, "has my seat");
 		if (hand.showdown) {
@@ -166,13 +181,10 @@ public abstract class Parser2 extends Parser {
 		}
 		if (GameUtil.isDraw(hand.game.type)) {
 			int d = GameUtil.getHoleCards(hand.game.type);
-			for (int n = 0; n < 3; n++) {
+			assert_(hand.myDrawCards0.length == d, "draw0");
+			for (int n = 1; n < 3; n++) {
 				String[] c = hand.myDrawCards(n);
-				if (n == 0) {
-					assert_(c.length == d, "draw: " + Arrays.toString(c));
-				} else {
-					assert_(c == null || c.length == d, "draw: " + Arrays.toString(c));
-				}
+				assert_(c == null || c.length == d, "draw: " + Arrays.toString(c));
 			}
 		}
 	}
@@ -232,7 +244,7 @@ public abstract class Parser2 extends Parser {
 		seatPip[seat.num] += amount;
 	}
 	
-	protected void validatePot () {
+	private void validatePot () {
 		println("hand pot=" + hand.pot + " rake=" + hand.rake + " antes=" + hand.db);
 		// validate pot size
 		assert_(hand.pot == pot, "total pot " + hand.pot + " equal to running pot " + pot);

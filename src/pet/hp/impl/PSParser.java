@@ -457,10 +457,10 @@ public class PSParser extends Parser2 {
 		}
 		
 		String gameStr = m.group(PSHandRE.game);
-		game.type = getGameType(gameStr);
+		game.type = parseGame(gameStr);
 		
 		String limits = m.group(PSHandRE.limit);
-		game.limit = getLimitType(limits);
+		game.limit = parseLimit(limits);
 		
 		String round = m.group(PSHandRE.tround);
 		if (round != null) {
@@ -678,7 +678,7 @@ public class PSParser extends Parser2 {
 		int actEnd = skipToken(line, actStart);
 		Action action = new Action(seat);
 		String actString = line.substring(actStart, actEnd);
-		Action.Type actByte = getAction(actString);
+		Action.Type actByte = ParseUtil.parseAction(actString);
 		action.type = actByte;
 		boolean drawAct = false;
 		

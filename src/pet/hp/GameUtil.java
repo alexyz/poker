@@ -21,9 +21,12 @@ public class GameUtil {
 	private static final StudPoker studPoker = new StudPoker(Value.hiValue, false);
 	private static final StudPoker studHLPoker = new StudPoker(Value.hiValue, true);
 	private static final StudPoker razzPoker = new StudPoker(Value.afLowValue, false);
+	private static final BadugiPoker badugiPoker = new BadugiPoker();
+	private static final FiveCardStudPoker fiveCardStudPoker = new FiveCardStudPoker();
+	
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre-draw", "Post-draw" };
-	private static final String[] tripdrawstreetnames = { "Pre-draw", "Post-draw 1", "Post-draw 2", "Post-draw 3" };
+	private static final String[] tripdrawstreetnames = { "Pre-draw", "Post-draw 1", "Post-draw 2", "River" };
 	private static final String[] studstreetnames = { "3rd Street", "4th Street", "5th Street", "6th Street", "River" };
 	private static final String[] fcstudstreetnames = { "2nd Street", "3rd Street", "4th Street", "River" };
 	
@@ -85,7 +88,7 @@ public class GameUtil {
 		return sb.toString();
 	}
 	
-	/** return the number of hole cards for this game */
+	/** return the number of hole cards for this game (including up cards) */
 	public static int getHoleCards(Game.Type gametype) {
 		switch (gametype) {
 			case HE:
@@ -226,6 +229,10 @@ public class GameUtil {
 				return razzPoker;
 			case STUDHL:
 				return studHLPoker;
+			case BG:
+				return badugiPoker;
+			case FCSTUD:
+				return fiveCardStudPoker;
 			default:
 				throw new RuntimeException("no poker for game " + gameType);
 		}
@@ -242,8 +249,22 @@ public class GameUtil {
 			case RAZZ:
 			case AFTD:
 				return Poker.afLowRankNames;
-			default:
+			case FCD:
+			case HE:
+			case OM:
+			case STUDHL:
+			case OM51:
+			case OM51HL:
+			case OMHL:
+			case STUD:
+			case OM5HL:
+			case OM5:
+			case FCSTUD:
 				return Poker.ranknames;
+			case BG:
+				return BadugiPoker.shortRanks;
+			default:
+				throw new RuntimeException();
 		}
 	}
 	
@@ -271,6 +292,34 @@ public class GameUtil {
 	 */
 	public static boolean isDraw(Game.Type gameType) {
 		return getDraws(gameType, 0) > 0;
+	}
+	
+	/**
+	 * return true if stud like game
+	 */
+	public static boolean isStud(Game.Type gameType) {
+		switch (gameType) {
+			case FCSTUD:
+			case RAZZ:
+			case STUD:
+			case STUDHL:
+				return true;
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
+				return false;
+			default:
+				throw new RuntimeException();
+		}
 	}
 	
 	public static boolean isHilo(Game.Type gameType) {
