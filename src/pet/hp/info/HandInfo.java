@@ -32,10 +32,10 @@ public class HandInfo {
 		this.hand = hand;
 	}
 	
-	public HoleCards hole() {
+	public HoleCards mydowncards() {
 		if (hole == null) {
 			// hole cards for my seat should never be null
-			String[] cards = hand.myseat.finalHoleCards;
+			String[] cards = hand.myseat.downCards;
 			if (cards.length == 3) {
 				// just show first two for stud
 				cards = Arrays.copyOf(cards, 2);

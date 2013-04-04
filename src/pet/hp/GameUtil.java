@@ -26,7 +26,7 @@ public class GameUtil {
 	
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre-draw", "Post-draw" };
-	private static final String[] tripdrawstreetnames = { "Pre-draw", "Post-draw 1", "Post-draw 2", "River" };
+	private static final String[] tripdrawstreetnames = { "Pre-draw", "Post-draw 1", "Post-draw 2", "Post-draw 3" };
 	private static final String[] studstreetnames = { "3rd Street", "4th Street", "5th Street", "6th Street", "River" };
 	private static final String[] fcstudstreetnames = { "2nd Street", "3rd Street", "4th Street", "River" };
 	
@@ -116,6 +116,36 @@ public class GameUtil {
 		}
 	}
 	
+	/**
+	 * get the max number of up cards for the game
+	 */
+	public static int getUpCards(Game.Type gametype) {
+		switch (gametype) {
+			case HE:
+			case OM:
+			case OMHL:
+			case BG:
+			case FCD:
+			case DSTD:
+			case DSSD:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case AFTD:
+				return 0;
+				
+			case FCSTUD:
+			case STUD:
+			case RAZZ:
+			case STUDHL:
+				return 4;
+				
+			default: 
+				throw new RuntimeException();
+		}
+	}
+	
 	/** return the minimum number of hole cards required for an equity calculation for this game */
 	public static int getMinHoleCards(Game.Type gametype) {
 		// should probably get this from poker instance
@@ -127,7 +157,7 @@ public class GameUtil {
 			case OM5HL:
 			case OM51HL:
 				return 2;
-				//$CASES-OMITTED$
+				
 			default: 
 				return 1;
 		}
@@ -174,11 +204,11 @@ public class GameUtil {
 	
 	/** return true if this street is the showdown street for the given game type */
 	public static boolean isShowdown (Game.Type gametype, int streetIndex) {
-		return streetIndex == getStreetNames(gametype).length - 1;
+		return streetIndex == getStreets(gametype) - 1;
 	}
 	
 	/** return the maximum number of streets in this game type */
-	public static int getMaxStreets (Game.Type gametype) {
+	public static int getStreets (Game.Type gametype) {
 		return getStreetNames(gametype).length;
 	}
 	
@@ -192,7 +222,6 @@ public class GameUtil {
 		switch (currency) {
 			case '$':
 			case '€':
-				// TODO $2 instead of $2.00
 				return String.format("%c%.2f", currency, amount / 100f);
 			case Game.TOURN_CURRENCY:
 			case Game.PLAY_CURRENCY:
@@ -273,17 +302,67 @@ public class GameUtil {
 	 */
 	public static int getDraws(Game.Type gameType, int streetIndex) {
 		switch (gameType) {
+			case FCSTUD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
+			case RAZZ:
+			case STUD:
+			case STUDHL: 
+				return 0;
+				
 			case FCD:
 			case DSSD:
 				// 1, 0 draws
 				return 1 - streetIndex;
+				
 			case BG:
 			case DSTD:
 			case AFTD:
 				// 3, 2, 1, 0 draws
-				return 3 - streetIndex; 
+				return 3 - streetIndex;
+				
 			default:
+				throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * get the number of up cards that are displayed on the street (index from
+	 * 0) for the game type
+	 */
+	public static int getUpCards(Game.Type gameType, int streetIndex) {
+		switch (gameType) {
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
 				return 0;
+				
+			case FCSTUD:
+				// 0:1, 1:2, 2:3, 3:4
+				return streetIndex + 1;
+				
+			case RAZZ:
+			case STUD:
+			case STUDHL:
+				// 0:1, 1:2, 2:3, 3:4, 4:4
+				return Math.min(streetIndex + 1, 4);
+				
+			default:
+				throw new RuntimeException();
 		}
 	}
 	
@@ -295,15 +374,10 @@ public class GameUtil {
 	}
 	
 	/**
-	 * return true if stud like game
+	 * return true if stud like game - i.e. has up cards
 	 */
 	public static boolean isStud(Game.Type gameType) {
 		switch (gameType) {
-			case FCSTUD:
-			case RAZZ:
-			case STUD:
-			case STUDHL:
-				return true;
 			case AFTD:
 			case BG:
 			case DSSD:
@@ -317,20 +391,45 @@ public class GameUtil {
 			case OM5HL:
 			case OMHL:
 				return false;
+				
+			case FCSTUD:
+			case RAZZ:
+			case STUD:
+			case STUDHL:
+				return true;
+				
 			default:
 				throw new RuntimeException();
 		}
 	}
 	
+	/**
+	 * return true if game is high/low split
+	 */
 	public static boolean isHilo(Game.Type gameType) {
 		switch (gameType) {
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case FCSTUD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case RAZZ:
+			case STUD:
+				return false;
+				
 			case OM51HL:
 			case OM5HL:
 			case OMHL:
 			case STUDHL:
 				return true;
+				
 			default:
-				return false;
+				throw new RuntimeException();
 		}
 	}
 }

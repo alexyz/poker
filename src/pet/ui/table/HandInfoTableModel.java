@@ -23,7 +23,7 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 		cols.add(new MyColumn<HandInfo>(HoleCards.class, "MyHole", "Final hole cards") {
 			@Override
 			public HoleCards getValue(HandInfo o) {
-				return o.hole();
+				return o.mydowncards();
 			}
 			@Override
 			public Font getFont (HandInfo row) {

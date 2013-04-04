@@ -70,8 +70,8 @@ public class HandUtil {
 			case STUD:
 			case STUDHL:
 			case RAZZ: {
-				String[] holeCards = seat.finalHoleCards;
-				String[] upCards = seat.finalUpCards;
+				String[] holeCards = seat.downCards;
+				String[] upCards = seat.upCards;
 				if (holeCards == null && upCards == null) {
 					return null;
 				}
@@ -103,7 +103,7 @@ public class HandUtil {
 			case OM5HL:
 			case OMHL:
 				// TODO sort them?
-				return seat.finalHoleCards;
+				return seat.downCards;
 				
 			default:
 				throw new RuntimeException();

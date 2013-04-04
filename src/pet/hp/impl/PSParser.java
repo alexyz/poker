@@ -323,14 +323,14 @@ public class PSParser extends Parser2 {
 				// hand
 				hand.addMyDrawCards(cards);
 			}
-			theseat.finalHoleCards = checkCards(theseat.finalHoleCards,
-					getHoleCards(hand.game.type, cards));
-			theseat.finalUpCards = checkCards(theseat.finalUpCards,
+			theseat.downCards = checkCards(theseat.downCards,
+					getDownCards(hand.game.type, cards));
+			theseat.upCards = checkCards(theseat.upCards,
 					getUpCards(hand.game.type, cards));
 			
 		} else {
 			// not us, all cards are up cards
-			theseat.finalUpCards = checkCards(theseat.finalUpCards, cards);
+			theseat.upCards = checkCards(theseat.upCards, cards);
 		}
 		
 	}
@@ -357,9 +357,9 @@ public class PSParser extends Parser2 {
 				for (Seat seat : seatsMap.values()) {
 					if (seat.num == seatno) {
 						// get the hole cards and up cards
-						seat.finalHoleCards = checkCards(seat.finalHoleCards,
-								getHoleCards(hand.game.type, cards));
-						seat.finalUpCards = checkCards(seat.finalUpCards,
+						seat.downCards = checkCards(seat.downCards,
+								getDownCards(hand.game.type, cards));
+						seat.upCards = checkCards(seat.upCards,
 								getUpCards(hand.game.type, cards));
 					}
 				}
@@ -698,9 +698,9 @@ public class PSParser extends Parser2 {
 				int handStart = line.indexOf("[", actEnd);
 				if (handStart > 0) {
 					String[] cards = parseCards(line, handStart);
-					seat.finalHoleCards = checkCards(seat.finalHoleCards,
-							getHoleCards(hand.game.type, cards));
-					seat.finalUpCards = checkCards(seat.finalUpCards,
+					seat.downCards = checkCards(seat.downCards,
+							getDownCards(hand.game.type, cards));
+					seat.upCards = checkCards(seat.upCards,
 							getUpCards(hand.game.type, cards));
 				}
 				break;
@@ -807,10 +807,10 @@ public class PSParser extends Parser2 {
 				// tudy31: shows [7d Ad 4d Kd 8h Jh 3d] (Lo: 8,7,4,3,A)
 				int handStart = nextToken(line, actEnd);
 				String[] cards = parseCards(line, handStart);
-				seat.finalHoleCards = checkCards(seat.finalHoleCards,
-						getHoleCards(hand.game.type, cards));
-				seat.finalUpCards = ParseUtil
-						.checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
+				seat.downCards = checkCards(seat.downCards,
+						getDownCards(hand.game.type, cards));
+				seat.upCards = ParseUtil
+						.checkCards(seat.upCards, getUpCards(hand.game.type, cards));
 				break;
 			}
 			
@@ -836,7 +836,7 @@ public class PSParser extends Parser2 {
 				// stands pat
 				if (hand.myseat == seat) {
 					// there is no deal so push previous hole cards here
-					hand.addMyDrawCards(seat.finalHoleCards);
+					hand.addMyDrawCards(seat.downCards);
 				}
 				drawAct = true;
 				println("stands");

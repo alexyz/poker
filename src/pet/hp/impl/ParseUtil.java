@@ -297,7 +297,7 @@ public class ParseUtil {
 	}
 	
 	/** get the (private) hole cards from the array depending on game type */
-	static String[] getHoleCards(final Game.Type gametype, final String[] cards) {
+	static String[] getDownCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
 			case STUD:
 			case STUDHL:
@@ -315,7 +315,10 @@ public class ParseUtil {
 		}
 	}
 	
-	/** get the up cards from the array depending on the game type */
+	/**
+	 * get the up cards from the array depending on the game type. return null
+	 * if there are no up cards
+	 */
 	static String[] getUpCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
 			case STUD:

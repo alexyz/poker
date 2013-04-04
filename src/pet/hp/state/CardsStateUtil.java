@@ -29,7 +29,7 @@ public class CardsStateUtil {
 	 * Get cards player had on this street
 	 */
 	public static CardsState getCards(final Hand hand, final Seat seat, final int streetIndex, String[] blockers) {
-		if (seat.finalHoleCards == null && seat.finalUpCards == null) {
+		if (seat.downCards == null && seat.upCards == null) {
 			// nothing to base return value on
 			// note that only stud has up cards and the hole cards could be null
 			return null;
@@ -55,9 +55,9 @@ public class CardsStateUtil {
 				
 			case DSTD:
 			case DSSD:
-				if (streetIndex == GameUtil.getMaxStreets(hand.game.type) - 1) {
+				if (streetIndex == GameUtil.getStreets(hand.game.type) - 1) {
 					// on final street just return final hand from seat
-					cs = new CardsState(seat.finalHoleCards.clone(), null, false, null);
+					cs = new CardsState(seat.downCards.clone(), null, false, null);
 					
 				} else if (hand.myseat == seat) {
 					// get current player cards but also see which ones were kept
@@ -69,7 +69,7 @@ public class CardsStateUtil {
 					
 					String[] y = hand.myDrawCards(streetIndex + 1);
 					if (y == null) {
-						y = hand.myseat.finalHoleCards;
+						y = hand.myseat.downCards;
 					}
 					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
 					
@@ -85,7 +85,7 @@ public class CardsStateUtil {
 					// guess opponents hole cards based on final hand
 					final ArrayList<DrawPoker.Draw> l = new ArrayList<>();
 					final int drawn = seat.drawn(streetIndex);
-					String[] h = DrawPoker.getDrawingHand(l, seat.finalHoleCards, drawn, high, blockers);
+					String[] h = DrawPoker.getDrawingHand(l, seat.downCards, drawn, high, blockers);
 					cs = new CardsState(h, null, true, l);
 				}
 				break;
@@ -97,7 +97,7 @@ public class CardsStateUtil {
 			case OM51:
 			case OM5HL:
 			case OM51HL:
-				cs = new CardsState(seat.finalHoleCards, null, false, null);
+				cs = new CardsState(seat.downCards, null, false, null);
 				break;
 				
 			default:

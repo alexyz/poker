@@ -36,7 +36,8 @@ public class FTParser extends Parser2 {
 		" is dealt 5 cards",
 		" stands up",
 		" sits down",
-		" has registered late for the tournament and will be dealt in on their big blind"
+		" has registered late for the tournament and will be dealt in on their big blind",
+		" seconds to reconnect"
 	};
 	
 	private final DateFormat df = new SimpleDateFormat("HH:mm:ss zzz - yyyy/MM/dd");
@@ -104,31 +105,28 @@ public class FTParser extends Parser2 {
 				
 				if (line.startsWith(sbExp, actIndex)) {
 					action.amount = parseMoney(line, actIndex + sbExp.length());
-					assert_(action.amount == hand.sb, "post sb " + action.amount + " = hand sb " + hand.sb);
 					seat.smallblind = true;
 					seatPip(seat, action.amount);
-					println("post sb " + action.amount);
+					println("post sb");
 					
 				} else if (line.startsWith(bbExp, actIndex)) {
 					action.amount = parseMoney(line, actIndex + bbExp.length());
-					assert_(action.amount == hand.bb, "action bb = hand bb");
 					seat.bigblind = true;
 					seatPip(seat, action.amount);
-					println("post bb " + action.amount);
+					println("post bb");
 					
 				} else if (line.startsWith(dsbExp, actIndex)) {
 					action.amount = parseMoney(line, actIndex + dsbExp.length());
-					assert_(action.amount == hand.sb, "action dsb = hand sb");
 					anonPip(action.amount);
-					println("post dead sb " + action.amount);
+					println("post dead sb");
 					
 				} else if (line.indexOf(" ", actEndIndex + 1) == -1) {
 					// Keynell posts 10
+					// doesn't say what it's for, so guess bb
 					action.amount = parseMoney(line, actEndIndex + 1);
-					assert_(action.amount == hand.bb, "inspecific post = bb");
 					seat.bigblind = true;
 					seatPip(seat, action.amount);
-					println("inspecific post " + action.amount);
+					println("post bb2");
 					
 				} else {
 					fail("unknown post");
@@ -172,10 +170,12 @@ public class FTParser extends Parser2 {
 			case SHOW: {
 				// bombermango shows [Ah Ad]
 				// bombermango shows two pair, Aces and Sevens
+				// Allante_93 shows [5c 8c 9s 7s Ah Ks 8h] 98,75,A
 				if (line.indexOf("[", actEndIndex + 1) > 0) {
 					final String[] cards = parseCards(line, actEndIndex + 1);
-					seat.finalHoleCards = checkCards(seat.finalHoleCards, getHoleCards(hand.game.type, cards));
-					seat.finalUpCards = checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
+					seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+					seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+					println("show upcards: " + Arrays.toString(seat.upCards));
 					println("show " + Arrays.toString(cards));
 				}
 				break;
@@ -225,14 +225,14 @@ public class FTParser extends Parser2 {
 				// safrans stands pat
 				if (hand.myseat == seat) {
 					// there is no deal so push previous hole cards here
-					hand.addMyDrawCards(seat.finalHoleCards);
+					hand.addMyDrawCards(seat.downCards);
 				}
 				break;
 			}
 			
 			case BRINGSIN: {
 				// obvid0nkkk brings in for 3
-				Pattern p = Pattern.compile(".+ brings in for (\\d)");
+				Pattern p = Pattern.compile(".+ brings in for (\\d+)");
 				Matcher m = p.matcher(line);
 				assert_(m.matches(), "brings in");
 				action.amount = parseMoney(m.group(1), 0);
@@ -279,13 +279,15 @@ public class FTParser extends Parser2 {
 		// Dealt to Keynell [Qs 3s] [5s]
 		// after draw: [kept] [received]
 		// Dealt to Keynell [2h 4c] [Qs Kd Kh]
+		// if someone is all in
+		// Dealt to Allante_93 [5c 8c 9s 7s Ah Ks] [8h]
 		
 		// get seat
 		// have to skip over name which could be anything
 		final String prefix = "Dealt to ";
 		final String name = parseName(seatsMap, line, prefix.length());
 		final int cardsStart = line.indexOf("[", prefix.length() + name.length());
-		final Seat theseat = seatsMap.get(name);
+		final Seat seat = seatsMap.get(name);
 		
 		// get cards and cards 2
 		String[] cards = parseCards(line, cardsStart);
@@ -298,21 +300,37 @@ public class FTParser extends Parser2 {
 		// get current player seat - always has more than 1 initial hole card
 		if (hand.myseat == null && cards.length > 1) {
 			println("this is my seat");
-			hand.myseat = theseat;
+			hand.myseat = seat;
 		}
 		
-		if (theseat == hand.myseat) {
+		if (seat == hand.myseat) {
 			if (GameUtil.isDraw(hand.game.type)) {
 				// hole cards can be changed in draw so store them all on
 				// hand
 				hand.addMyDrawCards(cards);
 			}
-			theseat.finalHoleCards = checkCards(theseat.finalHoleCards, getHoleCards(hand.game.type, cards));
-			theseat.finalUpCards = checkCards(theseat.finalUpCards, getUpCards(hand.game.type, cards));
+			seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+			seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+			println("deal upcards 1: " + Arrays.toString(seat.upCards));
 			
 		} else {
-			// not us, all cards are up cards
-			theseat.finalUpCards = checkCards(theseat.finalUpCards, cards);
+			// not us, all cards are up cards, unless the player has shown their hand before showdown
+			int uc = GameUtil.getUpCards(hand.game.type, currentStreetIndex());
+			
+			if (cards.length == uc) {
+				// only up cards
+				seat.upCards = checkCards(seat.upCards, cards);
+				println("deal upcards 2: " + Arrays.toString(seat.upCards));
+				
+			} else if (cards.length > uc) {
+				// mixed
+				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+				println("deal upcards 3: " + Arrays.toString(seat.upCards));
+				
+			} else {
+				fail("not enough cards");
+			}
 		}
 		
 	}
@@ -463,6 +481,9 @@ public class FTParser extends Parser2 {
 			println("no low");
 			hand.showdownNoLow = true;
 			
+		} else if (line.equals("Time has expired")) {
+			//
+			
 		} else if (line.indexOf(": ") > 0) {
 			// following checks assume no talk, i.e. use endsWith
 			
@@ -541,6 +562,7 @@ public class FTParser extends Parser2 {
 			case "SUMMARY":
 				println("summary");
 				// pip in case there is only one street
+				// though the street may not actually be over if there is a missing uncall/collect
 				pip();
 				summaryPhase = true;
 				break;
@@ -553,55 +575,105 @@ public class FTParser extends Parser2 {
 	
 	private void parseSeat () {
 		if (summaryPhase) {
-			String nameExp = "(.+?)(?: \\(.+?\\))?";
-			// Seat 4: CougarMD showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
-			// Seat 6: Keynell showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
-			String winExp = "Seat (\\d): " + nameExp + " showed (\\[.+?\\]) and won \\((.+?)\\) with .+";
+			// Seat 4: CougarMD                showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
+			// Seat 6: Keynell                 showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
 			// Seat 3: Srta_Arruez (big blind) showed [Ah Tc 9s 6h 4c] and lost with Ace Ten high
-			String loseExp = "Seat (\\d): " + nameExp + " showed (.+?) and lost with .+";
-			// Seat 3: redcar 55 (big blind) mucked [Ad 9h 4c 3c 2h] - A,9,4,3,2
-			// Seat 1: Cherry65 (big blind) mucked [Td 7c 5c 4s 2d] - T,7,5,4,2
-			// Seat 6: Keynell (big blind) mucked [Kh Ks 6c 6d 5c] - two pair, Kings and Sixes
+			// Seat 3: redcar 55   (big blind) mucked [Ad 9h 4c 3c 2h] - A,9,4,3,2
+			// Seat 1: Cherry65    (big blind) mucked [Td 7c 5c 4s 2d] - T,7,5,4,2
+			// Seat 6: Keynell     (big blind) mucked [Kh Ks 6c 6d 5c] - two pair, Kings and Sixes
 			// Seat 3: Srta_Arruez (big blind) collected ($0.02), mucked
+			// Seat 6: yarden311   (button)    collected (29000), mucked
+			// Seat 1: Keynell     (big blind) collected (600)
+			String nameExp = "(.+?)(?: \\(.+?\\))?";
+			int seatGroup = 1, nameGroup = 2, cardsGroup = 3, wonGroup = 4, amountGroupShow = 5;
+			String showExp = "Seat (\\d): " + nameExp + " showed (\\[.+?\\]) and (lost|won \\((.+?)\\)) with .+";
 			String muckExp = "Seat (\\d): " + nameExp + " mucked (.+?) - .+";
+			int amountGroupColl = 3;
+			String collExp = "Seat (\\d): " + nameExp + " collected \\((.+)\\)(?:, mucked)?";
+			boolean collect = false;
+			int amount = 0;
+			Seat seat = null;
 			
 			Matcher m;
-			if ((m = Pattern.compile(winExp).matcher(line)).matches()) {
-				println("win exp");
-				Seat seat = seatsMap.get(m.group(2));
-				assert_ (seat.num == Integer.parseInt(m.group(1)), "seat num");
-				int amount = parseMoney(m.group(4), 0);
-				String[] cards = parseCards(m.group(3), 0);
-				seat.finalHoleCards = checkCards(seat.finalHoleCards, getHoleCards(hand.game.type, cards));
-				seat.finalUpCards = checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
+			if ((m = Pattern.compile(showExp).matcher(line)).matches()) {
+				println("show exp");
+				seat = seatsMap.get(m.group(nameGroup));
+				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+				String[] cards = parseCards(m.group(cardsGroup), 0);
+				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+				boolean won = m.group(wonGroup).equals("won");
 				seat.showdown = true;
-				if (!won) {
-					// there was no win action, add here
-					// note that more than one seat can win
-					Action action = new Action(seat);
-					action.type = Action.Type.COLLECT;
-					action.amount = -amount;
-					currentStreet().add(action);
-					seat.won = amount;
-					// assume this means it was a showdown and not just a flash
-					hand.showdown = true;
-					println("sum collect " + amount);
+				hand.showdown = true;
+				if (!this.won && won) {
+					amount = parseMoney(m.group(amountGroupShow), 0);
+					collect = true;
 				}
 				
-			} else if ((m = Pattern.compile(muckExp).matcher(line)).matches() || (m = Pattern.compile(loseExp).matcher(line)).matches()) {
-				println("muck/lose exp");
-				Seat seat = seatsMap.get(m.group(2));
-				assert_ (seat.num == Integer.parseInt(m.group(1)), "seat num");
-				String[] cards = parseCards(m.group(3), 0);
-				seat.finalHoleCards = checkCards(seat.finalHoleCards, getHoleCards(hand.game.type, cards));
-				seat.finalUpCards = checkCards(seat.finalUpCards, getUpCards(hand.game.type, cards));
+			} else if ((m = Pattern.compile(muckExp).matcher(line)).matches()) {
+				println("muck exp");
+				seat = seatsMap.get(m.group(nameGroup));
+				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+				String[] cards = parseCards(m.group(cardsGroup), 0);
+				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
 				seat.showdown = true;
 				
+			} else if ((m = Pattern.compile(collExp).matcher(line)).matches()) {
+				println("coll exp");
+				seat = seatsMap.get(m.group(nameGroup));
+				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+				amount = parseMoney(m.group(amountGroupColl), 0);
+				if (!this.won) {
+					collect = true;
+				}
+				
 				// XXX ehh remove this
-			} else if ((line.contains("mucked") && !line.endsWith("mucked")) || line.contains("showed")) {
-				fail("unmatched show/muck");
+			} else if (line.contains("mucked") || line.contains("collected") || line.contains("showed")) {
+				fail("unmatched summary");
 			}
 			
+			if (collect) {
+				// FIXME add uncall to balance pot
+				// there was no win action, add here
+				// note that more than one seat can win
+				
+				println("hand.pot=" + hand.pot);
+				println("pot()=" + pot());
+				println("seat.pip=" + seat.pip);
+				println("seatPip(seat)=" + seatPip(seat));
+				
+				if (pot() > hand.pot) {
+					// there is a missing uncalled bet action
+					int ucamount = pot() - hand.pot;
+					// should really check seatPip(seat), but pip() has already been called
+					if (ucamount <= seat.pip) {
+						// assume it is for the current seat (though it might not be for multiple pots)
+						println("add missing uncall " + ucamount);
+						anonPop(ucamount);
+						seat.pip -= ucamount;
+						// add the uncall as a fake action so the action amounts sum to pot size
+						final Action action = new Action(seat);
+						action.amount = -ucamount;
+						action.type = Action.Type.UNCALL;
+						println("action " + action);
+						currentStreet().add(action);
+					}
+				}
+				
+				while (!GameUtil.isShowdown(hand.game.type, currentStreetIndex())) {
+					println("new street");
+					newStreet();
+				}
+				
+				println("add missing collect");
+				seat.won = amount;
+				Action action = new Action(seat);
+				action.type = Action.Type.COLLECT;
+				action.amount = -amount;
+				println("action " + action);
+				currentStreet().add(action);
+			}
 			
 		} else {
 			// Seat 3: Keynell (90000)

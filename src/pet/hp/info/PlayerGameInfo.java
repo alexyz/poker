@@ -54,7 +54,7 @@ public class PlayerGameInfo {
 		this.player = player;
 		this.game = game;
 
-		int s = GameUtil.getMaxStreets(game.type);
+		int s = GameUtil.getStreets(game.type);
 		streetinits = new int[s];
 		streetsseen = new int[s];
 		

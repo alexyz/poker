@@ -19,9 +19,9 @@ public class Seat implements Serializable {
 	/** starting chips */
 	public int chips;
 	/** seats final hole cards (not the up cards!) */
-	public String[] finalHoleCards;
+	public String[] downCards;
 	/** seats final public cards */
-	public String[] finalUpCards;
+	public String[] upCards;
 	/** amount won */
 	public int won;
 	/**
@@ -40,18 +40,14 @@ public class Seat implements Serializable {
 	public boolean bigblind;
 	/** seat posted a small blind */
 	public boolean smallblind;
-	/** won or tied for main pot with hi value. implies showdown and won > 0 */
-	//public boolean wonMainHigh;
-	/** won or tied for main pot with low value. implies showdown and won > 0 */
-	//public boolean wonMainLow;
 	
 	/** get seats final cards (both down and up) */
 	public String[] cards() {
-		if (finalHoleCards != null) {
-			if (finalUpCards != null) {
-				return ArrayUtil.join(finalHoleCards, finalUpCards);
+		if (downCards != null) {
+			if (upCards != null) {
+				return ArrayUtil.join(downCards, upCards);
 			} else {
-				return finalHoleCards;
+				return downCards;
 			}
 		} else {
 			return null;
@@ -83,11 +79,11 @@ public class Seat implements Serializable {
 	@Override
 	public String toString() {
 		String s = num + ":" + name + "(" + chips + ")";
-		if (finalHoleCards != null) {
-			s += " " + Arrays.asList(finalHoleCards);
+		if (downCards != null) {
+			s += " " + Arrays.asList(downCards);
 		}
-		if (finalUpCards != null) {
-			s += " " + Arrays.asList(finalUpCards);
+		if (upCards != null) {
+			s += " " + Arrays.asList(upCards);
 		}
 		if (drawn0 > 0) {
 			s += " discards " + drawn0;

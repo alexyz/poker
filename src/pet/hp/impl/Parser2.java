@@ -130,6 +130,9 @@ public abstract class Parser2 extends Parser {
 					default:
 						throw new RuntimeException();
 				}
+				if (a.type == Action.Type.POST || a.type == Action.Type.ANTE) {
+					assert_(a.amount <= hand.bb, "post/ante <= bb");
+				}
 			}
 		}
 	}
@@ -137,22 +140,30 @@ public abstract class Parser2 extends Parser {
 	private void validateSeats () {
 		// can't check bb or sb as there may be 0-many
 		assert_(seatsMap.size() <= hand.game.max, "seats < max");
+		boolean sd = false;
 		int s = 0;
+		int hc = GameUtil.getHoleCards(hand.game.type);
+		int uc = GameUtil.getUpCards(hand.game.type);
 		for (Seat seat : seatsMap.values()) {
 			assert_(seat.pip <= seat.chips, "chips");
 			int c = 0;
-			if (seat.finalHoleCards != null) {
-				c += seat.finalHoleCards.length;
+			if (seat.downCards != null) {
+				c += seat.downCards.length;
 			}
-			if (seat.finalUpCards != null) {
-				c += seat.finalUpCards.length;
+			if (seat.upCards != null) {
+				c += seat.upCards.length;
+				assert_(seat.upCards.length <= uc, "uc");
 			}
 			if (seat.showdown) {
 				s++;
-				assert_(c == GameUtil.getHoleCards(hand.game.type), "hole cards");
+				assert_(c == hc, "hole cards");
 			} else {
-				assert_(c <= GameUtil.getHoleCards(hand.game.type), "hole cards");
+				assert_(c <= hc, "hole cards");
 			}
+			sd |= seat.showdown;
+		}
+		if (sd) {
+			assert_(hand.showdown, "ssd = hsd");
 		}
 		if (hand.showdown) {
 			assert_(s >= 2, "2 seat showdown");
@@ -164,6 +175,9 @@ public abstract class Parser2 extends Parser {
 	private void validateHand () {
 		assert_(hand.date != 0, "has date");
 		assert_(hand.game != null, "has game");
+		assert_(hand.bb > 0, "bb");
+		assert_(hand.sb > 0 && hand.sb < hand.bb, "sb");
+		assert_(hand.ante >= 0, "ante");
 		if (GameUtil.isStud(hand.game.type)) {
 			assert_(hand.button == 0, "no button");
 		} else {
@@ -172,9 +186,9 @@ public abstract class Parser2 extends Parser {
 		assert_(hand.id != 0, "has id");
 		assert_(hand.myseat != null, "has my seat");
 		if (hand.showdown) {
-			assert_(streets.size() == GameUtil.getMaxStreets(hand.game.type), "all streets");
+			assert_(streets.size() == GameUtil.getStreets(hand.game.type), "all streets for showdown");
 		} else {
-			assert_(streets.size() <= GameUtil.getMaxStreets(hand.game.type), "streets");
+			assert_(streets.size() <= GameUtil.getStreets(hand.game.type), "streets");
 		}
 		if (!GameUtil.isHilo(hand.game.type)) {
 			assert_(!hand.showdownNoLow, "no low for non hilo");
@@ -212,18 +226,27 @@ public abstract class Parser2 extends Parser {
 			}
 		}
 		// could check if pip amounts are same for those not all in
-		println("pot now " + pot);
+		println("pip: pot now " + pot);
 	}
 	
 	/**
-	 * put an amount in the pot anonymously (dead blinds and antes). also
-	 * updates hand.db
+	 * put an amount in the running pot anonymously (dead blinds and antes).
+	 * also updates hand.db
 	 */
 	protected void anonPip (int amount) {
 		assert_(amount > 0, "am > 0");
 		pot += amount;
 		hand.db += amount;
-		println("pot now " + pot);
+		println("anonPip: pot now " + pot);
+	}
+	
+	/**
+	 * literally steal money from the running pot
+	 */
+	protected void anonPop (int amount) {
+		assert_(amount > 0, "am > 0");
+		pot -= amount;
+		println("anonPop: pot now " + pot);
 	}
 	
 	protected int pot () {
@@ -231,7 +254,7 @@ public abstract class Parser2 extends Parser {
 	}
 	
 	/**
-	 * get pip total for seat
+	 * get pip total for seat for this street (before pip() is called)
 	 */
 	protected int seatPip (Seat seat) {
 		return seatPip[seat.num];
@@ -271,7 +294,7 @@ public abstract class Parser2 extends Parser {
 			}
 		}
 		assert_(asum == 0, "actsum " + asum + " = zero");
-		
+		// could check if seat pip = seat pot then one action is all in
 	}
 	
 }
