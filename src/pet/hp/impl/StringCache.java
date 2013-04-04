@@ -40,5 +40,9 @@ public class StringCache {
 		}
 		return s;
 	}
+
+	public static synchronized int size () {
+		return cache.size();
+	}
 	
 }

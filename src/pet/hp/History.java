@@ -199,4 +199,8 @@ public class History {
 		return hands.size();
 	}
 	
+	public synchronized int getTourns() {
+		return tourns.size();
+	}
+	
 }

@@ -83,6 +83,7 @@ public class GameUtil {
 		sb.append(formatMoney(game.currency, game.sb)).append("/");
 		sb.append(formatMoney(game.currency, game.bb));
 		if (game.ante != 0) {
+			sb.append("/");
 			sb.append(formatMoney(game.currency, game.ante));
 		}
 		return sb.toString();

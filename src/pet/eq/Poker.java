@@ -135,7 +135,7 @@ public abstract class Poker {
 	static int lowCount(String[] hand, boolean acehigh) {
 		int count = 0;
 		for (int n = 0; n < hand.length; n++) {
-			if (faceToValue(hand[n], acehigh) <= 8) {
+			if (faceValue(hand[n], acehigh) <= 8) {
 				count++;
 			}
 		}
@@ -247,7 +247,7 @@ public abstract class Poker {
 		int str = 5;
 		for (int n = 0; n < hand.length; n++) {
 			// sub 1 so bottom bit equals ace low
-			int v = faceToValue(hand[n], true) - 1;
+			int v = faceValueAH(hand[n]) - 1;
 			x |= (1 << v);
 			if (v == 13) {
 				// add ace low as well as ace high
@@ -273,7 +273,7 @@ public abstract class Poker {
 		// count card face frequencies (3 bits each) -- 0, 1, 2, 3, 4
 		long v = 0;
 		for (int n = 0; n < hand.length; n++) {
-			v += (1L << ((14 - faceToValue(hand[n], acehigh)) * 3));
+			v += (1L << ((14 - faceValue(hand[n], acehigh)) * 3));
 		}
 		// get the card faces for each frequency
 		int fk = 0, tk = 0, pa = 0, hc = 0;
@@ -319,19 +319,22 @@ public abstract class Poker {
 	/**
 	 * Return integer value of card face, ace high or low (from A = 14 to 2 = 2 or K = 13 to A = 1)
 	 */
-	static int faceToValue(String card, boolean acehigh) {
+	static int faceValue(String card, boolean acehigh) {
 		if (acehigh) {
-			int i = "23456789TJQKA".indexOf(face(card));
-			if (i >= 0) {
-				return i + 2;
-			}
+			return faceValueAH(card);
 		} else {
-			int i = "A23456789TJQK".indexOf(face(card));
-			if (i >= 0) {
-				return i + 1;
-			}
+			return faceValueAL(card);
 		}
-		throw new RuntimeException("unknown face " + card);
+	}
+
+	static int faceValueAL (String card) {
+		int i = "A23456789TJQK".indexOf(face(card));
+		return i + 1;
+	}
+
+	static int faceValueAH (String card) {
+		int i = "23456789TJQKA".indexOf(face(card));
+		return i + 2;
 	}
 	
 	/**
@@ -342,9 +345,16 @@ public abstract class Poker {
 	}
 	
 	/**
+	 * return number representing value of suit
+	 */
+	public static int suitValue(String card) {
+		return "cdhs".indexOf(card.charAt(1));
+	}
+	
+	/**
 	 * Return character symbol of face value
 	 */
-	private static char valueToFace(int x) {
+	static char valueFace(int x) {
 		int v = x & 0xf;
 		// allow 0 index and ace low
 		return "?A23456789TJQKA".charAt(v);
@@ -374,11 +384,11 @@ public abstract class Poker {
 				return "##" + Integer.toHexString(value) + "##";
 		}
 		
-		final char c1 = valueToFace(highValue);
-		final char c2 = valueToFace(highValue >> 4);
-		final char c3 = valueToFace(highValue >> 8);
-		final char c4 = valueToFace(highValue >> 12);
-		final char c5 = valueToFace(highValue >> 16);
+		final char c1 = valueFace(highValue);
+		final char c2 = valueFace(highValue >> 4);
+		final char c3 = valueFace(highValue >> 8);
+		final char c4 = valueFace(highValue >> 12);
+		final char c5 = valueFace(highValue >> 16);
 		
 		String s;
 		switch (highValue & RANK) {

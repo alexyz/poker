@@ -84,6 +84,11 @@ public class FTParser extends Parser2 {
 		final String actStr = line.substring(actIndex, actEndIndex);
 		println("action str " + actStr);
 		
+		if (actStr.length() == 0) {
+			println("no action");
+			return;
+		}
+		
 		final Action action = new Action(seat);
 		action.type = ParseUtil.parseAction(actStr);
 		
@@ -367,8 +372,8 @@ public class FTParser extends Parser2 {
 		}
 		
 		hand = new Hand();
-		hand.id = Long.parseLong(m.group(FTHandRe.hid));
-		hand.tablename = m.group(FTHandRe.table);
+		hand.id = Long.parseLong(m.group(FTHandRe.hid)) | Hand.FT_ROOM;
+		hand.tablename = StringCache.get(m.group(FTHandRe.table));
 		hand.sb = parseMoney(m.group(FTHandRe.sb), 0);
 		hand.bb = parseMoney(m.group(FTHandRe.bb), 0);
 		final String ante = m.group(FTHandRe.ante);
@@ -489,6 +494,9 @@ public class FTParser extends Parser2 {
 		} else if (line.startsWith("The button is in seat #")) {
 			parseButton(line);
 			
+		} else if (line.startsWith("The blinds are now ")) {
+			//
+			
 		} else if (line.equals("No low hand qualified")) {
 			println("no low");
 			hand.showdownNoLow = true;
@@ -520,7 +528,7 @@ public class FTParser extends Parser2 {
 		
 		return false;
 	}
-
+	
 	private void parseButton (String line) {
 		println("button");
 		final Matcher m = Pattern.compile("The button is in seat #(\\d)").matcher(line);
@@ -587,106 +595,7 @@ public class FTParser extends Parser2 {
 	
 	private void parseSeat () {
 		if (summaryPhase) {
-			println("seat summary: collected=" + collected);
-			// Seat 4: CougarMD                showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
-			// Seat 6: Keynell                 showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
-			// Seat 3: Srta_Arruez (big blind) showed [Ah Tc 9s 6h 4c] and lost with Ace Ten high
-			// Seat 3: redcar 55   (big blind) mucked [Ad 9h 4c 3c 2h] - A,9,4,3,2
-			// Seat 1: Cherry65    (big blind) mucked [Td 7c 5c 4s 2d] - T,7,5,4,2
-			// Seat 6: Keynell     (big blind) mucked [Kh Ks 6c 6d 5c] - two pair, Kings and Sixes
-			// Seat 3: Srta_Arruez (big blind) collected ($0.02), mucked
-			// Seat 6: yarden311   (button)    collected (29000), mucked
-			// Seat 1: Keynell     (big blind) collected (600)
-			String nameExp = "(.+?)(?: \\(.+?\\))?";
-			int seatGroup = 1, nameGroup = 2, cardsGroup = 3, wonGroup = 4, amountGroupShow = 5;
-			String showExp = "Seat (\\d): " + nameExp + " showed (\\[.+?\\]) and (lost|won \\((.+?)\\)) with .+";
-			String muckExp = "Seat (\\d): " + nameExp + " mucked (.+?) - .+";
-			int amountGroupColl = 3;
-			String collExp = "Seat (\\d): " + nameExp + " collected \\((.+)\\)(?:, mucked)?";
-			boolean collect = false;
-			int amount = 0;
-			Seat seat = null;
-			
-			Matcher m;
-			if ((m = Pattern.compile(showExp).matcher(line)).matches()) {
-				println("show exp");
-				seat = seatsMap.get(m.group(nameGroup));
-				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
-				String[] cards = parseCards(m.group(cardsGroup), 0);
-				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
-				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
-				boolean won = m.group(wonGroup).startsWith("won");
-				seat.showdown = true;
-				hand.showdown = true;
-				if (!this.collected && won) {
-					amount = parseMoney(m.group(amountGroupShow), 0);
-					collect = true;
-				}
-				
-			} else if ((m = Pattern.compile(muckExp).matcher(line)).matches()) {
-				println("muck exp");
-				seat = seatsMap.get(m.group(nameGroup));
-				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
-				String[] cards = parseCards(m.group(cardsGroup), 0);
-				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
-				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
-				seat.showdown = true;
-				
-			} else if ((m = Pattern.compile(collExp).matcher(line)).matches()) {
-				println("coll exp");
-				seat = seatsMap.get(m.group(nameGroup));
-				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
-				if (!this.collected) {
-					amount = parseMoney(m.group(amountGroupColl), 0);
-					collect = true;
-				}
-				
-				// XXX ehh remove this
-			} else if (line.contains("mucked") || line.contains("collected") || line.contains("showed")) {
-				fail("unmatched summary");
-			}
-			
-			if (collect) {
-				// FIXME add uncall to balance pot
-				// there was no win action, add here
-				// note that more than one seat can win
-				
-				println("hand.pot=" + hand.pot);
-				println("pot()=" + pot());
-				println("seat.pip=" + seat.pip);
-				println("seatPip(seat)=" + seatPip(seat));
-				
-				if (pot() > hand.pot) {
-					// there is a missing uncalled bet action
-					int ucamount = pot() - hand.pot;
-					// should really check seatPip(seat), but pip() has already been called
-					if (ucamount <= seat.pip) {
-						// assume it is for the current seat (though it might not be for multiple pots)
-						println("add missing uncall " + ucamount);
-						anonPop(ucamount);
-						seat.pip -= ucamount;
-						// add the uncall as a fake action so the action amounts sum to pot size
-						final Action action = new Action(seat);
-						action.amount = -ucamount;
-						action.type = Action.Type.UNCALL;
-						println("action " + action);
-						currentStreet().add(action);
-					}
-				}
-				
-				while (!GameUtil.isShowdown(hand.game.type, currentStreetIndex())) {
-					println("new street");
-					newStreet();
-				}
-				
-				println("add missing collect");
-				seat.won = amount;
-				Action action = new Action(seat);
-				action.type = Action.Type.COLLECT;
-				action.amount = -amount;
-				println("action " + action);
-				currentStreet().add(action);
-			}
+			parseSeatSummary();
 			
 		} else {
 			// Seat 3: Keynell (90000)
@@ -699,9 +608,111 @@ public class FTParser extends Parser2 {
 			seat.name = StringCache.get(line.substring(col + 2, braStart - 1));
 			seat.chips = parseMoney(line, braStart + 1);
 			seatsMap.put(seat.name, seat);
+			assert_(seatsMap.size() <= hand.game.max, "seats < max");
 		}
-		// TODO might get opponent cards here
-		assert_(seatsMap.size() <= hand.game.max, "seats < max");
+	}
+	
+	private void parseSeatSummary () {
+		println("seat summary: collected=" + collected);
+		// Seat 4: CougarMD                showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
+		// Seat 6: Keynell                 showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
+		// Seat 3: Srta_Arruez (big blind) showed [Ah Tc 9s 6h 4c] and lost with Ace Ten high
+		// Seat 3: redcar 55   (big blind) mucked [Ad 9h 4c 3c 2h] - A,9,4,3,2
+		// Seat 1: Cherry65    (big blind) mucked [Td 7c 5c 4s 2d] - T,7,5,4,2
+		// Seat 6: Keynell     (big blind) mucked [Kh Ks 6c 6d 5c] - two pair, Kings and Sixes
+		// Seat 3: Srta_Arruez (big blind) collected ($0.02), mucked
+		// Seat 6: yarden311   (button)    collected (29000), mucked
+		// Seat 1: Keynell     (big blind) collected (600)
+		String nameExp = "(.+?)(?: \\(.+?\\))?";
+		int seatGroup = 1, nameGroup = 2, cardsGroup = 3, wonGroup = 4, amountGroupShow = 5;
+		String showExp = "Seat (\\d): " + nameExp + " showed (\\[.+?\\]) and (lost|won \\((.+?)\\)) with .+";
+		String muckExp = "Seat (\\d): " + nameExp + " mucked (.+?) - .+";
+		int amountGroupColl = 3;
+		String collExp = "Seat (\\d): " + nameExp + " collected \\((.+)\\)(?:, mucked)?";
+		boolean collect = false;
+		int amount = 0;
+		Seat seat = null;
+		
+		Matcher m;
+		if ((m = Pattern.compile(showExp).matcher(line)).matches()) {
+			println("show exp");
+			seat = seatsMap.get(m.group(nameGroup));
+			assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+			String[] cards = parseCards(m.group(cardsGroup), 0);
+			seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+			seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+			boolean won = m.group(wonGroup).startsWith("won");
+			seat.showdown = true;
+			hand.showdown = true;
+			if (!this.collected && won) {
+				amount = parseMoney(m.group(amountGroupShow), 0);
+				collect = true;
+			}
+			
+		} else if ((m = Pattern.compile(muckExp).matcher(line)).matches()) {
+			println("muck exp");
+			seat = seatsMap.get(m.group(nameGroup));
+			assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+			String[] cards = parseCards(m.group(cardsGroup), 0);
+			seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
+			seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
+			seat.showdown = true;
+			
+		} else if ((m = Pattern.compile(collExp).matcher(line)).matches()) {
+			println("coll exp");
+			seat = seatsMap.get(m.group(nameGroup));
+			assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
+			if (!this.collected) {
+				amount = parseMoney(m.group(amountGroupColl), 0);
+				collect = true;
+			}
+			
+			// XXX ehh remove this
+		} else if (line.contains("mucked") || line.contains("collected") || line.contains("showed")) {
+			fail("unmatched summary");
+		}
+		
+		if (collect) {
+			// there was no win action, add here
+			// note that more than one seat can win
+			
+			println("hand.pot=" + hand.pot);
+			println("pot()=" + pot());
+			println("seat.pip=" + seat.pip);
+			println("seatPip(seat)=" + seatPip(seat));
+			
+			if (pot() > hand.pot) {
+				// there is a missing uncalled bet action
+				// add uncall to balance pot
+				int ucamount = pot() - hand.pot;
+				// should really check seatPip(seat), but pip() has already been called
+				if (ucamount <= seat.pip) {
+					// assume it is for the current seat (though it might not be for multiple pots)
+					println("add missing uncall " + ucamount);
+					anonPop(ucamount);
+					seat.pip -= ucamount;
+					// add the uncall as a fake action so the action amounts sum to pot size
+					final Action action = new Action(seat);
+					action.amount = -ucamount;
+					action.type = Action.Type.UNCALL;
+					println("action " + action);
+					currentStreet().add(action);
+				}
+			}
+			
+			while (!GameUtil.isShowdown(hand.game.type, currentStreetIndex())) {
+				println("new street");
+				newStreet();
+			}
+			
+			println("add missing collect");
+			seat.won = amount;
+			Action action = new Action(seat);
+			action.type = Action.Type.COLLECT;
+			action.amount = -amount;
+			println("action " + action);
+			currentStreet().add(action);
+		}
 	}
 	
 	private void parseTotal () {

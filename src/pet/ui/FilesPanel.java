@@ -9,6 +9,7 @@ import pet.PET;
 import pet.hp.impl.FTParser;
 import pet.hp.impl.HistoryUtil;
 import pet.hp.impl.PSParser;
+import pet.hp.impl.StringCache;
 import pet.hp.info.FollowThread;
 import pet.ui.hp.HistoryPanel;
 
@@ -18,13 +19,14 @@ public class FilesPanel extends JPanel {
 		Runtime r = Runtime.getRuntime();
 		r.gc();
 		double mib = Math.pow(2,20);
-		int h = PET.getHistory().getHands();
-		System.out.println(String.format("memory max: %.3f total: %.3f free: %.3f used: %.3f (MiB) hands: %d",
+		System.out.println(String.format("memory max: %.3f total: %.3f free: %.3f used: %.3f (MiB)",
 				r.maxMemory() / mib,
 				r.totalMemory() / mib,
 				r.freeMemory() / mib,
-				(r.totalMemory() - r.freeMemory()) / mib,
-				h));
+				(r.totalMemory() - r.freeMemory()) / mib));
+		System.out.println("hands: " + PET.getHistory().getHands());
+		System.out.println("Tournaments: " + PET.getHistory().getTourns());
+		System.out.println("String cache: " + StringCache.size());
 	}
 	
 	private final JButton funcButton = new JButton("Memory");

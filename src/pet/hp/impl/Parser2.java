@@ -200,6 +200,10 @@ public abstract class Parser2 extends Parser {
 		int bs = hand.board != null ? hand.board.length : 0;
 		assert_(bs <= GameUtil.getBoard(hand.game.type), "board");
 		assert_(hand.id != 0, "has id");
+		assert_((hand.id & Hand.ROOM) != 0, "hand room");
+		if (hand.tourn != null) {
+			assert_((hand.tourn.id & Hand.ROOM) != 0, "tourn room");
+		}
 		assertObj(hand.myseat, "my seat");
 		if (hand.showdown) {
 			assert_(streets.size() == GameUtil.getStreets(hand.game.type), "all streets for showdown");

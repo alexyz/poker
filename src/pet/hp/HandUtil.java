@@ -124,6 +124,35 @@ public class HandUtil {
 		return cardsList;
 	}
 	
+	/**
+	 * get user readable hand identifier
+	 */
+	public static final String getId(Hand hand) {
+		long r = hand.id & Hand.ROOM;
+		long i = hand.id & ~Hand.ROOM;
+		if (r == Hand.FT_ROOM) {
+			return "FT:" + i;
+		} else if (r == Hand.PS_ROOM) {
+			return "PS:" + i;
+		} else {
+			throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * get the poker room this hand took place at
+	 */
+	public static final String getRoom(Hand hand) {
+		long r = hand.id & Hand.ROOM;
+		if (r == Hand.FT_ROOM) {
+			return "Full Tilt";
+		} else if (r == Hand.PS_ROOM) {
+			return "PokerStars";
+		} else {
+			throw new RuntimeException();
+		}
+	}
+	
 	private HandUtil() {
 		//
 	}

@@ -9,7 +9,7 @@ public class HEPoker extends Poker {
 
 	/** check board is either null or 3-5 cards */
 	private static void validateBoard(String[] board) {
-		if (board.length > 5) {
+		if (board != null && board.length > 5) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
 		}
 	}
@@ -87,7 +87,7 @@ public class HEPoker extends Poker {
 		validateBoard(board);
 		validateHole(hole, omaha);
 		
-		if (board.length < 3) {
+		if (board == null || board.length < 3) {
 			// could use the draw poker getPair method...
 			return 0;
 			

@@ -403,14 +403,14 @@ public class PSParser extends Parser2 {
 		}
 		
 		Hand hand = new Hand();
-		hand.id = Long.parseLong(m.group(PSHandRE.handid));
+		hand.id = Long.parseLong(m.group(PSHandRE.handid)) | Hand.PS_ROOM;
 		
 		// get all the tournament stuff if there is tourn id
 		String tournids = m.group(PSHandRE.tournid);
 		if (tournids != null) {
 			game.currency = Game.TOURN_CURRENCY;
 			// get the tournament id and instance
-			long tournid = Long.parseLong(tournids);
+			long tournid = Long.parseLong(tournids) | Hand.PS_ROOM;
 			
 			String tournbuyins = m.group(PSHandRE.tbuyin);
 			String tourncosts = m.group(PSHandRE.tcost);

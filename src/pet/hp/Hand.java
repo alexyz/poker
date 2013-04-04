@@ -11,10 +11,14 @@ import java.util.*;
  */
 public class Hand implements Serializable {
 	
-	public static final long PS = 1L << 60;
-	public static final long FT = 2L << 60;
+	public static final long ROOM = 0xfL << 60;
+	public static final long PS_ROOM = 1L << 60;
+	public static final long FT_ROOM = 2L << 60;
 	
-	/** hand id - object so it can be used in map/set without being recreated */
+	/**
+	 * hand id combined with poker room - object so it can be used in map/set
+	 * without being recreated
+	 */
 	public Long id;
 	/** game type */
 	public Game game;
@@ -106,7 +110,7 @@ public class Hand implements Serializable {
 	public String toString() {
 		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 		return String.format("Hand[%s '%s' at '%s' on %s seats=%s str=%d]", 
-				id, game, tablename, df.format(new Date(date)), seats != null ? seats.length : -1, streets != null ? streets.length : -1);
+				id & ~ROOM, game, tablename, df.format(new Date(date)), seats != null ? seats.length : -1, streets != null ? streets.length : -1);
 	}
 	
 }

@@ -169,7 +169,8 @@ public class HandInfo {
 		sb.append("game " + hand.game + "\n");
 		sb.append("date " + hand.date + "\n");
 		sb.append("original draw cards " + Arrays.toString(hand.myDrawCards0) + "\n");
-		sb.append("id " + hand.id + "\n");
+		sb.append("id " + HandUtil.getId(hand) + "\n");
+		sb.append("room " + HandUtil.getRoom(hand) + "\n");
 		sb.append("pot " + hand.pot + "\n");
 		sb.append("rake " + hand.rake + "\n");
 		sb.append("showdown " + hand.showdown + "\n");
@@ -190,6 +191,6 @@ public class HandInfo {
 	
 	@Override
 	public String toString() {
-		return "HandInfo[" + hand.id + "]";
+		return "HandInfo[" + HandUtil.getId(hand) + "]";
 	}
 }
