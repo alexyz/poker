@@ -46,7 +46,9 @@ public class FTParser extends Parser2 {
 	private String line;
 	/** is in summary phase */
 	protected boolean summaryPhase;
-	private boolean won;
+	/** has there been a collect action yet */
+	private boolean collected;
+	/** is this hand partial, i.e not worth parsing */
 	private boolean partial;
 	
 	public FTParser() {
@@ -58,7 +60,7 @@ public class FTParser extends Parser2 {
 		super.clear();
 		summaryPhase = false;
 		line = null;
-		won = false;
+		collected = false;
 		partial = false;
 	}
 	
@@ -188,8 +190,8 @@ public class FTParser extends Parser2 {
 				final int braIndex = line.indexOf("(", actEndIndex + 1);
 				final int amount = parseMoney(line, braIndex + 1);
 				seat.won += amount;
-				// sometimes there is no win, have to fake it in summary phase
-				won = true;
+				// sometimes there is no collect, have to fake it in summary phase
+				collected = true;
 				
 				// add the collect as a fake action so the action amounts sum to
 				// pot size
@@ -405,8 +407,18 @@ public class FTParser extends Parser2 {
 				case STUDHL:
 					game.max = 8;
 					break;
-				default:
+				case FCSTUD:
+				case HE:
+				case OM:
+				case OM5:
+				case OM51:
+				case OM51HL:
+				case OM5HL:
+				case OMHL:
 					game.max = 9;
+					break;
+				default:
+					throw new RuntimeException();
 			}
 		}
 		if (game.limit == Game.Limit.FL) {
@@ -575,6 +587,7 @@ public class FTParser extends Parser2 {
 	
 	private void parseSeat () {
 		if (summaryPhase) {
+			println("seat summary: collected=" + collected);
 			// Seat 4: CougarMD                showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
 			// Seat 6: Keynell                 showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
 			// Seat 3: Srta_Arruez (big blind) showed [Ah Tc 9s 6h 4c] and lost with Ace Ten high
@@ -602,10 +615,10 @@ public class FTParser extends Parser2 {
 				String[] cards = parseCards(m.group(cardsGroup), 0);
 				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
 				seat.upCards = checkCards(seat.upCards, getUpCards(hand.game.type, cards));
-				boolean won = m.group(wonGroup).equals("won");
+				boolean won = m.group(wonGroup).startsWith("won");
 				seat.showdown = true;
 				hand.showdown = true;
-				if (!this.won && won) {
+				if (!this.collected && won) {
 					amount = parseMoney(m.group(amountGroupShow), 0);
 					collect = true;
 				}
@@ -623,8 +636,8 @@ public class FTParser extends Parser2 {
 				println("coll exp");
 				seat = seatsMap.get(m.group(nameGroup));
 				assert_ (seat.num == Integer.parseInt(m.group(seatGroup)), "seat num");
-				amount = parseMoney(m.group(amountGroupColl), 0);
-				if (!this.won) {
+				if (!this.collected) {
+					amount = parseMoney(m.group(amountGroupColl), 0);
 					collect = true;
 				}
 				

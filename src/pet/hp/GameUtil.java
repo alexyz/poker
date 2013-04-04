@@ -432,4 +432,36 @@ public class GameUtil {
 				throw new RuntimeException();
 		}
 	}
+	
+	/**
+	 * get the max board size for this game
+	 */
+	public static int getBoard(Game.Type gameType) {
+		switch (gameType) {
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case FCSTUD:
+				return 0;
+				
+			case RAZZ:
+			case STUD:
+			case STUDHL:
+				return 1;
+				
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
+				return 5;
+				
+			default:
+				throw new RuntimeException();
+		}
+	}
 }

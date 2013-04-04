@@ -39,6 +39,15 @@ public abstract class Parser2 extends Parser {
 		}
 	}
 	
+	/**
+	 * throw exception if object is false
+	 */
+	protected void assertObj (Object obj, String objDesc) {
+		if (obj == null) {
+			throw new RuntimeException("Assertion failed: object is null: " + objDesc);
+		}
+	}
+	
 	@Override
 	public void clear () {
 		super.clear();
@@ -130,8 +139,9 @@ public abstract class Parser2 extends Parser {
 					default:
 						throw new RuntimeException();
 				}
+				// this isn't really asserting very much
 				if (a.type == Action.Type.POST || a.type == Action.Type.ANTE) {
-					assert_(a.amount <= hand.bb, "post/ante <= bb");
+					assert_(a.amount <= hand.bb + hand.sb, "post/ante " + a + " <= bb+sb");
 				}
 			}
 		}
@@ -154,6 +164,10 @@ public abstract class Parser2 extends Parser {
 				c += seat.upCards.length;
 				assert_(seat.upCards.length <= uc, "uc");
 			}
+			if (GameUtil.isStud(hand.game.type) && hand.board != null) {
+				// incredibly rare community card in stud
+				c += hand.board.length;
+			}
 			if (seat.showdown) {
 				s++;
 				assert_(c == hc, "hole cards");
@@ -174,17 +188,19 @@ public abstract class Parser2 extends Parser {
 	
 	private void validateHand () {
 		assert_(hand.date != 0, "has date");
-		assert_(hand.game != null, "has game");
+		assertObj(hand.game, "game");
 		assert_(hand.bb > 0, "bb");
 		assert_(hand.sb > 0 && hand.sb < hand.bb, "sb");
 		assert_(hand.ante >= 0, "ante");
 		if (GameUtil.isStud(hand.game.type)) {
-			assert_(hand.button == 0, "no button");
+			assert_(hand.button == 0, "no button: " + hand.button);
 		} else {
 			assert_(hand.button != 0, "has button");
 		}
+		int bs = hand.board != null ? hand.board.length : 0;
+		assert_(bs <= GameUtil.getBoard(hand.game.type), "board");
 		assert_(hand.id != 0, "has id");
-		assert_(hand.myseat != null, "has my seat");
+		assertObj(hand.myseat, "my seat");
 		if (hand.showdown) {
 			assert_(streets.size() == GameUtil.getStreets(hand.game.type), "all streets for showdown");
 		} else {
@@ -280,8 +296,8 @@ public abstract class Parser2 extends Parser {
 		}
 		println("won=" + won + " pip=" + pip);
 		
-		assert_(won == (hand.pot - hand.rake), "won " + won + " equal to pot " + pot + " - rake " + hand.rake);
-		assert_(won == (pip - hand.rake + hand.db), "won " + won + " equal to pip " + pip + " - rake " + hand.rake
+		assert_(won == (hand.pot - hand.rake), "sum(seat.won) " + won + " equal to running pot " + pot + " - rake " + hand.rake);
+		assert_(won == (pip - hand.rake + hand.db), "sum(seat.won) " + won + " equal to sum(seat.pip) " + pip + " - rake " + hand.rake
 				+ " + antes " + hand.db);
 		
 		int asum = -hand.rake;
