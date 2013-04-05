@@ -11,61 +11,53 @@ public abstract class Poker {
 	
 	/* 
 	 * poker hand values are represented by 7 x 4 bit values (28 bits total):
-	 * 0x7654321
-	 * 7 - hand type (high, a-5 low, 2-7 low)
-	 * 6 - rank
-	 * 5 - most significant card (if any)
+	 * 0x87654321
+	 * 8 = 0
+	 * 7 = hand type (high, a-5 low, 2-7 low, badugi)
+	 * 6 = rank
+	 * 5 = most significant card (if any)
 	 * ...
-	 * 1 - least significant card
+	 * 1 = least significant card
 	 */
 	
 	/** hand value type mask */
-	protected static final int TYPE = 0xf000000;
+	protected static final int TYPE = 0x0f000000;
+	/** rank mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
+	protected static final int RANK = 0x00f00000;
+	/** rank and hand value mask */
+	protected static final int HAND = 0x00ffffff;
+	
 	/** high hand valuation type */
-	protected static final int HI_TYPE = 0;
+	protected static final int HI_TYPE = 0x01000000;
 	/** deuce to seven low hand valuation type */
-	protected static final int DS_LOW_TYPE = 0x1000000;
-	/**
-	 * ace to five low hand valuation type - do MAX_MASK - (value & HAND) to get
+	protected static final int DS_LOW_TYPE = 0x02000000;
+	/** ace to five low hand valuation type - do MAX_MASK - (value & HAND) to get
 	 * apparent high value
 	 */
-	protected static final int AF_LOW_TYPE = 0x2000000;
-	
-	/** rank mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
-	protected static final int RANK = 0xf00000;
-	/** rank and hand value mask */
-	protected static final int HAND = 0xffffff;
-	
-	public static final int H_RANK = 0;
-	public static final int P_RANK = 1;
-	public static final int TP_RANK = 2;
-	public static final int TK_RANK = 3;
-	public static final int S_RANK = 4;
-	public static final int F_RANK = 5;
-	public static final int FH_RANK = 6;
-	public static final int Q_RANK = 7;
-	public static final int SF_RANK = 8;
+	protected static final int AF_LOW_TYPE = 0x03000000;
+	/** badugi value type (inverted) */
+	protected static final int BADUGI_TYPE = 0x04000000;
 	
 	/** high card bit mask (always zero) */
-	protected static final int H_MASK = 0;
+	protected static final int H_RANK = 0;
 	/** pair rank bit mask */
-	protected static final int P_MASK = 0x100000;
+	protected static final int P_RANK = 0x100000;
 	/** two pair rank bit mask */
-	protected static final int TP_MASK = 0x200000;
+	protected static final int TP_RANK = 0x200000;
 	/** three of a kind rank bit mask */
-	protected static final int TK_MASK = 0x300000;
+	protected static final int TK_RANK = 0x300000;
 	/** straight bit mask */
-	public static final int ST_MASK = 0x400000;
+	public static final int ST_RANK = 0x400000;
 	/** flush bit mask */
-	protected static final int FL_MASK = 0x500000;
+	protected static final int FL_RANK = 0x500000;
 	/** full house bit mask */
-	protected static final int FH_MASK = 0x600000;
+	protected static final int FH_RANK = 0x600000;
 	/** four of a kind bit mask */
-	protected static final int FK_MASK = 0x700000;
+	protected static final int FK_RANK = 0x700000;
 	/** straight flush rank mask */
-	protected static final int SF_MASK = 0x800000;
+	protected static final int SF_RANK = 0x800000;
 	/** impossible rank higher than straight flush for low hand value purposes */
-	protected static final int MAX_MASK = 0x900000;
+	protected static final int MAX_RANK = 0x900000;
 	
 	/** max number of possible ranks (all valuation types) */
 	public static final int RANKS = 9;
@@ -150,10 +142,10 @@ public abstract class Poker {
 		validate(hand);
 		if (lowCount(hand, false) ==  5) {
 			int p = isPair(hand, false);
-			if (p < P_MASK) {
+			if (p < P_RANK) {
 				// no pairs
 				// invert value
-				int v = AF_LOW_TYPE | (MAX_MASK - p);
+				int v = AF_LOW_TYPE | (MAX_RANK - p);
 				return v;
 			}
 		}
@@ -168,7 +160,7 @@ public abstract class Poker {
 		// allow pairs but not straights or flushes, ace low
 		int p = isPair(hand, false);
 		// invert value
-		int v = AF_LOW_TYPE | (MAX_MASK - p);
+		int v = AF_LOW_TYPE | (MAX_RANK - p);
 		return v;
 	}
 	
@@ -197,7 +189,7 @@ public abstract class Poker {
 	public static int strValue (String[] hand) {
 		int s = isStraight(hand);
 		if (s > 0) {
-			return ST_MASK | s;
+			return ST_RANK | s;
 		} else {
 			return 0;
 		}
@@ -209,20 +201,20 @@ public abstract class Poker {
 	public static int value (String[] hand) {
 		validate(hand);
 		int p = isPair(hand, true);
-		if (p < P_MASK) {
+		if (p < P_RANK) {
 			boolean f = isFlush(hand);
 			int s = isStraight(hand);
 			if (f) {
 				if (s > 0) {
-					return SF_MASK | s;
+					p = SF_RANK | s;
 				} else {
-					return FL_MASK | p;
+					p = FL_RANK | p;
 				}
 			} else if (s > 0) {
-				return ST_MASK | s;
+				p = ST_RANK | s;
 			}
 		}
-		return p;
+		return p | HI_TYPE;
 	}
 	
 	/**
@@ -293,19 +285,19 @@ public abstract class Poker {
 		}
 		
 		if (fk != 0) {
-			return FK_MASK | (fk << 4) | hc;
+			return FK_RANK | (fk << 4) | hc;
 		} else if (tk != 0) {
 			if (pa != 0) {
-				return FH_MASK | (tk << 4) | pa;
+				return FH_RANK | (tk << 4) | pa;
 			} else {
-				return TK_MASK | (tk << 8) | hc;
+				return TK_RANK | (tk << 8) | hc;
 			}
 		} else if (pa >= 16) {
-			return TP_MASK | (pa << 4) | hc;
+			return TP_RANK | (pa << 4) | hc;
 		} else if (pa != 0) {
-			return P_MASK | (pa << 12) | hc;
+			return P_RANK | (pa << 12) | hc;
 		} else {
-			return H_MASK | hc;
+			return H_RANK | hc;
 		}
 	}
 	
@@ -313,7 +305,7 @@ public abstract class Poker {
 	 * deuce to seven value - exact opposite of high value
 	 */
 	static int dsValue(String[] hand) {
-		return Poker.DS_LOW_TYPE | (Poker.MAX_MASK - Poker.value(hand));
+		return Poker.DS_LOW_TYPE | (Poker.MAX_RANK - Poker.value(hand));
 	}
 	
 	/**
@@ -367,41 +359,57 @@ public abstract class Poker {
 		if (value <= 0) {
 			return "No value";
 		}
-		
-		final boolean high;
-		final int highValue;
 		switch (value & TYPE) {
 			case HI_TYPE:
-				high = true;
-				highValue = value;
-				break;
+				return valueStringHi(value & HAND, true);
 			case DS_LOW_TYPE:
 			case AF_LOW_TYPE:
-				high = false;
-				highValue = MAX_MASK - (value & HAND);
-				break;
+				return valueStringHi(MAX_RANK - (value & HAND), false);
+			case BADUGI_TYPE:
+				return Badugi.valueString(value);
 			default:
 				return "##" + Integer.toHexString(value) + "##";
 		}
-		
+	}
+
+	private static String valueStringHi (final int highValue, final boolean high) {
 		final char c1 = valueFace(highValue);
 		final char c2 = valueFace(highValue >> 4);
 		final char c3 = valueFace(highValue >> 8);
 		final char c4 = valueFace(highValue >> 12);
 		final char c5 = valueFace(highValue >> 16);
 		
-		String s;
+		final String s;
 		switch (highValue & RANK) {
-			case SF_MASK: s = "Straight Flush - " + c1 + " high"; break;
-			case FK_MASK: s = "Four of a Kind " + c2 + " - " + c1; break;
-			case FH_MASK: s = "Full House " + c2 + " full of " + c1; break;
-			case FL_MASK: s = "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1; break;
-			case ST_MASK: s = "Straight - " + c1 + " high"; break;
-			case TK_MASK: s = "Three of a Kind " + c3 + " - " + c2 + " " + c1; break;
-			case TP_MASK: s = "Two Pair " + c3 + " and " + c2 + " - " + c1; break;
-			case P_MASK: s = "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1; break;
-			case H_MASK: s = c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + (high ? " high" : " low"); break;
-			default: s = "**" + Integer.toHexString(highValue) + "**";
+			case SF_RANK:
+				s = "Straight Flush - " + c1 + " high";
+				break;
+			case FK_RANK:
+				s = "Four of a Kind " + c2 + " - " + c1;
+				break;
+			case FH_RANK:
+				s = "Full House " + c2 + " full of " + c1;
+				break;
+			case FL_RANK:
+				s = "Flush - " + c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1;
+				break;
+			case ST_RANK:
+				s = "Straight - " + c1 + " high";
+				break;
+			case TK_RANK:
+				s = "Three of a Kind " + c3 + " - " + c2 + " " + c1;
+				break;
+			case TP_RANK:
+				s = "Two Pair " + c3 + " and " + c2 + " - " + c1;
+				break;
+			case P_RANK:
+				s = "Pair " + c4 + " - " + c3 + " " + c2 + " " + c1;
+				break;
+			case H_RANK:
+				s = c5 + " " + c4 + " " + c3 + " " + c2 + " " + c1 + (high ? " high" : " low");
+				break;
+			default:
+				s = "**" + Integer.toHexString(highValue) + "**";
 		}
 		
 		return high ? s : "(" + s + ")";
@@ -418,24 +426,25 @@ public abstract class Poker {
 	 */
 	public static int rank(int value) {
 		int t = value & TYPE;
-		int x;
 		switch (t) {
 			case HI_TYPE:
 				return (value & RANK) >> 20;
 			case AF_LOW_TYPE:
-				x = 5;
-				break;
+				return rankLo(value, 5);
 			case DS_LOW_TYPE:
-				x = 7;
-				break;
+				return rankLo(value, 7);
+			case BADUGI_TYPE:
+				return Badugi.rank(value);
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("v=" + Integer.toHexString(value));
 		}
-		
+	}
+
+	private static int rankLo (int value, int x) {
 		// get low rank
-		final int v = MAX_MASK - (value & HAND);
+		final int v = MAX_RANK - (value & HAND);
 		final int r = v & RANK;
-		if (r == H_MASK) {
+		if (r == H_RANK) {
 			final int c = (v >> 16) & 0xf;
 			if (c < x + 4) {
 				// 5-8 or 7-10

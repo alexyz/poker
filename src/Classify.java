@@ -86,7 +86,7 @@ public class Classify {
 		return ret;
 	}
 	
-	static final int NS = Poker.ST_MASK | 14;
+	static final int NS = Poker.ST_RANK | 14;
 	
 	private static int getnutstr(String[][] holes, String[] board) {
 		Poker p = new HEPoker(true, false, Value.strHiValue, null);

@@ -76,12 +76,15 @@ public class ArrayUtil {
 				a[i] = r.nextInt(10);
 			}
 			int[] b = a.clone();
-			insertionSort(b);
+			sort(b);
 			System.out.println(Arrays.toString(a) + " => " + Arrays.toString(b));
 		}
 	}
 	
-	public static void insertionSort (int[] a) {
+	/**
+	 * sort a small array of numbers, more efficiently than Arrays.sort
+	 */
+	public static void sort (int[] a) {
 		// simple insertion sort derived from wikipedia
 		for (int i = 1; i < a.length; i++) {
 			int v = a[i];

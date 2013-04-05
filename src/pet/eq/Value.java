@@ -79,7 +79,7 @@ public abstract class Value {
 	}
 	
 	/**
-	 * get hand value
+	 * get hand value from subclass
 	 */
 	public abstract int value(String[] hand);
 }

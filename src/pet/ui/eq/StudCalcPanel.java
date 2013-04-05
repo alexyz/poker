@@ -50,8 +50,8 @@ public class StudCalcPanel extends CalcPanel {
 	
 	@Override
 	protected void hideOpp(boolean hidden) {
-		for (int n = 1; n < handPanels.length; n++) {
-			List<CardButton> cardLabels = handPanels[n].getCardButtons();
+		for (int n = 1; n < handCardPanels.length; n++) {
+			List<CardButton> cardLabels = handCardPanels[n].getCardButtons();
 			cardLabels.get(0).setCardHidden(hidden);
 			cardLabels.get(1).setCardHidden(hidden);
 			cardLabels.get(6).setCardHidden(hidden);
@@ -68,11 +68,11 @@ public class StudCalcPanel extends CalcPanel {
 		
 		if (numPlayers >= 8 && numCards == 7) {
 			numCards = 6;
-			boardPanel.setCard(deck[51], 0);
+			boardCardPanel.setCard(deck[51], 0);
 		}
 		
 		for (int n = 0; n < numPlayers; n++) {
-			handPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * numCards, (n + 1) * numCards)));
+			handCardPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * numCards, (n + 1) * numCards)));
 		}
 		updateDeck();
 	}

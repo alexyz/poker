@@ -5,20 +5,33 @@ import java.util.*;
 
 import static pet.eq.Poker.*;
 
+/**
+ * methods for badugi valuation. note this doesn't subclass Poker, as badugi is
+ * hand valuation only, the game is otherwise the game as draw poker
+ */
 public class Badugi {
 	
+	/*
+	 * badugi hand values as represented by an integer:
+	 * 0x87654321
+	 * 8 = 0
+	 * 7 = 4 (BADUGI_TYPE)
+	 * 6 = rank (B1-B4)
+	 * 5 = 0
+	 * 4 = most significant (highest) card
+	 * 3,2,1 = less significant cards
+	 */
+	
 	/** unachievable worst value */
-	private static final int B0 = 0x50000;
+	private static final int B0_RANK = 0x500000;
 	/** 1 card hand */
-	private static final int B1 = 0x40000;
+	private static final int B1_RANK = 0x400000;
 	/** 2 card hand */
-	private static final int B2 = 0x30000;
+	private static final int B2_RANK = 0x300000;
 	/** 3 card hand */
-	private static final int B3 = 0x20000;
+	private static final int B3_RANK = 0x200000;
 	/** badugi */
-	private static final int B4 = 0x10000;
-	/** bitmask for getting rank */
-	private static final int BMASK = 0xf0000;
+	private static final int B4_RANK = 0x100000;
 	
 	public static final String[] shortRankNames = { "B4", "B5", "B6", "B7", "B", "3", "2/1" };
 	
@@ -48,7 +61,7 @@ public class Badugi {
 		for (int n = 0; n < 10; n++) {
 			Collections.shuffle(l);
 			String[] a = l.subList(0, 4).toArray(new String[4]);
-			System.out.println(Arrays.toString(a) + " => " + desc(badugiValue(a)));
+			System.out.println(Arrays.toString(a) + " => " + valueString(badugiValue(a)));
 		}
 	}
 	
@@ -58,12 +71,12 @@ public class Badugi {
 			throw new RuntimeException();
 		}
 		// the values are bigger for worse hands, so invert
-		return B0 - v4(hand);
+		return (B0_RANK - v4(hand)) | Poker.BADUGI_TYPE;
 	}
 	
 	/** get value of 4 card hand */
 	private static int v4 (String[] h) {
-		int v = B0;
+		int v = B0_RANK;
 		for (int n = 0; n < V3.length; n++) {
 			byte[] p = V3[n];
 			int p0 = p[0], p1 = p[1], p2 = p[2], p3 = p[3];
@@ -74,19 +87,19 @@ public class Badugi {
 				v = Math.min(v, v3(h[p1], h[p2], h[p3]));
 			}
 		}
-		if (v == B0) {
+		if (v == B0_RANK) {
 			// no cards are equal
 			// its B4, sort...
 			int[] a = { faceValueAL(h[0]), faceValueAL(h[1]), faceValueAL(h[2]), faceValueAL(h[3]) };
-			ArrayUtil.insertionSort(a);
-			return B4 | (a[3] << 12) | (a[2] << 8) | (a[1] << 4) | a[0];
+			ArrayUtil.sort(a);
+			return B4_RANK | (a[3] << 12) | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
 	}
 
 	/** get value of 3 card hand */
 	private static int v3 (String c0, String c1, String c2) {
-		int v = B0;
+		int v = B0_RANK;
 		for (int n = 0; n < V2.length; n++) {
 			byte[] p = V2[n];
 			String cp0 = arg(p[0], c0, c1, c2);
@@ -100,11 +113,11 @@ public class Badugi {
 				v = Math.min(v, v2(cp1, cp2));
 			}
 		}
-		if (v == B0) {
+		if (v == B0_RANK) {
 			// it's a B3, sort
 			int[] a = { faceValueAL(c0), faceValueAL(c1), faceValueAL(c2) };
-			ArrayUtil.insertionSort(a);
-			v = B3 | (a[2] << 8) | (a[1] << 4) | a[0];
+			ArrayUtil.sort(a);
+			v = B3_RANK | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
 	}
@@ -113,7 +126,7 @@ public class Badugi {
 	private static int v2 (String c0, String c1) {
 		if (eq(c0, c1)) {
 			// oh dear, both equal, it's a B1
-			return B1 | faceValueAL(c0);
+			return B1_RANK | faceValueAL(c0);
 			
 		} else {
 			// it's a B2
@@ -124,7 +137,7 @@ public class Badugi {
 				v0 = v1;
 				v1 = t;
 			}
-			return B2 | (v1 << 4) | v0;
+			return B2_RANK | (v1 << 4) | v0;
 		}
 	}
 
@@ -150,24 +163,49 @@ public class Badugi {
 		}
 	}
 	
-	/** return description of hand */
-	private static final String desc (int v) {
-		int v2 = B0 - v;
+	/**
+	 * return description of hand.
+	 */
+	static final String valueString (int value) {
+		int v2 = B0_RANK - (value & Poker.HAND);
 		char c0 = valueFace(v2 & 0xf);
 		char c1 = valueFace((v2 >> 4) & 0xf);
 		char c2 = valueFace((v2 >> 8) & 0xf);
 		char c3 = valueFace((v2 >> 12) & 0xf);
-		switch (v2 & BMASK) {
-			case B1:
+		switch (v2 & Poker.RANK) {
+			case B1_RANK:
 				return "1-Card: " + c0;
-			case B2:
+			case B2_RANK:
 				return "2-Card: " + c1 + " " + c0;
-			case B3:
+			case B3_RANK:
 				return "3-Card: " + c2 + " " + c1 + " " + c0;
-			case B4:
+			case B4_RANK:
 				return "Badugi: " + c3 + " " + c2 + " " + c1 + " " + c0;
 			default:
-				return "?";
+				throw new RuntimeException("v2=" + Integer.toHexString(v2));
+		}
+	}
+
+	/**
+	 * get the index into the short rank names array.
+	 */
+	public static int rank (int value) {
+		// { "B4", "B5", "B6", "B7", "B", "3", "2/1" };
+		int v2 = B0_RANK - (value & Poker.HAND);
+		switch (v2 & Poker.RANK) {
+			case B1_RANK:
+			case B2_RANK:
+				return 6;
+			case B3_RANK:
+				return 5;
+			case B4_RANK: {
+				// get most significant card
+				int hc = (v2 & 0xf000) >> 12;
+				// 4->0, 5->1, 6->2, 7->3, 8+->4
+				return hc <= 7 ? hc - 4 : 4;
+			}
+			default:
+				throw new RuntimeException("v2=" + Integer.toHexString(v2));
 		}
 	}
 	

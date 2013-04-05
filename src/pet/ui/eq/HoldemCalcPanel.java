@@ -22,6 +22,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		
 		// create board and hands and collect card labels
 		CardPanel boardPanel = new CardPanel("Community Cards", 0, 5);
+		setBoard(boardPanel);
 		
 		PokerItem[] items = new PokerItem[] {
 				new PokerItem(PokerItem.HIGH, new HEPoker(max > 2, false)),
@@ -34,9 +35,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		for (int n = 0; n < handPanels.length; n++) {
 			handPanels[n] = new HandCardPanel(name + " hand " + (n+1), min, max, false);
 		}
-		
 		// add to layout
-		setBoard(boardPanel);
 		setHandCardPanels(handPanels);
 		
 		initCardLabels();
@@ -54,38 +53,31 @@ public class HoldemCalcPanel extends CalcPanel {
 	}
 	
 	@Override
-	public void hideOpp(boolean hide) {
-		for (int n = 1; n < handPanels.length; n++) {
-			handPanels[n].setCardsHidden(hide);
-		}
-	}
-	
-	@Override
 	public void random(int numhands) {
 		System.out.println("holdem panel random hand");
 		
 		// clear
-		for (HandCardPanel hp : handPanels) {
+		for (HandCardPanel hp : handCardPanels) {
 			if (randHandsBox.isSelected()) {
 				hp.clearCards();
 			}
 			hp.setEquity(null);
 		}
 		if (randHandsBox.isSelected() && max > 4) {
-			boardPanel.setCard(null, 0);
+			boardCardPanel.setCard(null, 0);
 		}
 		if (randFlopBox.isSelected()) {
 			if (max <= 4) {
-				boardPanel.setCard(null, 0);
+				boardCardPanel.setCard(null, 0);
 			}
-			boardPanel.setCard(null, 1);
-			boardPanel.setCard(null, 2);
+			boardCardPanel.setCard(null, 1);
+			boardCardPanel.setCard(null, 2);
 		}
 		if (randFlopBox.isSelected() || randTurnBox.isSelected()) {
-			boardPanel.setCard(null, 3);
+			boardCardPanel.setCard(null, 3);
 		}
 		if (randFlopBox.isSelected() || randTurnBox.isSelected() || randRiverBox.isSelected()) {
-			boardPanel.setCard(null, 4);
+			boardCardPanel.setCard(null, 4);
 		}
 		
 		// update deck, get remaining cards
@@ -96,26 +88,26 @@ public class HoldemCalcPanel extends CalcPanel {
 		int i = 0;
 		if (randHandsBox.isSelected()) {
 			for (int n = 0; n < numhands; n++) {
-				handPanels[n].setCards(deck.subList(i, i + max));
+				handCardPanels[n].setCards(deck.subList(i, i + max));
 				i += max;
 			}
 			if (max > 4) {
-				boardPanel.setCard(deck.get(i++), 0);
+				boardCardPanel.setCard(deck.get(i++), 0);
 			}
 		}
 		
 		if (randFlopBox.isSelected()) {
 			if (max <= 4) {
-				boardPanel.setCard(deck.get(i++), 0);
+				boardCardPanel.setCard(deck.get(i++), 0);
 			}
-			boardPanel.setCard(deck.get(i++), 1);
-			boardPanel.setCard(deck.get(i++), 2);
+			boardCardPanel.setCard(deck.get(i++), 1);
+			boardCardPanel.setCard(deck.get(i++), 2);
 		}
 		if (randTurnBox.isSelected()) {
-			boardPanel.setCard(deck.get(i++), 3);
+			boardCardPanel.setCard(deck.get(i++), 3);
 		}
 		if (randRiverBox.isSelected()) {
-			boardPanel.setCard(deck.get(i++), 4);
+			boardCardPanel.setCard(deck.get(i++), 4);
 		}
 		
 		updateDeck();

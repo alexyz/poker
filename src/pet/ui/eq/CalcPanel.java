@@ -15,6 +15,135 @@ import pet.eq.*;
  */
 public abstract class CalcPanel extends JPanel {
 	
+	private final class dpcl implements PropertyChangeListener {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			System.out.println("calc panel deck card deselected prop change");
+			for (int n = 0; n < cardButtons.size(); n++) {
+				CardButton cl = cardButtons.get(n);
+				String c = cl.getCard();
+				if (c != null && c.equals(e.getNewValue())) {
+					// remove the card
+					cl.setCard(null);
+					selectCard(n);
+					break;
+				}
+			}
+		}
+	}
+
+	private final class spcl implements PropertyChangeListener {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent e) {
+			System.out.println("calc panel deck card selected prop change");
+			find: {
+				String newCard = (String) e.getNewValue();
+				for (int n = 0; n < cardButtons.size(); n++) {
+					CardButton b = cardButtons.get(n);
+					if (b.isSelected()) {
+						// set the selected card to the deck card and move to next card
+						String oldCard = b.getCard();
+						if (oldCard != null && !oldCard.equals(newCard)) {
+							deckPanel.setCardSelected(oldCard, false);
+						}
+						b.setCard(newCard);
+						b.setSelected(false);
+						
+						// select next button
+						CardButton nb = cardButtons.get((n + 1) % cardButtons.size());
+						nb.setSelected(true);
+						// req focus? will take it from deck
+						break find;
+					}
+				}
+				// reject if no card selected
+				deckPanel.setCardSelected(newCard, false);
+			}
+		}
+	}
+
+	private final class bkl extends KeyAdapter {
+		
+		char c1 = 0;
+		
+		@Override
+		public void keyTyped(KeyEvent e) {
+			CardButton b = (CardButton) e.getSource();
+			char c2 = e.getKeyChar();
+			System.out.println("calc panel typed " + Integer.toHexString(e.getKeyChar()));
+			if (c2 == '\n') {
+				System.out.println("-- return --");
+				for (CardButton ob : cardButtons) {
+					ob.setSelected(false);
+				}
+				// shift doesn't work
+				CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
+				nb.setSelected(true);
+				nb.requestFocusInWindow();
+				c1 = 0;
+				
+				// TODO backspace
+				
+			} else if (c1 != 0) {
+				String c = new String(new char[] { 
+						Character.toUpperCase(c1), 
+						Character.toLowerCase(c2) 
+				});
+				
+				// note: may already be selected in deck
+				if (deckPanel.setCardSelected(c, true)) {
+					// unset card from any other buttons
+					for (CardButton ob : cardButtons) {
+						ob.setSelected(false);
+						if (ob != b && ob.getCard() != null && ob.getCard().equals(c)) {
+							ob.setCard(null);
+						}
+					}
+					
+					// set the card on this button
+					b.setCard(c);
+					
+					// focus next button
+					CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
+					nb.setSelected(true);
+					nb.requestFocusInWindow();
+				}
+				c1 = 0;
+				
+			} else {
+				c1 = c2;
+			}
+		}
+	}
+
+	private final class bal implements ActionListener {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			CardButton b = (CardButton) e.getSource();
+			if (b.isSelected()) {
+				System.out.println("calc panel card selected: " + b.getName() + " value " + b.getCard());
+				if (b.getCard() != null) {
+					// clear card
+					deckPanel.setCardSelected(b.getCard(), false);
+					b.setCard(null);
+				}
+				// deselect other cards
+				for (CardButton ob : cardButtons) {
+					if (ob != b) {
+						ob.setSelected(false);
+					}
+				}
+				
+			} else {
+				System.out.println("calc panel card deselected: " + b.getName() + " value " + b.getCard());
+				// do nothing
+			}
+		}
+	}
+	
 	private final DeckPanel deckPanel = new DeckPanel();
 	private final JPanel randPanel = new JPanel();
 	private final JPanel randOptsPanel = new JPanel();
@@ -32,11 +161,12 @@ public abstract class CalcPanel extends JPanel {
 	 * blockers (in that order)
 	 */
 	private final List<CardButton> cardButtons = new ArrayList<>();
-	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>(); // XXX
-	public final JSpinner drawsSpinner; // XXX
+	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>();
+	private final JSpinner drawsSpinner;
 	
-	public HandCardPanel[] handPanels; // XXX
-	public CardPanel boardPanel;
+	// protected to allow access by subclasses
+	protected HandCardPanel[] handCardPanels;
+	protected CardPanel boardCardPanel;
 	
 	public CalcPanel() {
 		this(false);
@@ -61,52 +191,9 @@ public abstract class CalcPanel extends JPanel {
 			}
 		});
 		
-		deckPanel.addPropertyChangeListener(DeckPanel.CARD_SEL_PROP_CHANGE, new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent e) {
-				System.out.println("calc panel deck card selected prop change");
-				find: {
-					String newCard = (String) e.getNewValue();
-					for (int n = 0; n < cardButtons.size(); n++) {
-						CardButton b = cardButtons.get(n);
-						if (b.isSelected()) {
-							// set the selected card to the deck card and move to next card
-							String oldCard = b.getCard();
-							if (oldCard != null && !oldCard.equals(newCard)) {
-								deckPanel.setCardSelected(oldCard, false);
-							}
-							b.setCard(newCard);
-							b.setSelected(false);
-							
-							// select next button
-							CardButton nb = cardButtons.get((n + 1) % cardButtons.size());
-							nb.setSelected(true);
-							// req focus? will take it from deck
-							break find;
-						}
-					}
-					// reject if no card selected
-					deckPanel.setCardSelected(newCard, false);
-				}
-			}
-		});
+		deckPanel.addPropertyChangeListener(DeckPanel.CARD_SEL_PROP_CHANGE, new spcl());
 		
-		deckPanel.addPropertyChangeListener(DeckPanel.CARD_DESEL_PROP_CHANGE, new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent e) {
-				System.out.println("calc panel deck card deselected prop change");
-				for (int n = 0; n < cardButtons.size(); n++) {
-					CardButton cl = cardButtons.get(n);
-					String c = cl.getCard();
-					if (c != null && c.equals(e.getNewValue())) {
-						// remove the card
-						cl.setCard(null);
-						selectCard(n);
-						break;
-					}
-				}
-			}
-		});
+		deckPanel.addPropertyChangeListener(DeckPanel.CARD_DESEL_PROP_CHANGE, new dpcl());
 		
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -178,7 +265,7 @@ public abstract class CalcPanel extends JPanel {
 	
 	/** set the community card panel */
 	protected void setBoard(CardPanel boardPanel) {
-		this.boardPanel = boardPanel;
+		this.boardCardPanel = boardPanel;
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridy = 1;
 		add(boardPanel, c);
@@ -188,7 +275,7 @@ public abstract class CalcPanel extends JPanel {
 	 * Set the card panels created by the subclass (not the actual hands)
 	 */
 	protected void setHandCardPanels(HandCardPanel[] cardPanels) {
-		this.handPanels = cardPanels;
+		this.handCardPanels = cardPanels;
 		
 		randNumOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
 		
@@ -229,13 +316,13 @@ public abstract class CalcPanel extends JPanel {
 	 */
 	protected void initCardLabels() {
 		// collect the card labels in selection order
-		if (boardPanel != null) {
-			for (CardButton b : boardPanel.getCardButtons()) {
+		if (boardCardPanel != null) {
+			for (CardButton b : boardCardPanel.getCardButtons()) {
 				cardButtons.add(b);
 			}
 		}
 		
-		for (CardPanel cp : handPanels) {
+		for (CardPanel cp : handCardPanels) {
 			for (CardButton b : cp.getCardButtons()) {
 				cardButtons.add(b);
 			}
@@ -249,79 +336,8 @@ public abstract class CalcPanel extends JPanel {
 		for (int n = 0; n < cardButtons.size(); n++) {
 			final CardButton b = cardButtons.get(n);
 			b.setName("Hand-" + n);
-			b.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (b.isSelected()) {
-						System.out.println("calc panel card selected: " + b.getName() + " value " + b.getCard());
-						if (b.getCard() != null) {
-							// clear card
-							deckPanel.setCardSelected(b.getCard(), false);
-							b.setCard(null);
-						}
-						// deselect other cards
-						for (CardButton ob : cardButtons) {
-							if (ob != b) {
-								ob.setSelected(false);
-							}
-						}
-						
-					} else {
-						System.out.println("calc panel card deselected: " + b.getName() + " value " + b.getCard());
-						// do nothing
-					}
-				}
-			});
-			b.addKeyListener(new KeyAdapter() {
-				char c1 = 0;
-				@Override
-				public void keyTyped(KeyEvent e) {
-					char c2 = e.getKeyChar();
-					System.out.println("calc panel typed " + Integer.toHexString(e.getKeyChar()));
-					if (c2 == '\n') {
-						System.out.println("-- return --");
-						for (CardButton ob : cardButtons) {
-							ob.setSelected(false);
-						}
-						// shift doesn't work
-						CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
-						nb.setSelected(true);
-						nb.requestFocusInWindow();
-						c1 = 0;
-						
-						// TODO backspace
-						
-					} else if (c1 != 0) {
-						String c = new String(new char[] { 
-								Character.toUpperCase(c1), 
-								Character.toLowerCase(c2) 
-						});
-						
-						// note: may already be selected in deck
-						if (deckPanel.setCardSelected(c, true)) {
-							// unset card from any other buttons
-							for (CardButton ob : cardButtons) {
-								ob.setSelected(false);
-								if (ob != b && ob.getCard() != null && ob.getCard().equals(c)) {
-									ob.setCard(null);
-								}
-							}
-							
-							// set the card on this button
-							b.setCard(c);
-							
-							// focus next button
-							CardButton nb = cardButtons.get((cardButtons.indexOf(b) + 1) % cardButtons.size());
-							nb.setSelected(true);
-							nb.requestFocusInWindow();
-						}
-						c1 = 0;
-						
-					} else {
-						c1 = c2;
-					}
-				}
-			});
+			b.addActionListener(new bal());
+			b.addKeyListener(new bkl());
 		}
 	}
 	
@@ -344,11 +360,11 @@ public abstract class CalcPanel extends JPanel {
 	protected void clear() {
 		deckPanel.deselectCards();
 		int n = 0;
-		if (boardPanel != null) {
-			boardPanel.clearCards();
-			n += boardPanel.getCardButtons().size();
+		if (boardCardPanel != null) {
+			boardCardPanel.clearCards();
+			n += boardCardPanel.getCardButtons().size();
 		}
-		for (CardPanel cp : handPanels) {
+		for (CardPanel cp : handCardPanels) {
 			cp.clearCards();
 		}
 		blockersCardPanel.clearCards();
@@ -384,10 +400,10 @@ public abstract class CalcPanel extends JPanel {
 		clear();
 		if (board != null) {
 			// board panel could be null...
-			boardPanel.setCards(Arrays.asList(board));
+			boardCardPanel.setCards(Arrays.asList(board));
 		}
 		for (int n = 0; n < holeCards.size(); n++) {
-			handPanels[n].setCards(Arrays.asList(holeCards.get(n)));
+			handCardPanels[n].setCards(Arrays.asList(holeCards.get(n)));
 		}
 		randNumOppSpinner.setValue(holeCards.size());
 		updateDeck();
@@ -398,8 +414,8 @@ public abstract class CalcPanel extends JPanel {
 	 * get cards from array of hand card panels.
 	 * return null if no cards set or some hands incomplete
 	 */
-	public void collectCards(List<String[]> hands, List<HandCardPanel> panels) {
-		for (HandCardPanel p : handPanels) {
+	private void collectCards(List<String[]> hands, List<HandCardPanel> panels) {
+		for (HandCardPanel p : handCardPanels) {
 			List<String> cards = p.getCards();
 			if (cards.size() > 0) {
 				if (cards.size() < p.getMinCards()) {
@@ -415,12 +431,12 @@ public abstract class CalcPanel extends JPanel {
 	}
 	
 	/** calc button pressed */
-	public void calc() {
-		for (HandCardPanel hp : handPanels) {
+	protected void calc() {
+		for (HandCardPanel hp : handCardPanels) {
 			hp.setEquity(null);
 		}
 		
-		List<String> board = boardPanel != null ? boardPanel.getCards() : null;
+		List<String> board = boardCardPanel != null ? boardCardPanel.getCards() : null;
 		List<HandCardPanel> cardPanels = new ArrayList<>();
 		List<String[]> cards = new ArrayList<>();
 		collectCards(cards, cardPanels);
@@ -447,8 +463,8 @@ public abstract class CalcPanel extends JPanel {
 	
 	/** hide the cards in the deck. subclass should also hide opponents hole card */
 	protected void hideOpp(boolean hide) {
-		for (int n = 1; n < handPanels.length; n++) {
-			handPanels[n].setCardsHidden(hide);
+		for (int n = 1; n < handCardPanels.length; n++) {
+			handCardPanels[n].setCardsHidden(hide);
 		}
 	}
 	
@@ -457,8 +473,8 @@ public abstract class CalcPanel extends JPanel {
 		String[] deck = Poker.deck();
 		ArrayUtil.shuffle(deck, new Random());
 		for (int n = 0; n < num; n++) {
-			int c = handPanels[n].getMaxCards();
-			handPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * c, n * c + c)));
+			int c = handCardPanels[n].getMaxCards();
+			handCardPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * c, n * c + c)));
 		}
 		updateDeck();
 	}
