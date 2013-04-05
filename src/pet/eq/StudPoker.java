@@ -129,8 +129,8 @@ public class StudPoker extends Poker {
 		// set current values
 		MEquityUtil.updateCurrent(meqs, value.eqtype(), hivals);
 		if (hasLow) {
-			MEquityUtil.updateCurrent(meqs, Equity.HILO_HI_HALF, hivals);
-			MEquityUtil.updateCurrent(meqs, Equity.HILO_AFLO8_HALF, lovals);
+			MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_HI_HALF, hivals);
+			MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_AFLO8_HALF, lovals);
 		}
 		
 		final int samples;

@@ -111,7 +111,7 @@ public class HEPoker extends Poker {
 		}
 		
 		// equity type is ignored if hilo is true
-		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, Equity.HI_ONLY, heboard.deck.length, heboard.exact());
+		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, Equity.Type.HI_ONLY, heboard.deck.length, heboard.exact());
 		final int[] hivals = new int[holeCards.length];
 		final int[] lovals = lowPossible ? new int[holeCards.length] : null;
 		
@@ -122,15 +122,15 @@ public class HEPoker extends Poker {
 					hivals[n] = heValue(hiValue, heboard.current, holeCards[n]);
 				}
 			}
-			MEquityUtil.updateCurrent(meqs, Equity.HI_ONLY, hivals);
+			MEquityUtil.updateCurrent(meqs, Equity.Type.HI_ONLY, hivals);
 			
 			if (lowPossible) {
-				MEquityUtil.updateCurrent(meqs, Equity.HILO_HI_HALF, hivals);
+				MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_HI_HALF, hivals);
 				// get current low values
 				for (int n = 0; n < holeCards.length; n++) {
 					lovals[n] = heValue(loValue, heboard.current, holeCards[n]);
 				}
-				MEquityUtil.updateCurrent(meqs, Equity.HILO_AFLO8_HALF, lovals);
+				MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_AFLO8_HALF, lovals);
 			}
 		}
 		
@@ -175,7 +175,7 @@ public class HEPoker extends Poker {
 				
 			} else {
 				// high winner
-				MEquityUtil.updateEquityHi(meqs, Equity.HI_ONLY, hivals, null);
+				MEquityUtil.updateEquityHi(meqs, Equity.Type.HI_ONLY, hivals, null);
 			}
 		}
 

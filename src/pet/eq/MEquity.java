@@ -25,14 +25,14 @@ public class MEquity {
 	int scoopcount;
 	
 	/** create mequity - either hi/hi half/lo half or with given equity type, not both */
-	MEquity(boolean hilo, int eqtype, int rem, boolean exact) {
+	MEquity(boolean hilo, Equity.Type eqtype, int rem, boolean exact) {
 		this.hilo = hilo;
 		// keep track of outs only if exact
 		if (hilo) {
 			this.eqs = new Equity[] { 
-				new Equity(Equity.HI_ONLY, exact), 
-				new Equity(Equity.HILO_HI_HALF, exact),
-				new Equity(Equity.HILO_AFLO8_HALF, exact) 
+				new Equity(Equity.Type.HI_ONLY, exact), 
+				new Equity(Equity.Type.HILO_HI_HALF, exact),
+				new Equity(Equity.Type.HILO_AFLO8_HALF, exact) 
 			};
 		} else {
 			this.eqs = new Equity[] { 
@@ -44,19 +44,19 @@ public class MEquity {
 	}
 	
 	/** get the equity instance for the given equity type */
-	public Equity getEq(int eqtype) {
+	public Equity getEq(Equity.Type eqtype) {
 		int i;
 		switch (eqtype) {
-			case Equity.DSLO_ONLY:
-			case Equity.AFLO_ONLY:
-			case Equity.AFLO8_ONLY:
-			case Equity.HI_ONLY:
+			case DSLO_ONLY:
+			case AFLO_ONLY:
+			case AFLO8_ONLY:
+			case HI_ONLY:
 				i = 0;
 				break;
-			case Equity.HILO_HI_HALF:
+			case HILO_HI_HALF:
 				i = 1;
 				break;
-			case Equity.HILO_AFLO8_HALF:
+			case HILO_AFLO8_HALF:
 				i = 2;
 				break;
 			default:

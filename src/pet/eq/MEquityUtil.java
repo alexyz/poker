@@ -9,7 +9,7 @@ public class MEquityUtil {
 	 * Make array of multiple hand equities for given number of remaining cards,
 	 * game type and calculation method
 	 */
-	static MEquity[] createMEquity(int hands, boolean hilo, int eqtype, int rem, boolean exact) {
+	static MEquity[] createMEquity(int hands, boolean hilo, Equity.Type eqtype, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
 			meqs[n] = new MEquity(hilo, eqtype, rem, exact);
@@ -20,7 +20,7 @@ public class MEquityUtil {
 	/**
 	 * Set the current value of the hands, not the equity
 	 */
-	static void updateCurrent(MEquity[] meqs, int eqtype, int[] vals) {
+	static void updateCurrent(MEquity[] meqs, Equity.Type eqtype, int[] vals) {
 		int max = 0, times = 0;
 		for (int i = 0; i < vals.length; i++) {
 			int v = vals[i];
@@ -53,9 +53,9 @@ public class MEquityUtil {
 	 */
 	static void updateEquityHiLo(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
 		// high winner
-		int hw = MEquityUtil.updateEquity(meqs, Equity.HILO_HI_HALF, hivals, cards);
+		int hw = MEquityUtil.updateEquity(meqs, Equity.Type.HILO_HI_HALF, hivals, cards);
 		// low winner
-		int lw = MEquityUtil.updateEquity(meqs, Equity.HILO_AFLO8_HALF, lovals, cards);
+		int lw = MEquityUtil.updateEquity(meqs, Equity.Type.HILO_AFLO8_HALF, lovals, cards);
 		// have to win hi and low for scoop
 		if (hw >= 0 && hw == lw) {
 			meqs[hw].scoopcount++;
@@ -66,7 +66,7 @@ public class MEquityUtil {
 	 * Update equities win, tie, win rank and scoop with given hand values for the
 	 * given cards.
 	 */
-	static void updateEquityHi(MEquity[] meqs, int eqtype, int[] hivals, String[] cards) {
+	static void updateEquityHi(MEquity[] meqs, Equity.Type eqtype, int[] hivals, String[] cards) {
 		int hw = MEquityUtil.updateEquity(meqs, eqtype, hivals, cards);
 		if (hw >= 0) {
 			meqs[hw].scoopcount++;
@@ -78,7 +78,7 @@ public class MEquityUtil {
 	 * given cards.
 	 * Return index of single winner (scoop), if any, or -1
 	 */
-	private static int updateEquity(MEquity[] meqs, int eqtype, int[] vals, String[] cards) {
+	private static int updateEquity(MEquity[] meqs, Equity.Type eqtype, int[] vals, String[] cards) {
 		// find highest hand and number of times it occurs
 		int max = 0, maxcount = 0;
 		for (int i = 0; i < vals.length; i++) {
@@ -222,40 +222,6 @@ public class MEquityUtil {
 		}
 		
 		return s;
-	}
-	
-
-	/** get name of equity type */
-	public static String getEqTypeName(int eqtype) {
-		switch (eqtype) {
-			case Equity.DSLO_ONLY: return "2-7 Low Only";
-			case Equity.AFLO_ONLY: return "A-5 Low Only";
-			case Equity.AFLO8_ONLY: return "A-5 Low (8) Only";
-			case Equity.HI_ONLY: return "High Only";
-			case Equity.HILO_HI_HALF: return "High Half";
-			case Equity.HILO_AFLO8_HALF: return "A-5 Low (8) Half";
-			default: throw new RuntimeException("no such equity type: " + eqtype);
-		}
-	}
-	
-	/**
-	 * get the array of rank names for the equity type. can't use current value
-	 * to get type because it might not be set
-	 */
-	public static String[] getRankNames(int eqtype) {
-		switch (eqtype) {
-			case Equity.DSLO_ONLY: 
-				return Poker.dsLowRankNames;
-			case Equity.AFLO_ONLY:
-			case Equity.HILO_AFLO8_HALF:
-			case Equity.AFLO8_ONLY: 
-				return Poker.afLowRankNames;
-			case Equity.HI_ONLY:
-			case Equity.HILO_HI_HALF:
-				return Poker.ranknames;
-			default: 
-				throw new RuntimeException("no such equity type: " + eqtype);
-		}
 	}
 	
 }

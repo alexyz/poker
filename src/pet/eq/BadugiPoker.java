@@ -29,7 +29,11 @@ public class BadugiPoker extends Poker {
 		{ 1, 2, 0 } 
 	};
 	
-	/** six combinations of 3 card hands (one of [0] or [1], plus [2] and [3]) */
+	/**
+	 * six combinations of 3 card hands (one of [0] or [1], plus [2] and [3]).
+	 * i.e. the first two columns are [0123] pick 2, and the second two are the
+	 * remaining indexes
+	 */
 	private static final byte[][] V3 = { 
 		{ 0, 1, 2, 3 }, 
 		{ 0, 2, 1, 3 }, 

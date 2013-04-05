@@ -41,7 +41,7 @@ class EquityPanel extends JPanel {
 	
 	public void setEquity(Equity e) {
 		typeLab.setFont(font);
-		typeLab.setText(MEquityUtil.getEqTypeName(e.eqtype));
+		typeLab.setText(EquityUtil.getEqTypeName(e.eqtype));
 		
 		equityLab.setFont(font);
 		String et = String.format("Win: %.1f%%", e.won);

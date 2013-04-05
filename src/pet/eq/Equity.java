@@ -28,28 +28,29 @@ public class Equity {
 		}
 	}
 	
-	/*
+	/**
 	 * equity types (note: hi/lo (8 or better) is not a type, it is actually
 	 * three types, hence the MEquity class). These look similar to the
 	 * constants in the Poker class, such as AF_LOW_TYPE, but they deal with
 	 * hand valuation only, whereas these include the context of how that
 	 * valuation is used.
 	 */
-	/** deuce to seven low only equity type (single draw/triple draw) */
-	public static final int DSLO_ONLY = 1;
-	/** ace to five low only equity type  (razz) */ 
-	public static final int AFLO_ONLY = 2;
-	/** high only equity type (holdem, omaha hi, 5 card draw, etc) */
-	public static final int HI_ONLY = 3;
-	/** high half of hi/lo equity type (omaha 8, stud 8, etc) */
-	public static final int HILO_HI_HALF = 4;
-	/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
-	public static final int HILO_AFLO8_HALF = 5;
-	/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
-	public static final int AFLO8_ONLY = 6;
-	
+	public enum Type {
+		/** deuce to seven low only equity type (single draw/triple draw) */
+		DSLO_ONLY,
+		/** ace to five low only equity type  (razz) */ 
+		AFLO_ONLY,
+		/** high only equity type (holdem, omaha hi, 5 card draw, etc) */
+		HI_ONLY,
+		/** high half of hi/lo equity type (omaha 8, stud 8, etc) */
+		HILO_HI_HALF,
+		/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
+		HILO_AFLO8_HALF,
+		/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
+		AFLO8_ONLY
+	}
 	/** equity type description */
-	public final int eqtype;
+	public final Type eqtype;
 	/** current value */
 	public int current;
 	/** Currently winning and not tying */
@@ -84,12 +85,12 @@ public class Equity {
 	/** count that each card (as part of group of cards) will make the best hand */
 	final int[] outcount;
 	
-	public Equity(int eqtype, boolean hasouts) {
+	public Equity(Equity.Type eqtype, boolean hasouts) {
 		this.eqtype = eqtype;
 		this.outcount = hasouts ? new int[52] : null;
 		this.outs = hasouts ? new ArrayList<Out>() : null;
 	}
-
+	
 	/**
 	 * update percentage won, tied and by rank
 	 */
@@ -108,7 +109,7 @@ public class Equity {
 			//System.out.println("    hands=" + hands + " woncount=" + woncount + " tiedcount=" + tiedcount + " tiedwithcount=" + tiedwithcount + " totalpc=" + total);
 		}
 	}
-
+	
 	/**
 	 * Summarise out probabilities for given number of picks from remaining cards
 	 */
