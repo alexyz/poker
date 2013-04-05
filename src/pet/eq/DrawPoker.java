@@ -50,26 +50,26 @@ public class DrawPoker extends Poker {
 		final String[] deck = Poker.remdeck(holeCards, blockers);
 		
 		// return value
-		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, false, value.eqtype(), deck.length, false);
+		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, false, value.eqtype, deck.length, false);
 		
 		// get current hand values (not equity)
 		final int[] vals = new int[holeCards.length];
 		for (int n = 0; n < holeCards.length; n++) {
-			if (holeCards[n].length == 5) {
+			if (holeCards[n].length == value.cards) {
 				vals[n] = value.value(holeCards[n]);
 			}
 		}
-		MEquityUtil.updateCurrent(meqs, value.eqtype(), vals);
+		MEquityUtil.updateCurrent(meqs, value.eqtype, vals);
 		
 		if (draws == 0) {
 			// final street, just return current values
 			System.out.println("no draws, using current");
-			MEquityUtil.updateEquityHi(meqs, value.eqtype(), vals, null);
+			MEquityUtil.updateEquityHi(meqs, value.eqtype, vals, null);
 			MEquityUtil.summariseEquity(meqs, 1, 0);
 			
 		} else {
 			// draw at least once
-			final String[] hand = new String[5];
+			final String[] hand = new String[value.cards];
 			final int samples = 10000;
 			final Random r = new Random();
 			System.out.println("draw " + draws + ", " + samples + " samples");
@@ -87,7 +87,7 @@ public class DrawPoker extends Poker {
 					for (int d = 0; d < draws; d++) {
 						// could be any length
 						String[] cards = holeCards[hn];
-						for (int n = 0; n < 5; n++) {
+						for (int n = 0; n < value.cards; n++) {
 							if (cards.length > n) {
 								hand[n] = cards[n];
 							} else {
@@ -105,7 +105,7 @@ public class DrawPoker extends Poker {
 					}
 					vals[hn] = maxv;
 				}
-				MEquityUtil.updateEquityHi(meqs, value.eqtype(), vals, null);
+				MEquityUtil.updateEquityHi(meqs, value.eqtype, vals, null);
 			}
 			
 			MEquityUtil.summariseEquity(meqs, samples, 0);
@@ -116,7 +116,7 @@ public class DrawPoker extends Poker {
 	
 	@Override
 	public int value(String[] board, String[] hole) {
-		if (board != null || hole.length != 5) {
+		if (board != null || hole.length != value.cards) {
 			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
 		}
 		return value.value(hole);

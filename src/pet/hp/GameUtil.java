@@ -21,7 +21,7 @@ public class GameUtil {
 	private static final StudPoker studPoker = new StudPoker(Value.hiValue, false);
 	private static final StudPoker studHLPoker = new StudPoker(Value.hiValue, true);
 	private static final StudPoker razzPoker = new StudPoker(Value.afLowValue, false);
-	private static final BadugiPoker badugiPoker = new BadugiPoker();
+	private static final Badugi badugiPoker = new Badugi();
 	private static final FiveCardStudPoker fiveCardStudPoker = new FiveCardStudPoker();
 	
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };
@@ -292,7 +292,7 @@ public class GameUtil {
 			case FCSTUD:
 				return Poker.ranknames;
 			case BG:
-				return BadugiPoker.shortRanks;
+				return Badugi.shortRanks;
 			default:
 				throw new RuntimeException();
 		}

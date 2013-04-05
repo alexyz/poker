@@ -1,11 +1,11 @@
 
 package pet.eq;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
-public class BadugiPoker extends Poker {
+import static pet.eq.Poker.*;
+
+public class Badugi {
 	
 	/** unachievable worst value */
 	private static final int B0 = 0x50000;
@@ -166,16 +166,6 @@ public class BadugiPoker extends Poker {
 			default:
 				return "?";
 		}
-	}
-	
-	@Override
-	protected MEquity[] equity (String[] board, String[][] holeCards, String[] blockers, int draws) {
-		return null;
-	}
-	
-	@Override
-	public int value (String[] board, String[] hole) {
-		return 0;
 	}
 	
 }

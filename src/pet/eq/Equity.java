@@ -47,7 +47,9 @@ public class Equity {
 		/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
 		HILO_AFLO8_HALF,
 		/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
-		AFLO8_ONLY
+		AFLO8_ONLY,
+		/** badugi value */
+		BADUGI_ONLY
 	}
 	/** equity type description */
 	public final Type eqtype;
