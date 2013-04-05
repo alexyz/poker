@@ -3,11 +3,12 @@ package pet.ui.eq;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
+
+import pet.eq.*;
 
 /**
  * displays a deck and the game specific calc panel
@@ -31,11 +32,20 @@ public abstract class CalcPanel extends JPanel {
 	 * blockers (in that order)
 	 */
 	private final List<CardButton> cardButtons = new ArrayList<>();
+	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>(); // XXX
+	public final JSpinner drawsSpinner; // XXX
 	
-	private HandCardPanel[] cardPanels;
-	private CardPanel boardPanel;
+	public HandCardPanel[] handPanels; // XXX
+	public CardPanel boardPanel;
 	
 	public CalcPanel() {
+		this(false);
+	}
+	
+	/**
+	 * create panel with optional draw spinner
+	 */
+	public CalcPanel(boolean draw) {
 		setLayout(new GridBagLayout());
 		
 		// hack to get the selected card to be focused
@@ -146,6 +156,24 @@ public abstract class CalcPanel extends JPanel {
 		calcButtonsPanel.add(calcButton);
 		c.gridy = 5;
 		add(calcButtonsPanel, c);
+		
+		// used to be in subclass
+		
+		calcOptsPanel.add(new JLabel("Value"));
+		calcOptsPanel.add(pokerCombo);
+		
+		if (draw) {
+			drawsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 3, 1));
+			calcOptsPanel.add(new JLabel("Draws"));
+			calcOptsPanel.add(drawsSpinner);
+			
+		} else {
+			drawsSpinner = null;
+		}
+	}
+	
+	protected void setPokerItems(PokerItem[] items) {
+		pokerCombo.setModel(new DefaultComboBoxModel<>(items));
 	}
 	
 	/** set the community card panel */
@@ -160,7 +188,7 @@ public abstract class CalcPanel extends JPanel {
 	 * Set the card panels created by the subclass (not the actual hands)
 	 */
 	protected void setHandCardPanels(HandCardPanel[] cardPanels) {
-		this.cardPanels = cardPanels;
+		this.handPanels = cardPanels;
 		
 		randNumOppSpinner.setModel(new SpinnerNumberModel(2, 1, cardPanels.length, 1));
 		
@@ -195,10 +223,6 @@ public abstract class CalcPanel extends JPanel {
 		randOptsPanel.add(c);
 	}
 	
-	protected void addCalcOpt(JComponent c) {
-		calcOptsPanel.add(c);
-	}
-	
 	/**
 	 * Add selection listener to all the card labels. Need to call setBoard,
 	 * setCardPanels first.
@@ -211,7 +235,7 @@ public abstract class CalcPanel extends JPanel {
 			}
 		}
 		
-		for (CardPanel cp : cardPanels) {
+		for (CardPanel cp : handPanels) {
 			for (CardButton b : cp.getCardButtons()) {
 				cardButtons.add(b);
 			}
@@ -324,7 +348,7 @@ public abstract class CalcPanel extends JPanel {
 			boardPanel.clearCards();
 			n += boardPanel.getCardButtons().size();
 		}
-		for (CardPanel cp : cardPanels) {
+		for (CardPanel cp : handPanels) {
 			cp.clearCards();
 		}
 		blockersCardPanel.clearCards();
@@ -354,24 +378,20 @@ public abstract class CalcPanel extends JPanel {
 		return deckPanel.getCards(false);
 	}
 	
-	/**
-	 * get blockers
-	 */
-	protected List<String> getBlockers() {
-		return blockersCardPanel.getCards();
-	}
-	
-	/** set the board, hands and blockers */
-	protected void displayHand(String[] board, List<String[]> holeCards) {
+	/** display the given board, cards and hand value type */
+	public void displayHand(String[] board, List<String[]> holeCards, String type) {
+		// TODO - add blockers
 		clear();
 		if (board != null) {
+			// board panel could be null...
 			boardPanel.setCards(Arrays.asList(board));
 		}
 		for (int n = 0; n < holeCards.size(); n++) {
-			cardPanels[n].setCards(Arrays.asList(holeCards.get(n)));
+			handPanels[n].setCards(Arrays.asList(holeCards.get(n)));
 		}
 		randNumOppSpinner.setValue(holeCards.size());
 		updateDeck();
+		PokerItem.select(pokerCombo, type);
 	}
 	
 	/**
@@ -379,7 +399,7 @@ public abstract class CalcPanel extends JPanel {
 	 * return null if no cards set or some hands incomplete
 	 */
 	public void collectCards(List<String[]> hands, List<HandCardPanel> panels) {
-		for (HandCardPanel p : cardPanels) {
+		for (HandCardPanel p : handPanels) {
 			List<String> cards = p.getCards();
 			if (cards.size() > 0) {
 				if (cards.size() < p.getMinCards()) {
@@ -394,20 +414,53 @@ public abstract class CalcPanel extends JPanel {
 		System.out.println("hands: " + hands.size());
 	}
 	
-	//
-	// methods for subclass
-	//
-	
-	/** display the given board, cards and hand value type */
-	public abstract void displayHand(String[] board, List<String[]> cards, String type);
-	
-	/** random button pressed */
-	protected abstract void random(int num);
-	
 	/** calc button pressed */
-	protected abstract void calc();
+	public void calc() {
+		for (HandCardPanel hp : handPanels) {
+			hp.setEquity(null);
+		}
+		
+		List<String> board = boardPanel != null ? boardPanel.getCards() : null;
+		List<HandCardPanel> cardPanels = new ArrayList<>();
+		List<String[]> cards = new ArrayList<>();
+		collectCards(cards, cardPanels);
+		
+		if (cards.size() == 0) {
+			System.out.println("no hands");
+			return;
+		}
+		
+		final List<String> blockers = blockersCardPanel.getCards();
+		final PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
+		int draws = 0;
+		if (drawsSpinner != null) {
+			draws = ((SpinnerNumberModel) drawsSpinner.getModel()).getNumber().intValue();
+		}
+		
+		final MEquity[] meqs = pokerItem.poker.equity(board, cards, blockers, draws);
+		
+		for (int n = 0; n < meqs.length; n++) {
+			cardPanels.get(n).setEquity(meqs[n]);
+		}
+		
+	}
 	
 	/** hide the cards in the deck. subclass should also hide opponents hole card */
-	protected abstract void hideOpp(boolean hide);
+	protected void hideOpp(boolean hide) {
+		for (int n = 1; n < handPanels.length; n++) {
+			handPanels[n].setCardsHidden(hide);
+		}
+	}
+	
+	/** random button pressed */
+	protected void random(int num) {
+		String[] deck = Poker.deck();
+		ArrayUtil.shuffle(deck, new Random());
+		for (int n = 0; n < num; n++) {
+			int c = handPanels[n].getMaxCards();
+			handPanels[n].setCards(Arrays.asList(Arrays.copyOfRange(deck, n * c, n * c + c)));
+		}
+		updateDeck();
+	}
 	
 }

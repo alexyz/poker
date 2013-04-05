@@ -344,7 +344,7 @@ public class PlayerGameInfo {
 		sb.append("Actions:\n");
 		for (int n = 0; n < actionCount.length; n++) {
 			if (actionCount[n] > 0) {
-				sb.append("  " + Action.getTypeName(Action.Type.values()[n]) + " times: " + actionCount[n]);
+				sb.append("  " + Action.Type.values()[n].desc + " times: " + actionCount[n]);
 				sb.append("\n");
 			}
 		}

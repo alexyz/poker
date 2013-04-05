@@ -9,54 +9,31 @@ import java.io.Serializable;
  */
 public class Action implements Serializable {
 	
-	public static String getTypeName (Type type) {
-		switch (type) {
-			case ANTE:
-				return "ante";
-			case BET:
-				return "bet";
-			case BRINGSIN:
-				return "bring in";
-			case CALL:
-				return "call";
-			case CHECK:
-				return "check";
-			case COLLECT:
-				return "collect";
-			case DOESNTSHOW:
-				return "doesn't show";
-			case DRAW:
-				return "draw";
-			case FOLD:
-				return "fold";
-			case MUCK:
-				return "muck";
-			case POST:
-				return "post";
-			case RAISE:
-				return "raise";
-			case SHOW:
-				return "show";
-			case STANDPAT:
-				return "stand pat";
-			case UNCALL:
-				return "uncall";
-			default:
-				throw new RuntimeException();
-		}
-	}
-	
 	/** action types */
 	public enum Type {
-		CHECK, FOLD, RAISE, CALL, BET, 
+		CHECK("check"), 
+		FOLD("fold"), 
+		RAISE("raise"), 
+		CALL("call"), 
+		BET("bet"), 
 		/** post blind, not ante */
-		POST, MUCK, DOESNTSHOW, SHOW, DRAW, STANDPAT,
+		POST("post"), 
+		MUCK("muck"), 
+		DOESNTSHOW("doesn't show"), 
+		SHOW("show"), 
+		DRAW("draw"), 
+		STANDPAT("stand pat"),
 		/** uncalled bet returned to player */
-		UNCALL,
+		UNCALL("returned"),
 		/** win */
-		COLLECT, BRINGSIN,
+		COLLECT("collect"), 
+		BRINGSIN("bring in"),
 		/** posts ante */
-		ANTE,
+		ANTE("ante");
+		public String desc;
+		private Type(String desc) {
+			this.desc = desc;
+		}
 	}
 	
 	public Action(Seat seat) {
@@ -77,7 +54,7 @@ public class Action implements Serializable {
 	 */
 	@Override
 	public String toString () {
-		String s = seat.name + " " + Action.getTypeName(type);
+		String s = seat.name + " " + type.desc;
 		if (amount != 0) {
 			s += " " + amount;
 		}

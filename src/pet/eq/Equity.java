@@ -37,22 +37,26 @@ public class Equity {
 	 */
 	public enum Type {
 		/** deuce to seven low only equity type (single draw/triple draw) */
-		DSLO_ONLY,
+		DSLO_ONLY("2-7 Low Only"),
 		/** ace to five low only equity type  (razz) */ 
-		AFLO_ONLY,
+		AFLO_ONLY("A-5 Low Only"),
 		/** high only equity type (holdem, omaha hi, 5 card draw, etc) */
-		HI_ONLY,
+		HI_ONLY("High Only"),
 		/** high half of hi/lo equity type (omaha 8, stud 8, etc) */
-		HILO_HI_HALF,
+		HILO_HI_HALF("High Half"),
 		/** ace to five low 8 or better half of hi/lo equity type (omaha 8, stud 8, etc) */ 
-		HILO_AFLO8_HALF,
+		HILO_AFLO8_HALF("A-5 Low (8) Half"),
 		/** ace to five low 8 or better only equity type (not used alone by any game, as it's qualified) */
-		AFLO8_ONLY,
+		AFLO8_ONLY("A-5 Low (8) Only"),
 		/** badugi value */
-		BADUGI_ONLY
+		BADUGI_ONLY("Badugi");
+		public final String desc;
+		private Type(String name) {
+			this.desc = name;
+		}
 	}
-	/** equity type description */
-	public final Type eqtype;
+	/** equity type */
+	public final Type type;
 	/** current value */
 	public int current;
 	/** Currently winning and not tying */
@@ -88,7 +92,7 @@ public class Equity {
 	final int[] outcount;
 	
 	public Equity(Equity.Type eqtype, boolean hasouts) {
-		this.eqtype = eqtype;
+		this.type = eqtype;
 		this.outcount = hasouts ? new int[52] : null;
 		this.outs = hasouts ? new ArrayList<Out>() : null;
 	}

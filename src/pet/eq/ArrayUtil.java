@@ -23,7 +23,7 @@ public class ArrayUtil {
 	 * pick a value from a (max length 63) that hasn't been picked before
 	 * according to picked[0] and update picked[0]
 	 */
-	static String pick(Random r, String[] a, long[] picked) {
+	public static String pick(Random r, String[] a, long[] picked) {
 		if (a.length > 63) {
 			throw new RuntimeException("array is longer than 63");
 		}
@@ -56,8 +56,8 @@ public class ArrayUtil {
 	/**
 	 * subtract b from a
 	 */
-	static String[] sub(String[] a, String[] b) {
-		// inefficient...
+	public static String[] sub(String[] a, String[] b) {
+		// really inefficient...
 		TreeSet<String> s = new TreeSet<>(Arrays.asList(a));
 		s.removeAll(Arrays.asList(b));
 		if (s.size() != a.length) {
@@ -65,6 +65,32 @@ public class ArrayUtil {
 			return s.toArray(new String[s.size()]);
 		} else {
 			return a;
+		}
+	}
+	
+	public static void main (String[] args) {
+		Random r = new Random();
+		for (int n = 0; n < 10; n++) {
+			int[] a = new int[r.nextInt(5) + 1];
+			for (int i = 0; i < a.length; i++) {
+				a[i] = r.nextInt(10);
+			}
+			int[] b = a.clone();
+			insertionSort(b);
+			System.out.println(Arrays.toString(a) + " => " + Arrays.toString(b));
+		}
+	}
+	
+	public static void insertionSort (int[] a) {
+		// simple insertion sort derived from wikipedia
+		for (int i = 1; i < a.length; i++) {
+			int v = a[i];
+			int h = i;
+			while (h > 0 && v < a[h - 1]) {
+				a[h] = a[h - 1];
+				h--;
+			}
+			a[h] = v;
 		}
 	}
 	

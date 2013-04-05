@@ -20,7 +20,7 @@ public class Badugi {
 	/** bitmask for getting rank */
 	private static final int BMASK = 0xf0000;
 	
-	public static final String[] shortRanks = { "B4", "B5", "B6", "B7", "B", "3", "2/1" };
+	public static final String[] shortRankNames = { "B4", "B5", "B6", "B7", "B", "3", "2/1" };
 	
 	/** three combinations of two card hands (one of [0] or [1], plus [2]) */
 	private static final byte[][] V2 = { 
@@ -78,7 +78,7 @@ public class Badugi {
 			// no cards are equal
 			// its B4, sort...
 			int[] a = { faceValueAL(h[0]), faceValueAL(h[1]), faceValueAL(h[2]), faceValueAL(h[3]) };
-			Arrays.sort(a);
+			ArrayUtil.insertionSort(a);
 			return B4 | (a[3] << 12) | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
@@ -103,7 +103,7 @@ public class Badugi {
 		if (v == B0) {
 			// it's a B3, sort
 			int[] a = { faceValueAL(c0), faceValueAL(c1), faceValueAL(c2) };
-			Arrays.sort(a);
+			ArrayUtil.insertionSort(a);
 			v = B3 | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
@@ -133,7 +133,10 @@ public class Badugi {
 		return suit(c1) == suit(c2) || face(c1) == face(c2);
 	}
 
-	/** return indexed argument, a bit like an array */
+	/**
+	 * return indexed argument, a bit like an struct, i.e. a data structure that
+	 * is not on the heap
+	 */
 	private static String arg (int i, String s0, String s1, String s2) {
 		switch (i) {
 			case 0:

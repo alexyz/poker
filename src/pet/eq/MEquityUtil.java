@@ -6,13 +6,25 @@ package pet.eq;
 public class MEquityUtil {
 	
 	/**
-	 * Make array of multiple hand equities for given number of remaining cards,
-	 * game type and calculation method
+	 * Make array of multiple hand equities for given equity type, number of
+	 * remaining cards, calculation method
 	 */
-	static MEquity[] createMEquity(int hands, boolean hilo, Equity.Type eqtype, int rem, boolean exact) {
+	static MEquity[] createMEquities(Equity.Type eqtype, int hands, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
-			meqs[n] = new MEquity(hilo, eqtype, rem, exact);
+			meqs[n] = MEquity.createMEquity(eqtype, rem, exact);
+		}
+		return meqs;
+	}
+	
+	/**
+	 * Make array of multiple hand equities for hi or hi/lo equity type,
+	 * number of remaining cards, and calculation method
+	 */
+	static MEquity[] createMEquitiesHL(boolean hilo, int hands, int rem, boolean exact) {
+		MEquity[] meqs = new MEquity[hands];
+		for (int n = 0; n < meqs.length; n++) {
+			meqs[n] = MEquity.createMEquityHL(hilo, rem, exact);
 		}
 		return meqs;
 	}
@@ -34,7 +46,7 @@ public class MEquityUtil {
 		// only set curwin, curtie if there actually is non zero current value
 		if (max > 0) {
 			for (int i = 0; i < vals.length; i++) {
-				Equity e = meqs[i].getEq(eqtype);
+				Equity e = meqs[i].getEquity(eqtype);
 				e.current = vals[i];
 				if (e.current == max) {
 					if (times == 1) {
@@ -51,11 +63,11 @@ public class MEquityUtil {
 	 * Update equities win, tie, win rank and scoop with given hand values for the
 	 * given cards.
 	 */
-	static void updateEquityHiLo(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
+	static void updateMEquitiesHL(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
 		// high winner
-		int hw = MEquityUtil.updateEquity(meqs, Equity.Type.HILO_HI_HALF, hivals, cards);
+		int hw = MEquityUtil.updateMEquities2(meqs, Equity.Type.HILO_HI_HALF, hivals, cards);
 		// low winner
-		int lw = MEquityUtil.updateEquity(meqs, Equity.Type.HILO_AFLO8_HALF, lovals, cards);
+		int lw = MEquityUtil.updateMEquities2(meqs, Equity.Type.HILO_AFLO8_HALF, lovals, cards);
 		// have to win hi and low for scoop
 		if (hw >= 0 && hw == lw) {
 			meqs[hw].scoopcount++;
@@ -66,8 +78,8 @@ public class MEquityUtil {
 	 * Update equities win, tie, win rank and scoop with given hand values for the
 	 * given cards.
 	 */
-	static void updateEquityHi(MEquity[] meqs, Equity.Type eqtype, int[] hivals, String[] cards) {
-		int hw = MEquityUtil.updateEquity(meqs, eqtype, hivals, cards);
+	static void updateMEquities(MEquity[] meqs, Equity.Type eqtype, int[] hivals, String[] cards) {
+		int hw = MEquityUtil.updateMEquities2(meqs, eqtype, hivals, cards);
 		if (hw >= 0) {
 			meqs[hw].scoopcount++;
 		}
@@ -78,7 +90,7 @@ public class MEquityUtil {
 	 * given cards.
 	 * Return index of single winner (scoop), if any, or -1
 	 */
-	private static int updateEquity(MEquity[] meqs, Equity.Type eqtype, int[] vals, String[] cards) {
+	private static int updateMEquities2(MEquity[] meqs, Equity.Type eqtype, int[] vals, String[] cards) {
 		// find highest hand and number of times it occurs
 		int max = 0, maxcount = 0;
 		for (int i = 0; i < vals.length; i++) {
@@ -96,7 +108,7 @@ public class MEquityUtil {
 		for (int i = 0; i < vals.length; i++) {
 			if (vals[i] == max) {
 				// update the win/tied/rank count
-				Equity e = meqs[i].getEq(eqtype);
+				Equity e = meqs[i].getEquity(eqtype);
 				if (maxcount == 1) {
 					winner = i;
 					e.woncount++;
@@ -135,7 +147,7 @@ public class MEquityUtil {
 	/**
 	 * summarise equities (convert counts to percentages)
 	 */
-	static void summariseEquity(MEquity[] meqs, int count, int lowCount) {
+	static void summariseMEquities(MEquity[] meqs, int count, int lowCount) {
 		//System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
 		for (MEquity meq : meqs) {
 			//System.out.println("  meq " + meq);

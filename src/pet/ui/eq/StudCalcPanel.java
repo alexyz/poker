@@ -14,18 +14,16 @@ import pet.eq.*;
  */
 public class StudCalcPanel extends CalcPanel {
 	
-	
-	private final HandCardPanel[] handPanels = new HandCardPanel[8];
-	private final CardPanel boardPanel = new CardPanel("Community Card", 0, 1);
 	private final JComboBox<StudStreetItem> randStreet = new JComboBox<>();
-	private final JComboBox<PokerItem> pokerCombo = new JComboBox<>();
 	
 	public StudCalcPanel() {
+		HandCardPanel[] handPanels = new HandCardPanel[8];
 		for (int n = 0; n < handPanels.length; n++) {
 			handPanels[n] = new HandCardPanel("Stud hand " + (n + 1), 1, 7, true);
 		}
-		
 		setHandCardPanels(handPanels);
+		
+		CardPanel boardPanel = new CardPanel("Community Card", 0, 1);
 		setBoard(boardPanel);
 		
 		randStreet.setModel(new DefaultComboBoxModel<>(new StudStreetItem[] {
@@ -43,22 +41,11 @@ public class StudCalcPanel extends CalcPanel {
 				new PokerItem(PokerItem.AFLOW, new StudPoker(Value.afLowValue, false)),
 				new PokerItem(PokerItem.HILO, new StudPoker(Value.hiValue, true))
 		};
-		pokerCombo.setModel(new DefaultComboBoxModel<>(items));
-		
-		addCalcOpt(pokerCombo);
+		setPokerItems(items);
 		
 		initCardLabels();
 		
 		selectCard(1);
-	}
-	
-	/**
-	 * display the given hand
-	 */
-	@Override
-	public void displayHand(String[] board, List<String[]> holeCards, String type) {
-		displayHand(board, holeCards);
-		PokerItem.select(pokerCombo, type);
 	}
 	
 	@Override
@@ -68,35 +55,6 @@ public class StudCalcPanel extends CalcPanel {
 			cardLabels.get(0).setCardHidden(hidden);
 			cardLabels.get(1).setCardHidden(hidden);
 			cardLabels.get(6).setCardHidden(hidden);
-		}
-	}
-	
-	@Override
-	protected void calc() {
-		// TODO validate, e.g. no seventh card if board card
-		
-		for (HandCardPanel hp : handPanels) {
-			hp.setEquity(null);
-		}
-		
-		// get the hands and the panels of those hands
-		List<HandCardPanel> cardPanels = new ArrayList<>();
-		List<String[]> cards = new ArrayList<>();
-		collectCards(cards, cardPanels);
-		if (cards.size() == 0) {
-			System.out.println("no hands");
-			return;
-		}
-		
-		// get other stuff and calc equity
-		List<String> blockers = getBlockers();
-		List<String> board = boardPanel.getCards();
-		PokerItem pokerItem = (PokerItem) pokerCombo.getSelectedItem();
-		MEquity[] meqs = pokerItem.poker.equity(board, cards, blockers, 0);
-		
-		// update ui
-		for (int n = 0; n < meqs.length; n++) {
-			cardPanels.get(n).setEquity(meqs[n]);
 		}
 	}
 	

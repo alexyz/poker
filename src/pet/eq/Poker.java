@@ -73,12 +73,12 @@ public abstract class Poker {
 	/**
 	 * short rank names for high hand (value >> 20)
 	 */
-	public static final String[] ranknames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
+	public static final String[] shortRankNames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
 	
 	/** short rank names for ace to five low hands */
-	public static final String[] afLowRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
+	public static final String[] afLowShortRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
 	
-	public static final String[] dsLowRankNames = { "7H", "8H", "9H", "TH", "Hc", "P+" };
+	public static final String[] dsLowShortRankNames = { "7H", "8H", "9H", "TH", "Hc", "P+" };
 	
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
@@ -123,7 +123,7 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * return a clone of the deck
+	 * return a copy of the deck that can be modified
 	 */
 	public static String[] deck() {
 		return deckArr.clone();

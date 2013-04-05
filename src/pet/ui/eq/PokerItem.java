@@ -7,7 +7,11 @@ import pet.eq.Poker;
 /** represents a poker valuation type in the combo box */
 public class PokerItem {
 	
-	public static final String HIGH = "High", AFLOW = "A-5 Low", DSLOW = "2-7 Low", HILO = "High/A-5 Low (8)";
+	public static final String HIGH = "High";
+	public static final String AFLOW = "A-5 Low";
+	public static final String DSLOW = "2-7 Low";
+	public static final String HILO = "High/A-5 Low (8)";
+	public static final String BADUGI = "Badugi";
 	
 	/**
 	 * select the item in the combo box

@@ -105,7 +105,12 @@ public class StudPoker extends Poker {
 		//System.out.println("combs: " + combs + " combperms: " + combperms);
 		
 		// return value
-		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, value.eqtype(), deck.length, false);
+		final MEquity[] meqs;
+		if (hilo) {
+			meqs = MEquityUtil.createMEquitiesHL(true, holeCards.length, deck.length, false);
+		} else {
+			meqs = MEquityUtil.createMEquities(value.eqtype, holeCards.length, deck.length, false);
+		}
 		
 		// get current hand values (not equity)
 		// note that "hi" doesn't necessarily mean high value, just non-hi/lo value
@@ -127,7 +132,7 @@ public class StudPoker extends Poker {
 		}
 		
 		// set current values
-		MEquityUtil.updateCurrent(meqs, value.eqtype(), hivals);
+		MEquityUtil.updateCurrent(meqs, value.eqtype, hivals);
 		if (hasLow) {
 			MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_HI_HALF, hivals);
 			MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_AFLO8_HALF, lovals);
@@ -144,10 +149,10 @@ public class StudPoker extends Poker {
 			// no blank cards, just use current as only sample
 			if (hasLow) {
 				lowCount = 1;
-				MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, null);
+				MEquityUtil.updateMEquitiesHL(meqs, hivals, lovals, null);
 				
 			} else {
-				MEquityUtil.updateEquityHi(meqs, value.eqtype(), hivals, null);
+				MEquityUtil.updateMEquities(meqs, value.eqtype, hivals, null);
 			}
 			
 		} else {
@@ -198,17 +203,17 @@ public class StudPoker extends Poker {
 				
 				if (hasLow) {
 					lowCount++;
-					MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, null);
+					MEquityUtil.updateMEquitiesHL(meqs, hivals, lovals, null);
 					
 				} else {
 					// high winner only
-					MEquityUtil.updateEquityHi(meqs, value.eqtype(), hivals, null);
+					MEquityUtil.updateMEquities(meqs, value.eqtype, hivals, null);
 				}
 			}
 			
 		}
 		
-		MEquityUtil.summariseEquity(meqs, samples, lowCount);
+		MEquityUtil.summariseMEquities(meqs, samples, lowCount);
 		return meqs;
 	}
 	

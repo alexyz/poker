@@ -39,7 +39,7 @@ public class RanksPanel extends JPanel {
 	
 	/** populate the rank names and win percentages */
 	public void setEquity(Equity e) {
-		String[] names = EquityUtil.getRankNames(e.eqtype);
+		String[] names = EquityUtil.getRankNames(e.type);
 		for (int n = 0; n < rankLabs.length; n++) {
 			JLabel rl = rankLabs[n];
 			if (names != null && names.length > n) {

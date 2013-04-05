@@ -60,7 +60,7 @@ public class HandState implements Cloneable {
 	 */
 	public String actionString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Action.getTypeName(action.type));
+		sb.append(action.type.desc);
 		if (action.type == Action.Type.DRAW) {
 			sb.append(" ").append(action.seat.drawn(streetIndex - 1));
 		} else if (action.amount != 0) {

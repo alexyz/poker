@@ -44,6 +44,7 @@ public class PokerFrame extends JFrame {
 	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel("Omaha", 2, 4);
 	private final HoldemCalcPanel omaha5Panel = new HoldemCalcPanel("5 Card Omaha", 2, 5);
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
+	private final BadugiCalcPanel badugiPanel = new BadugiCalcPanel();
 	private final GamesPanel gamesPanel = new GamesPanel();
 	private final PlayerPanel playerPanel = new PlayerPanel();
 	private final HUDManager hudManager = new HUDManager();
@@ -70,6 +71,7 @@ public class PokerFrame extends JFrame {
 		eqTabs.addTab("Omaha", omahaPanel);
 		eqTabs.addTab("5 Card Omaha", omaha5Panel);
 		eqTabs.addTab("Draw", drawPanel);
+		eqTabs.addTab("Badugi", badugiPanel);
 		eqTabs.addTab("Stud", studPanel);
 		
 		hisTabs.addTab("Files", filesPanel);

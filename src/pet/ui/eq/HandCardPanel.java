@@ -14,7 +14,11 @@ class HandCardPanel extends CardPanel {
 	private final TotalPanel totalPanel = new TotalPanel();
 	private final AllPanels[] panels = new AllPanels[3];
 	
-	public HandCardPanel(String name, int mincards, int maxcards, boolean below) {
+	/**
+	 * create hand card panel with name and number of cards, with the equity
+	 * information optionally positioned either to the right or below the cards
+	 */
+	public HandCardPanel(String name, int mincards, int maxcards, boolean detailsBelow) {
 		super(name, mincards, maxcards);
 		
 		JPanel p = new JPanel(new GridBagLayout());
@@ -33,7 +37,7 @@ class HandCardPanel extends CardPanel {
 		}
 		
 		// add to superclass layout
-		addDetails(p, below);
+		addDetails(p, detailsBelow);
 		
 		clearEquity();
 	}

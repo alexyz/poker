@@ -106,6 +106,8 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 					case AFTD:
 						type = PokerItem.AFLOW;
 						break;
+					case BG:
+						type = PokerItem.BADUGI;
 					default:
 						throw new RuntimeException("unknown game type " + hs.hand);
 				}

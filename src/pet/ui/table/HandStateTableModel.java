@@ -168,7 +168,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 					sb.append("<th>Win</th>");
 					sb.append("<th>Tie</th></tr>");
 					for (Equity e : ss.meq.eqs) {
-						sb.append("<tr><th>").append(EquityUtil.getEqTypeName(e.eqtype)).append("</th>");
+						sb.append("<tr><th>").append(e.type.desc).append("</th>");
 						sb.append("<td>").append(pc(e.won)).append("</td>");
 						sb.append("<td>").append(pc(e.tied)).append("</td></tr>");
 					}

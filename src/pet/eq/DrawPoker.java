@@ -50,7 +50,7 @@ public class DrawPoker extends Poker {
 		final String[] deck = Poker.remdeck(holeCards, blockers);
 		
 		// return value
-		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, false, value.eqtype, deck.length, false);
+		final MEquity[] meqs = MEquityUtil.createMEquities(value.eqtype, holeCards.length, deck.length, false);
 		
 		// get current hand values (not equity)
 		final int[] vals = new int[holeCards.length];
@@ -64,8 +64,8 @@ public class DrawPoker extends Poker {
 		if (draws == 0) {
 			// final street, just return current values
 			System.out.println("no draws, using current");
-			MEquityUtil.updateEquityHi(meqs, value.eqtype, vals, null);
-			MEquityUtil.summariseEquity(meqs, 1, 0);
+			MEquityUtil.updateMEquities(meqs, value.eqtype, vals, null);
+			MEquityUtil.summariseMEquities(meqs, 1, 0);
 			
 		} else {
 			// draw at least once
@@ -105,10 +105,10 @@ public class DrawPoker extends Poker {
 					}
 					vals[hn] = maxv;
 				}
-				MEquityUtil.updateEquityHi(meqs, value.eqtype, vals, null);
+				MEquityUtil.updateMEquities(meqs, value.eqtype, vals, null);
 			}
 			
-			MEquityUtil.summariseEquity(meqs, samples, 0);
+			MEquityUtil.summariseMEquities(meqs, samples, 0);
 		}
 		
 		return meqs;

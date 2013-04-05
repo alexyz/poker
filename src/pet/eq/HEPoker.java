@@ -14,21 +14,11 @@ public class HEPoker extends Poker {
 		}
 	}
 	
-	/** check hole has at least 1 or 2 cards and at most 2 or 4 cards */
-	private static void validateHole(String[] hole, boolean omaha) {
-		final int min = omaha ? 2 : 1;
-		final int max = omaha ? 5 : 2;
-		if (hole.length < min || hole.length > max) {
-			throw new RuntimeException("invalid hole: " + Arrays.toString(hole));
-		}
-	}
-
 	//
 	// instance stuff
 	//
 	
-	/** temporary hand for the value method */
-	private final String[] valueTemp = new String[5];
+	/** must use 2 cards */
 	private final boolean omaha;
 	private final int min;
 	private final boolean hilo;
@@ -53,18 +43,25 @@ public class HEPoker extends Poker {
 		this.hilo = hilo;
 	}
 	
-	// sync to protect changes to temp
+	/** check hole has at least 1 or 2 cards and at most 2 or 4 cards */
+	private void validateHoleCards(String[] hole) {
+		final int min = omaha ? 2 : 1;
+		final int max = omaha ? 5 : 2;
+		if (hole.length < min || hole.length > max) {
+			throw new RuntimeException("invalid hole: " + Arrays.toString(hole));
+		}
+	}
+	
 	@Override
-	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
+	public MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
 		System.out.println("holdem/omaha equity: " + Arrays.deepToString(holeCards) + " board: " + Arrays.toString(board) + " blockers: " + Arrays.toString(blockers));
 		if (draws != 0) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid draws: " + draws);
 		}
 		
-		Arrays.fill(valueTemp, null);
 		validateBoard(board);
 		for (String[] hole : holeCards) {
-			validateHole(hole, omaha);
+			validateHoleCards(hole);
 		}
 		
 		// cards not used by hands or board
@@ -80,19 +77,17 @@ public class HEPoker extends Poker {
 		}
 	}
 
-	// sync to protect changes to temp
 	@Override
-	public synchronized int value(String[] board, String[] hole) {
-		Arrays.fill(valueTemp, null);
+	public int value(String[] board, String[] hole) {
 		validateBoard(board);
-		validateHole(hole, omaha);
+		validateHoleCards(hole);
 		
 		if (board == null || board.length < 3) {
 			// could use the draw poker getPair method...
 			return 0;
 			
 		} else {
-			return heValue(hiValue, board, hole);
+			return heValue(hiValue, board, hole, new String[5]);
 		}
 	}
 	
@@ -102,24 +97,29 @@ public class HEPoker extends Poker {
 	private MEquity[] equityImpl(final HEBoard heboard, final String[][] holeCards) {
 		
 		// XXX low possible should really be a method on Value
-		boolean lowPossible = hilo;
+		final boolean lowPossible;
 		if (hilo) {
-			if (heboard.current != null) {
+			if (heboard.current != null && heboard.current.length > 2) {
 				// only possible if there are no more than 2 high cards on board
 				lowPossible = heboard.current.length - lowCount(heboard.current, false) <= 2;
+			} else {
+				lowPossible = true;
 			}
+		} else {
+			lowPossible = false;
 		}
 		
-		// equity type is ignored if hilo is true
-		final MEquity[] meqs = MEquityUtil.createMEquity(holeCards.length, hilo, Equity.Type.HI_ONLY, heboard.deck.length, heboard.exact());
+		// note: HL MEquity actually contains 3 equity types, so can be treated as high only
+		final MEquity[] meqs = MEquityUtil.createMEquitiesHL(hilo, holeCards.length, heboard.deck.length, heboard.exact());
 		final int[] hivals = new int[holeCards.length];
 		final int[] lovals = lowPossible ? new int[holeCards.length] : null;
+		final String[] temp = new String[5];
 		
 		// get current high hand values (not equity)
 		if (heboard.current != null) {
 			for (int n = 0; n < holeCards.length; n++) {
 				if (heboard.current.length >= 3) {
-					hivals[n] = heValue(hiValue, heboard.current, holeCards[n]);
+					hivals[n] = heValue(hiValue, heboard.current, holeCards[n], temp);
 				}
 			}
 			MEquityUtil.updateCurrent(meqs, Equity.Type.HI_ONLY, hivals);
@@ -128,7 +128,7 @@ public class HEPoker extends Poker {
 				MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_HI_HALF, hivals);
 				// get current low values
 				for (int n = 0; n < holeCards.length; n++) {
-					lovals[n] = heValue(loValue, heboard.current, holeCards[n]);
+					lovals[n] = heValue(loValue, heboard.current, holeCards[n], temp);
 				}
 				MEquityUtil.updateCurrent(meqs, Equity.Type.HILO_AFLO8_HALF, lovals);
 			}
@@ -147,14 +147,14 @@ public class HEPoker extends Poker {
 			
 			// hi equity
 			for (int i = 0; i < holeCards.length; i++) {
-				hivals[i] = heValue(hiValue, heboard.board, holeCards[i]);
+				hivals[i] = heValue(hiValue, heboard.board, holeCards[i], temp);
 			}
 			
 			// low equity - only counts if at least one hand makes low
 			boolean hasLow = false;
 			if (lowPossible) {
 				for (int i = 0; i < holeCards.length; i++) {
-					int v = heValue(loValue, heboard.board, holeCards[i]);
+					int v = heValue(loValue, heboard.board, holeCards[i], temp);
 					if (v > 0) {
 						hasLow = true;
 					}
@@ -171,15 +171,15 @@ public class HEPoker extends Poker {
 			
 			if (hasLow) {
 				hiloCount++;
-				MEquityUtil.updateEquityHiLo(meqs, hivals, lovals, outs);
+				MEquityUtil.updateMEquitiesHL(meqs, hivals, lovals, outs);
 				
 			} else {
 				// high winner
-				MEquityUtil.updateEquityHi(meqs, Equity.Type.HI_ONLY, hivals, null);
+				MEquityUtil.updateMEquities(meqs, Equity.Type.HI_ONLY, hivals, null);
 			}
 		}
 
-		MEquityUtil.summariseEquity(meqs, count, hiloCount);
+		MEquityUtil.summariseMEquities(meqs, count, hiloCount);
 		// XXX shouldn't be here, just need to store pick and count on mequity
 		MEquityUtil.summariseOuts(meqs, pick, count);
 		return meqs;
@@ -190,16 +190,16 @@ public class HEPoker extends Poker {
 	 * Calculate value of holdem/omaha hand (using at least min cards from hand). 
 	 * Board can be 3-5 cards.
 	 */
-	private int heValue(final Value v, final String[] board, final String[] hole) {
+	private int heValue(final Value v, final String[] board, final String[] hole, final String[] temp) {
 		int hv = 0;
 		for (int n = min; n <= 2; n++) {
 			final int nh = MathsUtil.binaryCoefficientFast(hole.length, n);
 			final int nb = MathsUtil.binaryCoefficientFast(board.length, 5 - n);
 			for (int kh = 0; kh < nh; kh++) {
-				MathsUtil.kCombination(n, kh, hole, valueTemp, 0);
+				MathsUtil.kCombination(n, kh, hole, temp, 0);
 				for (int kb = 0; kb < nb; kb++) {
-					MathsUtil.kCombination(5 - n, kb, board, valueTemp, n);
-					final int val = v.value(valueTemp);
+					MathsUtil.kCombination(5 - n, kb, board, temp, n);
+					final int val = v.value(temp);
 					//System.out.println(Arrays.asList(h5) + " - " + Poker.desc(v));
 					if (val > hv) {
 						hv = val;
