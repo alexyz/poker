@@ -12,14 +12,18 @@ import static pet.eq.Poker.*;
 public class Badugi {
 	
 	/*
-	 * badugi hand values as represented by an integer:
-	 * 0x87654321
-	 * 8 = 0
-	 * 7 = 4 (BADUGI_TYPE)
-	 * 6 = rank (B1-B4)
-	 * 5 = 0
+	 * badugi hand values as represented by an integer: 
+	 * 0x87654321 
+	 * 8 = 0 
+	 * 7 = 4 (BADUGI_TYPE) 
+	 * 6 = rank (B1-B4) 
+	 * 5 = 0 
 	 * 4 = most significant (highest) card
 	 * 3,2,1 = less significant cards
+	 * 
+	 * NOTE: badugi valuation is not very efficient, due to its use of multiple
+	 * arrays. the best alternative is to pack the cards into an integer, but
+	 * that is very fiddly and not really worth the effort at this time
 	 */
 	
 	/** unachievable worst value */
@@ -33,7 +37,9 @@ public class Badugi {
 	/** badugi */
 	private static final int B4_RANK = 0x100000;
 	
-	public static final String[] shortRankNames = { "B4", "B5", "B6", "B7", "B", "3", "2/1" };
+	public static final String[] shortRankNames = {
+			"B4", "B5", "B6", "B7", "B", "3", "2/1"
+	};
 	
 	/** three combinations of two card hands (one of [0] or [1], plus [2]) */
 	private static final byte[][] V2 = { 
@@ -55,13 +61,15 @@ public class Badugi {
 		{ 1, 3, 0, 2 }, 
 		{ 2, 3, 0, 1 } 
 	};
-
+	
 	public static void main (String[] args) {
 		ArrayList<String> l = new ArrayList<>(Poker.deck);
+		Random r = new Random();
 		for (int n = 0; n < 10; n++) {
-			Collections.shuffle(l);
+			Collections.shuffle(l, r);
 			String[] a = l.subList(0, 4).toArray(new String[4]);
-			System.out.println(Arrays.toString(a) + " => " + valueString(badugiValue(a)));
+			int d = r.nextInt(4) + 1;
+			System.out.println(Arrays.toString(a) + " => " + valueString(badugiValue(a)) + " => draw " + d + " => " + Arrays.toString(draw(a, d)));
 		}
 	}
 	
@@ -75,58 +83,67 @@ public class Badugi {
 	}
 	
 	/** get value of 4 card hand */
-	private static int v4 (String[] h) {
+	private static int v4 (String[] hand) {
 		int v = B0_RANK;
+		String[] h3 = new String[3];
 		for (int n = 0; n < V3.length; n++) {
 			byte[] p = V3[n];
-			int p0 = p[0], p1 = p[1], p2 = p[2], p3 = p[3];
-			if (eq(h[p0], h[p1])) {
+			String hp0 = hand[p[0]], hp1 = hand[p[1]], hp2 = hand[p[2]], hp3 = hand[p[3]];
+			if (eq(hp0, hp1)) {
 				// (at least) two cards are equal, can't be B4
 				// try 3 card hand for each of the two cards
-				v = Math.min(v, v3(h[p0], h[p2], h[p3]));
-				v = Math.min(v, v3(h[p1], h[p2], h[p3]));
+				h3[0] = hp0;
+				h3[1] = hp2;
+				h3[2] = hp3;
+				v = Math.min(v, v3(h3));
+				h3[0] = hp1;
+				v = Math.min(v, v3(h3));
 			}
 		}
 		if (v == B0_RANK) {
 			// no cards are equal
 			// its B4, sort...
-			int[] a = { faceValueAL(h[0]), faceValueAL(h[1]), faceValueAL(h[2]), faceValueAL(h[3]) };
+			int[] a = {
+					faceValueAL(hand[0]), faceValueAL(hand[1]), faceValueAL(hand[2]), faceValueAL(hand[3])
+			};
 			ArrayUtil.sort(a);
 			return B4_RANK | (a[3] << 12) | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
 	}
-
+	
 	/** get value of 3 card hand */
-	private static int v3 (String c0, String c1, String c2) {
+	private static int v3 (String[] h3) {
 		int v = B0_RANK;
 		for (int n = 0; n < V2.length; n++) {
 			byte[] p = V2[n];
-			String cp0 = arg(p[0], c0, c1, c2);
-			String cp1 = arg(p[1], c0, c1, c2);
+			String cp0 = h3[p[0]];
+			String cp1 = h3[p[1]];
 			if (eq(cp0, cp1)) {
 				// (at least) two are equal
 				// can't be B3
 				// try 2 card hand for each of the two equal cards
-				String cp2 = arg(p[2], c0, c1, c2);
+				String cp2 = h3[p[2]];
 				v = Math.min(v, v2(cp0, cp2));
 				v = Math.min(v, v2(cp1, cp2));
 			}
 		}
 		if (v == B0_RANK) {
 			// it's a B3, sort
-			int[] a = { faceValueAL(c0), faceValueAL(c1), faceValueAL(c2) };
+			int[] a = {
+					faceValueAL(h3[0]), faceValueAL(h3[1]), faceValueAL(h3[2])
+			};
 			ArrayUtil.sort(a);
 			v = B3_RANK | (a[2] << 8) | (a[1] << 4) | a[0];
 		}
 		return v;
 	}
-
+	
 	/** get value of two card hand */
 	private static int v2 (String c0, String c1) {
 		if (eq(c0, c1)) {
 			// oh dear, both equal, it's a B1
-			return B1_RANK | faceValueAL(c0);
+			return v1(c0);
 			
 		} else {
 			// it's a B2
@@ -140,31 +157,39 @@ public class Badugi {
 			return B2_RANK | (v1 << 4) | v0;
 		}
 	}
-
-	/** return true of the two cards are equal */
-	private static boolean eq (String c1, String c2) {
-		return suit(c1) == suit(c2) || face(c1) == face(c2);
+	
+	/**
+	 * return value of 1 card
+	 */
+	private static int v1 (String c0) {
+		return B1_RANK | faceValueAL(c0);
 	}
 
 	/**
-	 * return indexed argument, a bit like an struct, i.e. a data structure that
-	 * is not on the heap
+	 * return value of variable length hand
 	 */
-	private static String arg (int i, String s0, String s1, String s2) {
-		switch (i) {
-			case 0:
-				return s0;
-			case 1:
-				return s1;
+	private static int v (String[] hand) {
+		switch (hand.length) {
+			case 4:
+				return v4(hand);
+			case 3:
+				return v3(hand);
 			case 2:
-				return s2;
+				return v2(hand[0], hand[1]);
+			case 1:
+				return v1(hand[0]);
 			default:
-				return null;
+				throw new RuntimeException();
 		}
 	}
 	
+	/** return true if the two cards are equal */
+	private static boolean eq (String c1, String c2) {
+		return suit(c1) == suit(c2) || face(c1) == face(c2);
+	}
+	
 	/**
-	 * return description of hand.
+	 * return description of hand (with type bits set)
 	 */
 	static final String valueString (int value) {
 		int v2 = B0_RANK - (value & Poker.HAND);
@@ -185,7 +210,7 @@ public class Badugi {
 				throw new RuntimeException("v2=" + Integer.toHexString(v2));
 		}
 	}
-
+	
 	/**
 	 * get the index into the short rank names array.
 	 */
@@ -207,6 +232,42 @@ public class Badugi {
 			default:
 				throw new RuntimeException("v2=" + Integer.toHexString(v2));
 		}
+	}
+	
+	/**
+	 * get the likely drawing hand
+	 */
+	public static String[] draw (String[] hand, int discard) {
+		switch (discard) {
+			case 0:
+				return hand;
+			case 1:
+			case 2:
+			case 3:
+				return draw2(hand, 4 - discard);
+			case 4:
+				return new String[0];
+			default:
+				throw new RuntimeException();
+		}
+	}
+	
+	/** return the cards making up the best badugi hand, k = 1, 2 or 3 */
+	private static String[] draw2 (String[] hand, int k) {
+		final String[] h = new String[k];
+		final int pmax = MathsUtil.binaryCoefficientFast(4, k);
+		int vmax = B0_RANK;
+		int vmaxp = 0;
+		for (int p = 0; p < pmax; p++) {
+			MathsUtil.kCombination(k, p, hand, h, 0);
+			int v = v(h);
+			if (v < vmax) {
+				vmax = v;
+				vmaxp = p;
+			}
+		}
+		MathsUtil.kCombination(k, vmaxp, hand, h, 0);
+		return h;
 	}
 	
 }

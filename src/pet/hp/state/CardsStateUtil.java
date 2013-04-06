@@ -55,7 +55,7 @@ public class CardsStateUtil {
 				
 			case DSTD:
 			case DSSD:
-				if (streetIndex == GameUtil.getStreets(hand.game.type) - 1) {
+				if (GameUtil.isShowdown(hand.game.type, streetIndex)) {
 					// on final street just return final hand from seat
 					cs = new CardsState(seat.downCards.clone(), null, false, null);
 					
@@ -99,6 +99,9 @@ public class CardsStateUtil {
 			case OM51HL:
 				cs = new CardsState(seat.downCards, null, false, null);
 				break;
+				
+			case BG:
+				
 				
 			default:
 				throw new RuntimeException("unknown game type " + hand.game);

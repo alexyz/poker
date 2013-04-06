@@ -18,8 +18,10 @@ public class GamesPanel extends JPanel implements HistoryListener {
 	private final JComboBox<String> gameCombo = new JComboBox<>();
 	private final MyJTable gamesTable = new MyJTable();
 	private final JTextArea textArea = new JTextArea();
+	private final JScrollPane textAreaScroller = new JScrollPane(textArea);
 	private final JButton playerButton = new JButton("Player");
 	private final JButton bankrollButton = new JButton("Bankroll");
+	private final JButton handsButton = new JButton("Hands");
 	private final JButton refreshButton = new JButton("Refresh");
 	
 	public GamesPanel() {
@@ -32,13 +34,10 @@ public class GamesPanel extends JPanel implements HistoryListener {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
-					int r = gamesTable.getSelectionModel().getMinSelectionIndex();
-					if (r >= 0) {
-						int sr = gamesTable.convertRowIndexToModel(r);
-						GameInfoTableModel gamesModel = (GameInfoTableModel) gamesTable.getModel();
-						PlayerGameInfo gi = gamesModel.getRow(sr);
-						System.out.println("selected " + r + " => " + sr + " => " + gi);
-						textArea.setText(gi.toLongString());
+					PlayerGameInfo pgi = getSelectedPgi();
+					if (pgi != null) {
+						textArea.setText(pgi.toLongString());
+						textArea.setCaretPosition(0);
 						revalidate();
 					}
 				}
@@ -48,14 +47,9 @@ public class GamesPanel extends JPanel implements HistoryListener {
 		playerButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
-				if (r >= 0) {
-					int sr = gamesTable.convertRowIndexToModel(r);
-					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
-					PlayerGameInfo pgi = m.getRow(sr);
-					if (pgi != null) {
-						PET.getPokerFrame().displayPlayer(pgi.player.name);
-					}
+				PlayerGameInfo pgi = getSelectedPgi();
+				if (pgi != null) {
+					PET.getPokerFrame().displayPlayer(pgi.player.name);
 				}
 			}
 		});
@@ -63,12 +57,8 @@ public class GamesPanel extends JPanel implements HistoryListener {
 		bankrollButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int r = gamesTable.getSelectionModel().getMinSelectionIndex();
-				if (r >= 0) {
-					int sr = gamesTable.convertRowIndexToModel(r);
-					GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
-					PlayerGameInfo pgi = m.getRow(sr);
-					
+				PlayerGameInfo pgi = getSelectedPgi();
+				if (pgi != null) {
 					List<Hand> hands = PET.getHistory().getHands(pgi.player.name, pgi.game.id);
 					String title = pgi.player.name + " - " + pgi.game.id;
 					GraphData br = BankrollUtil.getBankRoll(pgi.player.name, hands, title);
@@ -77,6 +67,16 @@ public class GamesPanel extends JPanel implements HistoryListener {
 					} else {
 						System.out.println("no bank roll for " + pgi);
 					}
+				}
+			}
+		});
+		
+		handsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed (ActionEvent e) {
+				PlayerGameInfo pgi = getSelectedPgi();
+				if (pgi != null) {
+				 	PET.getPokerFrame().displayHands(pgi.player.name, pgi.game.id);
 				}
 			}
 		});
@@ -109,7 +109,6 @@ public class GamesPanel extends JPanel implements HistoryListener {
 		JScrollPane tableScroller = new JScrollPane(gamesTable);
 		tableScroller.setBorder(BorderFactory.createTitledBorder("Player Game Infos"));
 		
-		JScrollPane textAreaScroller = new JScrollPane(textArea);
 		textAreaScroller.setBorder(BorderFactory.createTitledBorder("Selected Player Game Info"));
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tableScroller, textAreaScroller);
@@ -119,7 +118,22 @@ public class GamesPanel extends JPanel implements HistoryListener {
 		JPanel southPanel = new JPanel();
 		southPanel.add(playerButton);
 		southPanel.add(bankrollButton);
+		southPanel.add(handsButton);
 		add(southPanel, BorderLayout.SOUTH);
+	}
+	
+	private PlayerGameInfo getSelectedPgi() {
+		int r = gamesTable.getSelectionModel().getMinSelectionIndex();
+		if (r >= 0) {
+			int sr = gamesTable.convertRowIndexToModel(r);
+			GameInfoTableModel m = (GameInfoTableModel) gamesTable.getModel();
+			PlayerGameInfo pgi = m.getRow(sr);
+			System.out.println("selected " + r + " => " + sr + " => " + pgi);
+			return pgi;
+			
+		} else {
+			return null;
+		}
 	}
 	
 	private void updateGame() {

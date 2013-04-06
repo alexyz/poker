@@ -18,7 +18,7 @@ public class Seat implements Serializable {
 	public String name;
 	/** starting chips */
 	public int chips;
-	/** seats final hole cards (not the up cards!) */
+	/** seats final down hole cards (not the up cards!) */
 	public String[] downCards;
 	/** seats final public cards */
 	public String[] upCards;

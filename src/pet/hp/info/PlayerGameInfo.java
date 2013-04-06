@@ -1,5 +1,7 @@
 package pet.hp.info;
 
+import java.util.Arrays;
+
 import pet.eq.*;
 import pet.hp.*;
 
@@ -223,13 +225,13 @@ public class PlayerGameInfo {
 
 	/**
 	 * show downs won as percentage of all show downs.
-	 * returns NAN if this player has not seen any showdowns
+	 * returns null if this player has not seen any showdowns
 	 */
-	public float sw() {
+	public Float sw() {
 		if (showdownsseen > 0) {
 			return (handswonshow * 100f) / showdownsseen;
 		} else {
-			return Float.NaN;
+			return null;
 		}
 	}
 
@@ -278,12 +280,12 @@ public class PlayerGameInfo {
 	}
 
 	/** aggression factor count - afvol removed as it gets weird with all ins */
-	public float af() {
+	public Float af() {
 		return af(false);
 	}
 	
 	/** aggression factor count */
-	public float af(boolean ch) {
+	public Float af(boolean ch) {
 		// amount bet+raise / call
 		float a = actionCount[Action.Type.BET.ordinal()] + actionCount[Action.Type.RAISE.ordinal()];
 		float p = actionCount[Action.Type.CALL.ordinal()];
@@ -293,7 +295,7 @@ public class PlayerGameInfo {
 		if (p > 0) {
 			return a / p;
 		} else {
-			return Float.NaN;
+			return null;
 		}
 	}
 	

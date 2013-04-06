@@ -75,4 +75,21 @@ public class MathsUtil {
 		}
 	}
 	
+	public static float trunc(float f) {
+		return Math.round(f);
+	}
+	
+	public static Float trunc(Float f) {
+		return f != null ? trunc(f.floatValue()) : null;
+	}
+	
+	public static float round(float f, int dp) {
+		float pow = (float) Math.pow(10, dp);
+		float round = Math.round(f * pow);
+		return round / pow;
+	}
+	
+	public static Float round(Float f, int dp) {
+		return f != null ? round(f.floatValue(), dp) : null;
+	}
 }

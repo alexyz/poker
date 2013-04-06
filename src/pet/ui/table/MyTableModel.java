@@ -7,7 +7,7 @@ import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
 public class MyTableModel<T> extends AbstractTableModel {
-
+	
 	private final ArrayList<MyColumn<T>> cols = new ArrayList<>();
 
 	private final ArrayList<T> rows = new ArrayList<>();

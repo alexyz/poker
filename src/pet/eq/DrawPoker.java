@@ -250,18 +250,18 @@ public class DrawPoker extends Poker {
 				break;
 			case DS_LOW_TYPE:
 				high = false;
-				highValue = MAX_RANK - (value & HAND);
+				highValue = HI_TYPE | (MAX_RANK - (value & HAND));
 				break;
 			default:
 				// ace to five doesn't include str/fl
 				// but then, no drawing games use ace to five values so doesn't matter
-				throw new RuntimeException("can't get score of " + Poker.valueString(value));
+				throw new RuntimeException("can't get score of " + Integer.toHexString(value));
 		}
 		
 		final int[] highValues = highValues();
 		int p = Arrays.binarySearch(highValues, highValue);
 		if (p < 0) {
-			throw new RuntimeException("not a high value: " + Poker.valueString(highValue));
+			throw new RuntimeException("not a high value: " + Integer.toHexString(highValue));
 		}
 		
 		if (!high) {

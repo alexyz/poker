@@ -24,20 +24,26 @@ public abstract class Poker {
 	protected static final int TYPE = 0x0f000000;
 	/** rank mask (allowing 20 bits for hand value, i.e. 4 bits per card) */
 	protected static final int RANK = 0x00f00000;
-	/** rank and hand value mask */
+	/** rank and hand value mask, NOT type */
 	protected static final int HAND = 0x00ffffff;
 	
 	/** high hand valuation type */
 	protected static final int HI_TYPE = 0x01000000;
-	/** deuce to seven low hand valuation type */
+	/**
+	 * deuce to seven low hand valuation type - do MAX_RANK - (value & HAND) to
+	 * get apparent high value
+	 */
 	protected static final int DS_LOW_TYPE = 0x02000000;
-	/** ace to five low hand valuation type - do MAX_MASK - (value & HAND) to get
+	/**
+	 * ace to five low hand valuation type - do MAX_RANK - (value & HAND) to get
 	 * apparent high value
 	 */
 	protected static final int AF_LOW_TYPE = 0x03000000;
-	/** badugi value type (inverted) */
+	/**
+	 * badugi value type - do B0_RANK - (value & HAND) to get cards
+	 */
 	protected static final int BADUGI_TYPE = 0x04000000;
-	
+
 	/** high card bit mask (always zero) */
 	protected static final int H_RANK = 0;
 	/** pair rank bit mask */
@@ -196,7 +202,7 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * Get high value of 5 card hand
+	 * Get high value of 5 card hand with type of HI_TYPE
 	 */
 	public static int value (String[] hand) {
 		validate(hand);
@@ -258,7 +264,7 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * Return pair value or high cards.
+	 * Return pair value or high cards without type mask.
 	 * Does not require sorted hand
 	 */
 	private static int isPair(String[] hand, boolean acehigh) {
@@ -302,10 +308,11 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * deuce to seven value - exact opposite of high value
+	 * deuce to seven value - exact opposite of high value (i.e. worst high
+	 * hand, not best low hand)
 	 */
 	static int dsValue(String[] hand) {
-		return Poker.DS_LOW_TYPE | (Poker.MAX_RANK - Poker.value(hand));
+		return DS_LOW_TYPE | (MAX_RANK - (value(hand) & HAND));
 	}
 	
 	/**
@@ -353,10 +360,10 @@ public abstract class Poker {
 	}
 	
 	/**
-	 * Return string representation of hand value
+	 * Return string representation of hand value (any type)
 	 */
 	public static String valueString(int value) {
-		if (value <= 0) {
+		if (value == 0) {
 			return "No value";
 		}
 		switch (value & TYPE) {
@@ -368,10 +375,13 @@ public abstract class Poker {
 			case BADUGI_TYPE:
 				return Badugi.valueString(value);
 			default:
-				return "##" + Integer.toHexString(value) + "##";
+				throw new RuntimeException("v=" + Integer.toHexString(value));
 		}
 	}
 
+	/**
+	 * get string representation of bare high value (excluding type)
+	 */
 	private static String valueStringHi (final int highValue, final boolean high) {
 		final char c1 = valueFace(highValue);
 		final char c2 = valueFace(highValue >> 4);

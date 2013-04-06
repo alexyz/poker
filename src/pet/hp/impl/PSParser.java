@@ -36,7 +36,7 @@ public class PSParser extends Parser2 {
 	@Override
 	public boolean isHistoryFile (String name) {
 		// TS - tournament summaries
-		return name.startsWith("HH") && name.endsWith(".txt") && !name.contains("Badugi");
+		return name.startsWith("HH") && name.endsWith(".txt");
 	}
 	
 	/**
@@ -566,84 +566,46 @@ public class PSParser extends Parser2 {
 		int a = line.indexOf("***");
 		int b = line.indexOf("***", a + 3);
 		String name = line.substring(a + 4, b - 1);
-		boolean newStreet = false;
-		boolean ignoreStreet = false;
+		println("phase " + name);
 		
-		switch (hand.game.type) {
-			case HE:
-			case OM:
-			case OMHL:
-			case OM5:
-			case OM51:
-			case OM5HL:
-			case OM51HL:
-				if (name.equals("FLOP") || name.equals("TURN") || name.equals("RIVER")) {
-					newStreet = true;
-				} else if (name.equals("HOLE CARDS") || name.equals("PRE-FLOP")) {
-					ignoreStreet = true;
-				}
+		switch (name) {
+			case "FLOP":
+			case "TURN":
+			case "RIVER":
+			case "FIRST DRAW":
+			case "SECOND DRAW":
+			case "THIRD DRAW":
+			case "4th STREET":
+			case "5th STREET":
+			case "6th STREET":
+				pip();
+				newStreet();
+				println("new street index " + currentStreetIndex());
 				break;
-			
-			case FCD:
-			case DSSD:
-				if (name.equals("DEALING HANDS")) {
-					ignoreStreet = true;
-				}
-				// have to manually make new street in first draw/stand pat
-				// action
+				
+			case "SHOW DOWN":
+				println("showdown");
+				hand.showdown = true;
 				break;
-			
-			case DSTD:
-				// *** DEALING HANDS ***
-				// *** FIRST DRAW ***
-				// *** SECOND DRAW ***
-				// *** THIRD DRAW ***
-				if (name.equals("DEALING HANDS")) {
-					ignoreStreet = true;
-				} else if (name.equals("FIRST DRAW") || name.equals("SECOND DRAW") || name.equals("THIRD DRAW")) {
-					newStreet = true;
-				}
+				
+			case "DEALING HANDS":
+			case "3rd STREET":
+			case "HOLE CARDS":
+			case "PRE-FLOP":
+				println("ignore phase");
 				break;
-			
-			case STUD:
-			case STUDHL:
-			case RAZZ:
-				// *** 3rd STREET ***
-				// *** 4th STREET ***
-				// *** 5th STREET ***
-				// *** 6th STREET ***
-				// *** RIVER ***
-				// FIXME river could be followed by community card, like holdem
-				if (name.equals("3rd STREET")) {
-					ignoreStreet = true;
-				} else if (name.equals("4th STREET") || name.equals("5th STREET") || name.equals("6th STREET")
-						|| name.equals("RIVER")) {
-					newStreet = true;
-				}
+				
+			case "SUMMARY":
+				println("summary");
+				// pip in case there is only one street
+				pip();
+				summaryPhase = true;
 				break;
-			
+				
 			default:
-				throw new RuntimeException("unknown game type " + hand.game.type);
+				fail("unknown phase: " + name);
 		}
 		
-		if (newStreet) {
-			pip();
-			newStreet();
-			println("new street index " + currentStreetIndex());
-			
-		} else if (name.equals("SHOW DOWN")) {
-			println("showdown");
-			hand.showdown = true;
-			
-		} else if (name.equals("SUMMARY")) {
-			println("summary");
-			// pip in case there is only one street
-			pip();
-			summaryPhase = true;
-			
-		} else if (!ignoreStreet) {
-			throw new RuntimeException("unknown phase " + name);
-		}
 	}
 	
 	private void parseAction (final String line, final int i) {
@@ -789,15 +751,17 @@ public class PSParser extends Parser2 {
 			}
 			
 			case DRAW: {
+				// create new street before adding action (5cd only)
 				drawAct = true;
 				// tawvx: discards 1 card [Ah]
 				// joven2010: discards 3 cards
 				
-				// five card draw: always draw 0
-				// street 0 (size 1): no draw
-				// street 1 (size 2): draw 0, etc
-				int draw = hand.game.type == Game.Type.DSTD ? streets.size() - 2 : 0;
-				assert_(seat.drawn(draw) == 0, "not yet drawn");
+				// st=>draw
+				// 5cd: 0=>0
+				// td/bg: 1=>0, 2=>1, 3=>2
+				int gamedraw = GameUtil.getDraws(hand.game.type, 0);
+				int draw = gamedraw == 1 ? 0 : currentStreetIndex() - 1;
+				assert_(seat.drawn(draw) == 0, "seat drawn=zero: " + seat.drawn(draw));
 				int discardsStart = nextToken(line, actEnd);
 				seat.setDrawn(draw, (byte) parseInt(line, discardsStart));
 				// the actual cards will be set in parseDeal
@@ -836,7 +800,7 @@ public class PSParser extends Parser2 {
 		println("action " + action);
 		
 		if (drawAct && currentStreetIndex() == 0) {
-			// there is no draw phase, so pip and fake a new street
+			// there is no draw phase for 5 card draw, so pip and fake a new street
 			println("new street for draw");
 			pip();
 			newStreet();

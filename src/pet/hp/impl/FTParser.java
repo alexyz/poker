@@ -441,6 +441,7 @@ public class FTParser extends Parser2 {
 	
 	@Override
 	public boolean parseLine (String line) {
+		// TODO could make this faster by operating on stringbuilder
 		// remove null bytes, seem to be a lot of these
 		line = line.replace("\u0000", "");
 		// remove bom thing?

@@ -2,6 +2,7 @@ package pet.ui.table;
 
 import java.util.*;
 
+import pet.eq.MathsUtil;
 import pet.hp.info.*;
 
 public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
@@ -38,28 +39,28 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	private static final MyColumn<PlayerGameInfo> vpip = new MyColumn<PlayerGameInfo>(Float.class, "VP%", "Percentage of hands VPIP") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.vpip();
+			return MathsUtil.trunc(o.vpip());
 		}
 	};
 	
 	private static final MyColumn<PlayerGameInfo> showdownseen = new MyColumn<PlayerGameInfo>(Float.class, "SS%", "Percentage of hands reaching show down") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.ss();
+			return MathsUtil.trunc(o.ss());
 		}
 	};
 	
 	private static final MyColumn<PlayerGameInfo> handswon = new MyColumn<PlayerGameInfo>(Float.class, "HW%", "Percentage of hands won") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.hw();
+			return MathsUtil.trunc(o.hw());
 		}
 	};
 	
 	private static final MyColumn<PlayerGameInfo> showdownswon = new MyColumn<PlayerGameInfo>(Float.class, "SW%", "Percentage of hands reaching show down that won") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.sw();
+			return MathsUtil.trunc(o.sw());
 		}
 	};
 	
@@ -96,7 +97,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	private static final MyColumn<PlayerGameInfo> amph = new MyColumn<PlayerGameInfo>(Float.class, "Am/H", "Amount won per hand") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.amph();
+			return MathsUtil.trunc(o.amph());
 		}
 	};
 	
@@ -145,7 +146,7 @@ public class GameInfoTableModel extends MyTableModel<PlayerGameInfo> {
 	public static final MyColumn<PlayerGameInfo> pfr = new MyColumn<PlayerGameInfo>(Float.class, "PFR%", "Percentage of hands raised preflop") {
 		@Override
 		public Float getValue(PlayerGameInfo o) {
-			return o.pfr();
+			return MathsUtil.trunc(o.pfr());
 		}
 	};
 	
