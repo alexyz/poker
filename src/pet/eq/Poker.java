@@ -100,7 +100,7 @@ public abstract class Poker {
 	
 	/** array of all possible unique hi hand values (there are only approx 7500) */
 	private static int[] uniqueHighValues;
-	
+
 	static {
 		deckArrS = deckArr.clone();
 		Arrays.sort(deckArrS);
@@ -552,6 +552,18 @@ public abstract class Poker {
 		String[][] cardsArr = cards.toArray(new String[cards.size()][]);
 		String[] blockersArr = blockers.toArray(new String[blockers.size()]);
 		return equity(boardArr, cardsArr, blockersArr, draws);
+	}
+	
+	/** primary valuation method */
+	protected Value value;
+	
+	public Poker(Value value) {
+		this.value = value;
+	}
+	
+	/** get the primary value function for this game */
+	public Value getValue () {
+		return value;
 	}
 	
 	/**

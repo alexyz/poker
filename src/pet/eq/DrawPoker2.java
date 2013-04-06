@@ -6,18 +6,18 @@ import java.util.*;
 /**
  * experimental draw poker functions
  */
-public abstract class DrawPoker2 extends Poker {
+public class DrawPoker2 {
 	
 	public static void main(String[] args) {
 		
 		// [4h 2d 5d 7h 3s] draw 1 blockers 7h
 		String[] x = new String[] { "4h", "2d", "5d", "7h", "3s" };
-		List<DrawPoker.Draw> l = new ArrayList<>();
+		List<Draw> l = new ArrayList<>();
 		
 		DrawPoker.getDrawingHand(l, x, 1, false, null);
 		Collections.sort(l);
 		Collections.reverse(l);
-		for (DrawPoker.Draw d : l) {
+		for (Draw d : l) {
 			System.out.println("  " + d);
 		}
 		
@@ -25,7 +25,7 @@ public abstract class DrawPoker2 extends Poker {
 		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h" });
 		Collections.sort(l);
 		Collections.reverse(l);
-		for (DrawPoker.Draw d : l) {
+		for (Draw d : l) {
 			System.out.println("  " + d);
 		}
 		
@@ -33,7 +33,7 @@ public abstract class DrawPoker2 extends Poker {
 		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h", "5d" });
 		Collections.sort(l);
 		Collections.reverse(l);
-		for (DrawPoker.Draw d : l) {
+		for (Draw d : l) {
 			System.out.println("  " + d);
 		}
 		

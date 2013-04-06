@@ -10,18 +10,18 @@ public class CardsStateUtil {
 	/**
 	 * get the hole cards the current player kept and discarded
 	 */
-	private static void kept(String[] hole1, String[] hole2, String[] in, String[] out) {
+	private static void kept(String[] cards, String[] nextCards, String[] kept, String[] discarded) {
 		int i = 0, j = 0;
-		for (int n1 = 0; n1 < 5; n1++) {
+		for (int n1 = 0; n1 < cards.length; n1++) {
 			find: {
-				for (int n2 = 0; n2 < 5; n2++) {
-					if (hole1[n1].equals(hole2[n2])) {
-						in[i++] = hole1[n1];
-						break find;
-					}
+			for (int n2 = 0; n2 < cards.length; n2++) {
+				if (cards[n1].equals(nextCards[n2])) {
+					kept[i++] = cards[n1];
+					break find;
 				}
-				out[j++] = hole1[n1];
 			}
+			discarded[j++] = cards[n1];
+		}
 		}
 	}
 	
@@ -35,13 +35,12 @@ public class CardsStateUtil {
 			return null;
 		}
 		
-		CardsState cs = null;
+		final CardsState cs;
 		
-		boolean high = false;
 		switch (hand.game.type) {
 			case STUD:
 			case STUDHL:
-			case RAZZ:
+			case RAZZ: {
 				// XXX should maybe emphasise difference between down and up cards
 				String[] cards = HandUtil.getFinalCards(hand.game.type, seat);
 				if (streetIndex < 4) {
@@ -49,44 +48,50 @@ public class CardsStateUtil {
 				}
 				// don't sort (though could sort first two)
 				return new CardsState(cards, null, false, null);
+			}
 			
+			case AFTD:
+			case BG:
 			case FCD:
-				high = true;
-				
 			case DSTD:
 			case DSSD:
 				if (GameUtil.isShowdown(hand.game.type, streetIndex)) {
 					// on final street just return final hand from seat
 					cs = new CardsState(seat.downCards.clone(), null, false, null);
 					
-				} else if (hand.myseat == seat) {
-					// get current player cards but also see which ones were kept
-					String[] x = hand.myDrawCards(streetIndex);
-					if (x == null) {
-						return null;
-					}
-					System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(x));
-					
-					String[] y = hand.myDrawCards(streetIndex + 1);
-					if (y == null) {
-						y = hand.myseat.downCards;
-					}
-					System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(y));
-					
-					final ArrayList<DrawPoker.Draw> l = new ArrayList<>();
-					final int drawn = seat.drawn(streetIndex);
-					DrawPoker.getDrawingHand(l, x, drawn, high, blockers);
-					final String[] k = new String[5 - drawn];
-					final String[] d = new String[drawn];
-					kept(x, y, k, d);
-					cs = new CardsState(k, d, false, l);
-					
 				} else {
-					// guess opponents hole cards based on final hand
-					final ArrayList<DrawPoker.Draw> l = new ArrayList<>();
-					final int drawn = seat.drawn(streetIndex);
-					String[] h = DrawPoker.getDrawingHand(l, seat.downCards, drawn, high, blockers);
-					cs = new CardsState(h, null, true, l);
+					// get the draw method for the value type for the game
+					final Value v = GameUtil.getPoker(hand.game.type).getValue();
+					
+					if (hand.myseat == seat) {
+						// get current player cards but also see which ones were kept
+						String[] cards = hand.myDrawCards(streetIndex);
+						if (cards == null) {
+							return null;
+						}
+						System.out.println("my hole cards for street " + streetIndex + " are " + Arrays.toString(cards));
+						
+						String[] nextCards = hand.myDrawCards(streetIndex + 1);
+						if (nextCards == null) {
+							nextCards = hand.myseat.downCards;
+						}
+						System.out.println("my hole cards for street " + (streetIndex+1) + " are " + Arrays.toString(nextCards));
+						
+						final ArrayList<Draw> drawList = new ArrayList<>();
+						final int drawn = seat.drawn(streetIndex);
+						v.draw(cards, drawn, blockers, drawList);
+						final String[] in = new String[v.cards - drawn];
+						final String[] out = new String[drawn];
+						kept(cards, nextCards, in, out);
+						cs = new CardsState(in, out, false, drawList);
+						
+					} else {
+						// guess opponents hole cards based on final hand
+						final ArrayList<Draw> l = new ArrayList<>();
+						final int drawn = seat.drawn(streetIndex);
+						final String[] h = v.draw(seat.downCards, drawn, blockers, l);
+						cs = new CardsState(h, null, true, l);
+					}
 				}
 				break;
 				
@@ -99,9 +104,6 @@ public class CardsStateUtil {
 			case OM51HL:
 				cs = new CardsState(seat.downCards, null, false, null);
 				break;
-				
-			case BG:
-				
 				
 			default:
 				throw new RuntimeException("unknown game type " + hand.game);

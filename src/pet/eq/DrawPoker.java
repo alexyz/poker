@@ -8,32 +8,12 @@ import java.util.*;
  */
 public class DrawPoker extends Poker {
 	
-	/** represents a possible draw and its average score */
-	public static class Draw implements Comparable<Draw> {
-		public final String[] cards;
-		public double score;
-		public Draw(String[] hole, double score) {
-			this.cards = hole;
-			this.score = score;
-		}
-		@Override
-		public int compareTo(Draw other) {
-			return (int) Math.signum(score - other.score);
-		}
-		@Override
-		public String toString() {
-			return String.format("%.3f -> ", score) + PokerUtil.cardsString(cards);
-		}
-	}
-	
 	//
 	// instance methods
 	//
 	
-	private final Value value;
-	
 	public DrawPoker(Value value) {
-		this.value = value;
+		super(value);
 	}
 	
 	@Override
@@ -126,7 +106,7 @@ public class DrawPoker extends Poker {
 	 * get the best drawing hand for the given hand, number drawn and hand valuation.
 	 * optionally returns score of all possible drawing hands.
 	 */
-	public static String[] getDrawingHand(List<DrawPoker.Draw> list, String[] hand, int drawn, boolean high, String[] blockers) {
+	public static String[] getDrawingHand(List<Draw> list, String[] hand, int drawn, boolean high, String[] blockers) {
 		System.out.println("get drawing hand: " + Arrays.toString(hand) + " drawn: " + drawn + " blockers: " + Arrays.toString(blockers) + " high: " + high);
 		if (hand.length > 5) {
 			throw new RuntimeException();
@@ -176,8 +156,8 @@ public class DrawPoker extends Poker {
 		} else if (drawn == 0) {
 			// special case, nothing to test other than given hand
 			if (list != null) {
-				double s = score(value.value(hand), bias);
-				list.add(new DrawPoker.Draw(hand, s));
+				float s = score(value.value(hand), bias);
+				list.add(new Draw(hand, s));
 			}
 			return hand.clone();
 		}
@@ -213,7 +193,7 @@ public class DrawPoker extends Poker {
 			String[] drawingHand = Arrays.copyOf(drawnHand, 5 - drawn);
 			if (list != null) {
 				Arrays.sort(drawingHand, Cmp.revCardCmp);
-				list.add(new DrawPoker.Draw(drawingHand, averageScore));
+				list.add(new Draw(drawingHand, averageScore));
 			}
 			
 			if (score > maxScore) {
@@ -235,7 +215,7 @@ public class DrawPoker extends Poker {
 	 * inverted. bias is 0.5 to 1, representing how many values are less than
 	 * 0.5, e.g. 0.9 means 90% of values are less than 0.5
 	 */
-	protected static double score(final int value, final double bias) {
+	protected static float score(final int value, final double bias) {
 		if (bias < 0.5 || bias > 1.0) {
 			throw new RuntimeException("invalid bias " + bias);
 		}
@@ -271,7 +251,7 @@ public class DrawPoker extends Poker {
 		
 		// raise score to some power to bias toward high values
 		// note: for k=x^y, y=log(k)/log(x)... i think
-		return Math.pow((1f * p) / (highValues.length - 1f), Math.log(0.5) / Math.log(bias));
+		return (float) Math.pow((1f * p) / (highValues.length - 1f), Math.log(0.5) / Math.log(bias));
 	}
 	
 }

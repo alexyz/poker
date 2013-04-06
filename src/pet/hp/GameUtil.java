@@ -15,13 +15,13 @@ public class GameUtil {
 	private static final DrawPoker drawPoker = new DrawPoker(Value.hiValue);
 	private static final DrawPoker dsLowDrawPoker = new DrawPoker(Value.dsLowValue);
 	private static final DrawPoker afLowDrawPoker = new DrawPoker(Value.afLowValue);
+	private static final DrawPoker badugiPoker = new DrawPoker(Value.badugiValue);
 	private static final HEPoker holdemPoker = new HEPoker(false, false);
 	private static final HEPoker omahaPoker = new HEPoker(true, false);
 	private static final HEPoker omahaHLPoker = new HEPoker(true, true);
 	private static final StudPoker studPoker = new StudPoker(Value.hiValue, false);
 	private static final StudPoker studHLPoker = new StudPoker(Value.hiValue, true);
 	private static final StudPoker razzPoker = new StudPoker(Value.afLowValue, false);
-	private static final DrawPoker badugiPoker = new DrawPoker(Value.badugiValue);
 	private static final FiveCardStudPoker fiveCardStudPoker = new FiveCardStudPoker();
 	
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };

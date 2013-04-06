@@ -91,7 +91,7 @@ public class HandStateTableModel extends MyTableModel<HandState> {
 			if (ss.cardsState != null && ss.cardsState.suggestedDraws != null) {
 				// suggested draws
 				sb.append("<table><tr><th>Hand</th><th>Score</th></tr>");
-				for (DrawPoker.Draw d : ss.cardsState.suggestedDraws) {
+				for (Draw d : ss.cardsState.suggestedDraws) {
 					boolean e = Arrays.equals(ss.cardsState.cards, d.cards);
 					sb.append("<tr><td>");
 					if (e) {

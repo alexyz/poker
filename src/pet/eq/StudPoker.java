@@ -10,11 +10,10 @@ public class StudPoker extends Poker {
 	
 	private final String[] tempHand = new String[5];
 	private final String[] tempHoleCards = new String[7];
-	private final Value value;
 	private final boolean hilo;
 	
 	public StudPoker(Value value, boolean hilo) {
-		this.value = value;
+		super(value);
 		this.hilo = hilo;
 	}
 	

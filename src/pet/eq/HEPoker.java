@@ -22,7 +22,6 @@ public class HEPoker extends Poker {
 	private final boolean omaha;
 	private final int min;
 	private final boolean hilo;
-	private final Value hiValue;
 	private final Value loValue;
 
 	/**
@@ -36,8 +35,8 @@ public class HEPoker extends Poker {
 	 * create holdem equity calculator for given game type
 	 */
 	public HEPoker(boolean omaha, boolean hilo, Value hi, Value lo) {
+		super(hi);
 		this.omaha = omaha;
-		this.hiValue = hi;
 		this.loValue = lo;
 		this.min = omaha ? 2 : 0;
 		this.hilo = hilo;
@@ -87,7 +86,7 @@ public class HEPoker extends Poker {
 			return 0;
 			
 		} else {
-			return heValue(hiValue, board, hole, new String[5]);
+			return heValue(value, board, hole, new String[5]);
 		}
 	}
 	
@@ -119,7 +118,7 @@ public class HEPoker extends Poker {
 		if (heboard.current != null) {
 			for (int n = 0; n < holeCards.length; n++) {
 				if (heboard.current.length >= 3) {
-					hivals[n] = heValue(hiValue, heboard.current, holeCards[n], temp);
+					hivals[n] = heValue(value, heboard.current, holeCards[n], temp);
 				}
 			}
 			MEquityUtil.updateCurrent(meqs, Equity.Type.HI_ONLY, hivals);
@@ -147,7 +146,7 @@ public class HEPoker extends Poker {
 			
 			// hi equity
 			for (int i = 0; i < holeCards.length; i++) {
-				hivals[i] = heValue(hiValue, heboard.board, holeCards[i], temp);
+				hivals[i] = heValue(value, heboard.board, holeCards[i], temp);
 			}
 			
 			// low equity - only counts if at least one hand makes low

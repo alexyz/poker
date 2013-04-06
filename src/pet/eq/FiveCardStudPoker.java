@@ -3,6 +3,11 @@ package pet.eq;
 
 public class FiveCardStudPoker extends Poker {
 	
+	
+	public FiveCardStudPoker() {
+		super(Value.hiValue);
+	}
+	
 	@Override
 	protected MEquity[] equity (String[] board, String[][] holeCards, String[] blockers, int draws) {
 		return null;

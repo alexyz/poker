@@ -3,7 +3,7 @@ package pet.hp.state;
 import java.util.Arrays;
 import java.util.List;
 
-import pet.eq.DrawPoker;
+import pet.eq.Draw;
 
 /**
  * player hole cards as string array, plus meta data to indicate discarded cards
@@ -16,10 +16,10 @@ public class CardsState {
 	public final String[] discarded;
 	/** are hole cards guessed */
 	public final boolean guess;
-	public final List<DrawPoker.Draw> suggestedDraws;
+	public final List<Draw> suggestedDraws;
 	
-	public CardsState(String[] hole, String[] discarded, boolean guess, List<DrawPoker.Draw> l) {
-		this.cards = hole;
+	public CardsState(String[] cards, String[] discarded, boolean guess, List<Draw> l) {
+		this.cards = cards;
 		this.discarded = discarded;
 		this.guess = guess;
 		this.suggestedDraws = l;

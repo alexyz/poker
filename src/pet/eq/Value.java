@@ -1,5 +1,7 @@
 package pet.eq;
 
+import java.util.List;
+
 /**
  * 5 card hand value function
  */
@@ -13,6 +15,10 @@ public abstract class Value {
 		public final int value(String[] hand) {
 			return Poker.value(hand);
 		}
+		@Override
+		public String[] draw (String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
+			return DrawPoker.getDrawingHand(drawList, cards, drawn, true, blockers);
+		}
 	};
 	
 	/**
@@ -23,6 +29,7 @@ public abstract class Value {
 		public int value(String[] hand) {
 			return Poker.afLowValue(hand);
 		}
+		// draw - just the lowest unique cards?
 	};
 	
 	/**
@@ -42,6 +49,10 @@ public abstract class Value {
 		@Override
 		public int value(String[] hand) {
 			return Poker.dsValue(hand);
+		}
+		@Override
+		public String[] draw (String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
+			return DrawPoker.getDrawingHand(drawList, cards, drawn, false, blockers);
 		}
 	};
 	
@@ -63,6 +74,10 @@ public abstract class Value {
 		public int value(String[] hand) {
 			return Badugi.badugiValue(hand);
 		}
+		@Override
+		public String[] draw (String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
+			return Badugi.draw(cards, drawn);
+		}
 	};
 	
 	/**
@@ -82,4 +97,11 @@ public abstract class Value {
 	 * get hand value from subclass
 	 */
 	public abstract int value(String[] hand);
+	
+	/**
+	 * get drawing hand
+	 */
+	public String[] draw(String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
+		throw new RuntimeException("yawn");
+	}
 }

@@ -235,16 +235,17 @@ public class Badugi {
 	}
 	
 	/**
-	 * get the likely drawing hand
+	 * get the likely drawing hand.
+	 * should probably do something with blockers...
 	 */
-	public static String[] draw (String[] hand, int discard) {
-		switch (discard) {
+	public static String[] draw (String[] hand, int drawn) {
+		switch (drawn) {
 			case 0:
 				return hand;
 			case 1:
 			case 2:
 			case 3:
-				return draw2(hand, 4 - discard);
+				return draw2(hand, 4 - drawn);
 			case 4:
 				return new String[0];
 			default:
@@ -256,17 +257,19 @@ public class Badugi {
 	private static String[] draw2 (String[] hand, int k) {
 		final String[] h = new String[k];
 		final int pmax = MathsUtil.binaryCoefficientFast(4, k);
-		int vmax = B0_RANK;
-		int vmaxp = 0;
+		int vmin = B0_RANK;
+		int vminp = 0;
+		// find p for worst hand
 		for (int p = 0; p < pmax; p++) {
 			MathsUtil.kCombination(k, p, hand, h, 0);
 			int v = v(h);
-			if (v < vmax) {
-				vmax = v;
-				vmaxp = p;
+			if (v < vmin) {
+				vmin = v;
+				vminp = p;
 			}
 		}
-		MathsUtil.kCombination(k, vmaxp, hand, h, 0);
+		// get the cards for the winning combination
+		MathsUtil.kCombination(k, vminp, hand, h, 0);
 		return h;
 	}
 	
