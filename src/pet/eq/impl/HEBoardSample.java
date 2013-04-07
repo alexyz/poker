@@ -1,6 +1,8 @@
-package pet.eq;
+package pet.eq.impl;
 
 import java.util.Random;
+
+import pet.eq.ArrayUtil;
 
 /**
  * generate sample remaining boards

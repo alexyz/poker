@@ -1,6 +1,7 @@
 import java.util.*;
 
 import pet.eq.*;
+import pet.eq.impl.*;
 
 /**
  * experimental class to classify straight draws

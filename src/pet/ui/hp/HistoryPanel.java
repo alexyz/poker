@@ -13,7 +13,6 @@ import javax.swing.event.*;
 
 import pet.PET;
 import pet.hp.info.*;
-import pet.ui.*;
 
 /**
  * panel for parsing files

@@ -1,6 +1,8 @@
-package pet.eq;
+package pet.eq.impl;
 
 import java.util.Arrays;
+
+import pet.eq.*;
 
 /**
  * Hold'em and Omaha hand analysis, using a combinatorial number system.

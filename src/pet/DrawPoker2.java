@@ -1,7 +1,9 @@
 
-package pet.eq;
+package pet;
 
 import java.util.*;
+
+import pet.eq.*;
 
 /**
  * experimental draw poker functions
@@ -14,7 +16,7 @@ public class DrawPoker2 {
 		String[] x = new String[] { "4h", "2d", "5d", "7h", "3s" };
 		List<Draw> l = new ArrayList<>();
 		
-		DrawPoker.getDrawingHand(l, x, 1, false, null);
+		DrawPrediction.getDrawingHand(l, x, 1, false, null);
 		Collections.sort(l);
 		Collections.reverse(l);
 		for (Draw d : l) {
@@ -22,7 +24,7 @@ public class DrawPoker2 {
 		}
 		
 		l.clear();
-		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h" });
+		DrawPrediction.getDrawingHand(l, x, 1, false, new String[] { "7h" });
 		Collections.sort(l);
 		Collections.reverse(l);
 		for (Draw d : l) {
@@ -30,7 +32,7 @@ public class DrawPoker2 {
 		}
 		
 		l.clear();
-		DrawPoker.getDrawingHand(l, x, 1, false, new String[] { "7h", "5d" });
+		DrawPrediction.getDrawingHand(l, x, 1, false, new String[] { "7h", "5d" });
 		Collections.sort(l);
 		Collections.reverse(l);
 		for (Draw d : l) {

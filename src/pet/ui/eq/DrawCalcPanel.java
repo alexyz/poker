@@ -1,6 +1,7 @@
 package pet.ui.eq;
 
 import pet.eq.*;
+import pet.eq.impl.*;
 
 /**
  * calc panel for draw hands

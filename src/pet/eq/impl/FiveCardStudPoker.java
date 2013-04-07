@@ -1,8 +1,9 @@
-package pet.eq;
 
+package pet.eq.impl;
+
+import pet.eq.*;
 
 public class FiveCardStudPoker extends Poker {
-	
 	
 	public FiveCardStudPoker() {
 		super(Value.hiValue);

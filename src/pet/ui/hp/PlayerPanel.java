@@ -13,7 +13,6 @@ import pet.PET;
 import pet.hp.Hand;
 import pet.hp.History;
 import pet.hp.info.*;
-import pet.ui.PokerFrame;
 import pet.ui.graph.GraphData;
 import pet.ui.table.*;
 

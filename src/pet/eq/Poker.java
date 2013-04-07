@@ -71,12 +71,12 @@ public abstract class Poker {
 	/**
 	 * short rank names for high hand (value >> 20)
 	 */
-	public static final String[] shortRankNames = { "Hc", "P", "2P", "3K", "St", "Fl", "FH", "4K", "SF", "L" };
+	public static final String[] shortRankNames = { "Hc", "P", "Tp", "3K", "St", "Fl", "Fh", "4k", "Sf" };
 	
 	/** short rank names for ace to five low hands */
-	public static final String[] afLowShortRankNames = { "5H", "6H", "7H", "8H", "Hc", "P+" };
+	public static final String[] afLowShortRankNames = { "5", "6", "7", "8", "Hc", "P+" };
 	
-	public static final String[] dsLowShortRankNames = { "7H", "8H", "9H", "TH", "Hc", "P+" };
+	public static final String[] dsLowShortRankNames = { "7", "8", "9", "T", "Hc", "P+" };
 	
 	/** card suit representations */
 	public static final char H_SUIT = 'h', C_SUIT = 'c', S_SUIT = 's', D_SUIT = 'd';
@@ -130,7 +130,7 @@ public abstract class Poker {
 	/**
 	 * count low cards
 	 */
-	static int lowCount(String[] hand, boolean acehigh) {
+	protected static int lowCount(String[] hand, boolean acehigh) {
 		int count = 0;
 		for (int n = 0; n < hand.length; n++) {
 			if (faceValue(hand[n], acehigh) <= 8) {
@@ -501,12 +501,11 @@ public abstract class Poker {
 	/**
 	 * Go through every possible 5 card hand and collect the unique hand values in order
 	 */
-	static int[] highValues() {
+	protected static int[] highValues() {
 		if (uniqueHighValues != null) {
 			return uniqueHighValues;
 		}
 		
-		// TODO this is not very efficient, could just serialise/deserialise array
 		Set<Integer> uniqueValueSet = new TreeSet<>();
 		String[] hand = new String[5];
 		int valueCount = 0;
@@ -535,6 +534,7 @@ public abstract class Poker {
 		for (int v : uniqueValueSet) {
 			a[i++] = v;
 		}
+		
 		Arrays.sort(a);
 		uniqueHighValues = a;
 		return a;

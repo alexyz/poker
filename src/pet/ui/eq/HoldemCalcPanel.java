@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.swing.*;
 
-import pet.eq.*;
+import pet.eq.impl.HEPoker;
 
 /**
  * displays equity calculation panel specific to holdem/omaha

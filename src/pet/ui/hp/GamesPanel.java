@@ -39,6 +39,8 @@ public class GamesPanel extends JPanel implements HistoryListener {
 						textArea.setText(pgi.toLongString());
 						textArea.setCaretPosition(0);
 						revalidate();
+					} else {
+						textArea.setText("");
 					}
 				}
 			}

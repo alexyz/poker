@@ -1,13 +1,11 @@
 package pet.ui.eq;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import javax.swing.*;
 
 import pet.eq.*;
+import pet.eq.impl.*;
 
 /**
  * calc panel for stud hands

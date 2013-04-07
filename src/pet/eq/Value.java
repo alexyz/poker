@@ -17,7 +17,7 @@ public abstract class Value {
 		}
 		@Override
 		public String[] draw (String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
-			return DrawPoker.getDrawingHand(drawList, cards, drawn, true, blockers);
+			return DrawPrediction.getDrawingHand(drawList, cards, drawn, true, blockers);
 		}
 	};
 	
@@ -52,7 +52,7 @@ public abstract class Value {
 		}
 		@Override
 		public String[] draw (String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
-			return DrawPoker.getDrawingHand(drawList, cards, drawn, false, blockers);
+			return DrawPrediction.getDrawingHand(drawList, cards, drawn, false, blockers);
 		}
 	};
 	

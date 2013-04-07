@@ -1,4 +1,6 @@
-package pet.eq;
+package pet.eq.impl;
+
+import pet.eq.MathsUtil;
 
 /**
  * generate all possible remaining boards

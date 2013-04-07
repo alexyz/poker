@@ -9,7 +9,6 @@ import javax.swing.*;
 
 import pet.PET;
 import pet.hp.*;
-import pet.hp.impl.PSParser;
 import pet.hp.info.*;
 import pet.ui.eq.*;
 import pet.ui.graph.GraphData;

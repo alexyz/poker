@@ -1,7 +1,9 @@
-package pet.eq;
+package pet.eq.impl;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import pet.eq.*;
 
 /**
  * 7 card stud and razz poker calculations

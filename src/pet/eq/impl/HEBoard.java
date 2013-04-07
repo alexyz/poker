@@ -1,4 +1,4 @@
-package pet.eq;
+package pet.eq.impl;
 
 
 /**

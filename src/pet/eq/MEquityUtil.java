@@ -9,7 +9,7 @@ public class MEquityUtil {
 	 * Make array of multiple hand equities for given equity type, number of
 	 * remaining cards, calculation method
 	 */
-	static MEquity[] createMEquities(Equity.Type eqtype, int hands, int rem, boolean exact) {
+	public static MEquity[] createMEquities(Equity.Type eqtype, int hands, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
 			meqs[n] = MEquity.createMEquity(eqtype, rem, exact);
@@ -21,7 +21,7 @@ public class MEquityUtil {
 	 * Make array of multiple hand equities for hi or hi/lo equity type,
 	 * number of remaining cards, and calculation method
 	 */
-	static MEquity[] createMEquitiesHL(boolean hilo, int hands, int rem, boolean exact) {
+	public static MEquity[] createMEquitiesHL(boolean hilo, int hands, int rem, boolean exact) {
 		MEquity[] meqs = new MEquity[hands];
 		for (int n = 0; n < meqs.length; n++) {
 			meqs[n] = MEquity.createMEquityHL(hilo, rem, exact);
@@ -32,7 +32,7 @@ public class MEquityUtil {
 	/**
 	 * Set the current value of the hands, not the equity
 	 */
-	static void updateCurrent(MEquity[] meqs, Equity.Type eqtype, int[] vals) {
+	public static void updateCurrent(MEquity[] meqs, Equity.Type eqtype, int[] vals) {
 		int max = 0, times = 0;
 		for (int i = 0; i < vals.length; i++) {
 			int v = vals[i];
@@ -63,7 +63,7 @@ public class MEquityUtil {
 	 * Update equities win, tie, win rank and scoop with given hand values for the
 	 * given cards.
 	 */
-	static void updateMEquitiesHL(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
+	public static void updateMEquitiesHL(MEquity[] meqs, int[] hivals, int[] lovals, String[] cards) {
 		// high winner
 		int hw = MEquityUtil.updateMEquities2(meqs, Equity.Type.HILO_HI_HALF, hivals, cards);
 		// low winner
@@ -78,7 +78,7 @@ public class MEquityUtil {
 	 * Update equities win, tie, win rank and scoop with given hand values for the
 	 * given cards.
 	 */
-	static void updateMEquities(MEquity[] meqs, Equity.Type eqtype, int[] hivals, String[] cards) {
+	public static void updateMEquities(MEquity[] meqs, Equity.Type eqtype, int[] hivals, String[] cards) {
 		int hw = MEquityUtil.updateMEquities2(meqs, eqtype, hivals, cards);
 		if (hw >= 0) {
 			meqs[hw].scoopcount++;
@@ -147,7 +147,7 @@ public class MEquityUtil {
 	/**
 	 * summarise equities (convert counts to percentages)
 	 */
-	static void summariseMEquities(MEquity[] meqs, int count, int lowCount) {
+	public static void summariseMEquities(MEquity[] meqs, int count, int lowCount) {
 		//System.out.println("summarise count=" + count + " hilocount=" + hiloCount);
 		for (MEquity meq : meqs) {
 			//System.out.println("  meq " + meq);
@@ -182,7 +182,7 @@ public class MEquityUtil {
 		}
 	}
 
-	static void summariseOuts(MEquity[] meqs, int picks, int samples) {
+	public static void summariseOuts(MEquity[] meqs, int picks, int samples) {
 		for (MEquity meq : meqs) {
 			for (Equity eq : meq.eqs) {
 				eq.summariseOuts(meq.remCards, picks, samples);

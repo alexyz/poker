@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.util.Comparator;
 
 import pet.eq.*;
+import pet.eq.impl.*;
 
 /**
  * Utility methods for game objects, most methods are just interested in game
