@@ -3,7 +3,7 @@ package pet.eq;
 import java.util.List;
 
 /**
- * 5 card hand value function
+ * poker hand value and draw function
  */
 public abstract class Value {
 	
@@ -67,7 +67,7 @@ public abstract class Value {
 	};
 	
 	/**
-	 * straight hi value only (hi equity type)
+	 * badugi value
 	 */
 	public static final Value badugiValue = new Value(Equity.Type.BADUGI_ONLY, 4) {
 		@Override
@@ -99,7 +99,8 @@ public abstract class Value {
 	public abstract int value(String[] hand);
 	
 	/**
-	 * get drawing hand
+	 * get estimated drawing hand. this method is on Value and not Poker because
+	 * it largely depends on the valuation method rather than the game rules
 	 */
 	public String[] draw(String[] cards, int drawn, String[] blockers, List<Draw> drawList) {
 		throw new RuntimeException("yawn");

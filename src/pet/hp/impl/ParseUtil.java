@@ -232,6 +232,8 @@ public class ParseUtil {
 				return Game.Type.BG;
 			case "A-5 Triple Draw":
 				return Game.Type.AFTD;
+			case "5 Card Stud":
+				return Game.Type.FSTUD;
 			default:
 				throw new RuntimeException("unknown game " + gameStr);
 		}
@@ -299,6 +301,10 @@ public class ParseUtil {
 	/** get the (private) hole cards from the array depending on game type */
 	static String[] getDownCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
+			case FSTUD:
+				// only one down card in 5 stud
+				return new String[] { cards[0] };
+				
 			case STUD:
 			case STUDHL:
 			case RAZZ:
@@ -309,9 +315,24 @@ public class ParseUtil {
 				} else {
 					return new String[] { cards[0], cards[1], cards[6] }; 
 				}
-			default:
+				
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
 				// all cards are hole cards
 				return cards;
+				
+			default:
+				throw new RuntimeException();
 		}
 	}
 	
@@ -321,15 +342,33 @@ public class ParseUtil {
 	 */
 	static String[] getUpCards(final Game.Type gametype, final String[] cards) {
 		switch (gametype) {
+			case FSTUD:
+				return Arrays.copyOfRange(cards, 1, cards.length);
+				
 			case STUD:
 			case STUDHL:
 			case RAZZ:
 				// first two cards and last are hole, others are pub
 				// cards length is 3,4,5,6,7
 				return Arrays.copyOfRange(cards, 2, Math.min(cards.length, 6));
-			default:
-				// none are up cards
+				
+			case AFTD:
+			case BG:
+			case DSSD:
+			case DSTD:
+			case FCD:
+			case HE:
+			case OM:
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OMHL:
+				// no up cards in these games
 				return null;
+				
+			default:
+				throw new RuntimeException();
 		}
 	}
 	

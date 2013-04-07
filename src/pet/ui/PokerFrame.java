@@ -41,7 +41,7 @@ public class PokerFrame extends JFrame {
 	private final HandsPanel handsPanel = new HandsPanel();
 	private final HoldemCalcPanel holdemPanel = new HoldemCalcPanel("Hold'em", 1, 2);
 	private final HoldemCalcPanel omahaPanel = new HoldemCalcPanel("Omaha", 2, 4);
-	private final HoldemCalcPanel omaha5Panel = new HoldemCalcPanel("5 Card Omaha", 2, 5);
+	private final HoldemCalcPanel omaha5Panel = new HoldemCalcPanel("5-Omaha", 2, 5);
 	private final DrawCalcPanel drawPanel = new DrawCalcPanel();
 	private final BadugiCalcPanel badugiPanel = new BadugiCalcPanel();
 	private final GamesPanel gamesPanel = new GamesPanel();
@@ -68,7 +68,7 @@ public class PokerFrame extends JFrame {
 		
 		eqTabs.addTab("Hold'em", holdemPanel);
 		eqTabs.addTab("Omaha", omahaPanel);
-		eqTabs.addTab("5 Card Omaha", omaha5Panel);
+		eqTabs.addTab("5-Omaha", omaha5Panel);
 		eqTabs.addTab("Draw", drawPanel);
 		eqTabs.addTab("Badugi", badugiPanel);
 		eqTabs.addTab("Stud", studPanel);
@@ -138,31 +138,38 @@ public class PokerFrame extends JFrame {
 	 * hand
 	 */
 	public CalcPanel displayCalcPanel(Game.Type gameType) {
-		CalcPanel p;
-		switch (gameType) {
-			case HE: 
-				p = holdemPanel;
-				break;
-			case OM:
-			case OMHL:
-				p = omahaPanel;
-				break;
-			case DSTD:
-			case FCD:
-			case DSSD: 
-				p = drawPanel;
-				break;
-			case STUD:
-			case STUDHL:
-			case RAZZ:
-				p = studPanel;
-				break;
-			default:
-				throw new RuntimeException("no panel for game " + gameType);
-		}
+		CalcPanel p = getCalcPanel(gameType);
 		eqTabs.setSelectedComponent(p);
 		tabs.setSelectedComponent(eqTabs);
 		return p;
+	}
+	
+	private CalcPanel getCalcPanel(Game.Type gameType) {
+		switch (gameType) {
+			case HE: 
+				return holdemPanel;
+			case OM5:
+			case OM51:
+			case OM51HL:
+			case OM5HL:
+			case OM:
+			case OMHL:
+				return omahaPanel;
+			case FSTUD:
+			case AFTD:
+			case DSTD:
+			case FCD:
+			case DSSD: 
+				return drawPanel;
+			case STUD:
+			case STUDHL:
+			case RAZZ:
+				return studPanel;
+			case BG:
+				return badugiPanel;
+			default:
+				throw new RuntimeException("no panel for game " + gameType);
+		}
 	}
 
 	public void displayPlayer(String player) {

@@ -20,7 +20,7 @@ public class HandInfoTableModel extends MyTableModel<HandInfo> {
 				return new Date(o.hand.date);
 			}
 		});
-		cols.add(new MyColumn<HandInfo>(HoleCards.class, "MyHole", "Final hole cards") {
+		cols.add(new MyColumn<HandInfo>(HoleCards.class, "Down", "Final down cards") {
 			@Override
 			public HoleCards getValue(HandInfo o) {
 				return o.mydowncards();

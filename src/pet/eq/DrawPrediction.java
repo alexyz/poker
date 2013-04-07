@@ -14,7 +14,7 @@ public class DrawPrediction {
 	public static String[] getDrawingHand(List<Draw> list, String[] hand, int drawn, boolean high, String[] blockers) {
 		System.out.println("get drawing hand: " + Arrays.toString(hand) + " drawn: " + drawn + " blockers: " + Arrays.toString(blockers) + " high: " + high);
 		if (hand.length > 5) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid hand: " + Arrays.toString(hand));
 		}
 		
 		// XXX really should take into account multiple draws
@@ -39,7 +39,7 @@ public class DrawPrediction {
 		BigInteger combs = MathsUtil.binaryCoefficient(hand.length, 5 - drawn);
 		System.out.println("combs: " + combs);
 		if (combs.intValue() <= 0) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid combs: " + combs);
 		}
 		
 		// XXX if only 1 comb, just return hand?

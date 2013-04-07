@@ -2,7 +2,6 @@ package pet.ui.hp;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
-import java.text.DateFormat;
 import java.util.*;
 
 import javax.swing.*;
@@ -80,14 +79,14 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		equityButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				HandStateItem hs = (HandStateItem) stateCombo.getSelectedItem();
+				HandStateItem hsi = (HandStateItem) stateCombo.getSelectedItem();
 				String type;
-				switch (hs.hand.game.type) {
+				switch (hsi.hand.game.type) {
 					case HE:
 					case OM:
 					case FCD:
 					case STUD:
-					case FCSTUD:
+					case FSTUD:
 					case OM5:
 					case OM51:
 						type = PokerItem.HIGH;
@@ -109,13 +108,23 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 					case BG:
 						type = PokerItem.BADUGI;
 					default:
-						throw new RuntimeException("unknown game type " + hs.hand);
+						throw new RuntimeException("unknown game type " + hsi.hand);
 				}
 				
-				PokerFrame pf = PET.getPokerFrame();
-				CalcPanel calcPanel = pf.displayCalcPanel(hs.hand.game.type);
 				// TODO maybe take hands for selected street instead
-				List<String[]> cards = HandUtil.getFinalCards(hs.hand);
+				HandState hs = getSelectedHs();
+				if (hs == null) {
+					hs = hsi.states.get(hsi.states.size() - 1);
+				}
+				
+				List<String[]> cards = new ArrayList<>();
+				for (SeatState ss : hs.seats) {
+					if (ss != null && ss.cardsState.cards != null) {
+						cards.add(ss.cardsState.cards);
+					}
+				}
+				
+				CalcPanel calcPanel = PET.getPokerFrame().displayCalcPanel(hs.hand.game.type);
 				calcPanel.displayHand(hs.hand.board, cards, type);
 			}
 		});
@@ -151,6 +160,19 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 
+	private HandState getSelectedHs() {
+		int r = handTable.getSelectionModel().getMinSelectionIndex();
+		if (r >= 0) {
+			int sr = handTable.convertRowIndexToModel(r);
+			HandStateTableModel m = (HandStateTableModel) handTable.getModel();
+			HandState hs = m.getRow(sr);
+			System.out.println("selected " + r + " => " + sr + " => " + hs);
+			return hs;
+			
+		} else {
+			return null;
+		}
+	}
 
 	private void selectState(int off) {
 		int i = stateCombo.getSelectedIndex();
@@ -203,6 +225,7 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		}
 		
 		// TODO display "please wait" or something
+		// or just clear table
 		
 		// do equity calculation on non-awt thread
 		// don't use executor service because it doesn't tell you if an
@@ -238,19 +261,4 @@ public class LastHandPanel extends JPanel implements HistoryListener {
 		t.start();
 	}
 	
-}
-
-/** represents a list of hand states for a hand */
-class HandStateItem {
-	public final List<HandState> states;
-	public final Hand hand;
-	public HandStateItem(Hand hand) {
-		this.hand = hand;
-		this.states = HandStateUtil.getStates(hand);
-	}
-	@Override
-	public String toString() {
-		// user readable description of hand
-		return hand.tablename + " " + DateFormat.getDateTimeInstance().format(new Date(hand.date)) + (hand.showdown ? " *" : "");
-	}
 }

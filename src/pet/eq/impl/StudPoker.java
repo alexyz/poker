@@ -1,7 +1,6 @@
 package pet.eq.impl;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 import pet.eq.*;
 
@@ -68,7 +67,7 @@ public class StudPoker extends Poker {
 	@Override
 	public synchronized MEquity[] equity(final String[] board, final String[][] holeCardsOrig, final String[] blockers, final int draws) {
 		if (draws != 0) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid draws: " + draws);
 		}
 		System.out.println("stud sample equity: " + Arrays.deepToString(holeCardsOrig) + " board " + Arrays.toString(board) + " blockers " + Arrays.toString(blockers));
 		

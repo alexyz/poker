@@ -120,7 +120,11 @@ public class MyTableModel<T> extends AbstractTableModel {
 			MyColumn<T> col = cols.get(c);
 			StringBuilder sb = new StringBuilder();
 			sb.append("<html><b>").append(col.desc).append("</b>");
-			sb.append("<br>").append(col.getValue(row));
+			Object value = col.getValue(row);
+			if (value instanceof String[]) {
+				value = Arrays.toString((String[])value);
+			}
+			sb.append("<br>").append(value);
 			String tip = col.getToolTip(row);
 			if (tip != null && tip.length() > 0) {
 				sb.append("<br>").append(tip).append("</br>");

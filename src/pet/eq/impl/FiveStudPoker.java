@@ -3,20 +3,19 @@ package pet.eq.impl;
 
 import pet.eq.*;
 
-public class FiveCardStudPoker extends Poker {
+/**
+ * five stud is virtually the same as draw
+ */
+public class FiveStudPoker extends DrawPoker {
 	
-	public FiveCardStudPoker() {
+	public FiveStudPoker() {
 		super(Value.hiValue);
 	}
 	
 	@Override
 	protected MEquity[] equity (String[] board, String[][] holeCards, String[] blockers, int draws) {
-		return null;
-	}
-	
-	@Override
-	public int value (String[] board, String[] hole) {
-		return 0;
+		// pretend we are doing one draw
+		return super.equity(board, holeCards, blockers, 1);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package pet.ui;
+package pet.ui.hp;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ import pet.hp.impl.HistoryUtil;
 import pet.hp.impl.PSParser;
 import pet.hp.impl.StringCache;
 import pet.hp.info.FollowThread;
-import pet.ui.hp.HistoryPanel;
+import pet.ui.ConsolePanel;
 
 public class FilesPanel extends JPanel {
 

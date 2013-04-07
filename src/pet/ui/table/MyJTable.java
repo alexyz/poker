@@ -19,8 +19,7 @@ import javax.swing.table.TableCellRenderer;
  */
 public class MyJTable extends JTable {
 	
-	public static final Color defcol = UIManager.getDefaults().getColor("Table.background");
-	
+	public static final Color tableBackgroundColour = UIManager.getDefaults().getColor("Table.background");
 	public static final Font tableFont = UIManager.getDefaults().getFont("Table.font");
 	public static final Font monoTableFont = new Font("Monospaced", 0, tableFont.getSize());
 	public static final Font boldTableFont = tableFont.deriveFont(Font.BOLD);
@@ -88,7 +87,7 @@ public class MyJTable extends JTable {
 			int col2 = convertColumnIndexToModel(col);
 			if (!getSelectionModel().isSelectedIndex(row)) {
 				Color colour = ((MyTableModel<?>)getModel()).getColour(row2, col2);
-				jcomp.setBackground(colour != null ? colour : defcol);
+				jcomp.setBackground(colour != null ? colour : tableBackgroundColour);
 				//jcomp.setFont(new Font("Monospaced", 0, 8));
 			}
 			Font font = ((MyTableModel<?>)getModel()).getFont(row2, col2);

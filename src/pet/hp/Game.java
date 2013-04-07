@@ -32,7 +32,7 @@ public class Game implements Serializable {
 		/** stud high/low */
 		STUDHL("7 Card Stud H/L"),
 		/** 5 card stud */
-		FCSTUD("5 Card Stud"),
+		FSTUD("5 Card Stud"),
 		/** stars Courchevel */
 		OM51("5+1 Card Omaha"),
 		/** stars 5 card omaha */

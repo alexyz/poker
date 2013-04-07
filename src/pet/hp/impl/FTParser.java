@@ -67,7 +67,7 @@ public class FTParser extends Parser2 {
 	@Override
 	public boolean isHistoryFile (final String name) {
 		return name.startsWith("FT") && name.endsWith(".txt") && !name.endsWith(" Irish.txt")
-				&& !name.endsWith(" 5 Card Stud.txt") && !name.endsWith(" - Summary.txt");
+				 && !name.endsWith(" - Summary.txt");
 	}
 	
 	private void parseAction (final String name) {
@@ -407,12 +407,12 @@ public class FTParser extends Parser2 {
 				case BG:
 					game.max = 6;
 					break;
+				case FSTUD:
 				case RAZZ:
 				case STUD:
 				case STUDHL:
 					game.max = 8;
 					break;
-				case FCSTUD:
 				case HE:
 				case OM:
 				case OM5:
@@ -552,6 +552,12 @@ public class FTParser extends Parser2 {
 		final String name = line.substring(a + t.length(), b);
 		
 		switch (name) {
+			case "3RD STREET":
+				if (hand.game.type != Game.Type.FSTUD) {
+					// ignore for 7 stud, new street in 5 stud
+					break;
+				}
+				
 			case "FLOP":
 			case "TURN":
 			case "RIVER":
@@ -573,10 +579,10 @@ public class FTParser extends Parser2 {
 				// note there may not be a show down phase even if there is a showdown
 				hand.showdown = true;
 				break;
-				
-			case "3RD STREET":
+			
 			case "HOLE CARDS":
 			case "PRE-FLOP":
+			case "2ND STREET":
 				println("ignore street " + name);
 				break;
 				

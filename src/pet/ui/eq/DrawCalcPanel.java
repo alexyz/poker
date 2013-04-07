@@ -10,7 +10,8 @@ public class DrawCalcPanel extends CalcPanel {
 	
 	public DrawCalcPanel() {
 		super(true);
-		HandCardPanel[] handPanels = new HandCardPanel[6];
+		// make it 8 for 5 stud
+		HandCardPanel[] handPanels = new HandCardPanel[8];
 		for (int n = 0; n < handPanels.length; n++) {
 			handPanels[n] = new HandCardPanel("Draw hand " + (n + 1), 1, 5, false);
 		}

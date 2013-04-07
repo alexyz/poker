@@ -23,7 +23,7 @@ public class GameUtil {
 	private static final StudPoker studPoker = new StudPoker(Value.hiValue, false);
 	private static final StudPoker studHLPoker = new StudPoker(Value.hiValue, true);
 	private static final StudPoker razzPoker = new StudPoker(Value.afLowValue, false);
-	private static final FiveCardStudPoker fiveCardStudPoker = new FiveCardStudPoker();
+	private static final FiveStudPoker fiveCardStudPoker = new FiveStudPoker();
 	
 	private static final String[] hestreetnames = { "Pre-flop", "Flop", "Turn", "River" };
 	private static final String[] drawstreetnames = { "Pre-draw", "Post-draw" };
@@ -106,7 +106,7 @@ public class GameUtil {
 			case OM51:
 			case OM51HL:
 			case OM5HL:
-			case FCSTUD:
+			case FSTUD:
 			case AFTD:
 				return 5;
 			case STUD:
@@ -137,7 +137,7 @@ public class GameUtil {
 			case AFTD:
 				return 0;
 				
-			case FCSTUD:
+			case FSTUD:
 			case STUD:
 			case RAZZ:
 			case STUDHL:
@@ -145,23 +145,6 @@ public class GameUtil {
 				
 			default: 
 				throw new RuntimeException();
-		}
-	}
-	
-	/** return the minimum number of hole cards required for an equity calculation for this game */
-	public static int getMinHoleCards(Game.Type gametype) {
-		// should probably get this from poker instance
-		switch (gametype) {
-			case OM:
-			case OMHL:
-			case OM5:
-			case OM51:
-			case OM5HL:
-			case OM51HL:
-				return 2;
-				
-			default: 
-				return 1;
 		}
 	}
 	
@@ -178,7 +161,7 @@ public class GameUtil {
 	/** get street names for game type */
 	private static String[] getStreetNames (Game.Type gametype) {
 		switch (gametype) {
-			case FCSTUD:
+			case FSTUD:
 				return fcstudstreetnames;
 			case FCD:
 			case DSSD:
@@ -262,7 +245,7 @@ public class GameUtil {
 				return studHLPoker;
 			case BG:
 				return badugiPoker;
-			case FCSTUD:
+			case FSTUD:
 				return fiveCardStudPoker;
 			default:
 				throw new RuntimeException("no poker for game " + gameType);
@@ -290,7 +273,7 @@ public class GameUtil {
 			case STUD:
 			case OM5HL:
 			case OM5:
-			case FCSTUD:
+			case FSTUD:
 				return Poker.shortRankNames;
 			case BG:
 				return Badugi.shortRankNames;
@@ -304,7 +287,7 @@ public class GameUtil {
 	 */
 	public static int getDraws(Game.Type gameType, int streetIndex) {
 		switch (gameType) {
-			case FCSTUD:
+			case FSTUD:
 			case HE:
 			case OM:
 			case OM5:
@@ -353,7 +336,7 @@ public class GameUtil {
 			case OMHL:
 				return 0;
 				
-			case FCSTUD:
+			case FSTUD:
 				// 0:1, 1:2, 2:3, 3:4
 				return streetIndex + 1;
 				
@@ -394,7 +377,7 @@ public class GameUtil {
 			case OMHL:
 				return false;
 				
-			case FCSTUD:
+			case FSTUD:
 			case RAZZ:
 			case STUD:
 			case STUDHL:
@@ -415,7 +398,7 @@ public class GameUtil {
 			case DSSD:
 			case DSTD:
 			case FCD:
-			case FCSTUD:
+			case FSTUD:
 			case HE:
 			case OM:
 			case OM5:
@@ -445,7 +428,7 @@ public class GameUtil {
 			case DSSD:
 			case DSTD:
 			case FCD:
-			case FCSTUD:
+			case FSTUD:
 				return 0;
 				
 			case RAZZ:

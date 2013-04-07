@@ -38,11 +38,21 @@ public class CardsStateUtil {
 		final CardsState cs;
 		
 		switch (hand.game.type) {
+			case FSTUD: {
+				String[] cards = HandUtil.getCards(hand, seat);
+				// 0 -> 2, 1 -> 3, 2 -> 4, 3 -> 5
+				if (streetIndex < 3) {
+					cards = Arrays.copyOf(cards, streetIndex + 2);
+				}
+				// don't sort (though could sort first two)
+				return new CardsState(cards, null, false, null);
+			}
+			
 			case STUD:
 			case STUDHL:
 			case RAZZ: {
 				// XXX should maybe emphasise difference between down and up cards
-				String[] cards = HandUtil.getFinalCards(hand.game.type, seat);
+				String[] cards = HandUtil.getCards(hand, seat);
 				if (streetIndex < 4) {
 					cards = Arrays.copyOf(cards, streetIndex + 3);
 				}

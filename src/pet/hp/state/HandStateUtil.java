@@ -61,7 +61,7 @@ public class HandStateUtil {
 		
 		// equity stuff
 		final Poker poker = GameUtil.getPoker(hand.game.type);
-		final int minHoleCards = GameUtil.getMinHoleCards(hand.game.type);
+		final int minHoleCards = poker.minHoleCards();
 		final List<String[]> holeCards = new ArrayList<>();
 		final List<SeatState> holeCardSeats = new ArrayList<>();
 		final Set<String> blockers = new TreeSet<>();
@@ -204,6 +204,8 @@ public class HandStateUtil {
 					// XXX ante/post?
 					switch (act.type) {
 						case BRINGSIN:
+						case POST:
+							// post might include dead blind, but it's pretty rare
 						case BET:
 						case RAISE:
 							ss.bpr = (act.amount * 100f) / potraise;
@@ -228,7 +230,17 @@ public class HandStateUtil {
 							ss.amount = -act.amount;
 							break;
 							
+						case ANTE:
+						case CHECK:
+						case DOESNTSHOW:
+						case DRAW:
+						case FOLD:
+						case MUCK:
+						case SHOW:
+						case STANDPAT:
+						case UNCALL:
 						default:
+							// do nothing
 					}
 					
 					lastbet = Math.max(lastbet, ss.amount);

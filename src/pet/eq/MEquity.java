@@ -24,25 +24,6 @@ public class MEquity {
 	/** number of times won all pots, no ties */
 	int scoopcount;
 	
-	/** create mequity - either hi/hi half/lo half or with given equity type, not both */
-	//	MEquity(boolean hilo, Equity.Type eqtype, int rem, boolean exact) {
-	//		this.hilo = hilo;
-	//		// keep track of outs only if exact
-	//		if (hilo) {
-	//			this.eqs = new Equity[] { 
-	//				new Equity(Equity.Type.HI_ONLY, exact), 
-	//				new Equity(Equity.Type.HILO_HI_HALF, exact),
-	//				new Equity(Equity.Type.HILO_AFLO8_HALF, exact) 
-	//			};
-	//		} else {
-	//			this.eqs = new Equity[] { 
-	//				new Equity(eqtype, exact) 
-	//			};
-	//		}
-	//		this.remCards = rem;
-	//		this.exact = exact;
-	//	}
-	
 	static MEquity createMEquity (Equity.Type type, int rem, boolean exact) {
 		Equity[] eqs = new Equity[] {
 				new Equity(type, exact)
@@ -63,7 +44,7 @@ public class MEquity {
 				new Equity(Equity.Type.HI_ONLY, exact)
 			};
 		}
-		return new MEquity(eqs, true, rem, exact);
+		return new MEquity(eqs, hilo, rem, exact);
 	}
 	
 	private MEquity(Equity[] eqs, boolean hilo, int rem, boolean exact) {

@@ -39,7 +39,7 @@ public class HandUtil {
 			case FCD:
 			case DSTD:
 			case DSSD:
-			case FCSTUD:
+			case FSTUD:
 			case BG:
 			case AFTD:
 				return null;
@@ -62,24 +62,40 @@ public class HandUtil {
 	}
 
 	/**
-	 * get the final cards this seat had for display purposes returns null if no
-	 * known cards, array may contain null if some are unknown
+	 * get the final cards this seat had or null if the seat had no known cards.
+	 * array may contain null if some cards are unknown.
+	 * NOTE: to get cards on a specific street, use CardsStateUtil.getCards()
 	 */
-	public static String[] getFinalCards(Game.Type gametype, Seat seat) {
-		switch (gametype) {
+	public static String[] getCards(Hand hand, Seat seat) {
+		String[] downCards = seat.downCards;
+		String[] upCards = seat.upCards;
+		if (downCards == null && upCards == null) {
+			return null;
+		}
+		
+		switch (hand.game.type) {
+			case FSTUD: {
+				String[] cards = new String[5];
+				if (downCards != null && downCards.length > 0) {
+					cards[0] = downCards[0];
+				}
+				if (upCards != null) {
+					cards[1] = upCards.length > 0 ? upCards[0] : null;
+					cards[2] = upCards.length > 1 ? upCards[1] : null;
+					cards[3] = upCards.length > 2 ? upCards[2] : null;
+					cards[4] = upCards.length > 3 ? upCards[3] : null;
+				}
+				return cards;
+			}
+			
 			case STUD:
 			case STUDHL:
 			case RAZZ: {
-				String[] holeCards = seat.downCards;
-				String[] upCards = seat.upCards;
-				if (holeCards == null && upCards == null) {
-					return null;
-				}
 				String[] cards = new String[7];
-				if (holeCards != null) {
-					cards[0] = holeCards.length > 0 ? holeCards[0] : null;
-					cards[1] = holeCards.length > 1 ? holeCards[1] : null;
-					cards[6] = holeCards.length > 2 ? holeCards[2] : null;
+				if (downCards != null) {
+					cards[0] = downCards.length > 0 ? downCards[0] : null;
+					cards[1] = downCards.length > 1 ? downCards[1] : null;
+					cards[6] = downCards.length > 2 ? downCards[2] : null;
 				}
 				if (upCards != null) {
 					cards[2] = upCards.length > 0 ? upCards[0] : null;
@@ -108,20 +124,6 @@ public class HandUtil {
 			default:
 				throw new RuntimeException();
 		}
-	}
-	
-	/**
-	 * Get all final hole cards for hand and the blockers
-	 */
-	public static List<String[]> getFinalCards(Hand hand) {
-		List<String[]> cardsList = new ArrayList<>();
-		for (Seat seat : hand.seats) {
-			String[] cards = getFinalCards(hand.game.type, seat);
-			if (cards != null) {
-				cardsList.add(cards);
-			}
-		}
-		return cardsList;
 	}
 	
 	/**

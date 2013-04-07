@@ -205,10 +205,11 @@ public abstract class Parser2 extends Parser {
 			assert_((hand.tourn.id & Hand.ROOM) != 0, "tourn room");
 		}
 		assertObj(hand.myseat, "my seat");
+		int maxstr = GameUtil.getStreets(hand.game.type);
 		if (hand.showdown) {
-			assert_(streets.size() == GameUtil.getStreets(hand.game.type), "all streets for showdown");
+			assert_(streets.size() == maxstr, "streets " + streets.size() + " = max str " + maxstr + " for showdown");
 		} else {
-			assert_(streets.size() <= GameUtil.getStreets(hand.game.type), "streets");
+			assert_(streets.size() <= maxstr, "streets");
 		}
 		if (!GameUtil.isHilo(hand.game.type)) {
 			assert_(!hand.showdownNoLow, "no low for non hilo");

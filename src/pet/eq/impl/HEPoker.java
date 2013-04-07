@@ -9,7 +9,7 @@ import pet.eq.*;
  */
 public class HEPoker extends Poker {
 
-	/** check board is either null or 3-5 cards */
+	/** check board is either null or no more than 5 cards */
 	private static void validateBoard(String[] board) {
 		if (board != null && board.length > 5) {
 			throw new RuntimeException("invalid board: " + Arrays.toString(board));
@@ -49,7 +49,7 @@ public class HEPoker extends Poker {
 		final int min = omaha ? 2 : 1;
 		final int max = omaha ? 5 : 2;
 		if (hole.length < min || hole.length > max) {
-			throw new RuntimeException("invalid hole: " + Arrays.toString(hole));
+			throw new RuntimeException("invalid hole cards: " + Arrays.toString(hole));
 		}
 	}
 	
@@ -211,4 +211,8 @@ public class HEPoker extends Poker {
 		return hv;
 	}
 	
+	@Override
+	public int minHoleCards () {
+		return min;
+	}
 }

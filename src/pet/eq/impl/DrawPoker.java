@@ -8,6 +8,18 @@ import pet.eq.*;
  * Draw poker equity methods
  */
 public class DrawPoker extends Poker {
+
+	private static void validateHole (String[] hole) {
+		if (hole.length < 1 || hole.length > 5) {
+			throw new RuntimeException("invalid hole cards: " + Arrays.toString(hole));
+		}
+	}
+
+	private static void validateBoard (String[] board) {
+		if (board != null) {
+			throw new RuntimeException("invalid board: " + Arrays.toString(board));
+		}
+	}
 	
 	//
 	// instance methods
@@ -18,11 +30,9 @@ public class DrawPoker extends Poker {
 	}
 	
 	@Override
-	public synchronized MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
+	protected MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws) {
 		System.out.println("draw sample equity: " + Arrays.deepToString(holeCards) + " blockers " + Arrays.toString(blockers) + " draws " + draws);
-		if (board != null && board.length > 0) {
-			throw new RuntimeException("invalid board: " + Arrays.toString(board));
-		}
+		validateBoard(board);
 		if (draws < 0 || draws > 3) {
 			throw new RuntimeException("invalid draws: " + draws);
 		}
@@ -97,10 +107,13 @@ public class DrawPoker extends Poker {
 	
 	@Override
 	public int value(String[] board, String[] hole) {
-		if (board != null || hole.length != value.cards) {
-			throw new RuntimeException("invalid draw hand " + Arrays.toString(hole));
+		validateBoard(board);
+		validateHole(hole);
+		if (hole.length == value.cards) {
+			return value.value(hole);
+		} else {
+			return 0;
 		}
-		return value.value(hole);
 	}
 	
 }

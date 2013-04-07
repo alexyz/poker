@@ -76,7 +76,7 @@ public class Badugi {
 	/** get value of badugi hand */
 	public static final int badugiValue (String[] hand) {
 		if (hand.length != 4) {
-			throw new RuntimeException();
+			throw new RuntimeException("invalid badugi hand: " + Arrays.toString(hand));
 		}
 		// the values are bigger for worse hands, so invert
 		return (B0_RANK - v4(hand)) | Poker.BADUGI_TYPE;
@@ -179,7 +179,7 @@ public class Badugi {
 			case 1:
 				return v1(hand[0]);
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("invalid drawing hand: " + Arrays.toString(hand));
 		}
 	}
 	
@@ -249,7 +249,7 @@ public class Badugi {
 			case 4:
 				return new String[0];
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("invalid drawn: " + drawn);
 		}
 	}
 	

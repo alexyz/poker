@@ -572,9 +572,18 @@ public abstract class Poker {
 	protected abstract MEquity[] equity(String[] board, String[][] holeCards, String[] blockers, int draws);
 	
 	/**
-	 * Calculate value of exact hi hand.
-	 * The hand can be incomplete as long as it has at least 5 cards in the required format.
+	 * Calculate value of hand. If the hand is invalid (e.g. has board for non
+	 * board game, or hole cards null/empty), an error is thrown. If the hand is
+	 * incomplete, 0 is returned.
 	 */
 	public abstract int value(String[] board, String[] hole);
 	
+	
+	/**
+	 * get the minimum number of hole cards for an equity calculation (omaha: 2,
+	 * all other games: 1)
+	 */
+	public int minHoleCards() {
+		return 1;
+	}
 }
