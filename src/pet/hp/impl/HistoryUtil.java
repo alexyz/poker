@@ -47,6 +47,6 @@ public class HistoryUtil {
 				}
 			}
 		}
-		return new File(System.getProperty("home.dir"));
+		return new File(System.getProperty("user.home"));
 	}
 }
