@@ -7,7 +7,7 @@ import java.math.BigInteger;
  */
 public class MathsUtil {
 	
-	private static final int[][] C = makeBinaryCoefficients(52, 52);
+	private static final int[][] C = makeBinomialCoefficients(52, 52);
 	
 	/**
 	 * Factorial (slow)
@@ -19,19 +19,19 @@ public class MathsUtil {
 	/**
 	 * Binomial coefficient (slow)
 	 */
-	public static BigInteger binaryCoefficient(int n, int k) {
+	public static BigInteger binomialCoefficient(int n, int k) {
 		return n == 0 ? BigInteger.ZERO : factorial(n).divide(factorial(k).multiply(factorial(n - k)));
 	}
 	
 	/**
 	 * Calculate binomial coefficients
 	 */
-	private static int[][] makeBinaryCoefficients(int nm, int km) {
+	private static int[][] makeBinomialCoefficients(int nm, int km) {
 		BigInteger max = BigInteger.valueOf(Integer.MAX_VALUE);
 		int[][] r = new int[nm + 1][km + 1];
 		for (int n = 0; n <= nm; n++) {
 			for (int k = 0; k <= km; k++) {
-				BigInteger v = binaryCoefficient(n, k);
+				BigInteger v = binomialCoefficient(n, k);
 				if (v.compareTo(max) > 0) {
 					r[n][k] = -1;
 				} else {
@@ -46,10 +46,10 @@ public class MathsUtil {
 	 * Return cached binomial coefficient (n pick k).
 	 * I.e. how many ways can you pick k objects from n
 	 */
-	public static int binaryCoefficientFast(int n, int k) {
+	public static int binomialCoefficientFast(int n, int k) {
 		int c = C[n][k];
 		if (c == -1) {
-			throw new RuntimeException("no binary coefficient for " + n + ", " + k);
+			throw new RuntimeException("no binomial coefficient for " + n + ", " + k);
 		}
 		return c;
 	}
@@ -64,10 +64,10 @@ public class MathsUtil {
 		for (int b = k; b >= 1; b--) {
 			// find biggest bin coff that will fit p
 			for (int a = b - 1; a < 100; a++) {
-				int x = binaryCoefficientFast(a, b);
+				int x = binomialCoefficientFast(a, b);
 				if (x > p) {
 					// this is too big, so the last one must have fit
-					p -= binaryCoefficientFast(a - 1, b);
+					p -= binomialCoefficientFast(a - 1, b);
 					to[b - 1 + off] = from[a - 1];
 					break;
 				}

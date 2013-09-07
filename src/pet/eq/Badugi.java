@@ -256,7 +256,7 @@ public class Badugi {
 	/** return the cards making up the best badugi hand, k = 1, 2 or 3 */
 	private static String[] draw2 (String[] hand, int k) {
 		final String[] h = new String[k];
-		final int pmax = MathsUtil.binaryCoefficientFast(4, k);
+		final int pmax = MathsUtil.binomialCoefficientFast(4, k);
 		int vmin = B0_RANK;
 		int vminp = 0;
 		// find p for worst hand

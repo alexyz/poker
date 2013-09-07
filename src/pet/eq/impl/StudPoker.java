@@ -52,7 +52,7 @@ public class StudPoker extends Poker {
 		int maxv = 0;
 		if (hand.length >= 5) {
 			// pick best 5 card hand
-			final int positions = MathsUtil.binaryCoefficientFast(hand.length, 5);
+			final int positions = MathsUtil.binomialCoefficientFast(hand.length, 5);
 			for (int p = 0; p < positions; p++) {
 				MathsUtil.kCombination(5, p, hand, tempHand, 0);
 				final int v = val.value(tempHand);

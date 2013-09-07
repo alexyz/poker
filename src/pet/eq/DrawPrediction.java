@@ -36,7 +36,7 @@ public class DrawPrediction {
 			}
 		}
 		
-		BigInteger combs = MathsUtil.binaryCoefficient(hand.length, 5 - drawn);
+		BigInteger combs = MathsUtil.binomialCoefficient(hand.length, 5 - drawn);
 		System.out.println("combs: " + combs);
 		if (combs.intValue() <= 0) {
 			throw new RuntimeException("invalid combs: " + combs);
@@ -72,8 +72,8 @@ public class DrawPrediction {
 		// from players point of view, all other cards are possible (even the blockers)
 		final String[] deck = Poker.remdeck(null, hand);
 		final String[] drawnHand = new String[5];
-		final int imax = MathsUtil.binaryCoefficientFast(hand.length, 5 - drawn);
-		final int jmax = MathsUtil.binaryCoefficientFast(deck.length, drawn);
+		final int imax = MathsUtil.binomialCoefficientFast(hand.length, 5 - drawn);
+		final int jmax = MathsUtil.binomialCoefficientFast(deck.length, drawn);
 		System.out.println("imax: " + imax + " jmax: " + jmax);
 		
 		String[] maxDrawingHand = null;

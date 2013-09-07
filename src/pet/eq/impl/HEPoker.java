@@ -194,8 +194,8 @@ public class HEPoker extends Poker {
 	private int heValue(final Value v, final String[] board, final String[] hole, final String[] temp) {
 		int hv = 0;
 		for (int n = min; n <= 2; n++) {
-			final int nh = MathsUtil.binaryCoefficientFast(hole.length, n);
-			final int nb = MathsUtil.binaryCoefficientFast(board.length, 5 - n);
+			final int nh = MathsUtil.binomialCoefficientFast(hole.length, n);
+			final int nb = MathsUtil.binomialCoefficientFast(board.length, 5 - n);
 			for (int kh = 0; kh < nh; kh++) {
 				MathsUtil.kCombination(n, kh, hole, temp, 0);
 				for (int kb = 0; kb < nb; kb++) {

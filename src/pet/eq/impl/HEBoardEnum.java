@@ -19,7 +19,7 @@ class HEBoardEnum extends HEBoard {
 			board[n] = current[n];
 		}
 		k = 5 - current.length;
-		count = MathsUtil.binaryCoefficientFast(deck.length, k);
+		count = MathsUtil.binomialCoefficientFast(deck.length, k);
 	}
 	
 	@Override
