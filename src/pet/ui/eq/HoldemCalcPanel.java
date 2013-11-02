@@ -38,7 +38,7 @@ public class HoldemCalcPanel extends CalcPanel {
 		// add to layout
 		setHandCardPanels(handPanels);
 		
-		initCardLabels();
+		initCardButtons();
 		
 		// select first hole card
 		selectCard(5);

@@ -144,7 +144,7 @@ public abstract class Poker {
 	 * get 8 or better qualified ace to five low value of hand.
 	 * returns 0 if no low.
 	 */
-	static int aflow8Value(String[] hand) {
+	static int afLow8Value(String[] hand) {
 		validate(hand);
 		if (lowCount(hand, false) ==  5) {
 			int p = isPair(hand, false);
@@ -326,11 +326,13 @@ public abstract class Poker {
 		}
 	}
 
+	/** face value, ace low (A = 1, K = 13) */
 	static int faceValueAL (String card) {
 		int i = "A23456789TJQK".indexOf(face(card));
 		return i + 1;
 	}
 
+	/** face value, ace high (2 = 2, A = 14) */
 	static int faceValueAH (String card) {
 		int i = "23456789TJQKA".indexOf(face(card));
 		return i + 2;

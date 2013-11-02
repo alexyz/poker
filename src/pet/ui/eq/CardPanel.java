@@ -8,7 +8,7 @@ import java.util.List;
 import javax.swing.*;
 
 /**
- * A panel that shoes the given list of card labels in the west of a border
+ * A panel that shoes the given list of card buttons in the west of a border
  * layout
  */
 class CardPanel extends JPanel {
@@ -41,6 +41,7 @@ class CardPanel extends JPanel {
 		add(p, g);
 	}
 	
+	/** add the given details panel either to the right of or below the cards */
 	protected void addDetails (JComponent c, boolean below) {
 		GridBagConstraints g = new GridBagConstraints();
 		g.gridx = below ? 0 : 1;
@@ -51,7 +52,7 @@ class CardPanel extends JPanel {
 	}
 	
 	/**
-	 * Get the card labels.
+	 * Get the card buttons.
 	 */
 	public List<CardButton> getCardButtons () {
 		return Collections.unmodifiableList(Arrays.asList(cardButtons));
@@ -71,7 +72,7 @@ class CardPanel extends JPanel {
 	}
 	
 	/**
-	 * calls set card for each card label with the given cards or null
+	 * calls set card for each card button with the given cards or null
 	 */
 	public void setCards (List<String> cards) {
 		if (cards.size() > cardButtons.length) {

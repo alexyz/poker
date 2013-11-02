@@ -41,7 +41,7 @@ public class StudCalcPanel extends CalcPanel {
 		};
 		setPokerItems(items);
 		
-		initCardLabels();
+		initCardButtons();
 		
 		selectCard(1);
 	}

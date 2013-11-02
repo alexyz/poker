@@ -25,6 +25,7 @@ public class DrawPoker extends Poker {
 	// instance methods
 	//
 	
+	/** create draw poker calculator for given valuation method */
 	public DrawPoker(Value value) {
 		super(value);
 	}

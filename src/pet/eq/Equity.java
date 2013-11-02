@@ -29,11 +29,12 @@ public class Equity {
 	}
 	
 	/**
-	 * equity types (note: hi/lo (8 or better) is not a type, it is actually
+	 * equity types. (note: hi/lo (8 or better) is not a type, it is actually
 	 * three types, hence the MEquity class). These look similar to the
 	 * constants in the Poker class, such as AF_LOW_TYPE, but they deal with
 	 * hand valuation only, whereas these include the context of how that
-	 * valuation is used.
+	 * valuation is used (e.g. whether an equity is high only or just the high
+	 * half of a high/low split).
 	 */
 	public enum Type {
 		/** deuce to seven low only equity type (single draw/triple draw) */

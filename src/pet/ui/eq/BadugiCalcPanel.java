@@ -17,7 +17,7 @@ public class BadugiCalcPanel extends CalcPanel {
 		}
 		setHandCardPanels(handPanels);
 		
-		initCardLabels();
+		initCardButtons();
 		
 		PokerItem[] items = new PokerItem[] {
 			new PokerItem(PokerItem.BADUGI, new DrawPoker(Value.badugiValue))

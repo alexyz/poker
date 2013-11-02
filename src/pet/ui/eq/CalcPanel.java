@@ -15,7 +15,7 @@ import pet.eq.*;
  */
 public abstract class CalcPanel extends JPanel {
 	
-	private final class dpcl implements PropertyChangeListener {
+	private final class CardDeselectedPCL implements PropertyChangeListener {
 		
 		@Override
 		public void propertyChange(PropertyChangeEvent e) {
@@ -33,7 +33,7 @@ public abstract class CalcPanel extends JPanel {
 		}
 	}
 
-	private final class spcl implements PropertyChangeListener {
+	private final class CardSelectedPCL implements PropertyChangeListener {
 		
 		@Override
 		public void propertyChange(PropertyChangeEvent e) {
@@ -64,7 +64,8 @@ public abstract class CalcPanel extends JPanel {
 		}
 	}
 
-	private final class bkl extends KeyAdapter {
+	/** card button key listener */
+	private final class CardKL extends KeyAdapter {
 		
 		char c1 = 0;
 		
@@ -118,7 +119,8 @@ public abstract class CalcPanel extends JPanel {
 		}
 	}
 
-	private final class bal implements ActionListener {
+	/** card button action listener */
+	private final class CardAL implements ActionListener {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -191,9 +193,9 @@ public abstract class CalcPanel extends JPanel {
 			}
 		});
 		
-		deckPanel.addPropertyChangeListener(DeckPanel.CARD_SEL_PROP_CHANGE, new spcl());
+		deckPanel.addPropertyChangeListener(DeckPanel.CARD_SEL_PROP_CHANGE, new CardSelectedPCL());
 		
-		deckPanel.addPropertyChangeListener(DeckPanel.CARD_DESEL_PROP_CHANGE, new dpcl());
+		deckPanel.addPropertyChangeListener(DeckPanel.CARD_DESEL_PROP_CHANGE, new CardDeselectedPCL());
 		
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -259,6 +261,7 @@ public abstract class CalcPanel extends JPanel {
 		}
 	}
 	
+	/** set the items to display in the valuation type combo box */
 	protected void setPokerItems(PokerItem[] items) {
 		pokerCombo.setModel(new DefaultComboBoxModel<>(items));
 	}
@@ -311,10 +314,10 @@ public abstract class CalcPanel extends JPanel {
 	}
 	
 	/**
-	 * Add selection listener to all the card labels. Need to call setBoard,
+	 * Add selection listener to all the card buttons. Need to call setBoard,
 	 * setCardPanels first.
 	 */
-	protected void initCardLabels() {
+	protected void initCardButtons() {
 		// collect the card labels in selection order
 		if (boardCardPanel != null) {
 			for (CardButton b : boardCardPanel.getCardButtons()) {
@@ -336,8 +339,8 @@ public abstract class CalcPanel extends JPanel {
 		for (int n = 0; n < cardButtons.size(); n++) {
 			final CardButton b = cardButtons.get(n);
 			b.setName("Hand-" + n);
-			b.addActionListener(new bal());
-			b.addKeyListener(new bkl());
+			b.addActionListener(new CardAL());
+			b.addKeyListener(new CardKL());
 		}
 	}
 	

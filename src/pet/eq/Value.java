@@ -3,7 +3,7 @@ package pet.eq;
 import java.util.List;
 
 /**
- * poker hand value and draw function
+ * poker hand value and draw prediction function
  */
 public abstract class Value {
 	
@@ -38,7 +38,7 @@ public abstract class Value {
 	public static final Value afLow8Value = new Value(Equity.Type.AFLO8_ONLY, 5) {
 		@Override
 		public final int value(String[] hand) {
-			return Poker.aflow8Value(hand);
+			return Poker.afLow8Value(hand);
 		}
 	};
 	

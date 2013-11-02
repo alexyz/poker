@@ -17,7 +17,7 @@ public class DrawCalcPanel extends CalcPanel {
 		}
 		setHandCardPanels(handPanels);
 		
-		initCardLabels();
+		initCardButtons();
 		
 		PokerItem[] items = new PokerItem[] {
 				new PokerItem(PokerItem.HIGH, new DrawPoker(Value.hiValue)),

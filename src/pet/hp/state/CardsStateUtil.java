@@ -44,7 +44,6 @@ public class CardsStateUtil {
 				if (streetIndex < 3) {
 					cards = Arrays.copyOf(cards, streetIndex + 2);
 				}
-				// don't sort (though could sort first two)
 				return new CardsState(cards, null, false, null);
 			}
 			
