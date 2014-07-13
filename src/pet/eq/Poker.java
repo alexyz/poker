@@ -309,7 +309,9 @@ public abstract class Poker {
 	
 	/**
 	 * deuce to seven value - exact opposite of high value (i.e. worst high
-	 * hand, not best low hand)
+	 * hand, not best low hand) 
+	 * FIXME this is actually wrong, it should be best low hand not worst high hand
+	 * i.e. A2345 = A-high, not straight
 	 */
 	static int dsValue(String[] hand) {
 		return DS_LOW_TYPE | (MAX_RANK - (value(hand) & HAND));
