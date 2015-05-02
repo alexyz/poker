@@ -12,19 +12,21 @@ public class HistoryUtil {
 		String home = System.getProperty("user.home");
 		return getDir(home + "/Documents/HandHistory", parser);
 	}
-
+	
 	/** get the pokerstars hand history directory */
 	public static File getStarsPath(PSParser parser) {
 		// C:\Users\Alex\AppData\Local\PokerStars\HandHistory\
 		// /Users/alex/Library/Application Support/PokerStars/HandHistory/tawvx
 		String home = System.getProperty("user.home");
 		String os = System.getProperty("os.name");
-		String path = null;
+		String path;
 		if (os.equals("Mac OS X")) {
 			path = home + "/Library/Application Support/PokerStars/HandHistory";
 		} else if (os.contains("Windows")) {
 			// could be something like PokerStars.FR instead
 			path = home + "\\AppData\\Local\\PokerStars\\HandHistory";
+		} else {
+			path = home;
 		}
 		return getDir(path, parser);
 	}
@@ -39,14 +41,17 @@ public class HistoryUtil {
 			// get the first directory containing files matching the regex
 			for (File f2 : f.listFiles()) {
 				if (f2.isDirectory()) {
-					for (String f3 : f2.list()) {
-						if (parser.isHistoryFile(f3)) {
-							return f2;
+					final String[] list = f2.list();
+					if (list != null) {
+						for (String f3 : list) {
+							if (parser.isHistoryFile(f3)) {
+								return f2;
+							}
 						}
 					}
 				}
 			}
 		}
-		return new File(System.getProperty("user.home"));
+		return f;
 	}
 }
