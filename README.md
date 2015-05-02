@@ -37,4 +37,4 @@ The hand parser replayer
 
 ## Download
 
-[Runnable jar file](https://dl.dropboxusercontent.com/u/8069847/pet.jar)
+[Runnable jar file](https://dl.dropboxusercontent.com/u/8069847/pokerequity.jar)
