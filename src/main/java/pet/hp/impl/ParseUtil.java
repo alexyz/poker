@@ -182,15 +182,18 @@ public class ParseUtil {
 	}
 	
 	static Game.Limit parseLimit (String limits) {
-		switch (limits) {
+		switch (limits.trim()) {
 			case "Pot Limit":
+			case "PL":
 				return Game.Limit.PL;
 			case "No Limit":
+			case "NL":
 				return Game.Limit.NL;
 			case "Limit":
+			case "FL":
 				return Game.Limit.FL;
 			default:
-				throw new RuntimeException("unknown limit");
+				throw new IllegalArgumentException("Unknown limit: " + limits);
 		}
 	}
 	
