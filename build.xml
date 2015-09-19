@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="jar">
+
+	<property name="jarfile" value="pokerequity.jar" />
+
+	<target name="jar">
+		<jar destfile="dist/${jarfile}" basedir="bin/">
+			<manifest>
+				<attribute name="Main-Class" value="pet.PET" />
+			</manifest>
+		</jar>
+
+	</target>
+
+	<target name="deploy" depends="jar">
+		<copy file="dist/${jarfile}" tofile="${user.home}/Dropbox/Public/${jarfile}" />
+	</target>
+	
+</project>
