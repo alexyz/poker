@@ -8,7 +8,6 @@ import pet.hp.Parser;
 public class HistoryUtil {
 	
 	public static File getTiltPath(FTParser parser) {
-		// "/Users/alex/Documents/HandHistory/Keynell"
 		String home = System.getProperty("user.home");
 		return getDir(home + "/Documents/HandHistory", parser);
 	}
@@ -16,7 +15,6 @@ public class HistoryUtil {
 	/** get the pokerstars hand history directory */
 	public static File getStarsPath(PSParser parser) {
 		// C:\Users\Alex\AppData\Local\PokerStars\HandHistory\
-		// /Users/alex/Library/Application Support/PokerStars/HandHistory/tawvx
 		String home = System.getProperty("user.home");
 		String os = System.getProperty("os.name");
 		String path;

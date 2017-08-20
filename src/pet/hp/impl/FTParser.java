@@ -71,7 +71,6 @@ public class FTParser extends Parser2 {
 	}
 	
 	private void parseAction (final String name) {
-		// Keynell antes 100
 		println("action player " + name);
 		final Seat seat = seatsMap.get(name);
 		
@@ -94,7 +93,6 @@ public class FTParser extends Parser2 {
 		
 		switch (action.type) {
 			case ANTE: {
-				// Keynell antes 100
 				action.amount = parseMoney(line, actEndIndex + 1);
 				assert_(action.amount < hand.sb, "ante < sb");
 				// doesn't count toward pip
@@ -103,7 +101,6 @@ public class FTParser extends Parser2 {
 			}
 			
 			case POST: {
-				// Keynell posts a dead small blind of 5
 				// blinds always count toward player pip
 				// TODO except dead blinds...
 				final String sbExp = "posts the small blind of ";
@@ -128,7 +125,6 @@ public class FTParser extends Parser2 {
 					println("post dead sb");
 					
 				} else if (line.indexOf(" ", actEndIndex + 1) == -1) {
-					// Keynell posts 10
 					// doesn't say what it's for, so guess bb
 					action.amount = parseMoney(line, actEndIndex + 1);
 					seat.bigblind = true;
@@ -144,7 +140,6 @@ public class FTParser extends Parser2 {
 			
 			case CALL:
 			case BET: {
-				// Keynell calls 300
 				// doubleupnow completes it to 10
 				String compExp = "completes it to ";
 				if (line.startsWith(compExp, actIndex)) {
@@ -157,7 +152,6 @@ public class FTParser extends Parser2 {
 			}
 			
 			case RAISE: {
-				// x-G-MONEY raises to 2000
 				final String raiseExp = "raises to ";
 				assert_(line.startsWith(raiseExp, actIndex), "raise exp");
 				// subtract what seat has already put in this round
@@ -169,15 +163,11 @@ public class FTParser extends Parser2 {
 			}
 			
 			case FOLD: {
-				// Keynell folds
 				assert_(line.indexOf(" ", actEndIndex) == -1, "fold eol");
 				break;
 			}
 			
 			case SHOW: {
-				// bombermango shows [Ah Ad]
-				// bombermango shows two pair, Aces and Sevens
-				// Allante_93 shows [5c 8c 9s 7s Ah Ks 8h] 98,75,A
 				if (line.indexOf("[", actEndIndex + 1) > 0) {
 					final String[] cards = parseCards(line, actEndIndex + 1);
 					seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
@@ -189,9 +179,6 @@ public class FTParser extends Parser2 {
 			}
 			
 			case COLLECT: {
-				// stoliarenko1 wins the pot (2535) with a full house, Twos full of Sevens
-				// vestax4 ties for the pot ($0.76) with 7,6,4,3,2
-				// laiktoerees wins the side pot (45,000) with a straight, Queen high
 				final int braIndex = line.indexOf("(", actEndIndex + 1);
 				final int amount = parseMoney(line, braIndex + 1);
 				seat.won += amount;
@@ -212,12 +199,10 @@ public class FTParser extends Parser2 {
 			case CHECK:
 			case MUCK:
 			case DOESNTSHOW:
-				// x-G-MONEY mucks
 				assert_(line.indexOf(" ", actEndIndex) == -1, "check/muck eol");
 				break;
 				
 			case DRAW: {
-				// Rudapple discards 1 card
 				// the actual cards will be set in parseDeal
 				assert_(currentStreetIndex() > 0, "draw on street > 0");
 				final int draw = currentStreetIndex() - 1;
@@ -229,7 +214,6 @@ public class FTParser extends Parser2 {
 			}
 			
 			case STANDPAT: {
-				// safrans stands pat
 				if (hand.myseat == seat) {
 					// there is no deal so push previous hole cards here
 					hand.addMyDrawCards(seat.downCards);
@@ -238,7 +222,6 @@ public class FTParser extends Parser2 {
 			}
 			
 			case BRINGSIN: {
-				// obvid0nkkk brings in for 3
 				Pattern p = Pattern.compile(".+ brings in for (\\d+)");
 				Matcher m = p.matcher(line);
 				assert_(m.matches(), "brings in");
@@ -276,19 +259,6 @@ public class FTParser extends Parser2 {
 	}
 	
 	private void parseDeal () {
-		// omaha:
-		// Dealt to Keynell [Tc As Qd 3s]
-		// stud:
-		// Dealt to mamie2k [4d]
-		// Dealt to doubleupnow [3h]
-		// Dealt to bcs75 [5d]
-		// Dealt to mymommy [Jh]
-		// Dealt to Keynell [Qs 3s] [5s]
-		// after draw: [kept] [received]
-		// Dealt to Keynell [2h 4c] [Qs Kd Kh]
-		// if someone is all in
-		// Dealt to Allante_93 [5c 8c 9s 7s Ah Ks] [8h]
-		
 		// get seat
 		// have to skip over name which could be anything
 		final String prefix = "Dealt to ";
@@ -605,7 +575,6 @@ public class FTParser extends Parser2 {
 			parseSeatSummary();
 			
 		} else {
-			// Seat 3: Keynell (90000)
 			final int seatno = parseInt(line, 5);
 			final int col = line.indexOf(": ");
 			final int braStart = line.lastIndexOf("(");
@@ -621,15 +590,6 @@ public class FTParser extends Parser2 {
 	
 	private void parseSeatSummary () {
 		println("seat summary: collected=" + collected);
-		// Seat 4: CougarMD                showed [7c 6s 4h 3s 2s] and won ($0.57) with 7,6,4,3,2
-		// Seat 6: Keynell                 showed [Qh Qc 9d 9h 5d] and won ($0.14) with two pair, Queens and Nines
-		// Seat 3: Srta_Arruez (big blind) showed [Ah Tc 9s 6h 4c] and lost with Ace Ten high
-		// Seat 3: redcar 55   (big blind) mucked [Ad 9h 4c 3c 2h] - A,9,4,3,2
-		// Seat 1: Cherry65    (big blind) mucked [Td 7c 5c 4s 2d] - T,7,5,4,2
-		// Seat 6: Keynell     (big blind) mucked [Kh Ks 6c 6d 5c] - two pair, Kings and Sixes
-		// Seat 3: Srta_Arruez (big blind) collected ($0.02), mucked
-		// Seat 6: yarden311   (button)    collected (29000), mucked
-		// Seat 1: Keynell     (big blind) collected (600)
 		String nameExp = "(.+?)(?: \\(.+?\\))?";
 		int seatGroup = 1, nameGroup = 2, cardsGroup = 3, wonGroup = 4, amountGroupShow = 5;
 		String showExp = "Seat (\\d): " + nameExp + " showed (\\[.+?\\]) and (lost|won \\((.+?)\\)) with .+";

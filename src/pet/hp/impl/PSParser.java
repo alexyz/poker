@@ -121,15 +121,12 @@ public class PSParser extends Parser2 {
 			println("sit out");
 			
 		} else if (line.endsWith(" is sitting out")) {
-			// scotty912: is sitting out
 			println("sitting out");
 			
 		} else if (line.endsWith(" has timed out")) {
-			// Festo5811 has timed out
 			println("timed out");
 			
 		} else if (line.endsWith(" leaves the table")) {
-			// kuca444 leaves the table
 			println("leaves");
 			
 		} else if (line.endsWith(" is connected")) {
@@ -151,17 +148,14 @@ public class PSParser extends Parser2 {
 			println("play after");
 			
 		} else if (line.endsWith(" has returned")) {
-			// Flawless Gem has returned
 			println("he's back");
 			
 			// -------- contains ---------
 			
 		} else if (line.contains(" said, ")) {
-			// tawvx said, "it's not a race"
 			println("talk");
 			
 		} else if (line.contains(" joins the table at seat ")) {
-			// scotty912 joins the table at seat #6
 			println("joins");
 			
 		} else if ((i = line.indexOf(" collected ")) > 0) {
@@ -171,8 +165,6 @@ public class PSParser extends Parser2 {
 			parseAction(line, i);
 			
 		} else if ((i = line.indexOf(" finished the tournament in ")) > 0) {
-			// jr_uemura finished the tournament in 2nd place
-			// tawvx finished the tournament in 2nd place and received $2.77.
 			String name = line.substring(0, i);
 			Seat seat = seatsMap.get(name);
 			assertObj(seat, "seat");
@@ -195,7 +187,6 @@ public class PSParser extends Parser2 {
 			}
 			
 		} else if ((i = line.indexOf(" wins the tournament and receives ")) > 0) {
-			// tawvx wins the tournament and receives $2.76 - congratulations!
 			String name = line.substring(0, i);
 			Seat seat = seatsMap.get(name);
 			assertObj(seat, "seat");
@@ -221,10 +212,6 @@ public class PSParser extends Parser2 {
 	}
 	
 	private void parseCollect (String line, int a) {
-		// olasz53 collected $1.42 from main pot
-		// NightPred8or collected $1.41 from main pot
-		// olasz53 collected $0.56 from side pot
-		// NightPred8or collected $0.56 from side pot
 		String name = line.substring(0, a);
 		Seat seat = seatsMap.get(name);
 		assertObj(seat, "seat");
@@ -251,7 +238,6 @@ public class PSParser extends Parser2 {
 	}
 	
 	private void parseUncall (final String line) {
-		// Uncalled bet ($0.19) returned to Hokage_91
 		int amountStart = line.indexOf("(") + 1;
 		int amount = parseMoney(line, amountStart);
 		int nameStart = line.indexOf("to") + 3;
@@ -271,21 +257,6 @@ public class PSParser extends Parser2 {
 	}
 	
 	private void parseDeal (final String line) {
-		// Dealt to tawvx [4c 6h 7d 5h]
-		// after draw...
-		// Dealt to tawvx [Ts Th] [Kc 5d Qh]
-		// if discard all
-		// Dealt to tawvx [5c 7h 3d 4d Jh]
-		
-		// deals to others in stud
-		// Dealt to tawvx [9d 5d Th]
-		// Dealt to puddin pig [2d]
-		// later...
-		// Dealt to tawvx [9d 5d Th 2s 6d] [8s]
-		// Dealt to gregory9876 [5c 6c 7d] [Qh]
-		
-		// Dealt to [AUT] BigPot [Qc]
-		
 		// get seat
 		// have to skip over name which could be anything
 		String prefix = "Dealt to ";
@@ -327,17 +298,6 @@ public class PSParser extends Parser2 {
 		int seatno = parseInt(line, 5);
 		
 		if (summaryPhase) {
-			// Seat 1: 777KTO777 folded before Flop (didn't bet)
-			// Seat 2: tawvx showed [4c 6h 7d 5h] and won ($0.44) with a
-			// straight, Four to Eight
-			// Seat 4: fearvanilla folded before Flop (didn't bet)
-			// Seat 5: $AbRaO$ TT folded on the Flop
-			// Seat 6: Sama�ito mucked [2h 6c Qh Jh]
-			// Seat 7: azacel77 (button) folded before Flop (didn't bet)
-			// Seat 8: Bumerang16 (small blind) folded on the Flop
-			// Seat 9: NSavov (big blind) folded on the Flop
-			
-			// gregory9876 mucked [9s Ad 5c 6c 7d Qh Kd]
 			int muckedStart = line.indexOf("mucked");
 			if (muckedStart > 0) {
 				// get opponent hand
@@ -356,11 +316,6 @@ public class PSParser extends Parser2 {
 			}
 			
 		} else {
-			// Seat 2: tawvx ($2.96 in chips)
-			// Seat 6: abs(EV) ($2.40 in chips)
-			// Seat 5: OCTAVIAN 61 (2000 in chips) out of hand (moved from
-			// another table into small blind)
-			
 			int col = line.indexOf(": ");
 			int chEnd = line.indexOf(" in chips)");
 			int chStart = line.lastIndexOf("(", chEnd);
@@ -609,7 +564,6 @@ public class PSParser extends Parser2 {
 	}
 	
 	private void parseAction (final String line, final int i) {
-		// Bumerang16: posts small blind $0.01
 		String name = line.substring(0, i);
 		Seat seat = seatsMap.get(name);
 		assertObj(seat, "seat");
@@ -626,15 +580,10 @@ public class PSParser extends Parser2 {
 			case CHECK:
 			case MUCK:
 			case DOESNTSHOW:
-				// NSavov: checks
-				// scotty912: doesn't show hand
 				// not sure what difference is between muck and doesn't show
 				break;
 			
 			case FOLD: {
-				// azacel77: folds
-				// Ninjajundiai: folds [5d 5s]
-				// tawvx: folds [2h Tc 7s 4h Js 2c]
 				int handStart = line.indexOf("[", actEnd);
 				if (handStart > 0) {
 					String[] cards = parseCards(line, handStart);
@@ -645,7 +594,6 @@ public class PSParser extends Parser2 {
 			}
 			
 			case BRINGSIN: {
-				// trinitycubed: brings in for 3
 				// i assume this is the same as calling
 				int amountStart = line.indexOf("for", actEnd) + 4;
 				int amount = parseMoney(line, amountStart);
@@ -656,7 +604,6 @@ public class PSParser extends Parser2 {
 			
 			case CALL:
 			case BET: {
-				// Bumerang16: calls $0.01
 				int amountStart = nextToken(line, actEnd);
 				int amount = parseMoney(line, amountStart);
 				action.amount = amount;
@@ -665,7 +612,6 @@ public class PSParser extends Parser2 {
 			}
 			
 			case RAISE: {
-				// bluff.tb: raises $0.05 to $0.07
 				int amountStart = line.indexOf("to ", actEnd) + 3;
 				// subtract what seat has already put in this round
 				int amount = parseMoney(line, amountStart) - seatPip(seat);
@@ -675,11 +621,6 @@ public class PSParser extends Parser2 {
 			}
 			
 			case POST: {
-				// Bumerang16: posts small blind $0.01
-				// pisti361: posts small & big blinds $0.03
-				// Yury.Nik: posts big blind 50 and is all-in
-				// Festo5811: posts the ante 5
-				
 				// small and big blinds always posted first due to position
 				// though very occasionally the big blind may not be posted due
 				// to button rule
@@ -741,8 +682,6 @@ public class PSParser extends Parser2 {
 			}
 			
 			case SHOW: {
-				// bluff.tb: shows [Jc 8h Js Ad] (two pair, Aces and Kings)
-				// tudy31: shows [7d Ad 4d Kd 8h Jh 3d] (Lo: 8,7,4,3,A)
 				int handStart = nextToken(line, actEnd);
 				String[] cards = parseCards(line, handStart);
 				seat.downCards = checkCards(seat.downCards, getDownCards(hand.game.type, cards));
@@ -753,8 +692,6 @@ public class PSParser extends Parser2 {
 			case DRAW: {
 				// create new street before adding action (5cd only)
 				drawAct = true;
-				// tawvx: discards 1 card [Ah]
-				// joven2010: discards 3 cards
 				
 				// st=>draw
 				// 5cd: 0=>0
