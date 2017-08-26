@@ -25,16 +25,16 @@ with Java installed.
 
 The Omaha equity calculator (could use simplifying a bit)
 
-![Screenshot](https://dl.dropboxusercontent.com/u/8069847/petom.png)
+![Screenshot](petom.png)
 
 The hand parser last hand table
 
-![Screenshot](https://dl.dropboxusercontent.com/u/8069847/petlh.png)
+![Screenshot](petlh.png)
 
 The hand parser replayer
 
-![Screenshot](https://dl.dropboxusercontent.com/u/8069847/petrep.png)
+![Screenshot](petrep.png)
 
 ## Download
 
-[Runnable jar file](https://dl.dropboxusercontent.com/u/8069847/pokerequity.jar)
+[Runnable jar file](https://www.dropbox.com/s/7m9df1896rws7yz/pokerequity.jar?dl=0)
