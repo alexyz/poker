@@ -50,6 +50,7 @@ public class PET {
 				// need to create and pack in awt thread otherwise it can deadlock
 				// due to the java console panel
 				instance = new PokerFrame();
+				instance.setLocationRelativeTo(null);
 				System.out.println("Poker Equity Tool - https://github.com/alexyz");
 				instance.setVisible(true);
 			}

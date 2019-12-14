@@ -18,9 +18,6 @@ PET includes
 PET does not modify, move or copy parsed hand history files, or share 
 them with others (as doing so would be against the PokerStars TOS).
 
-PET is written in Java 1.6 using Swing, and will run on any major OS 
-with Java installed.
-
 ## Screenshots
 
 The Omaha equity calculator (could use simplifying a bit)
@@ -37,4 +34,4 @@ The hand parser replayer
 
 ## Download
 
-[Runnable jar file](https://www.dropbox.com/s/7m9df1896rws7yz/pokerequity.jar?dl=0)
+No binary download provided

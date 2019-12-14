@@ -43,7 +43,7 @@ public class GameUtil {
 		switch (currency) {
 			case '$': 
 				return "USD";
-			case 'â‚¬': 
+			case '€': 
 				return "EUR";
 			case Game.PLAY_CURRENCY: 
 				return "Play";
@@ -206,7 +206,7 @@ public class GameUtil {
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		switch (currency) {
 			case '$':
-			case 'â‚¬':
+			case '€':
 				return String.format("%c%.2f", currency, amount / 100f);
 			case Game.TOURN_CURRENCY:
 			case Game.PLAY_CURRENCY:
