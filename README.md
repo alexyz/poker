@@ -2,8 +2,8 @@
 
 PET includes
 
-- A poker equity calculator for 
-  - Hold'em, Omaha, Omaha H/L - estimated pre-flop, and exact post 
+- A poker equity calculator for
+  - Hold'em, Omaha, Omaha H/L - estimated pre-flop, and exact post
     flop
   - 5 Card Draw, 2-7 Triple Draw (estimated)
   - Stud, Razz, 5 Card Stud (estimated)
@@ -11,12 +11,19 @@ PET includes
 
 - A fast PokerStars and Full Tilt hand parser, with
    - searchable/sortable lists of players, games, tournaments and hands
-   - Two hand replayers, both including hand equity and SPR (stack to 
+   - Two hand replayers, both including hand equity and SPR (stack to
      pot ratio)
    - a floating HUD for tables currently being played at
 
-PET does not modify, move or copy parsed hand history files, or share 
+PET does not modify, move or copy parsed hand history files, or share
 them with others (as doing so would be against the PokerStars TOS).
+
+## Compilation
+
+- install [Apache Maven](https://maven.apache.org/)
+- run `mvn package`
+  - jar file is generated in `target/poker.jar`
+- run `java -jar target/poker.jar`
 
 ## Screenshots
 
