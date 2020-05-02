@@ -164,6 +164,23 @@ public class FollowThread extends Thread {
 				long pos = 0;
 				String line;
 				while ((line = br.readLine()) != null) {
+
+					if (line.startsWith("Subject:")) {
+						// consume all lines until first "*********** #"
+						while ((line = br.readLine()) != null) {
+							if (line.startsWith("*********** #")){
+								line = br.readLine();
+								break;
+							}
+						}
+						if (line == null) {
+							break;
+						}
+					// emailed hand histories have numbered hand e.g. "*********** # 2 **************"
+					} else if (line.startsWith("*********** #")) {
+						continue;
+					}
+
 					boolean hand = parser.parseLine(line);
 					if (hand) {
 						pos = fis.getChannel().position();

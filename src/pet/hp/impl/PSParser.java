@@ -35,8 +35,9 @@ public class PSParser extends Parser2 {
 	
 	@Override
 	public boolean isHistoryFile (String name) {
-		// TS - tournament summaries
-		return name.startsWith("HH") && name.endsWith(".txt");
+		// tournament summaries OR emailed hand histories
+		return name.startsWith("HH") && name.endsWith(".txt")
+				|| name.startsWith("PokerStars Hand History Request") &&  name.endsWith(".txt");
 	}
 	
 	/**
@@ -58,7 +59,7 @@ public class PSParser extends Parser2 {
 			line = line.substring(1);
 			println("skip bom");
 		}
-		
+
 		int i = 0;
 		line = line.trim();
 		println(">>> " + line);
@@ -205,7 +206,7 @@ public class PSParser extends Parser2 {
 			}
 			
 		} else {
-			fail("unknown line " + line);
+			println("unknown line " + line);
 		}
 		
 		return false;
@@ -328,7 +329,7 @@ public class PSParser extends Parser2 {
 			println("seat " + seat);
 		}
 	}
-	
+
 	/**
 	 * Parse the hand line starting with PokerStars
 	 */
@@ -347,7 +348,7 @@ public class PSParser extends Parser2 {
 		
 		Matcher m = PSHandRE.pat.matcher(handline);
 		assert_ (m.matches(), "match hand exp");
-		
+
 		game = new Game();
 		
 		// sub type - currently just zoom

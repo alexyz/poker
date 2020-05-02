@@ -75,7 +75,7 @@ public class ParseUtil {
 		// $2
 		// $1.05
 		boolean dec = false;
-		if ("$€".indexOf(line.charAt(off)) >= 0) {
+		if ("$€£".indexOf(line.charAt(off)) >= 0) {
 			off++;
 			dec = true;
 		}
@@ -171,7 +171,7 @@ public class ParseUtil {
 	 */
 	static char parseCurrency(String line, int off) {
 		char c = line.charAt(off);
-		if ("$€".indexOf(c) >= 0) {
+		if ("$€£".indexOf(c) >= 0) {
 			return c;
 		} else if (c >= '0' && c <= '9') {
 			// could be tourn chips...

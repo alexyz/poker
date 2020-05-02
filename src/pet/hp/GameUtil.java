@@ -45,6 +45,8 @@ public class GameUtil {
 				return "USD";
 			case '€': 
 				return "EUR";
+			case '£':
+				return "GBP";
 			case Game.PLAY_CURRENCY: 
 				return "Play";
 			case Game.TOURN_CURRENCY:
